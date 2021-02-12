@@ -1,6 +1,7 @@
 ---
 title: "Cabinet ministers - 1990:2014"
 author: "Abdul Najah"
+date: '2021-01-15'
 params:
   orig_date: "Original Publish Date: 15 January, 2021"
   update_date: !r paste("Updated on:", format(Sys.time(), '%d %B, %Y'))

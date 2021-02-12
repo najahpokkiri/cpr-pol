@@ -1,6 +1,7 @@
 ---
 title: "Cabinet ministers - 1990:2014"
 author: "Abdul Najah"
+date: '2021-01-15'
 params:
   orig_date: "Original Publish Date: 15 January, 2021"
   update_date: !r paste("Updated on:", format(Sys.time(), '%d %B, %Y'))
@@ -68,8 +69,8 @@ For more info on the  data please refer to the codebook - [codebook](http://lokd
 
 
 ```{=html}
-<div id="htmlwidget-8022d7db0a76bb160c54" style="width:100%;height:432px;" class="widgetframe html-widget"></div>
-<script type="application/json" data-for="htmlwidget-8022d7db0a76bb160c54">{"x":{"url":"index.en_files/figure-html//widgets/widget_unnamed-chunk-2.html","options":{"xdomain":"*","allowfullscreen":false,"lazyload":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-47683c57c91923a115c6" style="width:100%;height:432px;" class="widgetframe html-widget"></div>
+<script type="application/json" data-for="htmlwidget-47683c57c91923a115c6">{"x":{"url":"index.en_files/figure-html//widgets/widget_unnamed-chunk-2.html","options":{"xdomain":"*","allowfullscreen":false,"lazyload":false}},"evals":[],"jsHooks":[]}</script>
 ```
 
 
@@ -242,6 +243,6 @@ Eg: we can club coal/mine/petroleum to one natural resources category
 
 
 ```{=html}
-<div id="htmlwidget-39b0a2d5a0083a8024a6" style="width:100%;height:432px;" class="widgetframe html-widget"></div>
-<script type="application/json" data-for="htmlwidget-39b0a2d5a0083a8024a6">{"x":{"url":"index.en_files/figure-html//widgets/widget_unnamed-chunk-12.html","options":{"xdomain":"*","allowfullscreen":false,"lazyload":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-0322b94b36897900bbad" style="width:100%;height:432px;" class="widgetframe html-widget"></div>
+<script type="application/json" data-for="htmlwidget-0322b94b36897900bbad">{"x":{"url":"index.en_files/figure-html//widgets/widget_unnamed-chunk-12.html","options":{"xdomain":"*","allowfullscreen":false,"lazyload":false}},"evals":[],"jsHooks":[]}</script>
 ```
