@@ -1,0 +1,831 @@
+---
+title: AC Survey
+author: Abdul Najah
+date: '2020-01-21'
+authors:
+  - najah
+summary: Analysis of the data recieved from the demo AC survey
+output:
+  blogdown::html_page:
+    keep_md: true
+    toc: true
+    toc_depth: 3
+    number_sections: true
+    fig_width: 6
+---
+
+
+
+```{r set up, message=FALSE, warning=FALSE, include=FALSE}
+knitr::opts_chunk$set(cache = FALSE,echo = FALSE, message=FALSE, warning = FALSE,fig.width = 16/2, fig.height = 9/2)
+library(tidyverse)
+library(data.table)
+library(knitr)
+library(kableExtra)
+library(scales)
+library(gridExtra)
+library(stargazer)
+library(ggbump)
+library(cowplot)
+library(colorspace)
+library(ggthemes)
+library(ggridges)
+`%!in%` = Negate(`%in%`)
+select <- dplyr::select
+```
+
+```{r reading the data}
+
+
+
+gj <- read.csv("data/Gujarat.csv")
+
+rj <- read.csv("data/Rajasthan.csv")
+
+tl <- read.csv("data/Telangana.csv")
+
+up <- read.csv("data/Uttar_Pradesh.csv")
+
+wb<- read.csv("data/West_Bengal.csv")
+
+survey <- rbindlist(list(gj, rj, tl, up,wb), use.names = TRUE, fill =TRUE)
+
+
+```
+
+### Data summary
+
+**Main Variables**
+
+```{r}
+
+names(survey)
+
+
+
+```
+
+------------------------------------------------------------------------
+
+**Variable summary**
+
+```{r}
+
+#  survey %>% filter(state_name == "Gujarat" & !is.na(q2_response) &!is.na(q1_response))
+# # 
+# 
+# table(survey$gender)
+
+survey$gender_b <- ifelse(survey$gender=="M",1,0)
+
+
+#table(survey$q1_response)
+survey %>% group_by(state_name) %>% summarise(n_call = n(), 
+                                              n_ac = n_distinct(ac_name),
+                                              n_pc = n_distinct(pc_name),
+                                            
+                                              q1_or_q2_response = sum(!is.na(q2_response) |!is.na(q1_response)),
+                                            
+                                              n_q1_response = sum(!is.na(q1_response)),
+                                              n_q2_response = sum(!is.na(q2_response)),
+                                              n_q1_q2_response = sum(!is.na(q2_response) &!is.na(q1_response)),
+                                              q1_response_rate =(n_q1_response/n_call)*100,
+                                              q2_response_rate =(n_q2_response/n_call)*100,
+                                               q1_and_q2_response_rate =(n_q1_q2_response/n_call)*100,
+                                              q1_or_q2_response_rate =(q1_or_q2_response /n_call)*100,
+                                            
+                                              ) %>%
+                                                select(-c(n_q2_response, n_q1_response, n_q1_q2_response,q1_or_q2_response )) %>% 
+   kable(digits=2) %>% kable_styling(bootstrap_options ="striped" )
+
+```
+
+---
+
+```{r}
+survey %>% group_by(state_name) %>% summarise(n_call = n(), 
+                                              n_ac = n_distinct(ac_name),
+                                              n_pc = n_distinct(pc_name),
+                                              mean_call_ac = n_call/n_ac,
+                                              q1_or_q2_response = sum(!is.na(q2_response) |!is.na(q1_response)),
+                                               mean_q1_or_q2_response_ac = q1_or_q2_response/n_ac,
+                                              mean_age_ac = mean(age, na.rm = TRUE),
+                                              mean_male_pc = mean(gender_b)*100,
+                                              
+                                              mean_age = mean(age, na.rm = TRUE)) %>% 
+  
+  select(state_name, mean_call_ac, mean_q1_or_q2_response_ac, mean_age_ac, mean_male_pc) %>% 
+   kable(digits=2) %>% kable_styling(bootstrap_options ="striped" )
+```
+
+
+------------------------------------------------------------------------
+
+# States
+
+
+```{r  out.width = '70%',fig.align = "center"}
+# 
+# survey %>% group_by(state_name, gender) %>% summarise(count = n()) %>% group_by(state_name) %>%mutate(sum = sum(count)) %>%  
+#   ggplot(aes(reorder(state_name, -sum), count, fill = gender))+
+#   geom_bar(stat="identity")+
+#    scale_fill_brewer(palette="Paired",na.value = "darkgrey")+
+#   labs(x= "State", y = "Count", fill = "Gender")+
+#   coord_flip()+
+#    theme_minimal_vgrid()+
+#   theme(#legend.position = "bottom",
+#     panel.grid = element_blank(),
+#     axis.line.x= element_line(),
+#     axis.line.y = element_blank(),
+#     axis.ticks = element_blank(),
+#     axis.title.y = element_blank()
+#     )
+
+```
+
+------------------------------------------------------------------------
+
+## Calls & Responses
+
+### States
+
+The following plot shows the proportion and the number of calls made and responded in each state along with the break-up of the gender. It is evident that, there is a huge gender bias in the calls made in the all three states except West Bengal. Also, among the four states, Uttar Pradesh seems to have received the least number of calls contradicting its population size.
+
+Throughout the analysis, we count a responded call as the ones that have answered at least one of the two questions. It is quite evident that the number of respondents is relatively much less, averaging around 5% of the calls made. At the same time, the gender proportion of the respondents is identical to the callers.
+
+```{r}
+
+ survey <- survey %>%  mutate(response= ifelse((!is.na(q2_response) |!is.na(q1_response)),1,0))
+survey1 <- survey
+  
+survey1$state_name <- factor(survey1$state_name, levels = c("Uttar Pradesh","West Bengal","Gujarat" ,"Telangana" ,"Rajasthan"  ))
+
+          
+
+resp_a <- survey1 %>% group_by(state_name, gender) %>%
+summarise(total_count=  n(), response_count= sum(response)) %>%group_by(state_name) %>% mutate(sum = sum(total_count)) %>%  pivot_longer(-c(state_name, gender, sum)) %>% 
+ggplot(aes(reorder(name, -sum), value, fill=gender))+
+  geom_bar(position="stack", stat="identity")+
+  scale_fill_brewer(palette="Paired",na.value = "darkgrey")+
+  scale_x_discrete(labels=c("Calls received","Calls responded" ))+
+  
+  
+  
+  facet_wrap(~state_name, nrow=5)+
+  coord_flip()+
+  labs(x= "", y = "Count", fill = "Gender")+
+     theme_minimal()+
+  theme(legend.position = "bottom",
+    panel.grid = element_blank(),
+    axis.line.x= element_line(),
+    axis.line.y = element_blank(),
+    axis.ticks = element_blank(),
+    #axis.title.y = element_blank(),
+    axis.text.y = element_blank()
+    )
+
+resp_b <- survey1 %>% group_by(state_name, gender) %>%
+summarise(total_count=  n(), response_count= sum(response)) %>%group_by(state_name) %>% mutate(sum_total = sum(total_count), sum_response = sum(response_count), sum_pc = total_count/sum_total, response_pc = response_count/sum_response) %>% select(-c(total_count, response_count, sum_total, sum_response)) %>% pivot_longer(-c(state_name, gender)) %>% 
+ggplot(aes(name, value, fill=gender))+
+  geom_bar(position="stack", stat="identity")+
+  scale_fill_brewer(palette="Paired",na.value = "darkgrey")+
+  scale_x_discrete(labels=c("calls responded", "Calls made" ))+
+  facet_wrap(~state_name, nrow=5)+
+  coord_flip()+
+  labs(y = "Proportion", fill = "Gender")+
+     theme_minimal()+
+  theme(legend.position = "bottom",
+    panel.grid = element_blank(),
+    axis.line.x= element_line(),
+    axis.line.y = element_blank(),
+    axis.ticks = element_blank(),
+    axis.title.y = element_blank(),
+    
+    )
+
+plot_grid(resp_b, resp_a)
+  
+```
+
+------------------------------------------------------------------------
+
+We use density plots to observe the distribution and the differences of `Number of calls` , `Number of responses` and the `Response rate`. among the states. Response rate is simply the percentage of the calls that received response to at least one of the the two questions. We observe significant variation among the states on all three variables.
+
+```{r}
+ qn <- survey %>% group_by(state_name, ac_name) %>% summarise(calls_count = n(), response_count = sum(response), response_rate = (response_count/calls_count)*100) %>% pivot_longer(-c(state_name, ac_name))
+
+# qn <- survey %>% group_by(state_name, ac_name) %>% summarise(calls_count = n(), response_count = sum(response), response_rate = (response_count/calls_count)*100) 
+
+ggplot(qn %>% filter(state_name %in%c("Gujarat", "Telangana")),aes(value, fill= name))+
+  geom_density(alpha = .5)+
+  ylim(0,.20)+
+  labs(x = "Count", "Density - AC")+
+  facet_wrap(~state_name, strip.position = "bottom")+
+   theme_minimal_hgrid()+
+  theme(legend.position = "bottom",
+         axis.title.y= element_blank(),
+        legend.title = element_blank())
+
+
+ggplot(qn %>% filter(state_name %in%c("West Bengal", "Rajasthan")),aes(value, fill= name))+
+  geom_density(alpha = .5)+
+  ylim(0,.15)+
+  labs(x = "Count", "Density - AC")+
+  facet_wrap(~state_name, strip.position = "bottom")+
+   theme_minimal_hgrid()+
+  theme(legend.position = "bottom",
+         axis.title.y= element_blank(),
+        legend.title = element_blank())
+
+ggplot(qn %>% filter(state_name %in%c("Uttar Pradesh")),aes(value, fill= name))+
+  geom_density(alpha = .5)+
+  ylim(0,.20)+
+  labs(x = "Count", "Density - AC")+
+  facet_wrap(~state_name, strip.position = "bottom")+
+   theme_minimal_hgrid()+
+  theme(legend.position = "bottom",
+         #axis.title.y= element_blank(),
+        legend.title = element_blank())
+```
+
+------------------------------------------------------------------------
+
+### Assembly constituencies
+
+We explore the variation within the state by looking at the assembly constituency level.The following box plots illustrates the distribution of the calls, response and the response rate in all unique assembly constituencies in each state. The jittered dots represents the relavant value of the variables in every unique constituency in each states.
+
+```{r}
+q_resp_table_gen <- survey %>% group_by(state_name, ac_name) %>% summarise(calls_count = n(),response_count = sum(response),response_rate = (response_count/calls_count)*100) %>% pivot_longer(-c(state_name, ac_name)) 
+
+ q_resp_table_gen$name <- factor( q_resp_table_gen$name, levels = c( "calls_count","response_count", "response_rate"))
+ 
+ 
+ ggplot( q_resp_table_gen ,aes(state_name, value))+
+   geom_boxplot(lwd=1, fatten =1, outlier.shape = NA)+
+   scale_fill_brewer(palette="Paired",na.value = "darkgrey")+
+ geom_jitter(alpha = .5, color = "steelblue",width = 0.3)+
+   labs(color = "Gender")+
+   facet_wrap(~name, scale = "free_x",strip.position="bottom")+
+  coord_flip()+
+  theme_minimal_hgrid()+
+  theme(
+    axis.title = element_blank(),
+    legend.position = "bottom",
+    axis.ticks = element_blank()
+    
+  )
+```
+
+
+```{r}
+
+# q_resp_table_gen <- survey %>% group_by(state_name, ac_name, gender) %>% summarise(calls_count = n(),response_count = sum(response),response_rate = (response_count/calls_count)*100) %>% pivot_longer(-c(state_name, ac_name, gender)) 
+# 
+#  q_resp_table_gen$name <- factor( q_resp_table_gen$name, levels = c( "calls_count","response_count", "response_rate"))
+#  
+#  
+#  ggplot( q_resp_table_gen ,aes(state_name, value))+
+#    geom_boxplot(lwd=1, fatten =1, outlier.shape = NA)+
+#    scale_fill_brewer(palette="Paired",na.value = "darkgrey")+
+#  geom_jitter(alpha = .5, aes(color = gender),width = 0.3)+
+#    labs(color = "Gender")+
+#    facet_wrap(~name, scale = "free_x",strip.position="bottom")+
+#   coord_flip()+
+#   theme_minimal_hgrid()+
+#   theme(
+#     axis.title = element_blank(),
+#     legend.position = "bottom",
+#     axis.ticks = element_blank()
+#     
+#   )
+# 
+
+
+```
+
+------------------------------------------------------------------------
+
+## Gender
+
+Density plots along the lines of gender does reflect the sample bias in the gender as expected . Telengana and Rajasthan have a fair distribution given we take the sample bias into account while Uttar Pradesh has a inconsistent distribution. West Bengal seems to have a symmetrical distribution.
+
+```{r}
+qn_g <- survey %>% filter(state_name != "Gujarat")%>% group_by(state_name, ac_name, gender) %>% summarise(calls_count = n(), response_count = sum(response), response_rate = (response_count/calls_count)*100) 
+
+
+gen_a <- ggplot(qn_g, aes(calls_count, state_name,fill= gender))+
+  geom_density_ridges(alpha= .5)+
+   theme_minimal_hgrid()+
+
+    theme(legend.position = "none")+
+     theme(
+      axis.title.y= element_blank()
+    )
+
+gen_b <- ggplot(qn_g, aes(response_count, state_name,fill= gender))+
+  geom_density_ridges(alpha= .5)+
+   theme_minimal_hgrid()+
+  labs(y = " /n ")+
+    theme(legend.position = "none")+
+     theme(
+      axis.title.y= element_blank(),
+      axis.text.y = element_blank()
+    ) 
+
+
+gen_c <- ggplot(qn_g, aes(response_rate, state_name,fill= gender))+
+  geom_density_ridges(alpha= .5)+
+   theme_minimal_hgrid()+
+  labs(y = " /n ")+
+    theme(legend.position = "bottom")+
+     theme(
+      axis.title.y= element_blank(),
+      axis.text.y = element_blank()
+    )   
+
+plot_grid(gen_a, gen_b, gen_c, nrow = 1)
+
+
+
+```
+
+```{r}
+
+
+
+
+
+# ggplot(qn_g, aes(calls_count, fill= gender))+
+#   geom_density(alpha = .5)+
+#   facet_wrap(~state_name,  strip.position = "bottom")+
+#    theme_minimal_hgrid()+
+#   theme(legend.position = "bottom",
+#          axis.title.y= element_blank(),
+#         legend.title = element_blank())
+
+ 
+# ggplot(qn_g, aes(response_count, fill= gender))+
+#   geom_density(alpha = .5)+
+#   facet_wrap(~state_name,  strip.position = "bottom")+
+#    theme_minimal_hgrid()+
+#   theme(legend.position = "bottom",
+#          axis.title.y= element_blank(),
+#         legend.title = element_blank())
+
+# ggplot(qn_g, aes(response_rate, fill= gender))+
+#   geom_density(alpha = .5)+
+#   facet_wrap(~state_name,  strip.position = "bottom")+
+#    theme_minimal_hgrid()+
+#   theme(legend.position = "bottom",
+#          axis.title.y= element_blank(),
+#         legend.title = element_blank())
+
+
+
+
+
+
+```
+
+```{r}
+# 
+# ac_g <- survey %>% group_by(state_name, ac_name) %>% summarise(count = n()) %>% 
+#   ggplot(aes(reorder(state_name, -count), count))+
+#    
+#   #geom_point(alpha =.5)+
+#   
+#   geom_boxplot(lwd=1, fatten =1, outlier.shape = NA)+
+#   geom_jitter(alpha = .5, color = "steelblue",width = 0.25, height = 0.5)+
+#   #scale_fill_discrete_sequential(palette = "viridis")+
+#   labs( y = "Number of calls")+
+#   theme_minimal_hgrid()+
+#  ylim(c(0,400))+
+#   theme(
+#     axis.title.y = element_blank(),
+#     legend.position = "bottom"
+#   )+
+#   coord_flip()
+#  
+
+```
+
+```{r}
+# 
+# ac_gender <- survey %>% group_by(state_name, ac_name, gender) %>% summarise(count = n()) %>% 
+#    ggplot(aes(state_name, count, fill = gender))+
+#     
+#    #geom_point(alpha =.5)+
+#    #geom_jitter(alpha = .5)+
+#   geom_boxplot(alpha = .5)+
+#   theme_minimal_hgrid()+
+#   labs( y = "Number of calls", fill = "Gender")+
+#    theme(
+#     axis.title.y = element_blank(),
+#     axis.text.y = element_blank(),
+#     #legend.position = "bottom"
+#     
+#   )+
+#   coord_flip()
+# 
+# 
+# 
+# plot_grid(ac_g, ac_gender)
+```
+
+--
+
+
+## Age
+
+The following plot depicts the age distribution along with gender of the the callers. Looking at the aggregate picture, we observe that the proportion of calls to individuals less than 25 years is quite high among women.
+
+```{r}
+a <- ggplot(survey %>% filter(age<100), aes(age,fill = gender))+
+ geom_density(alpha= .5)+
+ theme_minimal_hgrid()+
+  ylim(0,.05)+
+  theme(legend.position = "bottom")+
+  labs(subtitle = "Call receivers age")+
+   theme(
+     legend.position = "bottom",
+    #axis.title.y= element_blank()
+  )
+
+b <- ggplot(survey %>% filter(age<100 & response ==1), aes(age,fill = gender))+
+ geom_density(alpha= .5)+
+ theme_minimal_hgrid()+
+  ylim(0,.05)+
+  labs(subtitle = "Call responders age", y = "")+
+   theme(
+     legend.position = "bottom",
+    axis.text.y= element_blank()
+  )
+  
+  plot_grid(a,b)
+```
+
+Once we look further into the states, the general trend fades away and looks more like the gender is fairly distributed along the age across the states. All the states except West Bengal has a fair distribution of age among both genders, while West Bengal one is extremely right skewed with a high number of young responders under 25 years of age.
+
+```{r}
+qn_g <- survey %>% filter(state_name != "Gujarat")%>% group_by(state_name, ac_name, gender) %>% summarise(calls_count = n(), response_count = sum(response), response_rate = (response_count/calls_count)*100) 
+
+
+
+
+
+age_a <- ggplot(survey %>% filter(age<100), aes(age, state_name,fill = gender))+
+ #geom_density(alpha= .5)+
+  geom_density_ridges(alpha= .5)+
+  labs(subtitle = "Call receivers", y = "")+
+ theme_minimal_hgrid()+
+    theme(legend.position = "bottom")+
+      theme(legend.position = "bottom")+
+     theme(
+      axis.title.y= element_blank()
+    ) 
+age_b <- ggplot(survey %>% filter(age<100 & response ==1), aes(age, state_name,fill = gender))+
+ #geom_density(alpha= .5)+
+  geom_density_ridges(alpha= .5)+
+  labs(subtitle = "Call responders")+
+ theme_minimal_hgrid()+
+  theme(legend.position = "bottom")+
+     theme(
+      axis.title.y= element_blank(),
+      axis.text.y = element_blank()
+    ) 
+
+plot_grid(age_a, age_b)
+ 
+```
+
+```{r}
+
+  
+#   
+#   facet_wrap(~state_name)
+# 
+# ggplot(survey %>% filter(age<100), aes(age, fill = state_name))+
+#   geom_density(alpha= .5)+
+#   theme_minimal_hgrid()+
+#   ylim(0,.20)+
+#   theme(legend.position = "bottom")
+
+```
+
+```{r}
+
+ #survey <- survey %>%  mutate(response= ifelse((!is.na(q2_response) |!is.na(q1_response)),1,0))
+# 
+# 
+# survey %>% group_by(state_name, gender) %>% summarise(count= sum(response))%>% group_by(state_name) %>% mutate(sum = sum(count)) %>% 
+#   ggplot(aes(reorder(state_name, -sum), count, fill = gender))+
+#   geom_bar(stat="identity")+
+#    scale_fill_brewer(palette="Paired",na.value = "darkgrey")+
+#   labs( y = "Count", fill = "Gender")+
+#   coord_flip()+
+#    theme_minimal_vgrid()+
+#   theme(#legend.position = "bottom",
+#     panel.grid = element_blank(),
+#     axis.line.x= element_line(),
+#     axis.line.y = element_blank(),
+#     axis.ticks = element_blank(),
+#     axis.title.y = element_blank()
+#     )
+# survey %>% filter(response==1) %>% 
+#   ggplot(aes(state_name))+
+#   geom_bar(stat= "count")
+# 
+# 
+
+  
+```
+
+
+
+## Demography
+
+### Urban
+
+
+In this section, we are attempting to ensure that there is no urban/rural bias in the sample. We define urban ACs as the constituencies with more than 40% of urban areas.  The distribution of urban/rural ACs in the dataset looks like this. 
+
+
+```{r}
+urban_pc <- read.csv("D:/cpr/UP/up_panchayat/data/ruralurban-aggregated-ac.csv")
+
+urban_pc <- urban_pc%>% filter(state %in% c( "Uttar Pradesh", "West Bengal", "Gujarat","Rajasthan","Telangana" ))
+
+
+
+urban_pc$ac_name <- tolower(urban_pc$ac_name)
+
+
+# survey_urban_uniq <- survey %>% filter(state_name %!in%c("Rajasthan","Telangana")) %>% distinct(ac_name, state_name)
+
+#survey_urban_all <- survey %>% filter(state_name %!in%c("Rajasthan","Telangana")) 
+
+#survey_up_uniq$ac_name <- tolower(survey_up_uniq$ac_name)
+
+library(fuzzyjoin)
+# 
+ # survey_all_urban <- fuzzyjoin::stringdist_left_join( survey, urban_pc, by = c( "ac_name" = "ac_name", "state_name"= "state"), distance_col = "dist",max_dist = 1, ignore_case = TRUE)%>% group_by(state_name,ac_name.x) %>% slice_min(ac_name.dist)
+# 
+# 
+# 
+#write.csv(survey_all_urban , "D:/cpr/data/ac_survey/survey_all_urban.csv")
+survey_all_urban <- read.csv("D:/cpr/data/ac_survey/survey_all_urban.csv")
+
+#survey_up_urban <- survey_up_urban %>% filter(ac_name.x %!in% c("atroli","baroli" ))
+
+# fuzzyjoin::stringdist_anti_join( survey_up_uniq, urban_pc_up, by = "ac_name", distance_col = "dist",ignore_case = TRUE, method = "jaccard") 
+# 
+# fuzzyjoin::stringdist_left_join( survey_up_uniq, urban_pc_up, by = "ac_name", distance_col = "dist",ignore_case = TRUE,
+#               method = "jaccard",max_dist = 1) %>% group_by(ac_name.x) %>% slice_min(dist)
+# 
+# fuzzyjoin::stringdist_left_join( survey_up_uniq, urban_pc_up, by = "ac_name", distance_col = "dist",ignore_case = TRUE,
+#               method = "cosine",max_dist = 1) %>% group_by(ac_name.x) %>% slice_min(dist) %>%filter(dist >0)
+
+#table(cut(urban_pc_up$urban_percent, c(0,40,100),include.lowest = TRUE))
+
+
+survey_all_urban$urban_y <- ifelse(survey_all_urban$urban_percent >=40,1,0)
+
+survey_all_urban <-survey_all_urban %>%  mutate(response= ifelse((!is.na(q2_response) |!is.na(q1_response)),1,0))
+
+
+survey_all_urban %>% group_by(state_name,urban_y) %>% summarise(count= n(),n_ac=  n_distinct(ac_name.x), calls_per_ac = count/n_ac, response_per_ac = sum(response)/n_ac,
+                                                                response_rate_per_ac = (response_per_ac/calls_per_ac)*100) %>% kable(digits =2) %>% kable_styling(bootstrap_options = "striped")
+```
+
+### Calls
+
+We see that both mean values and calls per constituency is considerably less for urban constituencies. We scrutinise this further by looking at a box plot.
+
+
+```{r}
+survey_all_urban %>% group_by(state_name,  ac_name.x, urban_y) %>% summarise(count = n()) %>% 
+  
+  ggplot(aes(factor(urban_y),count ))+
+  
+  geom_boxplot()+
+  facet_wrap(~state_name, nrow=1)+
+  scale_x_discrete(labels = c("Rural", "Urban"))+
+  theme_minimal_hgrid()+
+  theme(axis.title.x = element_blank())
+
+#survey_up_uniq %>% filter(str_detect(ac_name, "agra"))
+```
+
+### Response rate
+
+
+
+```{r}
+survey_all_urban %>% group_by(state_name,ac_name.x,urban_y) %>% summarise(response_rate_per_ac=(sum(response)/n())*100) %>% 
+  ggplot(aes(factor(urban_y),response_rate_per_ac ))+
+  
+  geom_boxplot()+
+  facet_wrap(~state_name, nrow=1)+
+  scale_x_discrete(labels = c("Rural", "Urban"))+
+  theme_minimal_hgrid()+
+  theme(axis.title.x = element_blank())
+
+  
+
+```
+
+
+It seems that there is a rural bias in the sampling even though the response rate from urban and rural area looks similar. We can statistically confirm this using  a t-test. 
+
+```{r}
+survey_all_urban <- survey_all_urban %>% group_by(state_name,  ac_name.x) %>% mutate(count = n())
+
+
+#survey_up_urban %>% group_by(urban_y) %>% summarise(mean(count))
+
+t.test(survey_all_urban$count ~survey_all_urban$urban_y)
+
+```
+We observe that there is a difference in the mean's of both urban and rural constituencies and it is significant at .005 level.  Hence, it is safe to conclude that there is a rural bias in the sample.
+
+
+
+
+### SC/ST
+
+In the following table, `sample_prop` is the proportion of calls made to the that particular category and the `electorate_prop` is the electorate proportion of that category. 
+
+```{r}
+
+tcpd_up <- read.csv("D:/cpr/data/tcpd/states/Uttar_Pradesh_2020.csv")
+
+tcpd_rj <-  read.csv("D:/cpr/data/tcpd/states/Rajasthan_2020.csv")
+  
+tcpd_gj <-  read.csv("D:/cpr/data/tcpd/states/Gujarat_2020.csv")
+  
+tcpd_wb <-  read.csv("D:/cpr/data/tcpd/states/West_Bengal_2020.csv")
+
+tcpd <- data.table::rbindlist(list(tcpd_up, tcpd_rj, tcpd_gj, tcpd_wb), use.names = TRUE, fill = TRUE)
+
+#tcpd_up <- tcpd_up  %>% filter(Year==2017 & Position ==1 & Poll_No==0)
+
+ tcpd_ae <- tcpd %>%group_by(State_Name) %>% filter(Year==max( Year) & Position ==1 & Poll_No==0)
+ 
+ #tcpd %>%  group_by(State_Name, Constituency_Type) %>% tally()
+
+#survey_all_urban_up <- survey_all_urban %>% filter(state_name == "Uttar Pradesh")
+ 
+survey_all_urban$new_state_name <- case_when(survey_all_urban$state_name == "Uttar Pradesh" ~ "Uttar_Pradesh",
+                                   survey_all_urban$state_name == "Rajasthan" ~ "Rajasthan",
+                                   survey_all_urban$state_name == "Gujarat" ~ "Gujarat",
+                                   survey_all_urban$state_name == "West Bengal" ~ "West_Bengal")
+
+tcpd_ae$reservation <- ifelse(tcpd_ae$Constituency_Type== "GEN", "GEN", "SC/ST")
+ 
+tcpd_survey<- left_join(survey_all_urban, tcpd_ae, by = c("new_state_name"="State_Name","ac" = "Constituency_No"))
+
+el <- tcpd_ae %>% group_by(State_Name, reservation) %>% summarise(sum_cat = sum(Electors)) %>% group_by(State_Name) %>% mutate(sum_el = sum(sum_cat), electorate_prop = sum_cat/sum_el) %>%ungroup() %>% select(State_Name, reservation,electorate_prop)
+
+
+
+
+tcpd_survey <- tcpd_survey %>%  mutate(response= ifelse((!is.na(q2_response) |!is.na(q1_response)),1,0))
+
+
+  sample <- tcpd_survey %>% filter(Constituency_Type != "NA")%>% group_by(state_name,reservation) %>% summarise(calls_count= n(), response = sum(response)) %>% filter(state_name != "West Bengal") %>% group_by(state_name) %>% mutate(sum = sum(calls_count),calls_prop=  calls_count/sum, sum_response = sum(response), response_prop = response/sum_response) %>% select(calls_prop, response_prop) 
+  
+  cbind(el, sample) %>%  kable(digits = 2) %>% kable_styling(bootstrap_options = "striped")
+
+
+
+```
+
+In both UP and Rajasthan, there is a fair representation of SC/ST community in the calls made and responses received.  But, in Gujarat, representation of SC/ST in this samples falls way below of their electoral proportion. 
+
+
+# Answers
+
+This analysis only includes only individuals who have  atleast responded either one of the two questions.
+
+## All India
+
+### Education
+
+In this grapph, we look at how people's response differes with their education levels.
+
+```{r}
+
+survey_a <- survey %>% filter(!is.na(q1_response) |!is.na(q2_response)) 
+
+survey_a$voted <- case_when(survey_a$q1_response== 1~ "Yes",
+                            survey_a$q1_response== 2~ "No",
+                            TRUE ~"No response")
+
+
+survey_a$education <- case_when(survey_a$q2_response== 1 ~"Primary",
+                                survey_a$q2_response== 2 ~"High school",
+                                survey_a$q2_response== 3 ~"UG/Diploma",
+                                survey_a$q2_response== 4 ~"PG+",
+                                TRUE ~"No response")
+
+survey_a$education <- factor(survey_a$education, levels = c("Primary", "High school", "UG/Diploma", "PG+", "No response"))
+
+
+survey_a$voted <- factor(survey_a$voted, levels = c("Yes", "No", "No response"))
+
+
+
+
+
+survey_a %>% group_by(voted, education) %>% summarise(count=n()) %>% group_by(voted) %>% 
+  mutate(sum=sum(count), perc = (count/sum)*100) %>% select(-c(count, sum)) %>% 
+  ggplot(aes(voted, perc, fill=forcats::fct_rev(education)))+
+  geom_bar(position = "stack",stat="identity")+
+  scale_fill_discrete_sequential(palette = "blues")+
+  labs(fill = "Education")+
+ theme_fivethirtyeight()+
+  theme(
+    panel.grid.major.x = element_blank()
+  )
+```
+
+### Gender
+
+Here, we check if we observe any difference in the answers with regards to gender. As we can see, clearly there no difference along the gender lines.
+
+```{r}
+survey_a %>% group_by(gender, voted) %>% summarise(count=n()) %>% group_by(gender) %>% 
+  mutate(sum=sum(count), perc = (count/sum)*100)  %>% 
+  ggplot(aes(gender, perc, fill = voted))+
+  geom_bar(position = "stack",stat="identity")+
+  #facet_wrap(~gender)+
+  scale_fill_discrete_sequential(palette = "blues")+
+  labs(fill = "Education")+
+ theme_fivethirtyeight()+
+  theme(
+    panel.grid.major.x = element_blank()
+  )
+```
+
+
+
+## States
+
+In the following charts, we observe how answers variate in different states with regards to education and gender.
+
+
+```{r}
+
+survey_a %>% group_by(voted,state_name, education) %>% summarise(count=n()) %>% group_by(state_name,voted) %>% 
+  mutate(sum=sum(count), perc = (count/sum)*100) %>% select(-c(count, sum)) %>% 
+  ggplot(aes(state_name, perc, fill=forcats::fct_rev(education)))+
+  geom_bar(position = "stack",stat="identity")+
+  facet_wrap(~voted)+
+  scale_fill_discrete_sequential(palette = "blues")+
+  labs(fill = "Education")+
+ theme_fivethirtyeight()+
+  theme(
+    panel.grid.major.x = element_blank(),
+    axis.text.x = element_text(angle = 90)
+  )
+
+```
+
+---
+  
+```{r}
+survey_a %>% group_by(state_name, voted,education) %>% summarise(count=n()) %>% group_by(state_name,voted) %>% 
+  mutate(sum=sum(count), perc = (count/sum)*100) %>% select(-c(count, sum)) %>% 
+  ggplot(aes(voted, perc, fill=forcats::fct_rev(education)))+
+  geom_bar(position = "stack",stat="identity")+
+  facet_wrap(~state_name, nrow =1)+
+  scale_fill_discrete_sequential(palette = "blues")+
+  labs(fill = "Education")+
+ theme_fivethirtyeight()+
+  theme(
+    panel.grid.major.x = element_blank(),
+    axis.text.x = element_text(angle = 90)
+  )
+```
+
+---
+
+### Gender
+
+```{r}
+
+survey_a %>% filter(state_name != "Gujarat")%>% group_by(state_name,gender, voted) %>% summarise(count=n()) %>% group_by(state_name,gender) %>% 
+  mutate(sum=sum(count), perc = (count/sum)*100)  %>% 
+  ggplot(aes(gender, perc, fill = voted))+
+  geom_bar(position = "stack",stat="identity")+
+  facet_wrap(~state_name, nrow =1)+
+  scale_fill_discrete_sequential(palette = "blues")+
+  labs(fill = "Education")+
+ theme_fivethirtyeight()+
+  theme(
+    panel.grid.major.x = element_blank()
+  )
+
+```
+  
+  

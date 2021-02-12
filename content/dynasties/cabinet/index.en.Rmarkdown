@@ -1,0 +1,320 @@
+---
+title: "Cabinet ministers - 1990:2014"
+author: "Abdul Najah"
+params:
+  orig_date: "Original Publish Date: 15 January, 2021"
+  update_date: !r paste("Updated on:", format(Sys.time(), '%d %B, %Y'))
+authors:
+  - najah
+summary: Analysis of the cabinet ministers data from TCPD
+output:
+  blogdown::html_page:
+    keep_md: true
+    toc: true
+    toc_depth: 3
+    number_sections: true
+    fig_width: 6
+editor_options: 
+  chunk_output_type: inline
+---
+
+
+
+### Document History
+
+`r params$orig_date`
+
+`r params$update_date`
+
+---
+
+```{r set up, warning=FALSE, include=FALSE, message= FALSE}
+knitr::opts_chunk$set(cache = FALSE,echo = FALSE, message=FALSE, warning = FALSE,fig.width = 16/2, fig.height = 9/2)
+library(tidyverse)
+library(data.table)
+library(knitr)
+library(kableExtra)
+library(scales)
+library(gridExtra)
+library(stargazer)
+library(ggbump)
+library(cowplot)
+library(colorspace)
+library(ggthemes)
+library(DT)
+library(widgetframe)
+`%!in%` = Negate(`%in%`)
+select <- dplyr::select
+```
+
+
+
+```{r reading the data}
+
+cabinet <-  read.csv("data/tcpd_cabinet_dyn.csv")
+```
+
+
+
+---
+
+# Data summary
+
+
+This data set on cabinet minsters in India from the year 1990-2014 provides us information on their party, appointment duration, ministry, rank, gender, caste and reservations and dynast status. This data set has `r dim(cabinet)[1]` observations and `r dim(cabinet)[2]` variables. 
+
+For more info on the  data please refer to the codebook - [codebook](http://lokdhaba.ashoka.edu.in:3003/static/media/qh_codebook.712c9103.pdf)
+
+**Main variables in the data**
+
+```{r}
+
+names(cabinet)
+
+```
+
+
+
+
+---
+
+**Sample data**
+
+```{r }
+
+
+sample_data <- DT::datatable(head(cabinet), class = 'cell-border stripe')
+
+widgetframe::frameWidget(sample_data)
+
+```
+
+
+---
+
+
+
+# Distribution
+
+
+**All ministers***
+
+The ministers are chosen from both Loksabha and Rajyasabha. This graphs shows us the distribution of the minsters with regards to the house across the years.
+
+
+```{r}
+# cabinet %>% filter(dyn !="")%>% group_by(house, dyn) %>% summarise(count = n()) %>% pivot_wider(names_from = "house", values_from = c( "count")) %>% mutate(x)
+
+cabinet %>% group_by(year) %>% distinct(name, .keep_all = TRUE) %>% summarise(count = n()) %>% 
+  ggplot(aes(factor(year), count, group=1))+
+  geom_point()+
+  geom_line()+
+  ylim(0,150)+
+  labs(title = "Distribution of the cabinet ministers", subtitle = "Number of cabnet minsters, by year",x = "Year")+
+  theme_fivethirtyeight()+
+  
+  #theme_minimal_hgrid()+
+  theme(
+    legend.position = "bottom",
+    text = element_text(family = "serif"),
+   #title = element_text (size =12)
+  )
+
+```
+
+
+
+
+**Dynasts**
+
+This bar plot shows us the proportion of dynast minsters from both the houses for each cabinet.
+
+
+
+
+
+```{r}
+
+cabinet %>%filter(dyn!= "")%>% group_by(year, dyn) %>% distinct(name, .keep_all = TRUE) %>%  summarise(count = n()) %>% group_by(year) %>% mutate(sum = sum(count), perc = (count/sum)*100) %>% filter(dyn==1) %>% 
+  ggplot(aes(factor(year), perc, group=1))+
+  geom_point()+
+
+  geom_line()+
+    ylim(0,50)+
+  theme_fivethirtyeight()+
+  labs(title = "Dynasts in the cabinet", subtitle = "What % of the house do they occupy?" ,x= "Year", y = "Pecentage", fill = "House")
+
+    
+
+```
+
+
+
+---
+
+## States
+
+```{r results = 'hide'}
+
+ge_all <- read.csv("D:/cpr/data/tcpd/TCPD_GE_all.csv")
+
+names(ge_all) <- tolower(names(ge_all) )
+
+ac_list <- ge_all %>% filter(year==2014 & poll_no==0 & position ==1) %>% group_by(state_name) %>% summarise(ac_n = n())
+
+state_min_list <- cabinet %>% group_by(State) %>% summarise(min_count = n()) %>% arrange(-min_count)
+
+ac_min_list <- left_join(state_min_list, ac_list, by = c("State" = "state_name"))
+
+ac_min_list  <- ac_min_list  %>% mutate(min_ac_ratio =min_count/ac_n ) %>% arrange(-min_ac_ratio)
+
+ library(sf)
+
+states_shp <-  st_read("D:/cpr/data/shape-file/maps-master/States/Admin2.shp")
+
+# states_shp$ST_NM
+# 
+# 
+# ggplot(states_shp )+
+#   geom_sf()
+
+library(fuzzyjoin)
+
+
+state_shp <- stringdist_full_join(states_shp, ac_min_list, by =c("ST_NM"= "State") )
+
+
+
+#
+```
+
+The following maps tell us the proportion of the minsters from each state. 
+
+In order to find the proportion of the ministers from each state, we created a variable named `Minister to ac ratio` which is _the ratio of number of ministers from that state to the number of Parliamentary constituencies in that state_. States in grey colour are the states which never had minsters during the period of 1990-2014.
+
+
+```{r}
+all_min <- ggplot(state_shp, aes(fill =min_ac_ratio ) )+
+  geom_sf(aes(geometry = geometry))+
+   scale_fill_continuous_sequential(palette = "Sunset")+
+   labs(title = "All cabinet ministers", subtitle = "1990-2014", fill = "Minister to ac ratio")+
+   theme_map()+
+   theme(text = element_text(family = "serif"),
+         legend.position ="bottom", legend.direction = "horizontal",
+       # legend.title = element_blank()
+       )
+
+
+#colorspace::hcl_palettes(plot= TRUE)
+
+```
+
+---
+
+
+
+```{r}
+
+state_min_list_dyn <- cabinet %>% filter(dyn!= "")%>% group_by(State, dyn) %>% summarise(min_count = n()) %>%filter(dyn==1) %>% arrange(-min_count)
+
+ac_min_list_dyn <- left_join(state_min_list_dyn, ac_list, by = c("State" = "state_name"))
+
+ac_min_list_dyn  <- ac_min_list_dyn  %>% mutate(min_ac_ratio =min_count/ac_n ) %>% arrange(-min_ac_ratio)
+
+state_shp_dyn <- stringdist_full_join(states_shp, ac_min_list_dyn, by =c("ST_NM"= "State") )
+
+dyn_min <- ggplot(state_shp_dyn, aes(fill =min_ac_ratio ) )+
+  geom_sf(aes(geometry = geometry))+
+   scale_fill_continuous_sequential(palette = "Sunset")+
+   labs(title = "Dynast cabinet ministers", subtitle = "1990-2014", fill = "Minister to ac ratio")+
+   theme_map()+
+   theme(text = element_text(family = "serif"),
+         legend.position ="bottom", legend.direction = "horizontal",
+        #legend.title = element_blank()
+        )
+
+plot_grid(all_min, dyn_min)
+
+
+```
+
+
+
+---
+
+
+# Term & Duration
+
+
+```{r}
+
+#lubridate::dmy(cabinet$appointment_begin)
+
+cabinet <- cabinet %>% mutate(begin_date =lubridate::dmy(appointment_begin) , end_date = lubridate::dmy(appointment_end), term_days = (end_date - begin_date), term_months = lubridate::interval(begin_date, end_date)/months(1) )
+
+cabinet$dynast <- ifelse(cabinet$dyn ==0, "Non-dynast", "Dynast")
+
+
+```
+
+
+This table shows the number of minsters/number of terms,number of unique minsters, total term and average term per person/uniq person for both the dynast and non-dynast ministers.
+ 
+```{r}
+
+cabinet %>%filter(dynast!= "")%>%  group_by(house,dynast) %>% summarise(count = n(),uniq_count = n_distinct(name), term = sum(term_months), average_term_per_minister = term/count, average_term_per_uniq_minister = term/uniq_count) %>% kable(digits=2,col.names = c("House", "dynastast", "N_ministers","uniq_ministers", "Total term (months)", "Average term per min", "Average term per uniq_min"),caption = "Term duration of minsters wrt identity") %>% kable_styling(bootstrap_options ="striped" )
+
+```
+
+---
+
+# Rank
+
+```{r}
+
+
+cabinet %>% group_by(dynast, rank)  %>% summarise(count = n()) %>% group_by(rank) %>% mutate(sum= sum(count), dynast_percentage = (count/sum)*100) %>% filter(dynast =="Dynast") %>% select(2:2, 5:5) %>% kable(digits = 2) %>% kable_styling(bootstrap_options = "striped")
+
+```
+
+---
+
+# Portfolio
+
+
+
+__Top ministries__
+
+```{r}
+cabinet %>% filter(dyn!= "")%>% group_by(dynast,portfolio) %>% summarise(count = n()) %>% 
+ group_by(portfolio) %>% mutate(sum= sum(count)) %>% arrange(-sum) %>% filter(sum>20) %>% 
+  ggplot(aes(reorder(portfolio,-count), count, fill= dynast))+
+  geom_bar(position="stack", stat= "identity")+
+  coord_flip()+
+  theme_minimal()+
+  theme(#legend.position = "bottom",
+        # axis.text.x = element_text(angle = 90), 
+         panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(), 
+         axis.line.x = element_line(),
+         legend.title = element_blank(),
+          axis.title.y = element_blank()
+        )
+
+```
+
+---
+
+
+  We have around 118 ministries now, we can reduce it further with some cleaning. Do we need a further analysis based on the ministries? this will enable us to address question like _what kind of ministries do dynasts prefer_ . If so, we we can go ahead with further cleaning.
+
+Eg: we can club coal/mine/petroleum to one natural resources category
+
+
+```{r}
+
+dept <- DT::datatable(cabinet %>% group_by(portfolio) %>% summarise(count = n()) %>% arrange(-count) , class = 'cell-border stripe')
+
+widgetframe::frameWidget(dept)
+
+```
