@@ -1,5 +1,6 @@
 ---
 title: 'Master file Analysis'
+author: "Abdul Najah"
 date: '2020-06-10'
 params:
   orig_date: "Original Publish Date: 10 June, 2020"
@@ -17,6 +18,7 @@ output:
 editor_options: 
   chunk_output_type: inline
 ---
+
 
 
 ```{r set up, warning=FALSE, include=FALSE, message= FALSE}

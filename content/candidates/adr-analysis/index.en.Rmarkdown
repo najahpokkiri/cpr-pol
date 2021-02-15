@@ -1,0 +1,296 @@
+---
+title: "ADR analysis"
+author: "Abdul Najah"
+date: '2020-09-28'
+params:
+  orig_date: 'Original Publish Date: 28 September, 2020'
+  update_date: !r paste("Updated on:", format(Sys.time(), '%d %B, %Y'))
+authors:
+  - najah
+summary: Analysis of the general election candidates using the ADR data.
+output:
+  blogdown::html_page:
+    keep_md: true
+    toc: true
+    toc_depth: 3
+    number_sections: true
+    fig_width: 6
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r set up, warning=FALSE, include=FALSE, message= FALSE }
+
+knitr::opts_chunk$set(cache = TRUE,echo = FALSE, message=FALSE, warning = FALSE)
+#fig.width = 16/2, fig.height = 9/2
+
+
+library(tidyverse)
+library(data.table)
+library(knitr)
+library(kableExtra)
+library(scales)
+library(gridExtra)
+library(stargazer)
+library(cowplot)
+library(ggalt)
+library(bbplot)
+library(colorspace)
+library(skimr)
+library(ggthemes)
+library(extrafont)
+
+`%!in%` = Negate(`%in%`)
+
+select <- dplyr::select
+
+
+
+
+
+```
+
+------------------------------------------------------------------------
+
+### Document History
+
+`r params$orig_date`
+
+`r params$update_date`
+
+------------------------------------------------------------------------
+
+
+
+```{r}
+
+adr_ge <- fread("D:/cpr/UP/up-dynasties/dyn_other_data/adr/adr_tcpd_09_14_19.csv")
+
+# names(adr_ge)
+# 
+# glimpse(adr_ge)
+
+names(adr_ge) <-  tolower(names(adr_ge))
+
+adr_ge <- adr_ge %>% mutate(position_new = case_when(position ==1 ~ "Winner",
+                                           position ==2 ~ "Runner-up",
+                                           position ==3 ~ "Second runner-up",
+                                           TRUE ~ "Others"
+                                           ))
+
+adr_ge$position_new <- factor(adr_ge$position_new , levels = c("Winner", "Runner-up","Second runner-up", "Others"))
+
+
+```
+
+## Age
+
+```{r}
+
+adr_ge$age <- as.integer(adr_ge$age)
+
+
+ggplot(adr_ge, aes(x= age))+
+  geom_histogram(binwidth = 5, color = "white", fill = "steelblue")+
+  labs(title = "Age distribution")+
+  theme_minimal()
+
+
+```
+
+------------------------------------------------------------------------
+
+```{r}
+ggplot(adr_ge %>% filter(age != "" & year != ""),aes(x=  position_new,  y= age))+
+  #geom_point(position=position_jitterdodge(),alpha=0.1)+
+  geom_boxplot()+
+  labs(title = "Age distribution",x = "Position")+
+  theme_minimal()+
+  theme(legend.position = "bottom",
+        panel.grid.major.x = element_blank())
+```
+
+------------------------------------------------------------------------
+
+```{r}
+ggplot(adr_ge %>% filter(age != "" & year != ""),aes(factor(year), age,fill = position_new))+
+  #geom_point(position=position_jitterdodge(),alpha=0.1)+
+  geom_boxplot()+
+  labs(title = "Age distribution - Year wise",x = "Age")+
+  theme_minimal()+
+  theme(legend.position = "bottom",
+        panel.grid.major.x = element_blank())
+  
+
+
+
+```
+
+------------------------------------------------------------------------
+
+## Education
+
+```{r}
+
+
+
+## re-catagorising education
+
+adr_ge <- adr_ge %>% mutate(education_new = case_when(education %in% c("8th Pass", "5th Pass")~ "School",
+                                           education %in% c("12th Pass", "10th Pass") ~"High School",
+                                           education %in% c("Graduate", "Graduate Professional") ~ "Graduate",
+                                           education %in% c("Post Graduate", "Doctorate")~ "Post Graduate",
+                                           education %in% c("Illiterate", "Literate", "Not Given", "Unknown", "Others")  ~ "Others",
+                                           TRUE ~"NA"
+                                             
+                                             ))
+
+adr_ge$education_new <- factor(adr_ge$education_new, levels = c("Post Graduate", "Graduate", "High School", "School","Others" ) )
+```
+
+```{r}
+adr_ge %>% group_by(position_new, education_new) %>% summarise(count =- n()) %>% ungroup() %>%
+  group_by(position_new) %>% mutate(sum = sum(count), prop = count/sum) %>% 
+  ggplot(aes(position_new, prop, fill = education_new))+
+  geom_bar(stat= "identity", position = "stack")+
+  labs(title = "candidates' education", x = "Position", y = "Proportion",fill = "Education")+
+  theme_fivethirtyeight()+
+  scale_fill_discrete_sequential(palette = "Blues 3", rev= FALSE)+
+  
+  theme(
+    panel.grid.major.x = element_blank(),
+    text = element_text(family = "Garamond")
+    #axis.title = element_text(family = "Garamond")
+  )
+
+```
+
+------------------------------------------------------------------------
+
+```{r}
+adr_ge %>% filter(year!= "")%>% group_by(year,position_new, education_new) %>% summarise(count =- n()) %>% ungroup() %>%
+  group_by(year,position_new) %>% mutate(sum = sum(count), prop = count/sum) %>% 
+  ggplot(aes(factor(year), prop, group = education_new, color = education_new))+
+  geom_point()+
+  geom_line()+
+  facet_wrap(~position_new)+
+  labs(title = "candidates' education", x = "Position", y = "Proportion",color = "Education")+
+  scale_color_discrete_qualitative(palette = "Dark 3", rev= FALSE)+
+  theme_fivethirtyeight()+
+  theme(
+    panel.grid.major.x = element_blank()
+  )
+
+  
+#hcl_palettes(plot = TRUE)
+
+
+
+```
+
+------------------------------------------------------------------------
+
+## Wealth
+
+```{r}
+
+
+adr_ge$total_assets <- as.numeric(adr_ge$total_assets)
+
+
+adr_ge  %>% group_by(position_new) %>% summarise(assets = mean(total_assets, na.rm = TRUE)) %>% 
+  ggplot(aes(position_new, assets))+
+  geom_bar(stat= "identity", fill = "steelblue", width =.8 )+
+  labs(title = "Average asset of the candidates", subtitle = "General elections - 2009:2019", caption = "Source: ADR")+
+  theme_fivethirtyeight()+
+  #ylim(0,200000000)+
+  scale_y_continuous(labels = scales::label_number_si(), limits = c(0,200000000))+
+  scale_x_discrete(labels = c( "Winner", "Runner-up", "Second \n runner-up", "Marginal \n candidates"))+
+  
+  theme(
+    axis.text = element_text(size = 10),
+    aspect.ratio = 1/1,
+    plot.title = element_text(size = 14),
+    panel.grid.major.x = element_blank(),
+    axis.line.x = element_line(color = "gray8"),
+    text = element_text(family = "serif"),
+    plot.caption = element_text(margin =margin(.75,0,0,0, "cm") , color = "darkgrey")
+  )
+
+# theme_fivethirtyeight$line
+# skim(adr_ge, total_assets)
+# 
+# adr_ge %>% filter(total_assets<1000000000)
+
+```
+
+------------------------------------------------------------------------
+
+```{r}
+
+adr_ge %>% filter(total_assets<1000000000& year != "") %>% group_by(year,position_new) %>% summarise(assets = mean(total_assets, na.rm = TRUE)) %>% 
+  ggplot(aes(factor(year), assets, fill = position_new))+
+  geom_bar(stat= "identity", position= "dodge" )+
+  labs(title = "Average asset of the candidates", subtitle = "General elections - 2009:2019", fill = "Position")+
+  scale_y_continuous(labels = scales::label_number_si())+
+  scale_fill_discrete_sequential(palette = "Blues 3", rev = FALSE)+
+  theme_fivethirtyeight()+
+  theme(
+    panel.grid.major.x = element_blank(),
+    axis.line.x = element_line(color = "darkgrey"),
+    text = element_text(family = "serif")
+  )
+
+#colorspace::hcl_palettes(plot = TRUE)
+
+```
+
+------------------------------------------------------------------------
+
+## Criminality
+
+```{r}
+
+
+
+adr_ge %>% group_by(position_new) %>% summarise(serious_crime = mean(serious_crime, na.rm = TRUE),
+                                                non_serious_crime = mean(non_serious_crime, na.rm = TRUE)) %>% pivot_longer(2:3, names_to = "crime", values_to = "proportion") %>% 
+  ggplot(aes(factor(crime), proportion, fill = position_new))+
+  geom_bar(stat= "identity", position= "dodge" , width = .8)+
+  labs(title = "Average number of criminal cases among candidates", subtitle = "General elections - 2009:2019", fill = "Position")+
+  scale_fill_discrete_sequential(palette = "Blues 3", rev = FALSE)+
+  scale_x_discrete(labels = c("Non - serious case", "Serious case"))+
+  theme_fivethirtyeight()+
+  theme(
+    panel.grid.major.x = element_blank(),
+    axis.line.x = element_line(color = "darkgrey"),
+    text = element_text(family = "serif")
+  )
+
+
+```
+
+------------------------------------------------------------------------
+
+```{r}
+
+
+
+
+adr_ge %>% filter(year != "") %>% group_by(position_new, year) %>% summarise(serious_crime = mean(serious_crime, na.rm = TRUE),
+                                                non_serious_crime = mean(non_serious_crime, na.rm = TRUE)) %>% pivot_longer(3:4, names_to = "crime", values_to = "proportion") %>% 
+  ggplot(aes(factor(crime), proportion, fill = position_new))+
+  geom_bar(stat= "identity", position= "dodge" , width = .8)+
+  facet_wrap(~year)+
+  labs(title = "Average number of criminal cases among candidates", subtitle = "General elections - 2009:2019", fill = "Position")+
+  scale_fill_discrete_sequential(palette = "Blues 3", rev = FALSE)+
+  scale_x_discrete(labels = c("Non - serious case", "Serious case"))+
+  theme_fivethirtyeight()+
+  theme(
+    panel.grid.major.x = element_blank(),
+    axis.line.x = element_line(color = "darkgrey"),
+    text = element_text(family = "serif")
+  )
+
+
+```

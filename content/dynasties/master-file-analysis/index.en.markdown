@@ -1,5 +1,6 @@
 ---
 title: 'Master file Analysis'
+author: "Abdul Najah"
 date: '2020-06-10'
 params:
   orig_date: "Original Publish Date: 10 June, 2020"
@@ -39,6 +40,7 @@ editor_options:
 <link href="{{< blogdown/postref >}}index.en_files/lightable/lightable.css" rel="stylesheet" />
 <script src="{{< blogdown/postref >}}index.en_files/kePrint/kePrint.js"></script>
 <link href="{{< blogdown/postref >}}index.en_files/lightable/lightable.css" rel="stylesheet" />
+
 
 
 

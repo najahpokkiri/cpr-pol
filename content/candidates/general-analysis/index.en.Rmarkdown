@@ -1,0 +1,393 @@
+---
+title: "General  Analysis of GE "
+author: "Abdul Najah"
+date: '2020-09-22'
+draft: true
+params:
+  orig_date: 'Original Publish Date: 22 September, 2020'
+  update_date: !r paste("Updated on:", format(Sys.time(), '%d %B, %Y'))
+authors:
+  - najah
+summary: A preliminary analysis  of past Indian general elections
+output:
+  blogdown::html_page:
+    keep_md: true
+    toc: true
+    toc_depth: 3
+    number_sections: true
+    fig_width: 6
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r set up, warning=FALSE, include=FALSE, message= FALSE }
+
+knitr::opts_chunk$set(cache = TRUE,echo = FALSE, message=FALSE, warning = FALSE,fig.width = 16/2, fig.height = 9/2)
+
+
+library(tidyverse)
+library(data.table)
+library(knitr)
+library(kableExtra)
+library(scales)
+library(gridExtra)
+library(stargazer)
+library(cowplot)
+library(ggalt)
+library(bbplot)
+library(colorspace)
+`%!in%` = Negate(`%in%`)
+library(ggthemes)
+
+select <- dplyr::select
+
+ #hcl_palettes(plot = TRUE)
+ 
+```
+
+------------------------------------------------------------------------
+
+### Document History
+
+`r params$orig_date`
+
+`r params$update_date`
+
+------------------------------------------------------------------------
+
+<!-- ## Top 3 distribution -->
+
+```{r reading the data}
+
+ge_all <- fread("D:/cpr/UP/up-dynasties/dyn_other_data/GE_all.csv")
+
+names(ge_all) <- tolower(names(ge_all))
+
+ge_all  <- ge_all %>% filter(poll_no ==0,  party != "NOTA")
+
+#names(ge_all)
+# 
+# dim(ge_all)
+
+## recategorsing them into 1,2, and other positions
+
+
+ge_all <- ge_all %>% mutate(position_new = case_when(position ==1 ~ "Winner",
+                                           position ==2 ~ "Runner-up",
+                                           position ==3 ~ "Second runner-up",
+                                           TRUE ~ "Others"
+                                           ))
+
+ge_all$position_new <- factor(ge_all$position_new , levels = c("Winner", "Runner-up","Second runner-up", "Others"))
+
+
+
+
+##categorsing states and UTs
+
+ge_all <- ge_all %>% mutate(region_type = case_when(state_name %in% c("Andaman & Nicobar Islands","Dadra & Nagar Haveli","Daman & Diu","Lakshadweep","Puducherry","Chandigarh") ~"UT",
+                                                    state_name %in% c("Madras","Mysore","Goa, Daman & Diu")~ "OT",
+                                                    state_name %in% c("Jharkhand","Telangana","Uttarakhand","Chhattisgarh") ~ "NT",
+                                                    TRUE ~"state"))
+
+#unique(ge_all$state_name)
+
+
+```
+
+------------------------------------------------------------------------
+
+## Number of candidates
+
+```{r}
+
+
+ge_all %>%  filter(region_type == "state" & year != 1996 & position ==1)%>% group_by(year) %>% summarise(n_cand = mean(n_cand)) %>% 
+  ggplot(aes(factor(year),n_cand, group = 1 ))+
+  geom_point()+
+  #geom_line()+
+  labs(title = "Average number of candidates across years", subtitle = "General elections constituency", x = "Year", caption = "Source: TCPD General elections data" )+
+  geom_smooth(color = "#f15a40")+
+  #ylim(0,25)+
+  #scale_fill_discrete_sequential(palette = "Blues 3", rev = FALSE)+
+  theme_fivethirtyeight()+
+  theme(
+    panel.grid.major.x = element_blank(),
+    axis.line.x = element_line(color = "gray8"),
+    text = element_text(family = "serif"),
+    plot.caption = element_text(margin =margin(.75,0,0,0, "cm") )
+  )
+
+
+
+ 
+
+```
+
+------------------------------------------------------------------------
+
+## Turnout percentage
+
+```{r message=FALSE, warning= FALSE}
+
+
+
+ge_all %>% filter(position ==1 & region_type == "state") %>% group_by(year) %>% summarise(turnout = mean(turnout_percentage)) %>% 
+  ggplot(aes(factor(year),turnout, group = 1 ))+
+  geom_point()+
+  #geom_line()+
+  labs(title = "Average turnout percentage", x = "Year")+
+  geom_smooth()+
+  theme_minimal()
+
+## state_wise
+
+# ge_all %>% filter(poll_no ==0 & position ==1) %>% group_by(state_name,year) %>% summarise(turnout = mean(turnout_percentage)) %>% 
+#   ggplot(aes(factor(year),turnout, group =1 ))+
+#   geom_point()+
+#   geom_line()+
+#   geom_smooth()+
+#   
+#   facet_wrap(~state_name, ncol = 4)
+# 
+
+
+```
+
+------------------------------------------------------------------------
+
+## margin percentage
+
+```{r warning = FALSE, message = FALSE}
+ge_all %>% filter(region_type == "state") %>% group_by(year, position_new) %>% summarise(margin = mean(margin_percentage, na.rm = TRUE))%>% 
+  ggplot(aes(factor(year),margin,  group = position_new, color = position_new ))+
+  geom_point()+
+  #scale_color_discrete_qualitative(palette = "Harmonic")+
+  #geom_line()+
+  labs(title = "Average margin percentage", x = "Year", color = "Position")+
+  geom_smooth()+
+  theme_minimal()+
+  theme(legend.position = "bottom")
+  
+ 
+```
+
+------------------------------------------------------------------------
+
+```{r warning = FALSE, message = FALSE}
+## Kerala, UP, WB
+
+ge_all %>% filter(region_type == "state" & state_name %in% c("Kerala", "Uttar Pradesh", "West Bengal")) %>% group_by(year,state_name, position_new) %>% summarise(margin = mean(margin_percentage, na.rm = TRUE))%>% 
+  ggplot(aes(factor(year),margin,  group = position_new, color = position_new ))+
+  geom_point()+
+  facet_wrap(~state_name, ncol = 1)+
+  theme(legend.position = "bottom")+
+  geom_smooth()
+```
+
+------------------------------------------------------------------------
+
+```{r warning = FALSE, message = FALSE}
+## states
+
+ge_all %>% filter(region_type == "state") %>% group_by(year,state_name, position_new) %>% summarise(margin = mean(margin_percentage, na.rm = TRUE))%>% 
+  ggplot(aes(factor(year),margin,  group = position_new, color = position_new ))+
+  geom_point()+
+  facet_wrap(~state_name)+
+  geom_smooth()+
+  theme_minimal()+
+  theme(legend.position = "bottom",
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank())
+
+
+
+```
+
+## ENOP
+
+```{r message=FALSE, warning=FALSE}
+ge_all %>% filter( position ==1 ) %>% group_by(year) %>% summarise(enop = mean(enop, na.rm = TRUE))%>% 
+  ggplot(aes(factor(year),enop, group = 1 ))+
+  geom_point()+
+  #geom_line()+
+  labs(title = "Effective number of parties", x = "Year")+
+  geom_smooth()+
+  theme_minimal()+
+  theme(legend.position = "bottom")
+
+## states
+
+  # ge_all %>% filter(poll_no ==0& position ==1 ) %>% group_by(state_name,year) %>% summarise(enop = mean(enop, na.rm = TRUE))%>% 
+  # ggplot(aes(factor(year),enop, group = 1 ))+
+  # geom_point()+
+  # #geom_line()+
+  # labs(title = "Effective number of parties", x = "Year")+
+  # geom_smooth()+
+  # facet_wrap(~state_name)
+```
+
+------------------------------------------------------------------------
+
+## Number of terms
+
+```{r mesage = FALSE, warning= FALSE}
+ge_all %>%   group_by(year, position_new) %>% summarise(no_terms = mean(no_terms, na.rm = TRUE))%>% 
+  ggplot(aes(factor(year),no_terms, group = position_new, color = position_new))+
+  geom_point()+
+  #geom_line()+
+  labs(title = "Number of terms ", x = "Year", color = "Position")+
+  geom_smooth()+
+  theme_minimal()+
+  theme(legend.position = "bottom")
+```
+
+------------------------------------------------------------------------
+
+```{r mesage = FALSE, warning= FALSE}
+## states
+
+ge_all %>% filter(region_type == "state")  %>%  group_by(year,state_name, position_new) %>% summarise(no_terms = mean(no_terms, na.rm = TRUE))%>% 
+  ggplot(aes(factor(year),no_terms, group = position_new, color = position_new))+
+  geom_point()+
+  facet_wrap(~state_name)+
+  geom_smooth()+
+  labs(title = "Number of terms ", x = "Year", color = "Position")+
+  theme_minimal()+
+  theme(legend.position = "bottom",
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank())
+
+```
+
+------------------------------------------------------------------------
+
+## Turncoat
+
+```{r}
+ge_all %>% filter(region_type == "state") %>% group_by(year, position_new) %>% summarise(turncoat = mean(turncoat, na.rm = TRUE))%>% 
+  ggplot(aes(factor(year),turncoat,  group = position_new, color = position_new))+
+  geom_point()+
+  #geom_line()+
+  labs(title = "Proportion of  turncoats", x = "Year", color = "Position")+
+  geom_smooth()+
+  theme_minimal()+
+  theme(legend.position = "bottom")
+```
+
+------------------------------------------------------------------------
+
+## Incumbents
+
+```{r}
+  ge_all %>% filter(region_type == "state") %>% group_by(year, position_new) %>% summarise(incumbent = mean(incumbent, na.rm = TRUE))%>% 
+    ggplot(aes(factor(year),incumbent,  group = position_new, color = position_new ))+
+    geom_point()+
+    labs(title = "Proportion of incumbents - candidates", x = "Year", color = "Position")+
+    geom_smooth()+
+    theme_minimal()+
+    theme(legend.position = "bottom")
+```
+
+------------------------------------------------------------------------
+
+## Recontest
+
+```{r}
+ge_all %>% filter(region_type == "state") %>% group_by(year, position_new) %>% summarise(recontest = mean(recontest, na.rm = TRUE))%>% 
+  ggplot(aes(factor(year),recontest,  group = position_new, color = position_new))+
+  geom_point()+
+  labs(title = "Proportion of recontestants - candidates", x = "Year", color = "Position")+
+  geom_smooth()+
+  theme_minimal()+
+  theme(legend.position = "bottom")
+```
+
+------------------------------------------------------------------------
+
+## Deposit lost
+
+```{r}
+
+ge_all$deposit_lost_log = ifelse(ge_all$deposit_lost == "no", FALSE, TRUE)
+
+ge_all %>% filter(region_type == "state") %>% group_by(year, position_new) %>% summarise(deposit_lost = mean(deposit_lost_log, na.rm = TRUE))%>% 
+  ggplot(aes(factor(year),deposit_lost,  group = position_new, color = position_new))+
+  geom_point()+
+  labs(title = "Lost deposits", x = "Year", color = "Position")+
+  geom_smooth()+
+  theme_minimal()+
+  theme(legend.position = "bottom")
+
+```
+
+------------------------------------------------------------------------
+
+## Gender
+
+```{r}
+
+ge_all$female = ifelse(ge_all$sex == "F", TRUE, FALSE)
+
+ge_all %>% filter(region_type == "state") %>% group_by(year, position_new) %>% summarise(female_contestants = mean(female, na.rm = TRUE))%>% 
+  ggplot(aes(factor(year),female_contestants,  group = position_new, color = position_new))+
+  geom_point()+
+  labs(title = "Proportion of female contestants", x = "Year", color = "Position")+
+  geom_smooth()+
+  theme_minimal()+
+  theme(legend.position = "bottom")
+
+```
+
+------------------------------------------------------------------------
+
+
+# states
+
+
+```{r}
+
+# getwd()
+# 
+# temp = list.files("D:/cpr/data/tcpd/states/*.csv")
+# myfiles = lapply(temp, read.delim)
+# 
+# 
+# 
+# setwd("D:/cpr/data/tcpd/states/")
+# ae_states <- list.files(pattern = "*.csv") %>%
+#   map_df(~fread(.))
+# 
+# 
+# 
+# your_data_frame <- do.call(rbind,lapply(file_names,read.csv))
+# 
+# 
+# file_names <- dir("./") #where you have your files
+# 
+# your_data_frame <- do.call(rbind,lapply(file_names,read.csv))
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
