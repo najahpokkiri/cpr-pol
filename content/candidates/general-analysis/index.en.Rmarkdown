@@ -2,7 +2,7 @@
 title: "General  Analysis of GE "
 author: "Abdul Najah"
 date: '2020-09-22'
-draft: true
+draft: false
 params:
   orig_date: 'Original Publish Date: 22 September, 2020'
   update_date: !r paste("Updated on:", format(Sys.time(), '%d %B, %Y'))
