@@ -1197,245 +1197,80 @@ wb_el_reg %>% filter(sub_region_ht== "South Bengal" & year %in% c(2016,2019) & p
 
 
 
+# South Bengal -BJP
 
 
+```{r}
 
-regressions?
 
+wb_el_reg_19 <- wb_el_reg %>% filter(year ==2019)
 
 
+wb_el_reg_19  <- wb_el_reg_19 %>% mutate(sub_reg_1 = ifelse(sub_region_ht == "South Bengal", "South Bengal", "Bengal - other"))
 
 
 
-<!-- # WB old -->
 
+wb_el_reg_19 %>% filter(front_new %in% c("BJP", "AITC", "LF+INC") & position ==1) %>% group_by (constituency_no) %>% distinct(front_new, .keep_all = TRUE) %>% ungroup() %>% group_by(sub_reg_1,front_new) %>% summarise(n_ac = n()) %>%  group_by(sub_reg_1) %>% mutate(n_ac_reg = sum(n_ac), ac_pc =( n_ac/n_ac_reg)*100) %>% kable(digits = 2, col.names = c("Region", "Front","Number of ACs leading", "Number of ACs in the region","% of ACs leading in the region")) %>% kable_styling(bootstrap_options = "striped")
 
+```
 
 
 
-<!-- This document focuses on the 2016  state and 2019 national election held in Bengal. -->
+---
 
-<!-- <!-- ## reading the 2014 7 2019 ac level files to merge --> -->
 
 
-<!-- ```{r} -->
+ **List of ACs in south Bengal with vote share of the fronts**
 
-<!-- #ac_19 <- readxl::read_xls("D:/cpr/data/GE_PC_AC-main/2019_AC_PC.xls") -->
 
-<!-- #wb_19 <- ac_19 %>% filter(`State-UT Code & Name` == "West Bengal" & PARTY != "IND") -->
+```{r}
+vs_ac <- wb_el_reg_19 %>% filter(front_new %in% c("BJP", "AITC", "LF+INC") & sub_reg_1 == "South Bengal") %>% group_by (constituency_no) %>% distinct(front_new, .keep_all = TRUE) %>% ungroup() %>% select(constituency_no, constituency_name,front_new, vote_share_percentage)%>% mutate(vote_share_percentage= round(vote_share_percentage,1)) %>% pivot_wider(names_from = front_new, values_from = vote_share_percentage) 
+DT::datatable(vs_ac)
+```
 
-<!-- # ac_14 <- readxl::read_xlsx("D:/cpr/data/GE_PC_AC-main/2014_AC_PC.xlsx") -->
-<!-- #  -->
-<!-- # wb_14 <- ac_14 %>% filter(`State-UT Code & Name` == "West Bengal" & PARTY != "IND") -->
-<!-- #  -->
-<!-- # wb_14 <- wb_14 %>% rename_all(paste0, "_14") -->
+---
 
-<!-- # wb_14_bjp <- wb_14 %>% filter(PARTY_14 == "BJP") -->
-<!-- #  -->
-<!-- # wb_19_bjp <- wb_19 %>% filter(PARTY == "BJP") -->
+**How does change in certain percentage point vote share reflects on the number of constituencies led by BJP**
 
-<!-- #names(wb_14) -->
 
-<!-- #unique(wb_14$AC.NAME) -->
 
+```{r}
+winners <- wb_el_reg_19 %>% filter(front_new %in% c("BJP", "AITC", "LF+INC") & sub_reg_1 == "South Bengal") %>% group_by (constituency_no) %>% distinct(front_new, .keep_all = TRUE) %>% ungroup() %>% select(constituency_no, constituency_name,front_new, vote_share_percentage) %>% pivot_wider(names_from = front_new, values_from = vote_share_percentage) %>% rowwise() %>% mutate(winner = ifelse(max(`BJP`, `AITC`, `LF+INC`)<= `BJP`,1,0),
+                                                                                                                                                                                                                                                                                                                                                                              winner_1 = ifelse(max(`BJP`, `AITC`, `LF+INC`)<= `BJP`+1,1,0),
+                                                                                                                                                                                                                                                                                                                                                                              winner_2 = ifelse(max(`BJP`, `AITC`, `LF+INC`)<= `BJP`+2,1,0),
+                                                                                                                                                                                                                                                                                                                                                                              winner_3 = ifelse(max(`BJP`, `AITC`, `LF+INC`)<= `BJP`+3,1,0),
+                                                                                                                                                                                                                                                                                                                                                                              winner_5 = ifelse(max(`BJP`, `AITC`, `LF+INC`)<= `BJP`+5,1,0),
+                                                                                                                                                                                                                                                                                                                                                                              winner_7 = ifelse(max(`BJP`, `AITC`, `LF+INC`)<= `BJP`+7,1,0),
+                                                                                                                                                                                                                                                                                                                                                                              winner_10 = ifelse(max(`BJP`, `AITC`, `LF+INC`)<= `BJP`+10,1,0)
+                                                                                                                                                                                                                                                                                                                                                                              )
+```
 
-<!-- # wb_14_19 <- inner_join(wb_19, wb_14, by = c("PC NO" = "PCNO_14","AC NO"= "AC NO_14", "PARTY" = "PARTY_14")) -->
-<!-- #  -->
-<!-- # wb_14_19_bjp <- inner_join(wb_19_bjp, wb_14_bjp, by = c("PC NO" = "PCNO_14","AC NO"= "AC NO_14")) -->
 
 
-<!-- #merge(wb_19,wb_14, by.x = c("PC NO", "AC NO", "PARTY"), by.y = c("PCNO_14", "AC.NO_14" , "PARTY_14")) -->
+```{r}
+win_long <- winners %>% group_by()%>% summarise(winner = sum(winner), winner_1pc = sum(winner_1),
+                                    winner_2pc = sum(winner_2),winner_3pc = sum(winner_3),
+                                    winner_5pc = sum(winner_5),winner_7pc = sum(winner_7),
+                                    winner_10pc = sum(winner_10)) 
+title  <- c("win_pc", "n_ac")
 
-<!-- #str(wb_14) -->
 
-<!-- #  -->
-<!-- # wb_14_19_bjp <- wb_14_19_bjp %>% mutate(vote_share_pc_14 = `VOTESSECURED EVM_14`/`TOTAL ELECTORS IN AC_14`*100,vote_share_pc_19 = `VOTES SECURED EVM`/`TOTAL ELECTORS` *100, vote_share_change = vote_share_pc_19 - vote_share_pc_14) -->
-<!-- #  -->
-<!-- # change <- wb_14_19_bjp %>% select(`AC NAME`, vote_share_change) -->
-<!-- #  -->
-<!-- # ggplot(change, aes(vote_share_change))+ -->
-<!-- #   geom_density(fill = "steelblue")+ -->
-<!-- #   labs(title = "Change BJP vote share in West Bengal", subtitle = "From 2014 to 2019")+ -->
-<!-- #   theme_minimal() -->
+win_long_title <- cbind(title, win_long)
 
+win_long_title  %>% pivot_longer(-1) %>% slice(1:7) %>% select(2:3) %>% rename("add_on" = "name", "n_ac_lead" = "value") %>% mutate(pc_ac = n_ac_lead/167*100) %>% 
+  kable(digits = 2, col.names= c ("Vote share added", "Number of ACs leading","Percentage of leading ACs in south")) %>% kable_styling(bootstrap_options = "striped")
 
-<!-- ``` -->
 
+```
 
 
-<!-- ```{r} -->
-<!-- wb_ac <- read_csv("D:/cpr/data/tcpd/states/West_Bengal_2020.csv") -->
 
-<!-- names(wb_ac) <- tolower(names(wb_ac)) -->
 
-<!-- wb_11_16 <- wb_ac %>% filter(year %in% c(2011,2016) & poll_no ==0) -->
 
 
 
 
-
-
-
-
-
-<!-- #wb_16 <- wb_ac %>% filter(year ==2016 & poll_no==0 & party!= "IND" & party!= "NOTA"& constituency_no!=51) -->
-
-<!-- wb_16 <- wb_16 %>% group_by(constituency_no)%>% mutate(winner_16 = party[position==1]) -->
-<!-- #  -->
-<!-- # table(wb_16$winner_16) -->
-<!-- #  -->
-<!-- # wb_16 %>%group_by(constituency_no) %>% tally() -->
-
-<!-- wb_19 <- wb_19 %>% mutate(vote_share_pc_19 = `VOTES SECURED EVM`/ac_votes *100, ) -->
-
-<!-- wb_19  <- wb_19 %>% group_by(`AC NO`) %>%  mutate(position_19 = order(order(vote_share_pc_19, decreasing=TRUE)))  -->
-
-<!-- wb_19 <- wb_19 %>% group_by(`AC NO`)%>% mutate(winner_19 = PARTY[position_19==1]) -->
-<!-- wb_16_19 <- right_join(wb_16, wb_19, by = c("constituency_no"="AC NO", "party"="PARTY")) -->
-
-<!-- #wb_16_19 %>% filter(position==1) -->
-
-<!-- #wb_16_19_anti <- anti_join(wb_16, wb_19, by = c("constituency_no"="AC NO", "party"="PARTY")) -->
-
-
-<!-- # wb_16 %>% filter(constituency_no==51) -->
-
-
-
-
-<!-- ``` -->
-
-
-<!-- ## seats won by parties at AS level -->
-
-<!-- ```{r} -->
-
-<!-- seats_19 <- wb_16_19 %>% filter(Year ==2019) %>% filter(position_19==1) %>%group_by(party) %>%  summarise(seats_19 =n()) -->
-
-<!-- seats_16 <- wb_16_19 %>% filter(year ==2016) %>% filter(position==1) %>%group_by(party) %>%  summarise(seats_16 =n()) %>% arrange(-seats_16) -->
-
-<!-- seats_16_19 <- left_join(seats_16, seats_19, by = "party") -->
-
-<!--  seats_16_19 <- seats_16_19  %>% mutate(seats_19 = replace_na(seats_19 ,0))  -->
-
-<!--  seats_16_19 %>% kable(digits =2) %>% kable_styling(bootstrap_options = "striped") -->
-
-<!-- ``` -->
-<!-- --- -->
-
-<!-- ## vote share of parties in 2016 & 2019 elections -->
-
-<!-- ```{r} -->
-
-<!-- vs_19 <- wb_16_19 %>% filter(Year ==2019) %>% group_by(party) %>%  summarise(vs_19 = sum(`VOTES SECURED EVM`)/sum(ac_votes)*100) -->
-
-
-<!-- vs_16 <- wb_16_19 %>% filter(year ==2016) %>% group_by(party) %>%  summarise(vs_16 =sum(votes)/sum(valid_votes)*100) -->
-
-<!-- vs_16_19 <- left_join(vs_16, vs_19, by = "party") -->
-
-<!-- vs_16_19  %>% mutate(vs_19 = replace_na(vs_19 ,0)) %>% arrange( -vs_19,-vs_16) %>% slice(1:7) %>% kable(digits =2)%>% kable_styling(bootstrap_options = "striped") -->
-
-<!-- ``` -->
-
-
-
-
-
-
-<!-- <!-- ## BJPs gain --> -->
-
-<!-- <!-- Following table shows the vote share gained by BJP in  2019  from the constituencies won by these parties in 2016. --> -->
-
-<!-- ```{r} -->
-
-<!--  wb_19_bjp <- wb_19 %>% filter(PARTY == "BJP" ) -->
-
-<!-- wb_16_winner <- wb_16 %>% filter(position==1) -->
-<!-- wb_16_19_bjp <-  inner_join(wb_16_winner, wb_19_bjp, by = c("constituency_no"="AC NO")) -->
-<!-- #  -->
-<!-- # wb_16_19_bjp <- wb_16_19_bjp %>% filter(position==1) -->
-<!-- #  -->
-<!-- #  -->
-<!-- # wb_16_19  %>% mutate(winner_16 = party[position==1]) -->
-<!-- #  -->
-<!-- #  -->
-<!-- # wb_16_19_b %>% filter(party == "AITC" & position==1) %>% select() -->
-
-
-<!-- # wb_16_19_bjp %>% group_by(party) %>% summarise(vs_16 = mean(vote_share_percentage), bjp_vs_19 = mean(vote_share_pc_19)) -->
-
-<!-- # wb_16_19_bjp %>% group_by(party) %>% summarise(winner_vs_16 = sum(votes[position==1])/sum(valid_votes)*100, bjp_vs_19 =sum(`VOTES SECURED EVM`)/sum(ac_votes)*100) %>% kable(digits =2)%>% kable_styling(bootstrap_options = "striped") -->
-
-<!-- # wb_16_19 %>% filter(Year == 2019) %>% group_by(party) %>% summarise(vs_19 = sum(`VOTES SECURED EVM`)/sum(ac_votes)*100) %>% filter(party %in% c(AIFB, AITC,BJP,CPI,CPM,)) -->
-
-<!-- # wb_16_19_bjp %>% group_by(party) -->
-<!-- #  -->
-<!-- # wb_16_19 %>% group_by(party) %>% summarise(winner_vs_16 = mean(vote_share_percentage[position==1], na.rm = TRUE), vs_19= mean(vote_share_pc_19), -->
-<!-- #                                            bjp_vs_19 =vote_share_pc_19[party == "BJP"]) %>% kable(digits =2)%>% kable_styling(bootstrap_options = "striped") -->
-<!-- #  -->
-<!-- #  -->
-<!-- # wb_16  %>% group_by(party) %>% summarise(winner_vs_16 = mean(vote_share_percentage[position==1], na.rm = TRUE),bjp_vs = mean(vote_share_percentage ) -->
-<!-- #  -->
-<!-- #  -->
-<!-- # wb_19 %>% filter(position_19==1) %>% group_by(PARTY) %>% summarise(winner_vs_19 = mean(vote_share_pc_19, na.rm = TRUE)) -->
-<!-- ``` -->
-
-
-
-<!-- ```{r} -->
-
-<!-- # wb_19 <- wb_19 %>% group_by(`AC NO`)%>% mutate(winner_19 = PARTY[position_19==1]) -->
-<!-- #  -->
-<!-- # wb_19 <- wb_19 %>% ungroup() -->
-<!-- #  -->
-<!-- # wb_19$winner <- wb_19$PARTY[wb_19$position_19==1] -->
-<!-- ``` -->
-
-<!-- --- -->
-
-<!-- ## Seat gains by different parties -->
-
-
-<!-- ```{r} -->
-<!-- wb_16_19 %>% filter(position_19==1)%>% group_by(winner_16, winner_19) %>% summarise(count = n()) %>% arrange(-count) %>% kable(digits =2) %>% kable_styling(bootstrap_options = "striped") -->
-<!-- ``` -->
-
-
-
-
-
-<!-- ```{r} -->
-<!-- #  -->
-<!-- # tmc_bjp <- rbind(wb_16 %>% filter(position==1 & party == "AITC") %>% select(constituency_no, party,vote_share_percentage), -->
-<!-- #  -->
-<!-- # wb_16 %>% filter(winner_16== "AITC" & party == "BJP") %>% select(constituency_no, party,vote_share_percentage)) -->
-<!-- #  -->
-<!-- #  -->
-<!-- # tmc_bjp %>% mutate(bjp_gain = vote_share_percentage...6-vote_share_percentage...3 ) -->
-<!-- #  -->
-<!-- #  -->
-<!-- # ggplot(tmc_bjp, aes(vote_share_percentage, fill = party))+ -->
-<!-- #   geom_density() -->
-
-
-<!-- ``` -->
-
-<!-- --- -->
-
-
-<!-- ## BJP vote share gain -->
-
-<!-- Mean percentage of votes BJP has gained 2019 election  since 2016 election from the constituencies won by following parties: -->
-
-<!-- ```{r} -->
-<!-- wb_16_19 <- full_join(wb_16, wb_19, by = c("constituency_no"="AC NO", "party"="PARTY")) -->
-
-<!-- wb_16_19 %>% mutate(bjp_change = vote_share_pc_19[party== "BJP"]- vote_share_percentage[party=="BJP"]) %>% filter(position==1) %>% select(constituency_no, party, vote_share_percentage, bjp_change) %>% group_by(party) %>% summarise(pc_gain = mean(bjp_change, na.rm = TRUE)) %>% -->
-<!-- arrange(-pc_gain) %>% kable(digits =2)%>% kable_styling(bootstrap_options = "striped") -->
-
-
-<!-- ``` -->
 
 
 
