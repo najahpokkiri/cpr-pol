@@ -1,6 +1,6 @@
 ---
 title: West Bengal
-summary: Preliminary  analysis of recent WB elections
+summary: Everything related to WB elections
 date: '2021-03-02'
 output:
   blogdown::html_page:
@@ -13,6 +13,8 @@ links:
 - icon: flask
   icon_pack: fas
   name: Post
-  url: ../../posts/WB_bjp.html
+  url: ../../elections/wb/WB_bjp.html
 ---
 
+
+- [West Bengal Main analysis](../../elections/wb/WB_bjp.html)

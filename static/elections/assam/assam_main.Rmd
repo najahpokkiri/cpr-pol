@@ -1,0 +1,417 @@
+---
+title: "Assam Analysis - 1"
+author: "Najah"
+date: "2/03/2021"
+params:
+  orig_date: 'Original Publish Date: 02 March, 2020'
+  update_date: !r paste("Updated on:", format(Sys.time(), '%d %B, %Y'))
+output:
+  html_document:
+    theme: flatly
+    toc: TRUE
+    toc_float: TRUE
+    toc_depth: 3
+    number_sections: false
+    fig_width: 6            
+editor_options: 
+  chunk_output_type: inline
+---
+
+------------------------------------------------------------------------
+
+### Document History
+
+`r params$orig_date`
+
+`r params$update_date`
+
+------------------------------------------------------------------------
+
+
+```{r set up, warning=FALSE, include=FALSE, message= FALSE }
+
+knitr::opts_chunk$set(cache = TRUE,echo = FALSE, message=FALSE, warning = FALSE,fig.width = 16/2, fig.height = 9/2)
+
+library(data.table)
+library(tidyverse)
+library(kableExtra)
+library(cowplot)
+
+`%!in%` = Negate(`%in%`)
+
+select <- dplyr::select
+```
+
+
+
+```{r}
+
+## reading pc files
+
+ac_19 <- readxl::read_xls("D:/cpr/data/GE_PC_AC-main/2019_AC_PC.xls")
+
+ac_14 <-  readxl::read_xlsx("D:/cpr/data/GE_PC_AC-main/2014_AC_PC.xlsx")
+
+#ac_19 <- ac_19 %>% group_by(`State-UT Code & Name`, `AC NO`) %>% mutate(ac_votes=(sum(`VOTES SECURED EVM`, na.rm = TRUE)))
+
+## not filtering nota and ind now since that is needed to calculate votes
+
+as_19 <- ac_19 %>% filter(`State-UT Code & Name` == "Assam" ) %>% ungroup()
+
+## changing to CPIM to CPM
+
+#as_19 <- as_19 %>% mutate(PARTY = ifelse(PARTY == "CPIM","CPM",PARTY))
+
+
+
+
+as_14 <- ac_14 %>% filter(`State-UT Code & Name` == "Assam" )
+
+as_14_19 <- rbindlist(list(as_14,as_19), use.names = FALSE)
+
+names(as_14_19) <- tolower(names(as_14_19))
+
+## changing variable names to append with ac
+
+
+as_14_19 <- as_14_19 %>% rename(state_name = `state-ut code & name`, pc_no = pcno, pc_name = `pc name`, constituency_no = `ac no`, constituency_name = `ac name`, electors = `total electors in ac`, candidate = `candidate name`,votes = `votessecured evm`)
+
+
+## creating new vote share variable
+
+
+
+as_14_19<- as_14_19 %>% group_by(year, constituency_no) %>% mutate(election_type = "GE",valid_votes=sum(votes, na.rm = TRUE), vote_share_percentage =( votes/valid_votes)*100,
+                                                                   turnout_percentage = (valid_votes/electors)*100) %>% ungroup()
+
+ as_14_19  <- as_14_19 %>%  group_by(year, constituency_no) %>%  mutate(position = order(order(vote_share_percentage, decreasing=TRUE))) %>% ungroup()
+ 
+ 
+pc_ac_as <- as_14_19 %>%  ungroup() %>% filter(position==1 & year ==2019) %>% select(pc_no, pc_name,  constituency_no,constituency_name)
+
+#write.csv(pc_ac_as, "D:/cpr/elections/as/pc_ac.csv")
+
+## Q - does valid votes include NOTA too?
+## adding position
+
+
+ 
+ 
+ ### victory margin but only for first
+ 
+
+#  
+ as_14_19 <- as_14_19 %>% arrange(year, constituency_no,position)%>% group_by(year, constituency_no) %>% mutate( margin_percentage = vote_share_percentage-lag(vote_share_percentage))
+# 
+# as_14_19 %>% group_by(year, constituency_no)%>% mutate(victory_margin = margin(position==1))
+ 
+ 
+## reading ac files
+ 
+ as_ac <- read_csv("D:/cpr/data/tcpd/states/Assam_2020.csv")
+
+names(as_ac) <- tolower(names(as_ac))
+
+as_11_16 <- as_ac %>% filter(year %in% c(2011,2016) & poll_no ==0)
+
+
+as_16 <- as_11_16 %>% filter(year==2016)
+
+as_el <- rbindlist(list(as_14_19, as_11_16), use.names = TRUE, fill = TRUE)
+
+# as_el <- as_el %>% mutate(party = case_when(party %in% c("CPM", "CPI", "RSP", "AIFB") ~"LF",
+#                                    TRUE ~party))
+#as_el <- as_el %>% ungroup()
+
+#& PARTY != "IND" & PARTY!= "NOTA"
+
+#unique(wb_14$PARTY)
+
+
+#as_el %>% filter(year == 2019 & position %in% c(1,2)) %>% group_by(party) %>% summarise(n())
+
+
+```
+
+
+
+# Prelim analysis{.tabset}
+
+
+
+## Party vote share
+
+
+```{r}
+
+as_el <- as_el  %>% group_by(year) %>% mutate(total_votes_state = sum(votes))
+
+vote <- as_el %>% group_by(year, party) %>% summarise(vs = (sum(votes)/total_votes_state)*100) %>% filter(party %in% c("AIUDF"  , "BJP",   "INC"  )) %>% 
+  ggplot(aes(factor(year), vs,group=party, color = party))+
+  #geom_bar(stat= "identity", position= "dodge")
+
+  geom_line(size = 1.2)+
+    geom_point(color = "black", size =1.5)+
+    scale_color_manual(values = c("BJP" = "darkorange1",
+                                "INC" = "steelblue", 
+
+                                "AIUDF" = "chartreuse4"))+
+  labs(title = "Vote share ", y = "Vote share (%)", x = "Year", color = "Party")+
+  ylim(0,50)+
+  ggthemes::theme_fivethirtyeight()+
+  #theme_minimal_hgrid()+
+  theme(legend.position = "bottom",
+        text = element_text(family="serif", face = "bold"),
+        axis.title = element_text()
+                            )
+
+
+
+
+```
+
+## Seats
+
+
+```{r}
+
+
+# as_el %>% filter(position==1)%>%  group_by(year, party) %>% summarise(count = n()) %>% 
+#   ggplot(aes(factor(year), count, fill =party))+
+#   geom_bar(stat= "identity", position= "dodge")+
+#   facet_wrap(~election_type)
+  
+seat <- as_el %>% filter(position==1)%>%  group_by(year, party) %>% summarise(count = n())%>% filter(party %in% c("AIUDF"  , "BJP",   "INC" )) %>% 
+  ggplot(aes(factor(year), count, group =party, color = party))+
+  geom_line(size = 1.2)+
+    geom_point(color = "black", size =1.5)+
+    scale_color_manual(values = c("BJP" = "darkorange1",
+                                "INC" = "steelblue", 
+
+                                "AIUDF" = "chartreuse4"))+
+  labs(title = "Seat share", y = "Number of seats", x = "Year", color = "Party")+
+  ylim(0,100)+
+  ggthemes::theme_fivethirtyeight()+
+  #theme_minimal_hgrid()+
+  theme(legend.position = "bottom",
+        text = element_text(family="serif", face = "bold"),
+        axis.title = element_text()
+                            )
+
+plot_grid(vote,seat)
+
+
+ggsave("vs_seat.png", width = 10, height = 4)
+
+```
+
+
+## Turnout
+
+
+```{r}
+
+as_el %>% group_by(year) %>% summarise(turnout = mean(turnout_percentage)) %>% 
+  ggplot(aes(factor(year), turnout, group= 1))+
+  geom_point()+
+  geom_line(size =1)+
+  ylim(70,90)+
+  labs(title = "Turnout percentage in the state", y = "Tunrout percentage", x = "Year")+
+  theme_minimal_hgrid()+
+  theme(legend.position = "bottom",
+        text = element_text(family="serif"),
+                            )
+
+```
+
+---
+
+## Strike rate
+
+
+```{r}
+
+# as_el %>% group_by(election_type,party) %>% summarise(contested = n(), won = sum(position==1)) %>%filter(party %in% c("AIUDF"  ,"INC" ,"BJP"  ))  %>% mutate(strike_rate = (won/contested)*100) %>% 
+#   ggplot(aes( factor(party, level = c("AIUDF", "INC", "BJP")),strike_rate, fill =election_type))+
+# 
+#   geom_bar(stat="identity", position="dodge")+
+#   labs(title = "Strike rate of parties in the state", y = "Strike rate (%)", x = "Parties", fill = "Election")+
+#   colorspace::scale_fill_discrete_qualitative(palette= "Dark 2")+
+#   ylim(0,80)+
+#   theme_minimal_hgrid()+
+#   theme(legend.position = "bottom",
+#         text = element_text(family="serif"),
+#                             )
+
+as_el %>%  filter(year %in% c(2016,2019)) %>% group_by(year,party) %>% summarise(contested = n(), won = sum(position==1)) %>%filter(party %in% c("AIUDF"  ,"INC" ,"BJP"  ))  %>% mutate(strike_rate = (won/contested)*100) %>% 
+  ggplot(aes( factor(year),strike_rate, fill =factor(party, level = c("BJP","AIUDF", "INC"))))+
+
+  geom_bar(stat="identity", position="dodge", width = .7)+
+  labs(title = "Strike rate of the major parties", y = "Strike rate (%)", x = "Year", fill = "Party")+
+    scale_fill_manual(values = c("BJP" = "darkorange1",
+                                "INC" = "steelblue", 
+
+                                "AIUDF" = "chartreuse4")) +
+ggthemes::theme_fivethirtyeight()+
+  #theme_minimal_hgrid()+
+  theme(legend.position = "bottom",
+        text = element_text(family="serif", face = "bold"),
+        axis.title = element_text()
+                            )
+ggsave("strike_rate.png", width = 6, height = 4)
+
+
+
+
+```
+
+<!-- ## margin percentage -->
+
+<!-- ```{r} -->
+<!-- as_el %>% filter(position==1) %>% group_by(election_type,year,party) %>% summarise(margin= mean(margin_percentage)) %>% -->
+<!--   filter(party %in% c("AIUDF"  , "BJP",   "INC"  )) %>% -->
+<!--     ggplot(aes(factor(year), margin, group =party, color = party))+ -->
+<!--   #geom_bar(stat= "identity", position= "dodge") -->
+<!--   geom_point()+ -->
+<!--   geom_line(size = 1)+ -->
+<!--   scale_color_manual(values = c("BJP" = "orange", -->
+<!--                                 "INC" = "steelblue", -->
+<!--                                 "LF" = "red", -->
+<!--                                 "AIUDF" = "darkdarkgreen")) + -->
+<!--   ylim(0,20)+ -->
+<!--   labs(title = "Vicory vargin percentage of  major parties in the state", y = "Margin(%)", x = "Year", color = "party")+ -->
+<!--   theme_minimal_hgrid()+ -->
+<!--   theme(legend.position = "bottom", -->
+<!--         text = element_text(family="serif"), -->
+<!--                             ) -->
+
+
+<!-- ``` -->
+
+
+
+# Phases{.tabset}
+
+
+
+
+
+
+
+
+
+```{r}
+
+as_phase <- read.csv("D:/cpr/elections/assam/as_phase.csv")
+
+names(as_phase)[1] <- "ac_no"
+
+as_el <- left_join(as_el, as_phase, by = c("constituency_no" = "ac_no"))
+
+```
+
+## seats covered
+
+```{r}
+
+
+as_phase %>% group_by(phase) %>% tally() %>% kable() %>% kable_styling(bootstrap_options = "striped")
+
+```
+
+
+## vote share
+
+
+```{r}
+as_el %>%  filter(party %in% c("AIUDF","INC","BJP") & year %in% c(2016 ,2019)) %>% group_by(year, phase, party) %>% summarise(vs = mean(vote_share_percentage)) %>% 
+  ggplot(aes(phase, vs, fill = party))+
+  geom_bar(stat= "identity", position= "dodge")+
+  facet_wrap(~year)+
+    scale_fill_manual(values = c("BJP" = "darkorange1",
+                                "INC" = "steelblue", 
+
+                                "AIUDF" = "chartreuse4"))+
+  labs(title = "Party performance in the different phases", x = "Phase", y = "Average vote share(%)", fill = "Party" )+
+  ggthemes::theme_fivethirtyeight()+
+  #theme_minimal_hgrid()+
+  theme(legend.position = "bottom",
+        text = element_text(family="serif", face = "bold"),
+        axis.title = element_text()
+                            )
+ggsave("vs_phase.png", width = 6, height = 4)
+
+```
+
+
+
+
+
+
+## seat share
+
+```{r}
+
+as_el %>%  filter(party %in% c("AIUDF","INC","BJP") & year %in% c(2016 ,2019) & position ==1) %>% group_by(year, phase, party) %>% summarise(count = n()) %>% 
+  ggplot(aes(phase, count, fill = party))+
+  geom_bar(stat= "identity", position= "dodge")+
+  facet_wrap(~year)+
+  ylim(0,40)+
+  scale_fill_manual(values = c("BJP" = "orange",
+                                "AIUDF" = "darkgreen", 
+                               "INC" = "steelblue")) +
+  labs(title = "Seats won wrt phase", x = "Phase", y = "Number of seats", fill = "Party" )+
+    theme_minimal_hgrid()+
+  theme(legend.position = "bottom",
+        text = element_text(family="serif"),
+                            )
+
+```
+
+
+
+## other data
+
+
+```{r}
+ac_data <- readxl::read_xlsx("D:/cpr/elections/assam/as_ac_datat.xlsx")
+
+
+names(ac_data) <- tolower(names(ac_data))
+
+
+table(ac_data$imm_nm)
+
+
+tea_16_17 <- as_el %>% filter(year %in% c(2016,2019) & party %in% c("AIUDF", "INC", "BJP") )
+
+tea_data <- left_join(ac_data, tea_16_17, by = c( "ac_id"="constituency_no"))
+
+tea_data %>% group_by(year,imm_nm, party) %>% summarise(vs= mean(vote_share_percentage)) %>% 
+ggplot(aes(imm_nm, vs, fill =factor(party, level = c("BJP", "INC","AIUDF"))))+
+  geom_bar(stat= "identity", position= "dodge")+
+  facet_wrap(~year)+
+    scale_fill_manual(values = c("BJP" = "darkorange1",
+                                "INC" = "steelblue", 
+
+                                "AIUDF" = "chartreuse4"))+
+  labs(title = "Party performance in the different regions", x = "Phase", y = "Average vote share(%)", fill = "Party" )+
+  ggthemes::theme_fivethirtyeight()+
+  #theme_minimal_hgrid()+
+  theme(legend.position = "bottom",
+        text = element_text(family="serif", face = "bold"),
+        axis.title = element_text(),
+        axis.text.x = element_text(angle = 45,hjust = 1)
+        
+                            )
+ggsave("vs_phase.png", width = 6, height = 4)
+```
+
+
+
+
+
+
+
+
+
