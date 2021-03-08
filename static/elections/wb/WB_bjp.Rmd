@@ -133,21 +133,37 @@ wb_el <- wb_el %>% ungroup()
 
 wb_el <- wb_el  %>% group_by(year) %>% mutate(total_votes_state = sum(votes))
 
-wb_el %>% group_by(year, front) %>% summarise(vs = (sum(votes)/total_votes_state)*100) %>% filter(front %in% c("AITC"  , "BJP",   "INC" , "LF"  )) %>% 
-  ggplot(aes(factor(year), vs,group=front, color = front))+
+
+wb_el <- wb_el %>% mutate(front_new = case_when(party %in% c("CPM", "CPI", "RSP", "AIFB", "INC") ~"LF+INC",
+                                                
+                                   TRUE ~party))
+
+wb_el %>% group_by(year, front_new) %>% summarise(vs = (sum(votes)/total_votes_state)*100) %>% filter(front_new %in% c("AITC"  , "BJP",  "LF+INC"  )) %>% 
+  ggplot(aes(factor(year), vs,group=front_new, color = front_new))+
   #geom_bar(stat= "identity", position= "dodge")
-  geom_point()+
-  geom_line(size = 1)+
-  scale_color_manual(values = c("BJP" = "orange",
-                                "INC" = "steelblue", 
-                                "LF" = "red",
-                                "AITC" = "darkgreen")) +
-  labs(title = "Vote share of the major parties in the state", y = "Percentage of votes", x = "Year", color = "Party")+
+  geom_line(size = 1.2)+
+  geom_point(color = "black", size =1.5)+
+  scale_color_manual(values = c("BJP" = "darkorange1",
+                                "LF+INC" = "red",
+                                "AITC" = "chartreuse4")) +
+  labs(title = "Vote share of the major parties" ,subtitle = "WB 2011:19",y = "Vote share (%)", x = "Year", color = "Party")+
+
+  ggthemes::theme_fivethirtyeight()+
   ylim(0,50)+
-  theme_minimal_hgrid()+
-  theme(legend.position = "bottom",
+  theme(#legend.position = "bottom",
         text = element_text(family="serif"),
+        #axis.title = element_text()
+        axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0)),
+        axis.line.x = element_line()
                             )
+
+
+
+
+
+ggsave("D:/cpr/elections/wb/wb_vs.png", width = 6, height = 4)
+
+
         
 
 
@@ -165,21 +181,28 @@ wb_el %>% group_by(year, front) %>% summarise(vs = (sum(votes)/total_votes_state
 #   geom_bar(stat= "identity", position= "dodge")+
 #   facet_wrap(~election_type)
   
-wb_el %>% filter(position==1)%>%  group_by(year, front) %>% summarise(count = n())%>% filter(front %in% c("AITC"  , "BJP",   "INC" , "LF"  )) %>% 
-  ggplot(aes(factor(year), count, group =front, color = front))+
-  #geom_bar(stat= "identity", position= "dodge")
-  geom_point()+
-  geom_line(size = 1)+
-  scale_color_manual(values = c("BJP" = "orange",
-                                "INC" = "steelblue", 
-                                "LF" = "red",
-                                "AITC" = "darkgreen")) +
-  ylim(0,250)+
-  labs(title = "Seat share of the major parties in the state", y = "Number of seats", x = "Year", color = "front")+
-  theme_minimal_hgrid()+
-  theme(legend.position = "bottom",
+wb_el %>% filter(position==1)%>%  group_by(year, front_new) %>% summarise(count = n(), seat_pc = count/294*100)%>% filter(front_new %in% c("AITC"  , "BJP",   "LF+INC"  )) %>% 
+  ggplot(aes(factor(year), seat_pc, group =front_new, color = front_new))+
+  geom_line(size = 1.2)+
+  geom_point(color = "black", size =1.5)+
+  scale_color_manual(values = c("BJP" = "darkorange1",
+                                "LF+INC" = "red",
+                                "AITC" = "chartreuse4")) +
+  labs(title = "Seat share of the major parties" ,subtitle = "WB assembly segments  2011:19",y = "Seat share (%)", x = "Year", color = "Party")+
+
+  ggthemes::theme_fivethirtyeight()+
+  ylim(0,80)+
+  theme(#legend.position = "bottom",
         text = element_text(family="serif"),
-                            )
+        #axis.title = element_text()
+        axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0)),
+        axis.line.x = element_line()
+                          )
+  
+
+ggsave("D:/cpr/elections/wb/wb_seat.png", width = 6, height = 4)
+
+
 ```
 
 
@@ -336,6 +359,56 @@ wb_el %>% group_by(election_type,front) %>% summarise(contested = n(), won = sum
 
 
 
+
+
+
+# Phases{.tabset}
+
+
+
+```{r}
+wb_phase <- read.csv("D:/cpr/elections/wb/wb_phase.csv")
+
+names(wb_phase)[1] <- "ac_no"
+
+wb_19_cl <- wb_el %>% filter(year ==2019)
+
+wb_el_phase <- left_join(wb_19_cl, wb_phase, by = c("constituency_no" = "ac_no"))
+
+```
+
+## seats covered
+
+```{r}
+
+
+wb_phase %>% group_by(phase_21) %>% tally() %>% kable() %>% kable_styling(bootstrap_options = "striped")
+
+```
+
+
+## vote share
+
+
+```{r}
+wb_el_phase  %>% filter(front_new %in% c("AITC"  , "BJP",   "LF+INC"  )) %>% group_by( phase_21, front_new) %>% summarise(vs = mean(vote_share_percentage)) %>% 
+  ggplot(aes(factor(phase_21), vs, fill =front_new))+
+  geom_bar(stat= "identity", position= "dodge")+
+scale_fill_manual(values = c("BJP" = "darkorange1",
+                                "LF+INC" = "red",
+                                "AITC" = "chartreuse4")) +
+  labs(title = "Party performance in 2021 phases",subtitle = "GE 2019",  x = "Phase", y = "Average vote share (%)", fill = "Party" )+
+
+  ggthemes::theme_fivethirtyeight()+
+  ylim(0,60)+
+  theme(
+        text = element_text(family="serif"),
+        axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0)),
+        axis.line.x = element_line()
+                            )
+ggsave("D:/cpr/elections/wb/vs_phase.png", width = 6, height = 4)
+
+```
 
 
 
@@ -506,7 +579,7 @@ wb_19_to <- read.csv("D:/cpr/elections/wb/turnout_wb_19.csv")
 ge <- fread("D:/cpr/data/tcpd/TCPD_GE_all.csv")
 
 
-ge %>% filter(State_Name=="Assam" & Year ==2019 & Position==1 & Party == "BJP") %>% summarise(mean(Margin_Percentage))
+# ge %>% filter(State_Name=="Assam" & Year ==2019 & Position==1 & Party == "BJP") %>% summarise(mean(Margin_Percentage))
 
 wb_ge_19 <- ge %>% filter(Year ==2019 & State_Name =="West_Bengal" & Party %in% c("BJP", "AITC"))
 
@@ -735,21 +808,32 @@ title <- ggdraw() +
 
 
 ```{r}
-ggplot(wb_sc, aes(sc_pc,vs_19 , color = party))+
-  geom_point(alpha = .5)+
-  geom_smooth(se = FALSE, method = "lm")+
-    scale_color_manual(values = c("BJP" = "orange",
-                              
-                                
-                                "AITC" = "steelblue")) +
-  ggthemes::theme_fivethirtyeight()+
-  labs( color = "Party", x= "SC Percentage", y = " Vote share (%) 2019)",subtitle= "Vote share as a function of proportion of SCs in the constituency")+
-  scale_x_continuous(limits = c(0,80))+
+ggplot(wb_sc, aes(sc_st_pc,vs_19 , color = party))+
+  geom_point(alpha = .6)+
+  geom_smooth(se = FALSE, method = "lm", size = 1.2)+
+
+  labs( color = "Party", #title= "Vote share as a function of \n proportion of SC & ST constituencts",
+        subtitle = "GE 2019",x="SC & ST Percentage" , y = "Vote share (%)")+
+  
+  scale_color_manual(values = c("BJP" = "darkorange1",
+                                "AITC" = "chartreuse4")) +
+    scale_x_continuous(limits = c(0,80))+
   scale_y_continuous(limits = c(0,80) )+
-  theme(legend.position = "bottom",
-        text = element_text(family="serif", face = "bold"),
-        axis.title = element_text()
+
+
+  ggthemes::theme_fivethirtyeight()+
+  theme(
+        text = element_text(family="serif"),
+        axis.title = element_text(size = 14),
+        axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0)),
+        #axis.line.x = element_line()
                             )
+
+ggsave("D:/cpr/elections/wb/sc_st_vs.png", width = 6, height = 4)
+
+
+
+
 ```
 
 
@@ -908,23 +992,28 @@ wb_mus<- dplyr::inner_join( wb_vs_16_19,muslim_pc, shrug_sc, by = c( "constituen
 
 
 ggplot(wb_mus, aes(muslim_pc, vs_19, color = party))+
-  geom_point(alpha = .5)+
-  geom_smooth(se = FALSE, method = "lm")+
-    scale_color_manual(values = c("BJP" = "orange",
-                              
-                                
-                                "AITC" = "steelblue")) +
+  geom_point(alpha = .6)+
+  geom_smooth(se = FALSE, method = "lm", size = 1.2)+
+
+  labs( color = "Party",
+        #title= "Vote share as a function of \n proportion of Muslims in the constituency",
+        subtitle = "GE 2019",x="Muslim Percentage" , y = "Vote share (%)")+
+  
+  scale_color_manual(values = c("BJP" = "darkorange1",
+                                "AITC" = "chartreuse4")) +
+    scale_x_continuous(limits = c(20,80))+
+  scale_y_continuous(limits = c(0,80) )+
+
+
   ggthemes::theme_fivethirtyeight()+
-  labs( color = "Party", subtitle= "vote share as a function of proportion of Muslims in the constituency",x="Muslim Percentage" , y = "vote share(%) 2019)")+
-  scale_x_continuous(limits = c(20,80) )+
-  scale_y_continuous(limits = c(20,80) )+
-  theme(legend.position = "bottom",
-        text = element_text(family="serif", face = "bold"),
-        axis.title = element_text(),
-        title = element_text()
+  theme(
+        text = element_text(family="serif"),
+        axis.title = element_text(size = 14),
+        axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0)),
+        #axis.line.x = element_line()
                             )
 
-
+ggsave("D:/cpr/elections/wb/muslim_vs.png", width = 6, height = 4)
 
 
 ```
@@ -1053,7 +1142,7 @@ names(sub_reg) <- tolower(names(sub_reg))
 
 #sub_reg <- sub_reg  %>% select(-c(pc_no, pc_name, constituency_name))
 
-
+sub_reg <- sub_reg %>% mutate(sub_region_rv = ifelse(district_name.y %in% c("BARDHAMAN", "NADIA","HOOGHLY"),"South-Central Bengal", sub_region_ht))
 
 
 
@@ -1072,7 +1161,7 @@ wb_el_reg <- left_join(wb_el_mus, sub_reg, by= "constituency_no" )
 ```{r}
 
 
-sub_reg %>% group_by(sub_region_ht) %>% summarise(ac_count=n()) %>% kable(digits =2) %>% kable_styling(bootstrap_options = "striped")
+sub_reg %>% group_by(sub_region_rv) %>% summarise(ac_count=n()) %>% kable(digits =2) %>% kable_styling(bootstrap_options = "striped")
 
 
 ```
@@ -1082,7 +1171,7 @@ sub_reg %>% group_by(sub_region_ht) %>% summarise(ac_count=n()) %>% kable(digits
 
 ```{r}
 
-wb_el_reg %>% filter(year == 2019 & position==1) %>% group_by(sub_region_ht) %>% summarise(mean_muslims = mean(muslim_pc, na.rm = TRUE)) %>% kable(digits =2) %>% kable_styling(bootstrap_options = "striped")
+wb_el_reg %>% filter(year == 2019 & position==1) %>% group_by(sub_region_rv) %>% summarise(mean_muslims = mean(muslim_pc, na.rm = TRUE)) %>% kable(digits =2) %>% kable_styling(bootstrap_options = "striped")
 
 ```
 
@@ -1094,7 +1183,7 @@ wb_el_reg %>% filter(year == 2019 & position==1) %>% group_by(sub_region_ht) %>%
  wb_el_reg$reservation<- ifelse( wb_el_reg$constituency_type== "GEN", "GEN", "SC/ST")
 
 
-wb_el_reg %>% filter(year == 2019 & position==1) %>% group_by(sub_region_ht,reservation )%>% summarise(count = n()) %>% pivot_wider(names_from = reservation, values_from = count)  %>% kable()%>% kable_styling(bootstrap_options = "striped")
+wb_el_reg %>% filter(year == 2016 & position==1) %>% group_by(sub_region_rv,reservation )%>% summarise(count = n()) %>% pivot_wider(names_from = reservation, values_from = count)  %>% kable()%>% kable_styling(bootstrap_options = "striped")
 ```
 
 
@@ -1105,9 +1194,9 @@ wb_el_reg %>% filter(year == 2019 & position==1) %>% group_by(sub_region_ht,rese
 
 
 ```{r}
-wb_el_reg %>% filter(party %in% c("BJP", "AITC") & year %in% c(2016,2019)) %>% group_by(year,sub_region_ht, party) %>% summarise(vs= mean(vote_share_percentage)) %>% 
+wb_el_reg %>% filter(party %in% c("BJP", "AITC") & year %in% c(2016,2019)) %>% group_by(year,sub_region_rv, party) %>% summarise(vs= mean(vote_share_percentage)) %>% 
 
-  ggplot((aes(factor(sub_region_ht, level = c("Hills", "Jangalmahal","South Bengal", "North Bengal", "Central Bengal")), vs, fill = party)))+
+  ggplot((aes(factor(sub_region_rv, level = c("Hills", "Jangalmahal","South Bengal", "North Bengal", "Central Bengal", "South-Central Bengal")), vs, fill = party)))+
   geom_bar(stat= "identity", position="dodge")+
   facet_wrap(~year)+
     labs(title = "Vote share  of parties wrt sub region", y = "Vote share (%)", x = "Sub region", fill = "Election")+
@@ -1121,11 +1210,14 @@ wb_el_reg %>% filter(party %in% c("BJP", "AITC") & year %in% c(2016,2019)) %>% g
   
 ```
 
-## seat share
+- it seems that south-central bengal is where BJP and AITC having a head to head competition.
+
+
+## Seat share
 
 ```{r}
 
-wb_el_reg %>% filter(party %in% c("BJP", "AITC") & position==1 & year %in% c(2016,2019)) %>% group_by(year,sub_region_ht, party) %>% summarise(count =n()) %>% pivot_wider(names_from = year, values_from = count)  %>% arrange(sub_region_ht) %>%  mutate(`2016`= replace_na(`2016`,0))%>%kable()%>% kable_styling(bootstrap_options = "striped")
+wb_el_reg %>% filter(party %in% c("BJP", "AITC") & position==1 & year %in% c(2016,2019)) %>% group_by(year,sub_region_rv, party) %>% summarise(count =n()) %>% pivot_wider(names_from = sub_region_rv, values_from = count) %>% replace(is.na(.),0)%>%kable()%>% kable_styling(bootstrap_options = "striped")
 
 ```
 
@@ -1197,7 +1289,9 @@ wb_el_reg %>% filter(sub_region_ht== "South Bengal" & year %in% c(2016,2019) & p
 
 
 
-# South Bengal -BJP
+# South Bengal - BJP 2019
+
+- New division
 
 
 ```{r}
@@ -1206,12 +1300,21 @@ wb_el_reg %>% filter(sub_region_ht== "South Bengal" & year %in% c(2016,2019) & p
 wb_el_reg_19 <- wb_el_reg %>% filter(year ==2019)
 
 
-wb_el_reg_19  <- wb_el_reg_19 %>% mutate(sub_reg_1 = ifelse(sub_region_ht == "South Bengal", "South Bengal", "Bengal - other"))
+wb_el_reg_19  <- wb_el_reg_19 %>% mutate(sub_reg_1 = ifelse(sub_region_rv == "South Bengal", "South Bengal", "Bengal - other"))
 
 
 
 
-wb_el_reg_19 %>% filter(front_new %in% c("BJP", "AITC", "LF+INC") & position ==1) %>% group_by (constituency_no) %>% distinct(front_new, .keep_all = TRUE) %>% ungroup() %>% group_by(sub_reg_1,front_new) %>% summarise(n_ac = n()) %>%  group_by(sub_reg_1) %>% mutate(n_ac_reg = sum(n_ac), ac_pc =( n_ac/n_ac_reg)*100) %>% kable(digits = 2, col.names = c("Region", "Front","Number of ACs leading", "Number of ACs in the region","% of ACs leading in the region")) %>% kable_styling(bootstrap_options = "striped")
+sub_reg_n <- wb_el_reg_19 %>% filter(front_new %in% c("BJP", "AITC", "LF+INC") & position ==1) %>% group_by (constituency_no) %>% distinct(front_new, .keep_all = TRUE) %>% ungroup() %>% group_by(sub_reg_1,front_new) %>% summarise(n_ac = n()) %>%  group_by(sub_reg_1) %>% mutate(n_ac_reg = sum(n_ac), ac_pc =( n_ac/n_ac_reg)*100) 
+# kable(digits = 2, col.names = c("Region", "Front","Number of ACs leading", "Number of ACs in the region","% of ACs leading in the region")) %>% kable_styling(bootstrap_options = "striped")
+
+wb_el_reg_19 <- wb_el_reg_19 %>% group_by(sub_reg_1) %>% mutate(tot_votes_reg = sum(votes))
+
+
+
+sub_reg_vs <- wb_el_reg_19 %>% ungroup()%>%filter(front_new %in% c("BJP", "AITC", "LF+INC")) %>%   group_by (sub_reg_1, front_new) %>%summarise(vote_share = sum(votes)/tot_votes_reg *100) %>% distinct(sub_reg_1,front_new, .keep_all = TRUE)
+
+inner_join(sub_reg_n, sub_reg_vs, by = c("sub_reg_1", "front_new")) %>% kable(digits = 2, col.names = c("Region", "Front","Number of ACs leading", "Number of ACs in the region","% of ACs leading in the region", "Vote share of the front")) %>% kable_styling(bootstrap_options = "striped")
 
 ```
 
@@ -1231,7 +1334,13 @@ DT::datatable(vs_ac)
 
 ---
 
+# Vote share change - assumption models
+
+## BJP
+
 **How does change in certain percentage point vote share reflects on the number of constituencies led by BJP**
+
+- Based on the new south bengal division
 
 
 
@@ -1258,7 +1367,7 @@ title  <- c("win_pc", "n_ac")
 
 win_long_title <- cbind(title, win_long)
 
-win_long_title  %>% pivot_longer(-1) %>% slice(1:7) %>% select(2:3) %>% rename("add_on" = "name", "n_ac_lead" = "value") %>% mutate(pc_ac = n_ac_lead/167*100) %>% 
+win_long_title  %>% pivot_longer(-1) %>% slice(1:7) %>% select(2:3) %>% rename("add_on" = "name", "n_ac_lead" = "value") %>% mutate(pc_ac = n_ac_lead/107*100) %>% 
   kable(digits = 2, col.names= c ("Vote share added", "Number of ACs leading","Percentage of leading ACs in south")) %>% kable_styling(bootstrap_options = "striped")
 
 
@@ -1266,7 +1375,45 @@ win_long_title  %>% pivot_longer(-1) %>% slice(1:7) %>% select(2:3) %>% rename("
 
 
 
+---
 
+
+## AITC
+
+**How does change in certain percentage point reduction in vote share reflects on the number of constituencies led by AITC**
+
+- Based on the new south bengal division
+
+
+
+```{r}
+winners_aitc <- wb_el_reg_19 %>% filter(front_new %in% c("BJP", "AITC", "LF+INC") & sub_reg_1 == "South Bengal") %>% group_by (constituency_no) %>% distinct(front_new, .keep_all = TRUE) %>% ungroup() %>% select(constituency_no, constituency_name,front_new, vote_share_percentage) %>% pivot_wider(names_from = front_new, values_from = vote_share_percentage) %>% rowwise() %>% mutate(winner = ifelse(max(`AITC`, `BJP`, `LF+INC`)<= `AITC`,1,0),
+                                                                                                                                                                                                                                                                                                                                                                              winner_1 = ifelse(max(`BJP`,  `LF+INC`)<= `AITC`-1,1,0),
+                                                                                                                                                                                                                                                                                                                                                                              winner_2 = ifelse(max(`BJP`, `LF+INC`)<= `AITC`-2,1,0),
+                                                                                                                                                                                                                                                                                                                                                                              winner_3 = ifelse(max(`BJP`,  `LF+INC`)<= `AITC`-3,1,0),
+                                                                                                                                                                                                                                                                                                                                                                              winner_5 = ifelse(max(`BJP`,  `LF+INC`)<= `AITC`-5,1,0),
+                                                                                                                                                                                                                                                                                                                                                                              winner_7 = ifelse(max(`BJP`,  `LF+INC`)<= `AITC`-7,1,0),
+                                                                                                                                                                                                                                                                                                                                                                              winner_10 = ifelse(max(`BJP`, `LF+INC`)<= `AITC`-10,1,0)
+                                                                                                                                                                                                                                                                                                                                                                              )
+```
+
+
+
+```{r}
+win_long_aitc <- winners_aitc%>% group_by()%>% summarise(winner = sum(winner), winner_1pc = sum(winner_1),
+                                    winner_2pc = sum(winner_2),winner_3pc = sum(winner_3),
+                                    winner_5pc = sum(winner_5),winner_7pc = sum(winner_7),
+                                    winner_10pc = sum(winner_10)) 
+title  <- c("win_pc", "n_ac")
+
+
+win_long_title_aitc <- cbind(title, win_long_aitc)
+
+win_long_title_aitc  %>% pivot_longer(-1) %>% slice(1:7) %>% select(2:3) %>% rename("add_on" = "name", "n_ac_lead" = "value") %>% mutate(pc_ac = n_ac_lead/107*100) %>% 
+  kable(digits = 2, col.names= c ("Vote share reduced", "Number of ACs leading","Percentage of leading ACs in south")) %>% kable_styling(bootstrap_options = "striped")
+
+
+```
 
 
 

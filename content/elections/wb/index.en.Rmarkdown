@@ -9,12 +9,9 @@ output:
     toc_depth: 3
     number_sections: true
     fig_width: 6
-links:
-- icon: flask
-  icon_pack: fas
-  name: Post
-  url: ../../elections/wb/WB_bjp.html
 ---
 
 
 - [West Bengal Main analysis](../../elections/wb/WB_bjp.html)
+
+- [Panel discussion slides](../../elections/wb/slides_wb.pdf)

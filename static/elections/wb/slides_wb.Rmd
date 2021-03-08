@@ -1,0 +1,119 @@
+---
+title: "How will Bengal vote in 2021?"
+subtitle : "Election Adda 2021"
+author: "Rahul Verma"
+institute: "Centre for Policy Research"
+date: "10th March, 2021"
+output:
+  beamer_presentation:
+    keep_tex: true
+    theme: "CambridgeUS"
+    colortheme: "beaver"
+    fonttheme: "professionalfonts"
+    slide_level: 2
+header-includes:
+    - \titlegraphic{\centering \includegraphics[width=10cm]{D:/cpr/elections/assam/logo.jpg}}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+knitr::opts_chunk$set(dev = 'pdf')
+```
+
+<!-- WB map -->
+
+
+
+
+
+```{r, fig.show="hold", out.width= "60%", out.height="100%",fig.align='center'}
+
+knitr::include_graphics(c("D:/cpr/elections/wb/wb_map.png"))
+
+```
+
+---
+
+<!-- vote and seat share -->
+
+
+```{r, figures-side, fig.show="hold", out.width="49%",fig.cap="Vote and Seat share", echo = FALSE}
+
+knitr::include_graphics(c("D:/cpr/elections/wb/wb_vs.png","D:/cpr/elections/wb/wb_seat.png"))
+
+```
+
+
+
+
+---
+
+<!-- margin vote share -->
+
+- Margin share graph to be added
+
+
+
+---
+
+
+<!-- 2021 phase wise performance in GE 2019 -->
+
+
+```{r, fig.show="hold", out.width= "80%", fig.align='center'}
+
+knitr::include_graphics(c("D:/cpr/elections/wb/vs_phase.png"))
+
+```
+
+
+
+---
+
+<!-- Muslim votes v/s 2019 bjp & inc vote share -->
+
+```{r, fig.show="hold", out.width= "80%", fig.align='center', fig.cap="Vote share as a function of  proportion of Muslims constituents"}
+
+knitr::include_graphics(c("D:/cpr/elections/wb/muslim_vs.png"))
+
+```
+
+
+
+---
+
+
+
+<!-- SC/ST votes v/s 2019 bjp & inc vote share -->
+
+
+```{r, fig.show="hold", out.width= "80%", fig.align='center', fig.cap="Vote share as a function of  proportion of SC and ST constituents"}
+
+knitr::include_graphics(c("D:/cpr/elections/wb/sc_st_vs.png"))
+
+```
+
+
+
+---
+
+
+<!-- caste share -->
+
+
+```{r, fig.show="hold", out.width= "80%", fig.align='center'}
+
+knitr::include_graphics(c("D:/cpr/elections/wb/caste_table.png"))
+
+```
+
+
+
+
+
+
+
+
+
+
