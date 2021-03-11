@@ -1,5 +1,5 @@
 ---
-title: "How will Bengal vote in 2021?"
+title: "How will West Bengal vote in 2021?"
 subtitle : "Election Adda 2021"
 author: "Rahul Verma"
 institute: "Centre for Policy Research"
@@ -27,74 +27,63 @@ knitr::opts_chunk$set(dev = 'pdf')
 
 
 
-```{r, fig.show="hold", out.width= "60%", out.height="100%",fig.align='center'}
+```{r, fig.show="hold", out.width= "60%", out.height="100%",fig.align='center', fig.cap="2021 Phases"}
 
 knitr::include_graphics(c("D:/cpr/elections/wb/wb_map.png"))
 
 ```
 
----
+
 
 <!-- vote and seat share -->
 
 
-```{r, figures-side, fig.show="hold", out.width="49%",fig.cap="Vote and Seat share", echo = FALSE}
+<!-- ```{r, figures-side, fig.show="hold",  echo = FALSE, fig.align='center',fig.cap = "Party performance in the state"} -->
 
-knitr::include_graphics(c("D:/cpr/elections/wb/wb_vs.png","D:/cpr/elections/wb/wb_seat.png"))
+<!-- knitr::include_graphics(c("D:/cpr/elections/wb/wb_vs.png","D:/cpr/elections/wb/wb_seat.png")) -->
 
+<!-- ``` -->
+
+---
+
+\centering
+![](D:/cpr/elections/wb/wb_vs.png){width=60%}  ![](D:/cpr/elections/wb/wb_seat.png){width=60%} 
+
+
+
+---
+
+```{r, out.width= "50%",fig.show="hold",  echo = FALSE, fig.align='center'}
+knitr::include_graphics(c("D:/cpr/elections/wb/wb_19_phase.jpg", "D:/cpr/elections/wb/won_map2.jpg"))
 ```
+
 
 
 
 
 ---
 
-<!-- margin vote share -->
 
-- Margin share graph to be added
-
+<!-- 2019 phase wise performance in GE 2019 -->
 
 
----
+<!-- ```{r, fig.show="hold", out.width="49%",fig.cap="Party performance - 2019 phases", echo = FALSE} -->
+
+<!-- knitr::include_graphics(c("D:/cpr/elections/wb/vs_phase_19.png","D:/cpr/elections/wb/seats_phase_19.png",)) -->
+
+<!-- ``` -->
 
 
-<!-- 2021 phase wise performance in GE 2019 -->
-
-
-```{r, fig.show="hold", out.width= "80%", fig.align='center'}
-
-knitr::include_graphics(c("D:/cpr/elections/wb/vs_phase.png"))
-
-```
+\centering
+![](D:/cpr/elections/wb/seats_phase_19.png){width=60%}  ![](D:/cpr/elections/wb/vs_sub.png){width=60%} 
 
 
 
----
+<!-- ```{r, fig.show="hold", out.width= "80%", fig.align='center', fig.cap=""} -->
 
-<!-- Muslim votes v/s 2019 bjp & inc vote share -->
+<!-- knitr::include_graphics(c("D:/cpr/elections/wb/vs_sub.png")) -->
 
-```{r, fig.show="hold", out.width= "80%", fig.align='center', fig.cap="Vote share as a function of  proportion of Muslims constituents"}
-
-knitr::include_graphics(c("D:/cpr/elections/wb/muslim_vs.png"))
-
-```
-
-
-
----
-
-
-
-<!-- SC/ST votes v/s 2019 bjp & inc vote share -->
-
-
-```{r, fig.show="hold", out.width= "80%", fig.align='center', fig.cap="Vote share as a function of  proportion of SC and ST constituents"}
-
-knitr::include_graphics(c("D:/cpr/elections/wb/sc_st_vs.png"))
-
-```
-
-
+<!-- ``` -->
 
 ---
 
@@ -112,8 +101,59 @@ knitr::include_graphics(c("D:/cpr/elections/wb/caste_table.png"))
 
 
 
+---
+
+
+\centering
+![](D:/cpr/elections/wb/muslim_vs.png){width=60%}  ![](D:/cpr/elections/wb/sc_st_vs.png){width=60%} 
+
+<!-- --- -->
+
+<!-- <!-- Muslim votes v/s 2019 bjp & inc vote share --> -->
+
+<!-- ```{r, fig.show="hold", out.width= "80%", fig.align='center', fig.cap="Vote share as a function of  proportion of Muslims constituents"} -->
+
+<!-- knitr::include_graphics(c("D:/cpr/elections/wb/muslim_vs.png")) -->
+
+<!-- ``` -->
 
 
 
+<!-- --- -->
+
+
+
+<!-- <!-- SC/ST votes v/s 2019 bjp & inc vote share --> -->
+
+
+<!-- ```{r, fig.show="hold", out.width= "80%", fig.align='center', fig.cap="Vote share as a function of  proportion of SC and ST constituents"} -->
+
+<!-- knitr::include_graphics(c("D:/cpr/elections/wb/sc_st_vs.png")) -->
+
+<!-- ``` -->
+
+
+
+---
+
+- West Bengal represents a new wave of religious polarisation in the country.
+
+- Not the typical divide that has dominant caste Hindu angst at its centre, but rather lower caste Hindus.
+
+ - All cultural anxieties, political contentions, and economic angle.
+
+- Why social identities spilling into the political realm?
+
+- Subaltern Hindutva. differences in causes and consequences: cultural anxieties, political contentions, and economic angle.
+
+- This election will leave a scar on nature of the social fracture in Bengal politics for a long-time.
+
+---
+
+
+
+
+
+![](D:/cpr/elections/wb/sweet.jpeg)
 
 

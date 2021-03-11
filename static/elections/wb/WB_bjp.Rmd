@@ -29,6 +29,9 @@ library(cowplot)
 `%!in%` = Negate(`%in%`)
 
 select <- dplyr::select
+
+
+setwd("D:/cpr/elections/wb")
 ```
 
 
@@ -147,15 +150,31 @@ wb_el %>% group_by(year, front_new) %>% summarise(vs = (sum(votes)/total_votes_s
                                 "LF+INC" = "red",
                                 "AITC" = "chartreuse4")) +
   labs(title = "Vote share of the major parties" ,subtitle = "WB 2011:19",y = "Vote share (%)", x = "Year", color = "Party")+
-
-  ggthemes::theme_fivethirtyeight()+
   ylim(0,50)+
-  theme(#legend.position = "bottom",
-        text = element_text(family="serif"),
-        #axis.title = element_text()
-        axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0)),
+  theme_minimal()+
+    theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
+        legend.position = "bottom",
+        plot.background = element_blank(),
+        plot.title = element_text( size = 18, family = "serif"),
+        plot.subtitle = element_text( size = 15,
+                                     margin = margin(t = 0, r = 0, b = 20, l = 0)),
+        text = element_text(color = "gray20",family = "serif"),
+        axis.text.x = element_text( 
+                                   hjust = .5, vjust = 0),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 12),
+        axis.text = element_text(face = "italic", size = 10),
+        axis.title = element_text(vjust = -1, size = 15),        
+        axis.ticks = element_blank(),
+        panel.grid.major = element_line(color = "gray50", size = .5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+         axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+        axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
         axis.line.x = element_line()
-                            )
+  ) 
+
+
 
 
 
@@ -189,15 +208,31 @@ wb_el %>% filter(position==1)%>%  group_by(year, front_new) %>% summarise(count 
                                 "LF+INC" = "red",
                                 "AITC" = "chartreuse4")) +
   labs(title = "Seat share of the major parties" ,subtitle = "WB assembly segments  2011:19",y = "Seat share (%)", x = "Year", color = "Party")+
-
-  ggthemes::theme_fivethirtyeight()+
   ylim(0,80)+
-  theme(#legend.position = "bottom",
-        text = element_text(family="serif"),
-        #axis.title = element_text()
-        axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0)),
+  theme_minimal()+
+    theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
+        legend.position = "bottom",
+        plot.background = element_blank(),
+        plot.title = element_text( size = 18, family = "serif"),
+        plot.subtitle = element_text( size = 15,
+                                     margin = margin(t = 0, r = 0, b = 20, l = 0)),
+        text = element_text(color = "gray20",family = "serif"),
+        axis.text.x = element_text( 
+                                   hjust = .5, vjust = 0),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 12),
+        axis.text = element_text(face = "italic", size = 10),
+        axis.title = element_text(vjust = -1, size = 15),        
+        axis.ticks = element_blank(),
+        panel.grid.major = element_line(color = "gray50", size = .5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+         axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+        axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
         axis.line.x = element_line()
-                          )
+  ) 
+
+
   
 
 ggsave("D:/cpr/elections/wb/wb_seat.png", width = 6, height = 4)
@@ -250,119 +285,12 @@ wb_el %>% group_by(election_type,front) %>% summarise(contested = n(), won = sum
 
 ![](D:/cpr/misc/analysis/margin_wb.png)
 
-```{r}
-
-# wb_el %>% filter(position==1) %>% group_by(election_type,party) %>% summarise(margin= mean(margin_percentage)) %>% 
-#   filter(party %in% c("AITC"  , "BJP",   "INC" , "CPM"  )) %>% 
-#     ggplot(aes( factor(party, level = c( "INC","AITC" ,"BJP","CPM")),margin, fill =election_type))+
-# 
-#   geom_bar(stat="identity", position="dodge")+
-#   labs(title = "Margin percentage of parties in the state", y = "Margin (%)", x = "Parties", fill = "Election")+
-#   colorspace::scale_fill_discrete_qualitative(palette= "Dark 2")+
-#   ylim(0,15)+
-#   theme_minimal_hgrid()+
-#   theme(legend.position = "bottom",
-#         text = element_text(family="serif"))
-#  
-        
-        
-# wb_el %>% filter(position==1) %>% group_by(election_type,year,front) %>% summarise(margin= mean(margin_percentage)) %>% 
-#   filter(front %in% c("AITC"  , "BJP",   "INC" , "LF"  )) %>% 
-#     ggplot(aes(factor(year), margin, group =front, color = front))+
-#   #geom_bar(stat= "identity", position= "dodge")
-#   geom_point()+
-#   geom_line(size = 1)+
-#   scale_color_manual(values = c("BJP" = "orange",
-#                                 "INC" = "steelblue", 
-#                                 "LF" = "red",
-#                                 "AITC" = "darkgreen")) +
-#   ylim(0,20)+
-#   labs(title = "Vicory vargin percentage of  major parties in the state", y = "Margin(%)", x = "Year", color = "front")+
-#   theme_minimal_hgrid()+
-#   theme(legend.position = "bottom",
-#         text = element_text(family="serif"),
-#                             )
-
-
-  
-
-```
-
-
-<!-- ## BJP vote share trends -->
-
-<!-- where is it gaining from -->
-
-<!-- ```{r} -->
-<!-- ##2019 -->
-
-<!-- bjp_19 <- wb_el %>% filter(year ==2019 & front == "BJP") %>% select(constituency_no, vote_share_percentage) %>% rename(BJP = vote_share_percentage) -->
-
-<!-- inc_19 <- wb_el %>% filter(year ==2019 & front == "INC") %>% select(constituency_no, vote_share_percentage) %>% rename(INC = vote_share_percentage) -->
-
-<!-- aitc_19 <- wb_el %>% filter(year ==2019 & front == "AITC") %>% select(constituency_no, vote_share_percentage) %>% rename(AITC = vote_share_percentage) -->
-<!-- LF_19 <- wb_el %>% filter(year ==2019 & front == "LF") %>% select( constituency_no, vote_share_percentage) %>%  rename(LF = vote_share_percentage) -->
-
-<!-- vs_reg <- full_join(bjp_19, aitc_19, by='constituency_no') %>% -->
-<!--                 left_join(., inc_19, by='constituency_no') %>%  -->
-<!--   left_join(., LF_19, by='constituency_no')  -->
-
-<!-- ##2016 -->
-
-
-<!-- bjp_16 <- wb_el %>% filter( year ==2016 &front == "BJP") %>% select(constituency_no, vote_share_percentage) %>% rename(BJP_16 = vote_share_percentage) -->
-
-<!-- inc_16 <- wb_el%>% filter(year ==2016 &front == "INC") %>% select(constituency_no, vote_share_percentage) %>% rename(INC_16 = vote_share_percentage) -->
-
-<!-- aitc_16 <-wb_el %>% filter(year ==2016 & front == "AITC") %>% select(constituency_no, vote_share_percentage) %>% rename(AITC_16 = vote_share_percentage) -->
-<!-- LF_16 <- wb_el %>% filter(year ==2016 & front == "LF") %>% select( constituency_no, vote_share_percentage) %>%  rename(LF_16 = vote_share_percentage) -->
-
-<!-- vs_reg <- full_join(bjp_19, aitc_19, by='constituency_no') %>% -->
-<!--                 left_join(., inc_19, by='constituency_no') %>%  -->
-<!--   left_join(., LF_19, by='constituency_no')  -->
-
-<!-- vs_reg_16 <- full_join(aitc_16, bjp_16, by='constituency_no') %>% -->
-<!--                 left_join(., LF_16, by='constituency_no') %>%  -->
-<!--   left_join(., inc_16, by='constituency_no')  -->
-
-
-<!-- vs_change <- full_join(vs_reg, vs_reg_16, by ='constituency_no' ) -->
-
-
-<!-- vs_change <- vs_change %>% mutate(aitc_delta = AITC-AITC_16, bjp_delta = BJP-BJP_16, -->
-<!--                      inc_delta = INC -INC_16, -->
-<!--                      lf_delta = LF-LF_16) -->
-<!-- ``` -->
-
-
-<!-- ## Model -->
-
-
-<!-- I ran a simple regression model with vote share change of parties in each constituencies in 2019 wrt 2016 election. The dependent variable is BJP's vote share change. It seems that CPM is paying a huge price for BJPs rising dominance. CPM is losing 1.7 percentage point votes as BJP gains one percentage point votes. -->
-
-<!-- ```{r} -->
-
-<!-- ## model -->
-
-
-<!-- m1 <- lm(data = vs_change, bjp_delta ~ aitc_delta + inc_delta + lf_delta) -->
-
-<!-- library(stargazer) -->
-
-
-<!-- stargazer(m1, type = "html") -->
-<!-- ``` -->
-
-
-
-
-
-
-
 
 
 
 # Phases{.tabset}
+
+## 2021 phases
 
 
 
@@ -377,7 +305,7 @@ wb_el_phase <- left_join(wb_19_cl, wb_phase, by = c("constituency_no" = "ac_no")
 
 ```
 
-## seats covered
+### seats covered
 
 ```{r}
 
@@ -387,7 +315,9 @@ wb_phase %>% group_by(phase_21) %>% tally() %>% kable() %>% kable_styling(bootst
 ```
 
 
-## vote share
+### vote share
+
+
 
 
 ```{r}
@@ -411,8 +341,109 @@ ggsave("D:/cpr/elections/wb/vs_phase.png", width = 6, height = 4)
 ```
 
 
+## 2019 phases
 
 
+
+
+### seats covered
+
+```{r}
+
+
+wb_el_phase %>% group_by(phase_19) %>% tally() %>% kable() %>% kable_styling(bootstrap_options = "striped")
+
+
+wb_el_phase <- wb_el_phase %>% group_by(phase_19) %>% mutate(tot_votes_phase =sum(votes) )
+
+wb_el_phase %>% filter(front_new %in% c("BJP", "AITC","LF+INC"))%>% group_by(phase_19, front_new) %>% summarise(vs = sum(votes)/tot_votes_phase*100) %>% distinct(front_new, .keep_all = TRUE)
+
+
+wb_el_phase %>% filter(front_new %in% c("BJP", "AITC","LF+INC") & position ==1)%>% group_by(phase_19, front_new) %>% summarise(seats = n()) %>% pivot_wider(names_from = phase_19, values_from = seats)
+
+
+```
+
+
+### vote share
+
+
+
+
+```{r}
+wb_el_phase  %>% filter(front_new %in% c("AITC"  , "BJP",   "LF+INC"  )) %>% group_by( phase_19, front_new) %>% summarise(vs = mean(vote_share_percentage)) %>% 
+  ggplot(aes(factor(phase_19), vs, fill =front_new))+
+  geom_bar(stat= "identity", position= "dodge")+
+scale_fill_manual(values = c("BJP" = "darkorange1",
+                                "LF+INC" = "red",
+                                "AITC" = "chartreuse4")) +
+  labs(title = "Party Performance : Vote Share",subtitle = "GE 2019 Phases",  x = "Phase", y = "Vote share (%)", fill = "Party" )+
+  ylim(0,60)+
+  theme_minimal()+
+  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
+        legend.position = "bottom",
+        plot.background = element_blank(),
+        plot.title = element_text( size = 18, family = "serif"),
+        plot.subtitle = element_text( size = 15,
+                                     margin = margin(t = 0, r = 0, b = 20, l = 0)),
+        text = element_text(color = "gray20",family = "serif"),
+        axis.text.x = element_text( 
+                                   hjust = .5, vjust = 0),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 12),
+        axis.text = element_text(face = "italic", size = 10),
+        axis.title = element_text(vjust = -1, size = 15),        
+        axis.ticks = element_blank(),
+        panel.grid.major = element_line(color = "gray50", size = .5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+         axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+        axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+        axis.line.x = element_line()
+  ) 
+
+
+ggsave("D:/cpr/elections/wb/vs_phase_19.png", width = 6, height = 4)
+
+```
+
+
+### seat share
+
+
+```{r}
+wb_el_phase %>% filter(front_new %in% c("BJP", "AITC","LF+INC") & position ==1)%>% group_by(phase_19, front_new) %>% summarise(seats = n()) %>% 
+  ggplot(aes(factor(phase_19), seats, fill =front_new, label = seats))+
+  geom_bar(stat= "identity",position = "fill", width = .5)+
+   geom_text(size = 3, position = position_fill(vjust = 0.5))+ 
+scale_fill_manual(values = c("BJP" = "darkorange1",
+                                "LF+INC" = "red",
+                                "AITC" = "chartreuse4")) +
+  labs(title = "Party Performance: Assembly Segment Seats",subtitle = "GE 2019 Phases",  x = "Phase", y = "Seats", fill = "Party" )+
+  #ylim(0,70)+
+  theme_minimal()+
+    theme(legend.position = "bottom",
+        plot.title = element_text( size = 18, family = "serif"),
+        plot.subtitle = element_text( size = 15,
+                                     margin = margin(t = 0, r = 0, b = 20, l = 0)),
+        text = element_text(color = "gray20",family = "serif"),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 12),
+        axis.text = element_text(face = "italic", size = 10),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.line= element_line(color = "gray40", size = .5),
+        axis.line.y = element_blank(),
+        panel.grid.major = element_line(color = "gray50", size = .5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0),vjust = -1, size = 1),
+        axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0),vjust = 2, size =14),
+        axis.line.x = element_line())
+
+
+ggsave("D:/cpr/elections/wb/seats_phase_19.png", width = 6, height = 4)
+```
 
 
 
@@ -440,13 +471,16 @@ party_19_ac <- inner_join(ac_wb, party_19, by = c("AC_NO"= "constituency_no"))
 
 ```{r results = 'hide'}
 ggplot(party_19_ac)+
-  geom_sf(aes(fill= party), lwd = .8)+
-  scale_fill_manual(values = c("BJP" = "orange",
-                                "INC" = "steelblue", 
-                                "AITC" = "darkgreen"))+
+  geom_sf(aes(fill= party), lwd = .7)+
+    scale_fill_manual(values = c("BJP" = "darkorange1",
+                                "AITC" = "chartreuse4",
+                                "INC" = "steelblue"
+                                ))+
     theme_map()+
-    labs(title ="Constituencies won by Party", subtitle = "2019 WB elections")+
+    labs(title ="Constituencies won by Party", subtitle = "GE 2019", fill = "Party")+
     theme(text = element_text(family = "serif"))
+
+ggsave("D:/cpr/elections/wb/won_map.png", width = 4, height = 9)
 
 
 ```
@@ -549,7 +583,7 @@ wb_16_fe_3 <- wb_16_fe %>% filter(front%in%c("BJP",  "AITC"))
 
 ggplot(wb_16_fe_3, aes(female_turnout, vote_share_percentage, color = front))+
   geom_point(alpha=0.5)+
-  geom_smooth()+
+  geom_smooth(method = "lm")+
   scale_color_manual(values = c("BJP" = "orange",
                                 
                                 "AITC" = "darkgreen")) +
@@ -819,15 +853,28 @@ ggplot(wb_sc, aes(sc_st_pc,vs_19 , color = party))+
                                 "AITC" = "chartreuse4")) +
     scale_x_continuous(limits = c(0,80))+
   scale_y_continuous(limits = c(0,80) )+
-
-
-  ggthemes::theme_fivethirtyeight()+
-  theme(
-        text = element_text(family="serif"),
-        axis.title = element_text(size = 14),
-        axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0)),
-        #axis.line.x = element_line()
-                            )
+  theme_minimal()+
+    theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
+        legend.position = "bottom",
+        plot.background = element_blank(),
+        plot.title = element_text( size = 18, family = "serif"),
+        plot.subtitle = element_text( size = 15,
+                                     margin = margin(t = 0, r = 0, b = 20, l = 0)),
+        text = element_text(color = "gray20",family = "serif"),
+        axis.text.x = element_text( 
+                                   hjust = .5, vjust = 0),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 12),
+        axis.text = element_text(face = "italic", size = 10),
+        axis.title = element_text(vjust = -1, size = 15),        
+        axis.ticks = element_blank(),
+        panel.grid.major = element_line(color = "gray50", size = .5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+         axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+        axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+        axis.line.x = element_line()
+  ) 
 
 ggsave("D:/cpr/elections/wb/sc_st_vs.png", width = 6, height = 4)
 
@@ -956,31 +1003,6 @@ ggplot(wb_el_mus %>% filter(front%in%c("BJP",  "AITC")& election_type =="GE"), a
 ```
 
 
-<!-- ### GE 2019 -->
-
-
-
-<!-- ```{r} -->
-
-
-<!-- ggplot(wb_el_mus %>% filter(front%in%c("BJP",  "AITC")& year ==2019), aes(muslim_pc, vote_share_percentage, color = front))+ -->
-<!--   geom_point(alpha=0.4)+ -->
-<!--   geom_smooth(method = "lm")+ -->
-<!--   scale_color_manual(values = c("BJP" = "orange", -->
-
-
-<!--                                 "AITC" = "darkgreen")) + -->
-<!--   labs(title = "Muslim voters v/s Vote share of the major parties in the state", y = "Vote share(%)",subtitle = "2014 & 2019 GE elections", x = "Muslim voters (%)", color = "Party")+ -->
-<!--   scale_x_continuous(limits = c(15,80))+ -->
-
-<!--   theme_minimal_grid()+ -->
-<!--   theme(legend.position = "bottom", -->
-<!--         text = element_text(family="serif"), -->
-<!--                             ) -->
-
-
-<!-- ``` -->
-
 
 
 
@@ -1003,15 +1025,30 @@ ggplot(wb_mus, aes(muslim_pc, vs_19, color = party))+
                                 "AITC" = "chartreuse4")) +
     scale_x_continuous(limits = c(20,80))+
   scale_y_continuous(limits = c(0,80) )+
+  theme_minimal()+
+    theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
+        legend.position = "bottom",
+        plot.background = element_blank(),
+        plot.title = element_text( size = 18, family = "serif"),
+        plot.subtitle = element_text( size = 15,
+                                     margin = margin(t = 0, r = 0, b = 20, l = 0)),
+        text = element_text(color = "gray20",family = "serif"),
+        axis.text.x = element_text( 
+                                   hjust = .5, vjust = 0),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 12),
+        axis.text = element_text(face = "italic", size = 10),
+        axis.title = element_text(vjust = -1, size = 15),        
+        axis.ticks = element_blank(),
+        panel.grid.major = element_line(color = "gray50", size = .5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+         axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+        axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+        axis.line.x = element_line()
+  ) 
 
 
-  ggthemes::theme_fivethirtyeight()+
-  theme(
-        text = element_text(family="serif"),
-        axis.title = element_text(size = 14),
-        axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0)),
-        #axis.line.x = element_line()
-                            )
 
 ggsave("D:/cpr/elections/wb/muslim_vs.png", width = 6, height = 4)
 
@@ -1194,19 +1231,43 @@ wb_el_reg %>% filter(year == 2016 & position==1) %>% group_by(sub_region_rv,rese
 
 
 ```{r}
-wb_el_reg %>% filter(party %in% c("BJP", "AITC") & year %in% c(2016,2019)) %>% group_by(year,sub_region_rv, party) %>% summarise(vs= mean(vote_share_percentage)) %>% 
+
+areas <- c("Hills","Jangalmahal","South", "North","Central", "South-Central")
+wb_el_reg %>% filter(party %in% c("BJP", "AITC") & year ==2019) %>% group_by(year,sub_region_rv, party) %>% summarise(vs= mean(vote_share_percentage)) %>% 
 
   ggplot((aes(factor(sub_region_rv, level = c("Hills", "Jangalmahal","South Bengal", "North Bengal", "Central Bengal", "South-Central Bengal")), vs, fill = party)))+
   geom_bar(stat= "identity", position="dodge")+
-  facet_wrap(~year)+
-    labs(title = "Vote share  of parties wrt sub region", y = "Vote share (%)", x = "Sub region", fill = "Election")+
+    labs(title = "Vote share of parties wrt sub region", subtitle = "GE 2019" ,y = "Vote share (%)", x = "Sub region", fill = "Election")+
+  ylim(0,60)+
   scale_fill_manual(values = c("BJP" = "orange",
                                 "AITC" = "darkgreen"))+
-  ylim(0,60)+
-  theme_minimal_hgrid()+
-  theme(legend.position = "bottom",
-        text = element_text(family="serif"),
-        axis.text.x = element_text(angle = 45,hjust = 1))
+  scale_x_discrete(labels= areas)+
+    theme_minimal()+
+  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
+        legend.position = "bottom",
+        plot.background = element_blank(),
+        plot.title = element_text( size = 18, family = "serif"),
+        plot.subtitle = element_text( size = 15,
+                                     margin = margin(t = 0, r = 0, b = 20, l = 0)),
+        text = element_text(color = "gray20",family = "serif"),
+        axis.text.x = element_text( size = 10),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 12),
+        axis.text = element_text(face = "italic"),
+        axis.title = element_text(vjust = -1, size = 15),        
+        axis.ticks = element_blank(),
+        panel.grid.major = element_line(color = "gray50", size = .5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+         axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+        axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+        axis.line.x = element_line(),
+    
+  ) 
+
+
+      ggsave("D:/cpr/elections/wb/vs_sub.png", width = 6, height = 4)
+
   
 ```
 
@@ -1219,6 +1280,12 @@ wb_el_reg %>% filter(party %in% c("BJP", "AITC") & year %in% c(2016,2019)) %>% g
 
 wb_el_reg %>% filter(party %in% c("BJP", "AITC") & position==1 & year %in% c(2016,2019)) %>% group_by(year,sub_region_rv, party) %>% summarise(count =n()) %>% pivot_wider(names_from = sub_region_rv, values_from = count) %>% replace(is.na(.),0)%>%kable()%>% kable_styling(bootstrap_options = "striped")
 
+```
+## tunrout
+
+
+```{r}
+wb_el_reg %>% filter(year %in% c(2016,2019) & position == 1) %>% group_by(year,sub_region_rv) %>% summarise(avg_turnout = mean(turnout_percentage)) %>% pivot_wider(names_from = year,values_from=avg_turnout) %>% kable(digits =2) %>% kable_styling(bootstrap_options = "striped")
 ```
 
 
@@ -1334,9 +1401,12 @@ DT::datatable(vs_ac)
 
 ---
 
-# Vote share change - assumption models
+# Vote share change - assumption models {.tabset}
 
-## BJP
+
+## South Bengal{.tabset}
+
+### BJP - addition
 
 **How does change in certain percentage point vote share reflects on the number of constituencies led by BJP**
 
@@ -1378,7 +1448,7 @@ win_long_title  %>% pivot_longer(-1) %>% slice(1:7) %>% select(2:3) %>% rename("
 ---
 
 
-## AITC
+### AITC -reduction
 
 **How does change in certain percentage point reduction in vote share reflects on the number of constituencies led by AITC**
 
@@ -1415,9 +1485,137 @@ win_long_title_aitc  %>% pivot_longer(-1) %>% slice(1:7) %>% select(2:3) %>% ren
 
 ```
 
+## Pan bengal model{.tabset}
+
+### BJP - addition
+
+```{r}
+winners <- wb_el_reg_19 %>% filter(front_new %in% c("BJP", "AITC", "LF+INC") ) %>% group_by (constituency_no) %>% distinct(front_new, .keep_all = TRUE) %>% ungroup() %>% select(constituency_no, constituency_name,front_new, vote_share_percentage) %>% pivot_wider(names_from = front_new, values_from = vote_share_percentage) %>% rowwise() %>% mutate(winner = ifelse(max(`BJP`, `AITC`, `LF+INC`)<= `BJP`,1,0),
+                                                                                                                                                                                                                                                                                                                                                                              winner_1 = ifelse(max(`BJP`, `AITC`, `LF+INC`)<= `BJP`+1,1,0),
+                                                                                                                                                                                                                                                                                                                                                                              winner_2 = ifelse(max(`BJP`, `AITC`, `LF+INC`)<= `BJP`+2,1,0),
+                                                                                                                                                                                                                                                                                                                                                                              winner_3 = ifelse(max(`BJP`, `AITC`, `LF+INC`)<= `BJP`+3,1,0),
+                                                                                                                                                                                                                                                                                                                                                                              winner_5 = ifelse(max(`BJP`, `AITC`, `LF+INC`)<= `BJP`+5,1,0),
+                                                                                                                                                                                                                                                                                                                                                                              winner_7 = ifelse(max(`BJP`, `AITC`, `LF+INC`)<= `BJP`+7,1,0),
+                                                                                                                                                                                                                                                                                                                                                                              winner_10 = ifelse(max(`BJP`, `AITC`, `LF+INC`)<= `BJP`+10,1,0)
+                                                                                                                                                                                                                                                                                                                                                                              )
+```
 
 
 
+```{r}
+win_long <- winners %>% group_by()%>% summarise(winner = sum(winner), winner_1pc = sum(winner_1),
+                                    winner_2pc = sum(winner_2),winner_3pc = sum(winner_3),
+                                    winner_5pc = sum(winner_5),winner_7pc = sum(winner_7),
+                                    winner_10pc = sum(winner_10)) 
+title  <- c("win_pc", "n_ac")
+
+
+win_long_title <- cbind(title, win_long)
+
+win_long_title  %>% pivot_longer(-1) %>% slice(1:7) %>% select(2:3) %>% rename("add_on" = "name", "n_ac_lead" = "value") %>% mutate(pc_ac = n_ac_lead/294*100) %>% 
+  kable(digits = 2, col.names= c ("Vote share added", "Number of ACs leading","Percentage of leading ACs in WB")) %>% kable_styling(bootstrap_options = "striped")
+
+
+```
+
+
+
+---
+
+### AITC - reduction
+
+
+```{r}
+winners_aitc <- wb_el_reg_19 %>% filter(front_new %in% c("BJP", "AITC", "LF+INC") ) %>% group_by (constituency_no) %>% distinct(front_new, .keep_all = TRUE) %>% ungroup() %>% select(constituency_no, constituency_name,front_new, vote_share_percentage) %>% pivot_wider(names_from = front_new, values_from = vote_share_percentage) %>% rowwise() %>% mutate(winner = ifelse(max(`AITC`, `BJP`, `LF+INC`)<= `AITC`,1,0),
+                                                                                                                                                                                                                                                                                                                                                                              winner_1 = ifelse(max(`BJP`,  `LF+INC`)<= `AITC`-1,1,0),
+                                                                                                                                                                                                                                                                                                                                                                              winner_2 = ifelse(max(`BJP`, `LF+INC`)<= `AITC`-2,1,0),
+                                                                                                                                                                                                                                                                                                                                                                              winner_3 = ifelse(max(`BJP`,  `LF+INC`)<= `AITC`-3,1,0),
+                                                                                                                                                                                                                                                                                                                                                                              winner_5 = ifelse(max(`BJP`,  `LF+INC`)<= `AITC`-5,1,0),
+                                                                                                                                                                                                                                                                                                                                                                              winner_7 = ifelse(max(`BJP`,  `LF+INC`)<= `AITC`-7,1,0),
+                                                                                                                                                                                                                                                                                                                                                                              winner_10 = ifelse(max(`BJP`, `LF+INC`)<= `AITC`-10,1,0)
+                                                                                                                                                                                                                                                                                                                                                                              )
+```
+
+
+
+```{r}
+win_long_aitc <- winners_aitc%>% group_by()%>% summarise(winner = sum(winner), winner_1pc = sum(winner_1),
+                                    winner_2pc = sum(winner_2),winner_3pc = sum(winner_3),
+                                    winner_5pc = sum(winner_5),winner_7pc = sum(winner_7),
+                                    winner_10pc = sum(winner_10)) 
+title  <- c("win_pc", "n_ac")
+
+
+win_long_title_aitc <- cbind(title, win_long_aitc)
+
+win_long_title_aitc  %>% pivot_longer(-1) %>% slice(1:7) %>% select(2:3) %>% rename("add_on" = "name", "n_ac_lead" = "value") %>% mutate(pc_ac = n_ac_lead/294*100) %>% 
+  kable(digits = 2, col.names= c ("Vote share reduced", "Number of ACs leading","Percentage of leading in WB")) %>% kable_styling(bootstrap_options = "striped")
+
+
+```
+
+
+## South and rest of the Bengal{.tabset}
+
+
+### BJP - addition
+
+```{r}
+winners <- wb_el_reg_19 %>% filter(front_new %in% c("BJP", "AITC", "LF+INC") ) %>% group_by (constituency_no) %>% distinct(front_new, .keep_all = TRUE) %>% ungroup() %>% select(sub_reg_1,constituency_no, constituency_name,front_new, vote_share_percentage) %>% pivot_wider(names_from = front_new, values_from = vote_share_percentage) %>% rowwise() %>% mutate(winner = ifelse(max(`BJP`, `AITC`, `LF+INC`)<= `BJP`,1,0),
+                                                                                                                                                                                                                                                                                                                                                                              winner_1 = ifelse(max(`BJP`, `AITC`, `LF+INC`)<= `BJP`+1,1,0),
+                                                                                                                                                                                                                                                                                                                                                                              winner_2 = ifelse(max(`BJP`, `AITC`, `LF+INC`)<= `BJP`+2,1,0),
+                                                                                                                                                                                                                                                                                                                                                                              winner_3 = ifelse(max(`BJP`, `AITC`, `LF+INC`)<= `BJP`+3,1,0),
+                                                                                                                                                                                                                                                                                                                                                                              winner_5 = ifelse(max(`BJP`, `AITC`, `LF+INC`)<= `BJP`+5,1,0),
+                                                                                                                                                                                                                                                                                                                                                                              winner_7 = ifelse(max(`BJP`, `AITC`, `LF+INC`)<= `BJP`+7,1,0),
+                                                                                                                                                                                                                                                                                                                                                                              winner_10 = ifelse(max(`BJP`, `AITC`, `LF+INC`)<= `BJP`+10,1,0)
+                                                                                                                                                                                                                                                                                                                                                                              )
+```
+
+
+
+```{r}
+win_long <- winners %>% group_by(sub_reg_1)%>% summarise(winner = sum(winner), winner_1pc = sum(winner_1),
+                                    winner_2pc = sum(winner_2),winner_3pc = sum(winner_3),
+                                    winner_5pc = sum(winner_5),winner_7pc = sum(winner_7),
+                                    winner_10pc = sum(winner_10)) 
+
+
+win_long %>% pivot_longer(2:8) %>% pivot_wider(names_from = sub_reg_1, values_from = value)%>% rename("add_on" = "name") %>% mutate(perc = `Bengal - other`/187*100, perc_sb = `South Bengal`/107 *100) %>% select(1:2, 4:4, 3:3, 5:5) %>% kable(digits = 2, col.names= c ("Vote share added", "Nn_ACs leading in rest of the Bengal","% of leading ACs in rest of the Bengal", "n_ACs leading in South Bengal","% of leading ACs in South Bengal")) %>% kable_styling(bootstrap_options = "striped")
+
+```
+
+
+
+---
+
+### AITC - reduction
+
+
+```{r}
+winners_aitc <- wb_el_reg_19 %>% filter(front_new %in% c("BJP", "AITC", "LF+INC") ) %>% group_by (constituency_no) %>% distinct(front_new, .keep_all = TRUE) %>% ungroup() %>% select(sub_reg_1,constituency_no, constituency_name,front_new, vote_share_percentage) %>% pivot_wider(names_from = front_new, values_from = vote_share_percentage) %>% rowwise() %>% mutate(winner = ifelse(max(`AITC`, `BJP`, `LF+INC`)<= `AITC`,1,0),
+                                                                                                                                                                                                                                                                                                                                                                              winner_1 = ifelse(max(`BJP`,  `LF+INC`)<= `AITC`-1,1,0),
+                                                                                                                                                                                                                                                                                                                                                                              winner_2 = ifelse(max(`BJP`, `LF+INC`)<= `AITC`-2,1,0),
+                                                                                                                                                                                                                                                                                                                                                                              winner_3 = ifelse(max(`BJP`,  `LF+INC`)<= `AITC`-3,1,0),
+                                                                                                                                                                                                                                                                                                                                                                              winner_5 = ifelse(max(`BJP`,  `LF+INC`)<= `AITC`-5,1,0),
+                                                                                                                                                                                                                                                                                                                                                                              winner_7 = ifelse(max(`BJP`,  `LF+INC`)<= `AITC`-7,1,0),
+                                                                                                                                                                                                                                                                                                                                                                              winner_10 = ifelse(max(`BJP`, `LF+INC`)<= `AITC`-10,1,0)
+                                                                                                                                                                                                                                                                                                                                                                              )
+```
+
+
+
+```{r}
+win_long_aitc <- winners_aitc %>% group_by(sub_reg_1)%>% summarise(winner = sum(winner), winner_1pc = sum(winner_1),
+                                    winner_2pc = sum(winner_2),winner_3pc = sum(winner_3),
+                                    winner_5pc = sum(winner_5),winner_7pc = sum(winner_7),
+                                    winner_10pc = sum(winner_10)) 
+
+
+
+win_long_aitc %>% pivot_longer(2:8) %>% pivot_wider(names_from = sub_reg_1, values_from = value)%>% rename("add_on" = "name") %>% mutate(perc = `Bengal - other`/187*100, perc_sb = `South Bengal`/107 *100) %>% select(1:2, 4:4, 3:3, 5:5) %>% kable(digits = 2, col.names= c ("Vote share reduced", "Nn_ACs leading in rest of the Bengal","% of leading ACs in rest of the Bengal", "n_ACs leading in South Bengal","% of leading ACs in South Bengal")) %>% kable_styling(bootstrap_options = "striped")
+
+
+```
 
 
 
