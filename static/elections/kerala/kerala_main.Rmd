@@ -1,0 +1,799 @@
+---
+title: "Kerala Analysis - 1"
+author: "Najah"
+date: "12/03/2021"
+params:
+  orig_date: 'Original Publish Date: 12 March, 2020'
+  update_date: !r paste("Updated on:", format(Sys.time(), '%d %B, %Y'))
+output:
+  html_document:
+    theme: flatly
+    toc: TRUE
+    toc_float: TRUE
+    toc_depth: 4
+    number_sections: false
+    fig_width: 6            
+editor_options: 
+  chunk_output_type: inline
+---
+
+<style>
+    body .main-container {
+        max-width: 1000px;
+    }
+</style>
+
+------------------------------------------------------------------------
+
+### Document History
+
+`r params$orig_date`
+
+`r params$update_date`
+
+------------------------------------------------------------------------
+
+
+```{r set up, warning=FALSE, include=FALSE, message= FALSE }
+
+knitr::opts_chunk$set(cache = TRUE,echo = FALSE, message=FALSE, warning = FALSE,fig.width = 16/2, fig.height = 9/2)
+
+library(data.table)
+library(tidyverse)
+library(kableExtra)
+library(cowplot)
+
+`%!in%` = Negate(`%in%`)
+
+select <- dplyr::select
+```
+
+
+The state has 140 Assembly seats and 20 Loksabha seats. Since 1980, elections are fought between two major electoral alliances - UDF and LDF. These two alliances have been dominating the electoral space leading to a bi-polar political contests in both AE & GE. I've listed the major allies of these two coalition below:
+
+- LDF
+  - CPI
+  - CPM
+- UDF
+  - IUML
+  - KEC(M)
+  - RSP
+
+There is only 11 reserved seats in the state.
+
+
+----
+
+
+
+
+```{r reading files}
+
+ge <- fread("D:/cpr/data/tcpd/TCPD_GE_all.csv")
+
+
+ge_kl <- ge %>% filter (State_Name == "Kerala")
+
+
+ae_kl <- fread("D:/cpr/data/tcpd/states/Kerala_2020.csv")
+
+ae_ge_kl <- rbind(ge_kl, ae_kl)
+
+
+names(ae_ge_kl) <- tolower(names(ae_ge_kl) )
+
+ae_ge_kl <-  ae_ge_kl %>% filter(poll_no ==0 & party != "NOTA")
+
+```
+
+
+
+##  Turnout
+
+
+
+```{r}
+
+ae_ge_kl %>% filter(position==1) %>% group_by(election_type, year) %>% summarise(turnout = mean(turnout_percentage, na.rm=TRUE)) %>% 
+  ggplot(aes(year, turnout, color = election_type))+
+  geom_point()+
+  geom_line(size = 1)+
+  ylim(50,90)+
+  colorspace::scale_colour_discrete_qualitative(palette = "Dark 2")+
+
+  labs(title = "Turnout Percentage",subtitle = "AE & GE",  x = "Years", y = "Average Turnout (%)", fill = "Election Type" )+
+
+  theme_minimal()+
+  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
+        legend.position = "bottom",
+        plot.background = element_blank(),
+        plot.title = element_text( size = 18, family = "serif"),
+        plot.subtitle = element_text( size = 15,color = "grey50",
+                                     margin = margin(t = 0, r = 0, b = 20, l = 0)),
+        text = element_text(color = "gray20",family = "serif"),
+        axis.text.x = element_text( 
+                                   hjust = .5, vjust = 0),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 12),
+        axis.text = element_text(face = "italic", size = 10),
+        axis.title = element_text(vjust = -1, size = 15),        
+        axis.ticks = element_blank(),
+        panel.grid.major = element_line(color = "gray50", size = .5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+         axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+        #axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+        axis.line.x = element_line(),
+        axis.title.x = element_blank()
+  ) 
+
+  
+ # colorspace::hcl_palettes(plot = TRUE)
+
+```
+
+
+## Vicotry margin
+
+
+```{r}
+
+ae_ge_kl %>% filter(position ==1) %>% group_by(election_type, year) %>% summarise(mv = mean(margin_percentage, na.rm  =TRUE)) %>% 
+  ggplot(aes(year,mv, color = election_type,group = election_type))+
+  geom_line(size =1)+
+    labs(title = "Average victory margin",subtitle = "AE GE",  x = "Years", y = "Margin (%)", fill = "Election Type")+
+colorspace::scale_colour_discrete_qualitative(palette = "Dark 2")+
+  theme_minimal()+
+  
+  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
+        legend.position = "bottom",
+        plot.background = element_blank(),
+        plot.title = element_text( size = 18, family = "serif"),
+        plot.subtitle = element_text( size = 15,color = "grey50",
+                                     margin = margin(t = 0, r = 0, b = 20, l = 0)),
+        text = element_text(color = "gray20",family = "serif"),
+        axis.text.x = element_text( 
+                                   hjust = .5, vjust = 0),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 12),
+        axis.text = element_text(face = "italic", size = 10),
+        axis.title = element_text(vjust = -1, size = 15),        
+        axis.ticks = element_blank(),
+        panel.grid.major = element_line(color = "gray50", size = .5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+         axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+       # axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+        axis.line.x = element_line(),
+        axis.title.x = element_blank()
+  )+
+  ylim(0,20)
+
+
+
+
+```
+
+# Party Performance
+
+
+## Party vote share
+
+
+### GE
+
+
+
+```{r alliance}
+#unique( ae_ge_kl$party[ae_ge_kl$position%in% c(1) &ae_ge_kl$year >1980])
+
+
+ae_ge_kl <- ae_ge_kl %>% mutate(party_1= case_when (party %in% c("MUL", "INL", "IUML") ~"IUML",
+                                                    TRUE ~party))
+
+
+ae_ge_kl  <- ae_ge_kl %>% mutate(front= case_when (party %in% c("KEC(M)","KEC(J)",  "INC", "IUML", "MUL","KCM", "RSP","RSPK(B)","KCS","MPKSC", "IML","NDP")  ~"UDF",
+                    party %in% c("CPI", "CPM", "JD(S)", "JD","NCP","C(S)","NSC", "CMPKSC","KEC(B)","CPIM","INL","KCST", "LJD","JPSS","DIC","NSC")  ~"LDF",
+                    party %in% c("BJP","JD(U)","IFDP") & year == 2016 ~"NDA",
+                    TRUE ~party
+                    ))
+```
+
+
+
+```{r}
+ae_ge_kl <- ae_ge_kl %>% group_by(election_type,year)%>% mutate(tot_votes_yr = sum(votes))
+
+ae_ge_kl %>% ungroup() %>% filter(election_type == "GE" &year >1980 & party_1 %in% c("INC", "CPI", "CPM", "IUML","KEC(M)", "BJP")) %>% group_by(election_type,year,party_1) %>% summarise(vs = sum(votes)/tot_votes_yr*100) %>% distinct(election_type, year, party_1, .keep_all = TRUE) %>% 
+  ggplot(aes(factor(year), vs, color = party_1, group= party_1))+
+  
+  geom_line(size =1)+
+  geom_point(color = "black")+
+  ylim(0,50)+
+  #facet_wrap(~election_type, ncol =1)+
+  colorspace::scale_colour_discrete_qualitative(palette = "Dark 2")+
+
+  labs(title = "Vote share  of major parties",subtitle = "GE 1980:2019",  x = "Years", y = "Vote share (%)", fill = "Election Type" )+
+  scale_color_manual(values = c(
+                                "INC" = "steelblue",
+                                "CPM" = "red",
+                                "IUML" = "chartreuse4",
+                                 "CPI" = "brown",
+                                "KEC(M)" = "cyan2",
+                                "BJP" = "darkorange1"))+
+
+  theme_minimal()+
+  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
+        legend.position = "bottom",
+        plot.background = element_blank(),
+        plot.title = element_text( size = 18, family = "serif"),
+        plot.subtitle = element_text( size = 15,color = "grey50",
+                                     margin = margin(t = 0, r = 0, b = 20, l = 0)),
+        text = element_text(color = "gray20",family = "serif"),
+        axis.text.x = element_text( 
+                                   hjust = .5, vjust = 0),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 12),
+        axis.text = element_text(face = "italic", size = 10),
+        axis.title = element_text(vjust = -1, size = 15),        
+        axis.ticks = element_blank(),
+        panel.grid.major = element_line(color = "gray", size = .5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+         axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+       # axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+        axis.line.x = element_line(),
+        axis.title.x = element_blank()
+  ) 
+
+
+```
+
+---
+
+### AE
+
+```{r}
+ae_ge_kl %>% ungroup() %>% filter(election_type == "AE" &year >1980 & party_1 %in% c("INC", "CPI", "CPM", "IUML","KEC(M)", "BJP")) %>% group_by(election_type,year,party_1) %>% summarise(vs = sum(votes)/tot_votes_yr*100) %>% distinct(election_type, year, party_1, .keep_all = TRUE) %>% 
+  ggplot(aes(factor(year), vs, color = party_1, group= party_1))+
+  
+  geom_line(size =1)+
+  geom_point(color = "grey50")+
+  ylim(0,40)+
+  #facet_wrap(~election_type, ncol =1)+
+  #colorspace::scale_colour_discrete_qualitative(palette = "Dark 2")+
+
+  labs(title = "Vote share  of major parties",subtitle = "AE 1980:2016",  x = "Years", y = "Vote share (%)", fill = "Election Type" )+
+  scale_color_manual(values = c(
+                                "INC" = "steelblue",
+                                "CPM" = "red",
+                                "IUML" = "chartreuse4",
+                                 "CPI" = "brown",
+                                "KEC(M)" = "cyan2",
+                                "BJP" = "darkorange1"))+
+
+  theme_minimal()+
+  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
+        legend.position = "bottom",
+        plot.background = element_blank(),
+        plot.title = element_text( size = 18, family = "serif"),
+        plot.subtitle = element_text( size = 15,color = "grey50",
+                                     margin = margin(t = 0, r = 0, b = 20, l = 0)),
+        text = element_text(color = "gray20",family = "serif"),
+        axis.text.x = element_text( 
+                                   hjust = .5, vjust = 0),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 12),
+        axis.text = element_text(face = "italic", size = 10),
+        axis.title = element_text(vjust = -1, size = 15),        
+        axis.ticks = element_blank(),
+        panel.grid.major = element_line(color = "gray", size = .5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+         axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+       # axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+        axis.line.x = element_line(),
+        axis.title.x = element_blank()
+  ) 
+
+```
+
+---
+
+## seat share
+
+### GE
+
+```{r}
+ae_ge_kl %>% ungroup() %>% filter(election_type == "GE" &year >1980 & party_1 %in% c("INC", "CPI", "CPM", "IUML","KEC(M)", "BJP")& position==1) %>% group_by(election_type,year,party_1) %>% summarise( n_seats = n(), seats_pc = (n_seats /20) *100) %>% 
+  ggplot(aes(factor(year), seats_pc, color = party_1, group = party_1))+
+  
+  geom_line(size =1)+
+  geom_point(color = "black")+
+  
+  #facet_wrap(~election_type, ncol =1)+
+  #colorspace::scale_colour_discrete_qualitative(palette = "Dark 2")+
+
+  labs(title = "Seat share  of major parties",subtitle = "GE 1980:2019",  x = "Years", y = "Seat share (%)", fill = "Election Type" )+
+  scale_color_manual(values = c(
+                                "INC" = "steelblue",
+                                "CPM" = "red",
+                                "IUML" = "chartreuse4",
+                                 "CPI" = "brown",
+                                "KEC(M)" = "cyan2",
+                                "BJP" = "darkorange1"))+
+
+  theme_minimal()+
+  
+  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
+        legend.position = "bottom",
+        plot.background = element_blank(),
+        plot.title = element_text( size = 18, family = "serif"),
+        plot.subtitle = element_text( size = 15,color = "grey50",
+                                     margin = margin(t = 0, r = 0, b = 20, l = 0)),
+        text = element_text(color = "gray20",family = "serif"),
+        axis.text.x = element_text( 
+                                   hjust = .5, vjust = 0),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 12),
+        axis.text = element_text(face = "italic", size = 10),
+        axis.title = element_text(vjust = -1, size = 15),        
+        axis.ticks = element_blank(),
+        panel.grid.major = element_line(color = "gray50", size = .5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+         axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+       # axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+        axis.line.x = element_line(),
+        axis.title.x = element_blank()
+  ) +
+  
+  ylim(0,80)
+
+```
+
+---
+
+### AE
+
+```{r}
+ae_ge_kl %>% ungroup() %>% filter(election_type == "AE" &year >1980 & party_1 %in% c("INC", "CPI", "CPM", "IUML","KEC(M)", "BJP")& position==1) %>% group_by(election_type,year,party_1) %>% summarise( n_seats = n(), seats_pc = (n_seats /140) *100) %>% 
+  ggplot(aes(factor(year), seats_pc, color = party_1, group = party_1))+
+  
+  geom_line(size =1)+
+  geom_point()+
+  
+  #facet_wrap(~election_type, ncol =1)+
+  #colorspace::scale_colour_discrete_qualitative(palette = "Dark 2")+
+
+  labs(title = "Seat share  of major parties",subtitle = "AE 1980:2016",  x = "Years", y = "Seat share (%)", fill = "Election Type" )+
+  scale_color_manual(values = c(
+                                "INC" = "steelblue",
+                                "CPM" = "red",
+                                "IUML" = "chartreuse4",
+                                 "CPI" = "brown",
+                                "KEC(M)" = "cyan2",
+                                "BJP" = "darkorange1"))+
+
+  theme_minimal()+
+  
+  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
+        legend.position = "bottom",
+        plot.background = element_blank(),
+        plot.title = element_text( size = 18, family = "serif"),
+        plot.subtitle = element_text( size = 15,color = "grey50",
+                                     margin = margin(t = 0, r = 0, b = 20, l = 0)),
+        text = element_text(color = "gray20",family = "serif"),
+        axis.text.x = element_text( 
+                                   hjust = .5, vjust = 0),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 12),
+        axis.text = element_text(face = "italic", size = 10),
+        axis.title = element_text(vjust = -1, size = 15),        
+        axis.ticks = element_blank(),
+        panel.grid.major = element_line(color = "gray50", size = .5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+         axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+       # axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+        axis.line.x = element_line(),
+        axis.title.x = element_blank()
+  ) +
+  
+  ylim(0,50)
+```
+
+
+
+```{r}
+## reading pc files
+
+ac_19 <- readxl::read_xls("D:/cpr/data/GE_PC_AC-main/2019_AC_PC.xls")
+
+ac_14 <-  readxl::read_xlsx("D:/cpr/data/GE_PC_AC-main/2014_AC_PC.xlsx")
+
+#ac_19 <- ac_19 %>% group_by(`State-UT Code & Name`, `AC NO`) %>% mutate(ac_votes=(sum(`VOTES SECURED EVM`, na.rm = TRUE)))
+
+## not filtering nota and ind now since that is needed to calculate votes
+
+kl_19 <- ac_19 %>% filter(`State-UT Code & Name` == "Kerala" ) %>% ungroup()
+
+names(kl_19) <- tolower(names(kl_19))
+
+
+kl_19 <- kl_19 %>% rename(state_name = `state-ut code & name`, pc_no = `pc no` , pc_name = `pc name`, constituency_no = `ac no`, constituency_name = `ac name`, electors = `total electors`, candidate = `candidate name`,votes = `votes secured evm`)
+
+kl_19<- kl_19 %>% group_by(year, constituency_no) %>% mutate(election_type = "GE",valid_votes=sum(votes, na.rm = TRUE), vote_share_percentage =( votes/valid_votes)*100,
+                                                                   turnout_percentage = (valid_votes/electors)*100) %>% ungroup()
+
+ kl_19  <- kl_19  %>% group_by(year, constituency_no) %>%  mutate(position = order(order(vote_share_percentage, decreasing=TRUE))) %>% ungroup()
+ 
+ 
+#unique (kl_19$party[kl_19$position==1])
+
+kl_19 <- kl_19 %>% mutate(front = case_when(party %in% c("INC","RSP", "KEC(M)","IMUL","CMPKSC") ~"UDF",
+                                   party %in% c("CPI","CPIM") ~"LDF",
+                                   candidate %in% c("P.V. Anvar Puthan Veetil","Adv, JOICE GEORGE" )~"LDF",
+                                   party %in% c("BJP", "BDJS","KEC" ) ~"NDA",
+                 TRUE ~ "OTHERS"))
+
+# 
+# kl_19$party 
+# 
+# #kl_19 %>% filter( str_detect(candidate, "george",regex(ignore_case = TRUE) )
+# 
+# 
+# kl_19 %>% filter(pc_name == "Idukki")
+
+```
+
+
+```{r}
+kl_14 <- ac_14 %>% filter(`State-UT Code & Name` == "Kerala" )
+
+names(kl_14) <- tolower(names(kl_14))
+
+
+
+kl_14 <- kl_14 %>% rename(state_name = `state-ut code & name`, pc_no = pcno, pc_name = `pc name`, constituency_no = `ac no`, constituency_name = `ac name`, electors = `total electors in ac`, candidate = `candidate name`,votes = `votessecured evm`)
+
+
+kl_14<- kl_14 %>% group_by(year, constituency_no) %>% mutate(election_type = "GE",valid_votes=sum(votes, na.rm = TRUE), vote_share_percentage =( votes/valid_votes)*100,
+                                                                   turnout_percentage = (valid_votes/electors)*100) %>% ungroup()
+
+ kl_14  <- kl_14  %>% group_by(year, constituency_no) %>%  mutate(position = order(order(vote_share_percentage, decreasing=TRUE))) %>% ungroup()
+ 
+ 
+unique (kl_14$party[kl_14$position==1])
+
+kl_14 <- kl_14 %>% mutate(front = case_when(party %in% c("INC","RSP", "KEC(M)","SJD", "IUML","CMPKSC") ~"UDF",
+                                   party %in% c("CPI","CPM","JD(S)") ~"LDF",
+                                   candidate %in% c("V.ABDURAHMAN","Adv, JOICE GEORGE", "INNOCENT","DR. CHRISTY FERNANDEZ",  "ADV. PEELIPOSE THOMAS")~"LDF",
+                                   party %in% c("BJP","RSPK(B)" ) ~"NDA",
+                 TRUE ~ "OTHERS"))
+
+#kl_14 %>% filter(grepl("peelipose", candidate, ignore.case = TRUE))
+
+```
+
+
+```{r}
+kl_14_19 <- rbindlist(list(kl_14,kl_19), use.names = FALSE)
+```
+
+
+
+
+```{r}
+
+
+
+
+names(ae_kl) <- tolower(names(ae_kl))
+
+kl_11<- ae_kl %>% filter(year %in% c(2011) & poll_no ==0 & party != "NOTA")
+
+#unique(kl_11$party)
+
+kl_11 <- kl_11 %>% mutate(front = case_when(party %in% c("INC", "KEC(M)","SJD", "MUL" , "KEC(J)","JD(U)","CMPKSC") ~"UDF",
+                                   party %in% c("CPI","CPM","JD(S)","NCP", "INL","C(S)") ~"LDF",
+                                   candidate %in% c("A.A. AZEEZ","SHIBU BABY JOHN")~"UDF",
+                                   candidate %in% c("KOVOOR KUNJUMON","ADV.P.T.A.RAHIM","ASHRAFALI KALIYATH","PROFESSOR.M.THOMAS MATHEW","K.V. SANKARANARAYANAN","ADV. V.V. PRAKASH","DR. SEBASTIAN PAUL",
+                                                    "PROF. JOSEPH AUGUSTINE","ADV MOHAN THOMAS","CHERIYAN PHILIP","ADV. M.V.JAYADALI")~"LDF",
+                                   party %in% c("BJP","RSPK(B)" ) ~"NDA",
+                 TRUE ~ "OTHERS"))
+
+#kl_11 %>% filter( grepl("kattak",constituency_name ,ignore.case =TRUE))
+
+
+###16
+
+
+kl_16<- ae_kl %>% filter(year %in% c(2016) & poll_no ==0 & party != "NOTA")
+
+#unique(kl_16$party[kl_16$position==1])
+
+
+
+
+
+kl_16 <- kl_16 %>% mutate(front = case_when(party %in% c("INC", "KEC(M)","SJD", "IMUL" ,"JD(U)","CMPKSC","RSP") ~"UDF",
+                                   party %in% c("CPI","CPM","JD(S)","NCP", "INL","C(S)","KEC(B)","NSC") ~"LDF",
+                                   
+                                   candidate %in% c("ADV. P.T.A. RAHIM","KARAT RAZACK","K.P. BEERANKUTTY","P V ANVAR","V ABDURAHIMAN","GAFOOR P LILLIS","DR. K.T. JALEEL","ADV. ROY VARICATTU","KOVOOR KUNJUMON","ADV.ANTONY RAJU")~"LDF",
+                                   party %in% c("BJP","BDJS" ) ~"NDA",
+                 TRUE ~ "OTHERS"))
+
+# kl_16 %>% filter( grepl("thodupuzha",constituency_name ,ignore.case =TRUE))
+# 
+# 
+# kl_16 %>% filter( grepl("antony",candidate ,ignore.case =TRUE))
+# 
+# kl_16 %>% filter(party =="RSP")
+
+kl_11_16 <- rbindlist(list(kl_11,kl_16), use.names = TRUE)
+
+
+kl_el <- rbindlist(list(kl_14_19, kl_11_16), use.names = TRUE, fill = TRUE)
+
+```
+# Front
+
+## vote share
+
+
+```{r}
+
+
+vs_front <- read.csv("D:/cpr/elections/kerala/vote.csv")
+
+
+names(vs_front)[1] <- "year"
+
+ggplot(vs_front, aes(factor(year), vs, fill = front, group = front, label = round(vs,0)))+
+  geom_bar(stat= "identity", position = "stack")+
+  geom_text(position= position_stack(vjust = .5))+
+  #   geom_line(size =1)+
+  # geom_point(color = "black")+
+  scale_fill_manual(values = c(
+                                "UDF" = "steelblue",
+                                "LDF" = "red",
+                             
+                                "NDA" = "darkorange1"))+
+labs(title = "Vote share of major fronts",subtitle = "1996:2019",  x = "Years", y = "Vote share (%)", fill = "Election Type" )+
+
+  theme_minimal()+
+  
+  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
+        #legend.position = "bottom",
+        plot.background = element_blank(),
+        plot.title = element_text( size = 18, family = "serif"),
+        plot.subtitle = element_text( size = 15,color = "grey50",
+                                     margin = margin(t = 0, r = 0, b = 20, l = 0)),
+        text = element_text(color = "gray20",family = "serif"),
+        axis.text.x = element_text( 
+                                   hjust = .5, vjust = 0),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 12),
+        axis.text = element_text(face = "italic", size = 10),
+        axis.title = element_text(vjust = -1, size = 15),        
+        axis.ticks = element_blank(),
+        panel.grid.major = element_line(color = "gray50", size = .5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+         axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+       # axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+        axis.line.x = element_line(),
+        axis.title.x = element_blank()
+  ) 
+  
+
+```
+
+---
+
+## seat share
+
+```{r}
+seats_front <- read.csv("D:/cpr/elections/kerala/assembly_seg.csv")
+
+
+names(seats_front)[1] <- "year"
+
+ggplot(seats_front, aes(factor(year), seats, fill = front, group = front, label = ifelse(seats>0,seats, NA)))+
+  geom_bar(stat= "identity", position = "fill")+
+  geom_text(position= position_fill(vjust = .5))+
+  scale_fill_manual(values = c(
+                                "UDF" = "steelblue",
+                                "LDF" = "red",
+                             
+                                "NDA" = "darkorange1"))+
+labs(title = "Seat share of major fronts",subtitle = "Assembly segements - 1996:2019",  x = "Years", y = "Vote share (%)", fill = "Election Type" )+
+
+  theme_minimal()+
+  
+  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
+        #legend.position = "bottom",
+        plot.background = element_blank(),
+        plot.title = element_text( size = 18, family = "serif"),
+        plot.subtitle = element_text( size = 15,color = "grey50",
+                                     margin = margin(t = 0, r = 0, b = 20, l = 0)),
+        text = element_text(color = "gray20",family = "serif"),
+        axis.text.x = element_text( 
+                                   hjust = .5, vjust = 0),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 12),
+        axis.text = element_text(face = "italic", size = 10),
+        axis.title = element_text(vjust = -1, size = 15),        
+        axis.ticks = element_blank(),
+        panel.grid.major = element_line(color = "gray50", size = .5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+         axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+       # axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+        axis.line.x = element_line(),
+        axis.title.x = element_blank()
+  ) 
+```
+
+
+
+# SC/ST
+
+
+```{r}
+
+
+shrug_cen <- read.csv("D:/cpr/elections/kerala/data/shrug_cen_kl.csv")
+
+shrug_cen$ac_no <- as.numeric(str_sub(shrug_cen$ï..ac08_id,-3))
+
+kl_vs_11 <- kl_el %>% filter(front %in% c("LDF", "UDF") & year == 2011) %>% select(year,constituency_no,party,front, vote_share_percentage) %>% rename(vs_11 = vote_share_percentage)
+
+kl_vs_16 <- kl_el %>% filter(front%in% c("LDF", "UDF") & year == 2016) %>% select(year,constituency_no,party,front, vote_share_percentage) %>% rename(vs_16 = vote_share_percentage)
+
+kl_vs_11_16 <- inner_join(kl_vs_16 , kl_vs_11, by = c("constituency_no", "party"))
+
+kl_vs_11_16 $vs_change <- kl_vs_11_16$vs_16- kl_vs_11_16$vs_11
+
+shrug_sc <- shrug_cen %>% select(ac_no, sc_pc, st_pc) %>% mutate(sc_st_pc = sc_pc +st_pc)
+
+## left_congress
+
+
+
+
+#####
+
+kl_sc<- dplyr::inner_join(kl_vs_11_16, shrug_sc, by = c("constituency_no" = "ac_no"))
+
+
+kl_el_sc <- inner_join(kl_el,shrug_sc, by = c("constituency_no" = "ac_no"))
+
+
+```
+
+
+```{r}
+ggplot(kl_el_sc %>% filter(front %in% c("UDF","LDF")), aes(sc_st_pc,vote_share_percentage , color = front))+
+  geom_point(alpha = .5)+
+  geom_smooth(se = FALSE, method = "lm")+
+    scale_color_manual(values = c("LDF" = "red",
+                              
+                                
+                                "UDF" = "steelblue")) +
+     labs(title = "Front vote share as a function of SC&ST constituents ", y = "Vote share(%)",subtitle = "WB GE elections - 1996:2019", x = "SC&ST (%) Rural", color = "Party")+
+    theme_minimal()+
+  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
+        #legend.position = "bottom",
+        plot.background = element_blank(),
+        plot.title = element_text( size = 18, family = "serif"),
+        plot.subtitle = element_text( size = 15,color = "grey50",
+                                     margin = margin(t = 0, r = 0, b = 20, l = 0)),
+        text = element_text(color = "gray20",family = "serif"),
+        axis.text.x = element_text( 
+                                   hjust = .5, vjust = 0),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 12),
+        axis.text = element_text(face = "italic", size = 10),
+        axis.title = element_text(vjust = -1, size = 15),        
+        axis.ticks = element_blank(),
+        panel.grid.major = element_line(color = "gray", size = .5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+         axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+       axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+        axis.line.x = element_line(),
+        #axis.title.x = element_blank()
+  ) +
+   lims(x = c(0,40), y= c(0,80))
+
+```
+
+
+# women turnout
+
+
+
+```{r}
+
+
+
+ge <- fread("D:/cpr/data/tcpd/TCPD_GE_all.csv")
+
+kl_to <- read.csv("D:/cpr/elections/kerala/data/kl_fe_to.csv")
+
+names(kl_to) <- tolower(names(kl_to))
+
+ge <- fread("D:/cpr/data/tcpd/TCPD_GE_all.csv")
+
+ge_kl <- ge %>% filter(State_Name == "Kerala")
+
+names(ge_kl) <- tolower(names(ge_kl))
+
+
+ge_kl_to <- inner_join(kl_to, ge_kl, by = c("constituency_no", "year"))
+
+# ge_kl_to <- ge_kl_to  %>% mutate(front = case_when(party %in% c("CPM", "CPI", "RSP", "AIFB") ~"LF",
+#                                                 
+#                                    TRUE ~party))
+
+
+ge_kl_to <- ge_kl_to %>% mutate(front= case_when (party %in% c("KEC(M)","KEC(J)",  "INC", "IUML", "MUL","KCM","RSP")  ~"UDF",
+                    party %in% c("CPI", "CPM")  ~"LDF",
+                    party %in% c("BJP","JD(U)","IFDP")  ~"NDA",
+                    TRUE ~party
+                    ))
+
+ggplot(ge_kl_to %>% filter(front %in% c("LDF","UDF","NDA")), aes(female_turnout, vote_share_percentage, color = front))+
+  geom_point(alpha=0.5)+
+  geom_smooth(method = "lm",se = FALSE)+
+      scale_color_manual(values = c("LDF" = "red",
+                              
+                                
+                                "UDF" = "steelblue",
+                                "NDA" = "darkorange1"))+
+
+   labs(title = "Female turnout as a function of party vote share", y = "Vote share(%)",subtitle = "Kerala GE elections - 1996:2014", x = "Turnout (%)", color = "Party")+
+    theme_minimal()+
+  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
+        #legend.position = "bottom",
+        plot.background = element_blank(),
+        plot.title = element_text( size = 18, family = "serif"),
+        plot.subtitle = element_text( size = 15,color = "grey50",
+                                     margin = margin(t = 0, r = 0, b = 20, l = 0)),
+        text = element_text(color = "gray20",family = "serif"),
+        axis.text.x = element_text( 
+                                   hjust = .5, vjust = 0),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 12),
+        axis.text = element_text(face = "italic", size = 10),
+        axis.title = element_text(vjust = -1, size = 15),        
+        axis.ticks = element_blank(),
+        panel.grid.major = element_line(color = "gray", size = .5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+         axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+       axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+        axis.line.x = element_line(),
+        #axis.title.x = element_blank()
+  ) +
+  lims(x = c(55,85), y= c(0,60))
+ggsave("D:/cpr/elections/wb/ge_f_to.png", width = 6, height = 4)
+
+```
+
+
+## region
+
+
+```{r}
+
+# 
+# ge_kl %>% filter(year ==2019 & position ==1) %>% tally(sub_region)
+
+```
+
+
+
+
