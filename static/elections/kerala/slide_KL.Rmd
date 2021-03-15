@@ -1,0 +1,72 @@
+---
+title: "How will Kerala vote in 2021?"
+subtitle : "Election Adda 2021"
+author: "Rahul Verma"
+institute: "Centre for Policy Research"
+date: "16th March, 2021"
+output:
+  beamer_presentation:
+    theme: "CambridgeUS"
+    colortheme: "beaver"
+    fonttheme: "professionalfonts"
+    slide_level: 2
+header-includes:
+    - \titlegraphic{\centering \includegraphics[width=12cm]{D:/cpr/elections/assam/logo.jpg}}
+classoption: aspectratio=169 
+
+---
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+knitr::opts_chunk$set(dev = 'pdf')
+```
+
+<!-- WB map -->
+
+
+
+
+```{r, fig.show="hold", out.width= "100%", out.height="100%",fig.align='center'}
+
+ knitr::include_graphics(c("D:/cpr/elections/kerala/kl_map.jpeg"))
+
+```
+
+---
+
+```{r, out.width= "49%",fig.show="hold",  echo = FALSE, fig.align='center'}
+
+
+knitr::include_graphics(c("D:/cpr/elections/kerala/front_vs.png", "D:/cpr/elections/kerala/front_seats.png"))
+```
+
+---
+
+```{r leaders, out.width= "100%", out.height="100%",fig.show="hold",  echo = FALSE, fig.align='center'}
+
+ knitr::include_graphics(c("D:/cpr/elections/kerala/leaders.jpg"))
+
+
+```
+
+
+
+---
+
+```{r vs 19, out.width= "80%", out.height = "80%", echo = FALSE, fig.align= "center"}
+
+knitr::include_graphics("D:/cpr/elections/kerala/front_vs_19.png")
+
+```
+
+
+
+
+
+
+
+
+

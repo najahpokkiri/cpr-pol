@@ -642,6 +642,8 @@ labs(title = "Vote share of major fronts",subtitle = "1996:2019",  x = "Years", 
   ) 
   
 
+ggsave("D:/cpr/elections/kerala/front_vs.png", width = 6, height = 4)
+
 ```
 
 ---
@@ -688,6 +690,8 @@ labs(title = "Seat share of major fronts",subtitle = "Assembly segements - 1996:
         axis.line.x = element_line(),
         axis.title.x = element_blank()
   ) 
+
+ggsave("D:/cpr/elections/kerala/front_seats.png", width = 6, height = 4)
 ```
 
 
@@ -728,6 +732,8 @@ kl_el_sc <- inner_join(kl_el,shrug_sc, by = c("constituency_no" = "ac_no"))
 ```
 
 
+
+
 ```{r}
 ggplot(kl_el_sc %>% filter(front %in% c("UDF","LDF")), aes(sc_st_pc,vote_share_percentage , color = front))+
   geom_point(alpha = .5)+
@@ -736,7 +742,7 @@ ggplot(kl_el_sc %>% filter(front %in% c("UDF","LDF")), aes(sc_st_pc,vote_share_p
                               
                                 
                                 "UDF" = "steelblue")) +
-     labs(title = "Front vote share as a function of SC&ST constituents ", y = "Vote share(%)",subtitle = "WB GE elections - 1996:2019", x = "SC&ST (%) Rural", color = "Party")+
+     labs(title = "Front vote share as a function of SC&ST constituents ", y = "Vote share(%)",subtitle = "Kerala  GE elections - 1996:2019", x = "SC&ST (%) Rural", color = "Party")+
     theme_minimal()+
   theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
         #legend.position = "bottom",
@@ -764,6 +770,198 @@ ggplot(kl_el_sc %>% filter(front %in% c("UDF","LDF")), aes(sc_st_pc,vote_share_p
 
 ```
 
+
+
+
+
+# urban
+
+
+<!-- new -->
+
+```{r}
+
+rv_data <- readxl::read_xls("D:/cpr/elections/kerala/data/Kerala_urban.xls")
+
+kl_el <- kl_el %>% inner_join(rv_data, by = c("constituency_no"= "ac_id"))
+#names(rv_data)
+
+```
+## front
+
+```{r}
+ggplot(kl_el %>% filter(front %in% c("UDF","LDF","NDA")), aes(ur_p,vote_share_percentage , color = front))+
+  geom_point(alpha = .5)+
+  geom_smooth(se = FALSE, method = "lm")+
+    scale_color_manual(values = c("LDF" = "red",
+                              
+                                
+                                "UDF" = "steelblue",
+                                "NDA" = "darkorange2")) +
+     labs(title = "Front vote share as a function of  % of urban constituents ", y = "Vote share(%)",subtitle = "Kerala elections - 2001:19", x = "Urban constituents (%) ", color = "Front")+
+    theme_minimal()+
+  theme(#plot.margin = unit(c(.5,.5,.5,.5), "cm"),
+        #legend.position = "bottom",
+        plot.background = element_blank(),
+        plot.title = element_text( size = 18, family = "serif"),
+        plot.subtitle = element_text( size = 15,color = "grey50",
+                                     #margin = margin(t = 0, r = 0, b = 20, l = 0)
+                                     ),
+        text = element_text(color = "gray20",family = "serif"),
+        axis.text.x = element_text( 
+                                   hjust = .5, vjust = 0),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 12),
+        axis.text = element_text(face = "italic", size = 10),
+        axis.title = element_text(vjust = -1, size = 15),        
+        axis.ticks = element_blank(),
+        panel.grid.major = element_line(color = "gray", size = .5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+         #axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+       #axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+        axis.line.x = element_line(),
+        #axis.title.x = element_blank()
+  )
+```
+
+---
+
+## party
+
+
+```{r}
+
+ggplot(kl_el %>% filter(party_1 %in% c("BJP", "CPI","CPM","INC","KEC","IUML", "IND" ) & vote_share_percentage>30), aes(ur_p,vote_share_percentage , color = party_1))+
+  geom_point(alpha = .5)+
+  geom_smooth(se = FALSE, method = "lm")+
+  scale_color_manual(values = c(
+                                "INC" = "steelblue",
+                                "CPM" = "red",
+                                "IUML" = "chartreuse4",
+                                 "CPI" = "brown",
+                                "KEC" = "cyan2",
+                                "BJP" = "darkorange1",
+                                "IND" = "skyblue"))+
+       labs(title = "Party vote share as a function of  % of urban constituents ", y = "Vote share(%)",subtitle = "Kerala elections - 2001:19", x = "Urban constituents (%) ", color = "Party")+
+    theme_minimal()+
+  theme(#plot.margin = unit(c(.5,.5,.5,.5), "cm"),
+        #legend.position = "bottom",
+        plot.background = element_blank(),
+        plot.title = element_text( size = 18, family = "serif"),
+        plot.subtitle = element_text( size = 15,color = "grey50",
+                                     #margin = margin(t = 0, r = 0, b = 20, l = 0)
+                                     ),
+        text = element_text(color = "gray20",family = "serif"),
+        axis.text.x = element_text( 
+                                   hjust = .5, vjust = 0),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 12),
+        axis.text = element_text(face = "italic", size = 10),
+        axis.title = element_text(vjust = -1, size = 15),        
+        axis.ticks = element_blank(),
+        panel.grid.major = element_line(color = "gray", size = .5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+         #axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+       #axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+        axis.line.x = element_line(),
+        #axis.title.x = element_blank()
+  )
+
+```
+
+
+---
+
+# sc/st
+
+
+## front
+
+```{r}
+ggplot(kl_el %>% filter(front %in% c("UDF","LDF","NDA")), aes(sc_p,vote_share_percentage , color = front))+
+  geom_point(alpha = .5)+
+  geom_smooth(se = FALSE, method = "lm")+
+    scale_color_manual(values = c("LDF" = "red",
+                              
+                                
+                                "UDF" = "steelblue",
+                                "NDA" = "darkorange2")) +
+     labs(title = "Front vote share as a function of  % of SC constituents ", y = "Vote share(%)",subtitle = "Kerala elections - 2001:19", x = "SC constituents (%) ", color = "Front")+
+    theme_minimal()+
+  theme(#plot.margin = unit(c(.5,.5,.5,.5), "cm"),
+        #legend.position = "bottom",
+        plot.background = element_blank(),
+        plot.title = element_text( size = 18, family = "serif"),
+        plot.subtitle = element_text( size = 15,color = "grey50",
+                                     #margin = margin(t = 0, r = 0, b = 20, l = 0)
+                                     ),
+        text = element_text(color = "gray20",family = "serif"),
+        axis.text.x = element_text( 
+                                   hjust = .5, vjust = 0),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 12),
+        axis.text = element_text(face = "italic", size = 10),
+        axis.title = element_text(vjust = -1, size = 15),        
+        axis.ticks = element_blank(),
+        panel.grid.major = element_line(color = "gray", size = .5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+         #axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+       #axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+        axis.line.x = element_line(),
+        #axis.title.x = element_blank()
+  ) +
+    lims(x = c(0,30), y = c(30,70))
+```
+
+---
+
+## party
+
+
+```{r}
+
+ggplot(kl_el %>% filter(party_1 %in% c("BJP", "CPI","CPM","INC","KEC","IUML", "IND" ) & vote_share_percentage>30), aes(sc_p,vote_share_percentage , color = party_1))+
+  geom_point(alpha = .5)+
+  geom_smooth(se = FALSE, method = "lm")+
+  scale_color_manual(values = c(
+                                "INC" = "steelblue",
+                                "CPM" = "red",
+                                "IUML" = "chartreuse4",
+                                 "CPI" = "brown",
+                                "KEC" = "cyan2",
+                                "BJP" = "darkorange1",
+                                "IND" = "skyblue"))+
+       labs(title = "Front vote share as a function of  % of SC constituents ", y = "Vote share(%)",subtitle = "Kerala elections - 2011:19", x = "SC constituents (%) ", color = "FParty")+
+    theme_minimal()+
+  theme(#plot.margin = unit(c(.5,.5,.5,.5), "cm"),
+        #legend.position = "bottom",
+        plot.background = element_blank(),
+        plot.title = element_text( size = 18, family = "serif"),
+        plot.subtitle = element_text( size = 15,color = "grey50",
+                                     #margin = margin(t = 0, r = 0, b = 20, l = 0)
+                                     ),
+        text = element_text(color = "gray20",family = "serif"),
+        axis.text.x = element_text( 
+                                   hjust = .5, vjust = 0),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 12),
+        axis.text = element_text(face = "italic", size = 10),
+        axis.title = element_text(vjust = -1, size = 15),        
+        axis.ticks = element_blank(),
+        panel.grid.major = element_line(color = "gray", size = .5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+         #axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+       #axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+        axis.line.x = element_line(),
+        #axis.title.x = element_blank()
+  )+
+  lims(x = c(0,30), y = c(30,70))
+
+```
 
 # women turnout
 
@@ -873,7 +1071,7 @@ kl_el <- kl_el %>% group_by(election_type, year, sub_region.y) %>% mutate(votes_
 sub <- c( "Central","North","South")
 
 kl_el %>%filter(front %in% c("LDF","UDF","NDA")) %>% group_by(year,sub_region.y, front) %>% summarise(vs = sum(votes)/votes_reg*100) %>%distinct(year, sub_region.y, front, .keep_all=TRUE) %>% 
-  ggplot(aes(sub_region.y,vs, fill = front, label = round(vs, 0) ))+
+  ggplot(aes(sub_region.y,vs, fill = factor(front,levels = c("NDA","LDF","UDF")), label = round(vs, 0) ))+
   geom_bar(stat = "identity",position = "stack")+
   geom_text(position= position_stack(vjust = .5), size = 3)+
   scale_x_discrete(labels= sub)+
@@ -888,12 +1086,13 @@ labs(title = "Vote share of major fronts",subtitle = "2011:2019",  x = "Years", 
 
   theme_minimal()+
   
-  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
+  theme(#plot.margin = unit(c(.5,.5,.5,.5), "cm"),
         #legend.position = "bottom",
         plot.background = element_blank(),
         plot.title = element_text( size = 18, family = "serif"),
         plot.subtitle = element_text( size = 15,color = "grey50",
-                                     margin = margin(t = 0, r = 0, b = 20, l = 0)),
+                                    # margin = margin(t = 0, r = 0, b = 20, l = 0)
+                                    ),
         text = element_text(color = "gray20",family = "serif"),
         axis.text.x = element_text( 
                                    hjust = .5, vjust = 0),
@@ -912,6 +1111,8 @@ labs(title = "Vote share of major fronts",subtitle = "2011:2019",  x = "Years", 
         axis.title.x = element_blank()
   ) +
   ylim(0,100)
+
+ggsave("D:/cpr/elections/kerala/front_vs_19.png", width = 6, height = 4)
 
 ```
 
