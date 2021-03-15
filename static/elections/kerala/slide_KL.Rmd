@@ -56,9 +56,9 @@ knitr::include_graphics(c("D:/cpr/elections/kerala/front_vs.png", "D:/cpr/electi
 
 ---
 
-```{r vs 19, out.width= "80%", out.height = "80%", echo = FALSE, fig.align= "center"}
+```{r, out.width= "49%",fig.show="hold",  echo = FALSE, fig.align='center'}
 
-knitr::include_graphics("D:/cpr/elections/kerala/front_vs_19.png")
+knitr::include_graphics(c("D:/cpr/elections/kerala/front_vs_19.png","D:/cpr/elections/kerala/party_vs_19.png" ))
 
 ```
 
