@@ -37,20 +37,21 @@ knitr::opts_chunk$set(dev = 'pdf')
 
 ---
 
-```{r, out.width= "49%",fig.show="hold",  echo = FALSE, fig.align='center'}
-
-
-knitr::include_graphics(c("D:/cpr/elections/kerala/front_vs.png", "D:/cpr/elections/kerala/front_seats.png"))
-```
-
----
-
 ```{r leaders, out.width= "100%", out.height="100%",fig.show="hold",  echo = FALSE, fig.align='center'}
 
  knitr::include_graphics(c("D:/cpr/elections/kerala/leaders.jpg"))
 
 
 ```
+---
+
+```{r, out.width= "49%",fig.show="hold",  echo = FALSE, fig.align='center'}
+
+
+knitr::include_graphics(c("D:/cpr/elections/kerala/front_vs.png", "D:/cpr/elections/kerala/front_seats.png"))
+```
+
+
 
 
 
