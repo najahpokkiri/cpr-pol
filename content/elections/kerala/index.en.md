@@ -15,4 +15,4 @@ output:
 - [Kerala Main analysis](../../elections/kerala/kerala_main.html)
 
 
-- [Kerala panel discussion slides]()
+- [Kerala panel discussion slides](../../elections/kerala/slide_KL.pdf)
