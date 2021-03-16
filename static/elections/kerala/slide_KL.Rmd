@@ -29,40 +29,94 @@ knitr::opts_chunk$set(dev = 'pdf')
 
 
 
-```{r, fig.show="hold", out.width= "100%", out.height="100%",fig.align='center'}
+```{r kerala map, fig.show="hold", out.width= "100%", out.height="100%",fig.align='center'}
 
  knitr::include_graphics(c("D:/cpr/elections/kerala/kl_map.jpeg"))
 
 ```
 
+
+
 ---
 
-```{r leaders, out.width= "100%", out.height="100%",fig.show="hold",  echo = FALSE, fig.align='center'}
-
- knitr::include_graphics(c("D:/cpr/elections/kerala/leaders.jpg"))
 
 
-```
+| Front | Parties |
+|------  | -------|
+| UDF | INC , IUML, KEC, RSP |
+| LDF | CPM, CPI |
+| NDA | BJP, BDJS |
+
+
+Table: Fronts : Pre-2021
+
 ---
 
-```{r, out.width= "49%",fig.show="hold",  echo = FALSE, fig.align='center'}
+```{r vote & seat share, out.width= "49%",fig.show="hold",  echo = FALSE, fig.align='center'}
 
 
 knitr::include_graphics(c("D:/cpr/elections/kerala/front_vs.png", "D:/cpr/elections/kerala/front_seats.png"))
 ```
 
+---
+
+| Sub-region | Districts | Assembly Constituencies | Religion |
+|-|-|-|-|
+| North   Kerala | Kasargod, Kannur, Wayanad,   Kozhikode, Malappuram, Palakkad | 60 | Hindus - 50%<br>     Muslims - 44%<br>     Christians - 6% |
+| Central   kerala | Thrissur, Ernakulam   ,Idukki,  Kottayam | 41 | Hindus - 51%<br>     Muslims -13%<br>     Christians - 35% |
+| South   Kerala | Alappuzha,  Pathanamthitta, Kollam, Thiruvananthapuram | 39 | Hindus - 65%<br>     Muslims - 13%<br>     Christians - 21% |
 
 
+
+Table: sub-region demographics
 
 
 ---
 
-```{r, out.width= "49%",fig.show="hold",  echo = FALSE, fig.align='center'}
 
-knitr::include_graphics(c("D:/cpr/elections/kerala/front_vs_19.png","D:/cpr/elections/kerala/party_vs_19.png" ))
+
+```{r sub region front, out.width= "80%",out.height = "100%", fig.show="hold",  echo = FALSE, fig.align='center'}
+
+knitr::include_graphics(c("D:/cpr/elections/kerala/front_vs_19.png" ))
 
 ```
 
+---
+
+
+```{r sub region party, out.width= "80%",out.height = "100%", fig.show="hold",  echo = FALSE, fig.align='center'}
+
+knitr::include_graphics(c("D:/cpr/elections/kerala/party_vs_19.png" ))
+
+```
+
+---
+
+```{r urban voting,out.width= "80%",out.height = "100%", fig.show="hold",  echo = FALSE, fig.align='center'}
+
+knitr::include_graphics("D:/cpr/elections/kerala/urban_bjp.png")
+
+```
+
+---
+
+
+```{r women voting,out.width= "80%",out.height = "100%", fig.show="hold",  echo = FALSE, fig.align='center'}
+
+knitr::include_graphics("D:/cpr/elections/kerala/women_vote.png")
+
+```
+
+
+---
+
+
+```{r caste,out.width= "80%",out.height = "100%", fig.show="hold",  echo = FALSE, fig.align='center'}
+
+
+knitr::include_graphics("D:/cpr/elections/kerala/csds_caste.png")
+
+```
 
 
 
