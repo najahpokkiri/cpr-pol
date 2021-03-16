@@ -37,18 +37,7 @@ knitr::opts_chunk$set(dev = 'pdf')
 
 
 
----
 
-
-
-| Front | Parties |
-|------  | -------|
-| UDF | INC , IUML, KEC, RSP |
-| LDF | CPM, CPI |
-| NDA | BJP, BDJS |
-
-
-Table: Fronts : Pre-2021
 
 ---
 
@@ -60,15 +49,38 @@ knitr::include_graphics(c("D:/cpr/elections/kerala/front_vs.png", "D:/cpr/electi
 
 ---
 
-| Sub-region | Districts | Assembly Constituencies | Religion |
-|-|-|-|-|
-| North   Kerala | Kasargod, Kannur, Wayanad,   Kozhikode, Malappuram, Palakkad | 60 | Hindus - 50%<br>     Muslims - 44%<br>     Christians - 6% |
-| Central   kerala | Thrissur, Ernakulam   ,Idukki,  Kottayam | 41 | Hindus - 51%<br>     Muslims -13%<br>     Christians - 35% |
-| South   Kerala | Alappuzha,  Pathanamthitta, Kollam, Thiruvananthapuram | 39 | Hindus - 65%<br>     Muslims - 13%<br>     Christians - 21% |
+### Sub-region demographics
+
++----------------+--------------------------------+-----+------------------+
+| Sub-regions    | Districts                      | ACs | Religion         |
++================+================================+=====+==================+
+| North Kerala   | Kasargod, Kannur,              | 60  | Hindus - 50%     |
+|                |                                |     |                  |
+|                | Wayanad, Kozhikode,            |     | Muslims - 44%    |
+|                |                                |     |                  |
+|                | Malappuram,                    |     | Christians - 6%  |
+|                |                                |     |                  |
+|                | Palakkad                       |     |                  |
++----------------+--------------------------------+-----+------------------+
+| Central Kerala | Thrissur,                      | 41  | Hindus - 51%,    |
+|                |                                |     |                  |
+|                | Ernakulam,                     |     | Muslims -13%     |
+|                |                                |     |                  |
+|                | Idukki,                        |     | Christians - 35% |
+|                |                                |     |                  |
+|                | Kottayam                       |     |                  |
++----------------+--------------------------------+-----+------------------+
+| South Kerala   | Alappuzha,                     | 39  | Hindus - 65%     |
+|                |                                |     |                  |
+|                | Pathanamthitta,                |     | Muslims - 13%    |
+|                |                                |     |                  |
+|                | Kollam,                        |     | Christians - 21% |
+|                |                                |     |                  |
+|                | Thiruvananthapuram             |     |                  |
++----------------+--------------------------------+-----+------------------+
 
 
-
-Table: sub-region demographics
+<!-- Table: sub-region demographics -->
 
 
 ---
@@ -92,18 +104,22 @@ knitr::include_graphics(c("D:/cpr/elections/kerala/party_vs_19.png" ))
 
 ---
 
-```{r urban voting,out.width= "80%",out.height = "100%", fig.show="hold",  echo = FALSE, fig.align='center'}
 
-knitr::include_graphics("D:/cpr/elections/kerala/urban_bjp.png")
-
-```
-
----
 
 
 ```{r women voting,out.width= "80%",out.height = "100%", fig.show="hold",  echo = FALSE, fig.align='center'}
 
 knitr::include_graphics("D:/cpr/elections/kerala/women_vote.png")
+
+```
+
+
+---
+
+
+```{r sabarimala,out.width= "80%",out.height = "100%", fig.show="hold",  echo = FALSE, fig.align='center'}
+
+knitr::include_graphics("D:/cpr/elections/kerala/sb.png")
 
 ```
 
@@ -118,6 +134,14 @@ knitr::include_graphics("D:/cpr/elections/kerala/csds_caste.png")
 
 ```
 
+---
+
+
+- According to the polls, the Incumbent LDF government is set to break the record by winning a second consecutive term.
+
+- At the same time, the negligible difference in the vote share between LDF and UDF in the recent local body election gives hope for UDF.
+
+- This election will reveal whether  BJP would rise as a formidable power in the state resulting in a tri-polar contest.
 
 
 
