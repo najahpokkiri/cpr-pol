@@ -35,18 +35,6 @@ knitr::opts_chunk$set(dev = 'pdf')
 
 ```
 
-
-
-
-
----
-
-```{r vote & seat share, out.width= "49%",fig.show="hold",  echo = FALSE, fig.align='center'}
-
-
-knitr::include_graphics(c("D:/cpr/elections/kerala/front_vs.png", "D:/cpr/elections/kerala/front_seats.png"))
-```
-
 ---
 
 ### Sub-region demographics
@@ -81,6 +69,18 @@ knitr::include_graphics(c("D:/cpr/elections/kerala/front_vs.png", "D:/cpr/electi
 
 
 <!-- Table: sub-region demographics -->
+
+
+
+
+
+---
+
+```{r vote & seat share, out.width= "49%",fig.show="hold",  echo = FALSE, fig.align='center'}
+
+
+knitr::include_graphics(c("D:/cpr/elections/kerala/front_vs.png", "D:/cpr/elections/kerala/front_seats.png"))
+```
 
 
 ---
