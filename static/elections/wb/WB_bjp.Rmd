@@ -576,23 +576,45 @@ wb_16_fe <- inner_join(wb_16, fe_to, by = c("constituency_no" = "ac.no"))
 
 wb_16_fe_aitc <- wb_16_fe %>% filter(party=="AITC")
 
-wb_16_fe_3 <- wb_16_fe %>% filter(front%in%c("BJP",  "AITC"))
+wb_16_fe_3 <- wb_16_fe %>% filter(front%in%c("BJP",  "AITC", "INC"))
 
 # ggplot(wb_16_fe_aitc, aes(female_turnout, vote_share_percentage))+
 #   geom_point()
 
 ggplot(wb_16_fe_3, aes(female_turnout, vote_share_percentage, color = front))+
   geom_point(alpha=0.5)+
-  geom_smooth(method = "lm")+
-  scale_color_manual(values = c("BJP" = "orange",
+  geom_smooth(method = "lm", se = FALSE)+
+  scale_color_manual(values = c("BJP" = "darkorange1",
                                 
-                                "AITC" = "darkgreen")) +
-  labs(title = "Female turnout v/s Vote share of the major parties in the state", y = "Vote share(%)",subtitle = "2016 WB Assembly election", x = "Turnout (%)", color = "Party")+
+                                "AITC" = "chartreuse4",
+                                "INC" = "steelblue")) +
+  labs(title = "Female turnout as a function of party vote share", y = "Vote share(%)",subtitle = " Assembly election 2016", x = "Female turnout (%)", color = "Party")+
   ylim(0,80)+
-  theme_minimal_grid()+
-  theme(legend.position = "bottom",
-        text = element_text(family="serif"),
-                            )
+    theme_minimal()+
+  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
+        #legend.position = "bottom",
+        plot.background = element_blank(),
+        plot.title = element_text( size = 18, family = "serif"),
+        plot.subtitle = element_text( size = 15,color = "grey50",
+                                     margin = margin(t = 0, r = 0, b = 20, l = 0)),
+        text = element_text(color = "gray20",family = "serif"),
+        axis.text.x = element_text( 
+                                   hjust = .5, vjust = 0),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 12),
+        axis.text = element_text(face = "italic", size = 10),
+        axis.title = element_text(vjust = -1, size = 15),        
+        axis.ticks = element_blank(),
+        panel.grid.major = element_line(color = "gray", size = .5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+         axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+       axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+        axis.line.x = element_line(),
+        #axis.title.x = element_blank()
+  ) +
+  xlim(50,100)
+ggsave("D:/cpr/elections/wb/ae_to_16.png", width = 6, height = 4)
 
 ```
 
@@ -623,11 +645,8 @@ wb_ge_to <- inner_join(wb_ge_19, wb_19_to, by = c("Constituency_No"= "pc_no"))
 
 ggplot(wb_ge_to, aes(FEMALE.1, Vote_Share_Percentage, color = Party))+
   geom_point(alpha=0.8)+
-  geom_smooth()+
-  scale_color_manual(values = c("BJP" = "orange",
-                                
-                                "AITC" = "darkgreen")) +
-  labs(title = "Female turnout v/s Vote share of the major parties in the state", y = "Vote share(%)",subtitle = "2019 WB General election", x = "Turnout (%)", color = "Party")+
+  geom_smooth(method = "lm")+
+  labs(title = "Female turnout v/s Vote share of the major parties in the state", y = "Vote share(%)",subtitle = "2019 WB General election", x = "Female turnout (%)", color = "Party")+
   lims(x = c(65,90), y= c(10,65))+
   theme_minimal_grid()+
   theme(legend.position = "bottom",
@@ -635,8 +654,71 @@ ggplot(wb_ge_to, aes(FEMALE.1, Vote_Share_Percentage, color = Party))+
                             )
 
 
+
+
 ```
 
+
+```{r}
+wb_to <- read.csv("D:/cpr/elections/wb/wb_ge_turnout.csv")
+
+names(wb_to) <- tolower(names(wb_to))
+
+ge <- fread("D:/cpr/data/tcpd/TCPD_GE_all.csv")
+
+ge_wb <- ge %>% filter(State_Name == "West_Bengal")
+
+names(ge_wb) <- tolower(names(ge_wb))
+
+
+ge_wb_to <- inner_join(wb_to, ge_wb, by = c("constituency_no", "year"))
+
+ge_wb_to <- ge_wb_to  %>% mutate(front = case_when(party %in% c("CPM", "CPI", "RSP", "AIFB") ~"LF",
+                                                
+                                   TRUE ~party))
+
+
+ggplot(ge_wb_to %>% filter(front %in% c("LF","INC", "AITC","BJP")), aes(female_turnout, vote_share_percentage, color = front))+
+  geom_point(alpha=0.5)+
+  geom_smooth(method = "lm",se = FALSE)+
+   scale_color_manual(values = c("BJP" = "darkorange1",
+                                
+                                "AITC" = "chartreuse4",
+                     "LF" = "red",
+                     "INC" = "steelblue"
+                     ) )+
+   labs(title = "Female turnout as a function of party vote share", y = "Vote share(%)",subtitle = "WB GE elections - 1996:2019", x = "Female turnout (%)", color = "Party")+
+    theme_minimal()+
+  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
+        #legend.position = "bottom",
+        plot.background = element_blank(),
+        plot.title = element_text( size = 18, family = "serif"),
+        plot.subtitle = element_text( size = 15,color = "grey50",
+                                     margin = margin(t = 0, r = 0, b = 20, l = 0)),
+        text = element_text(color = "gray20",family = "serif"),
+        axis.text.x = element_text( 
+                                   hjust = .5, vjust = 0),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 12),
+        axis.text = element_text(face = "italic", size = 10),
+        axis.title = element_text(vjust = -1, size = 15),        
+        axis.ticks = element_blank(),
+        panel.grid.major = element_line(color = "gray", size = .5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+         axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+       axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+        axis.line.x = element_line(),
+        #axis.title.x = element_blank()
+  ) 
+ggsave("D:/cpr/elections/wb/ge_f_to.png", width = 6, height = 4)
+
+
+```
+
+
+
+Our analysis of women turnout and party vote shares from 1996 to last loksabha elections, revealed  that AITMC is highly preferred among women voters as AITMCs vote share increases as more women turns out for voting. At the same time, left front looses its vote share as the women turnout increases. Event hough, the trend of BJP loosing votes with more women turnout is minimal in the General election, it is much stronger in the last Assembly election as shown in the fig.x scatter plot.
 
 ---
 

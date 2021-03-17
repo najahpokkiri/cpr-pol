@@ -20,7 +20,6 @@ classoption: aspectratio=169
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
-
 knitr::opts_chunk$set(dev = 'pdf')
 ```
 
@@ -30,9 +29,7 @@ knitr::opts_chunk$set(dev = 'pdf')
 
 
 ```{r kerala map, fig.show="hold", out.width= "100%", out.height="100%",fig.align='center'}
-
  knitr::include_graphics(c("D:/cpr/elections/kerala/kl_map.jpeg"))
-
 ```
 
 ---
@@ -77,8 +74,6 @@ knitr::opts_chunk$set(dev = 'pdf')
 ---
 
 ```{r vote & seat share, out.width= "49%",fig.show="hold",  echo = FALSE, fig.align='center'}
-
-
 knitr::include_graphics(c("D:/cpr/elections/kerala/front_vs.png", "D:/cpr/elections/kerala/front_seats.png"))
 ```
 
@@ -88,18 +83,14 @@ knitr::include_graphics(c("D:/cpr/elections/kerala/front_vs.png", "D:/cpr/electi
 
 
 ```{r sub region front, out.width= "80%",out.height = "100%", fig.show="hold",  echo = FALSE, fig.align='center'}
-
 knitr::include_graphics(c("D:/cpr/elections/kerala/front_vs_19.png" ))
-
 ```
 
 ---
 
 
 ```{r sub region party, out.width= "80%",out.height = "100%", fig.show="hold",  echo = FALSE, fig.align='center'}
-
 knitr::include_graphics(c("D:/cpr/elections/kerala/party_vs_19.png" ))
-
 ```
 
 ---
@@ -108,9 +99,7 @@ knitr::include_graphics(c("D:/cpr/elections/kerala/party_vs_19.png" ))
 
 
 ```{r women voting,out.width= "80%",out.height = "100%", fig.show="hold",  echo = FALSE, fig.align='center'}
-
 knitr::include_graphics("D:/cpr/elections/kerala/women_vote.png")
-
 ```
 
 
@@ -118,9 +107,7 @@ knitr::include_graphics("D:/cpr/elections/kerala/women_vote.png")
 
 
 ```{r sabarimala,out.width= "80%",out.height = "100%", fig.show="hold",  echo = FALSE, fig.align='center'}
-
 knitr::include_graphics("D:/cpr/elections/kerala/sb.png")
-
 ```
 
 
@@ -128,10 +115,7 @@ knitr::include_graphics("D:/cpr/elections/kerala/sb.png")
 
 
 ```{r caste,out.width= "80%",out.height = "100%", fig.show="hold",  echo = FALSE, fig.align='center'}
-
-
 knitr::include_graphics("D:/cpr/elections/kerala/csds_caste.png")
-
 ```
 
 ---
@@ -142,10 +126,4 @@ knitr::include_graphics("D:/cpr/elections/kerala/csds_caste.png")
 - At the same time, the negligible difference in the vote share between LDF and UDF in the recent local body election gives hope for UDF.
 
 - This election will reveal whether  BJP would rise as a formidable power in the state resulting in a tri-polar contest.
-
-
-
-
-
-
 
