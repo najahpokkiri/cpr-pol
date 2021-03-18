@@ -123,11 +123,11 @@ knitr::include_graphics(c("D:/cpr/misc/books/books_collage_2.png"))
     
     - Public provisioning of private, tangible goods 
     
-    - Perspective voting
-    
+    - Retrospective voting
+
         - Voters make the government accountable by punishing/rewarding them based on their actions during the rule. 
         
-    - Retrospective voting
+    - Perspective voting
     
         - Voters prefer a party based on their promises that will be delivered once they are in rule.
 
@@ -209,44 +209,6 @@ knitr::include_graphics(c("D:/cpr/misc/books/books_collage_2.png"))
 
 ---
 
-## What do we know about Indian voters from surveys?
-
-
-```{r image_1, fig.show = "hold", out.width = "47%",out.height= "47%", fig.align = "default"}
-
-knitr::include_graphics(c("D:/cpr/misc/books/indian_voter/1.png", "D:/cpr/misc/books/indian_voter/2.png","D:/cpr/misc/books/indian_voter/3.png","D:/cpr/misc/books/indian_voter/4.png"))
-
-```
-
-
-
-
----
-
-```{r image_2, fig.show = "hold", out.width = "100%",out.height= "80%", fig.align = "default"}
-
-knitr::include_graphics(c("D:/cpr/misc/books/indian_voter/graphs_5_7_1.png"))
-
-```
-
----
-
-```{r image_3, fig.show = "hold", out.width = "100%",out.height= "70%", fig.align = "default"}
-
-knitr::include_graphics(c("D:/cpr/misc/books/indian_voter/image_8_9.png"))
-
-```
-
----
-
-```{r image_4, fig.show = "hold", out.width = "47%",out.height= "47%", fig.align = "default"}
-
-knitr::include_graphics(c("D:/cpr/misc/books/indian_voter/10.png", "D:/cpr/misc/books/indian_voter/11.png","D:/cpr/misc/books/indian_voter/12.png",
-                          "D:/cpr/misc/books/indian_voter/13.png"))
-
-```
-
----
 
 
 
@@ -297,6 +259,47 @@ knitr::include_graphics(c("D:/cpr/misc/books/indian_voter/10.png", "D:/cpr/misc/
 
 ---
 
+## What do we know about Indian voters from surveys?
+
+
+```{r image_1, fig.show = "hold", out.width = "47%",out.height= "47%", fig.align = "default"}
+
+knitr::include_graphics(c("D:/cpr/misc/books/indian_voter/1.png", "D:/cpr/misc/books/indian_voter/2.png","D:/cpr/misc/books/indian_voter/3.png","D:/cpr/misc/books/indian_voter/4.png"))
+
+```
+
+
+
+
+---
+
+```{r image_2, fig.show = "hold", out.width = "100%",out.height= "80%", fig.align = "default"}
+
+knitr::include_graphics(c("D:/cpr/misc/books/indian_voter/graphs_5_7_1.png"))
+
+```
+
+---
+
+```{r image_3, fig.show = "hold", out.width = "100%",out.height= "70%", fig.align = "default"}
+
+knitr::include_graphics(c("D:/cpr/misc/books/indian_voter/image_8_9.png"))
+
+```
+
+---
+
+```{r image_4, fig.show = "hold", out.width = "47%",out.height= "47%", fig.align = "default"}
+
+knitr::include_graphics(c("D:/cpr/misc/books/indian_voter/10.png", "D:/cpr/misc/books/indian_voter/11.png","D:/cpr/misc/books/indian_voter/12.png",
+                          "D:/cpr/misc/books/indian_voter/13.png"))
+
+```
+
+---
+
+
+
 ## Future promises for electoral studies in India 
 
 
@@ -306,14 +309,10 @@ knitr::include_graphics(c("D:/cpr/misc/books/indian_voter/10.png", "D:/cpr/misc/
 
 - Silent voters, swing voters, fluctuations, volatility - concepts developed elsewhere are even valid for the Indian context; only needs careful examination.
 
-- Increasing media exposure, political churn and demographic changes is already producing a new Indian voter and novel political engagements.
+- Increasing media exposure, political churn and demographic changes are  producing new  political engagements.
 
 
 
----
-
-
-\begin{center} \LARGE  Thank you for the attention. \\ Any questions? \end{center}
 
 
 
