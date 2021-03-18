@@ -35,23 +35,15 @@ knitr::opts_chunk$set(dev = 'pdf')
 
 
 
-## Quiz!
-
-\begin{center} \LARGE  What is the single most important issue guiding people’s voting choices? \end{center}
-
-
-
-# Theories
+# Quiz!
 
 ---
 
-<!-- books -->
+\begin{center} \LARGE  What is the single most important issue guiding your vote choice? \end{center}
 
-```{r books,  fig.show="hold", out.width= "100%", out.height="100%",fig.align='center'}
 
-knitr::include_graphics(c("D:/cpr/misc/books/book_collage.png"))
 
-```
+# Theories of voting behaviour : US
 
 ---
 
@@ -66,6 +58,18 @@ knitr::include_graphics(c("D:/cpr/misc/books/funnel.png"))
 
 ```
 
+---
+
+<!-- books -->
+
+```{r books,  fig.show="hold", out.width= "100%", out.height="100%",fig.align='center'}
+
+knitr::include_graphics(c("D:/cpr/misc/books/books_collage_2.png"))
+
+```
+
+
+
 
 
 ---
@@ -77,7 +81,7 @@ knitr::include_graphics(c("D:/cpr/misc/books/funnel.png"))
 
 - Sociological Model: Identified with the Columbia school - focuses on influence of social factors like group affiliation (**The People’s Choice; Personal Influence**).
 
-- Psychosocial Model: Identified with the Michigan school - focuses on effect of partisanship or party identification (**The American Voter**).
+- Psycho-social Model: Identified with the Michigan school - focuses on effect of partisanship or party identification (**The American Voter**).
 
 - Rational Choice Model: Identified with the work by Anthony Downs (**An Economic Theory of Democracy**) and argues that voters seek to maximise the utility of their vote and parties seek to maximise electoral gains.
 
@@ -93,56 +97,65 @@ knitr::include_graphics(c("D:/cpr/misc/books/funnel.png"))
 
 ###  Preferences and Political accountability
 
-- Ideology
+- Ethnicity, caste, religion
 
-    - Spatial model/Downsian model - preference based on ideological proximities between parties and voters.
+    - In-group favoritism - Ethnic voting
+  
+    - Co-religiosity and voting behaviour 
+
+- Clientelism/Patronage Politics: 
+
+    - Quid pro quo - Political parties earn support by the distribution of public or private goods to targeted groups of voters 
+
+    - India as a patronage democracy -> ethnic favouritism .
     
-    - Median voter theorem .
+    - Brokers/ Intermediaries
     
-    - Ideology & Identity : Statism & Recognition -  Chhibber and Verma 
+      - *Naya Neta's* 
+    
+      - *You can’t buy a vote* 
+    
+---
+
+- Programmatic Voting
+
+    - Voters reward performance on civic/economic and developmental issues.
+    
+    - Public provisioning of private, tangible goods 
+    
+    - Perspective voting
+    
+        - Voters make the government accountable by punishing/rewarding them based on their actions during the rule. 
+        
+    - Retrospective voting
+    
+        - Voters prefer a party based on their promises that will be delivered once they are in rule.
+
+
+    
+- Personalistic voting
+
+
+
+---
     
 - Partisanship
 
     - People identify with certain parties and their loyalty stays intact despite political circumstances. 
     
-    - Partisan  Heart and Minds - Green, Palmquist & Schickler
-    
-- Personalistic voting
 
-- Ethnicity, caste, religion
+- Ideology
 
-    - In-group favoritism.
-   
-    - Ethnic voting - Chandra
-  
-    - Co-religiosity and voting behaviour : Heath et al.
-  
----
-
-
-- Programmatic outreach: voters reward performance on civic/economic and developmental issues.
-
-    - Improving public goods: evidence from limited experiments across states
+    - Spatial / Downsian model
     
-    - Public provisioning of private, tangible goods 
+         - preference based on ideological proximities between parties and voters ; Median voter theorem .
     
-- Clientelism/Patronage Politics: Quid pro quo - Political parties earn support by the distribution of public or private goods to targeted groups of voters 
-
-    - Kanchan Chandra - India as a patronage democracy -> ethnic favouritism .
-    
-    - Brokers and Dallas
-    
-      - Naya Neta's - Anirudh Krishna
-    
-      - You can’t buy a vote : Meanings of money in a Mumbai election- Bjorkman
-    
-      - Electoral Handouts in Mumbai Elections -: Cost of electoral competition - Chauchard
+         - Ideology & Identity 
 
 
 
 # Studying voting behaviour using surveys
 
-<!-- Surveys as tools for studying voting behaviour -->
 ---
 
 - **Why use surveys? **
@@ -172,8 +185,6 @@ knitr::include_graphics(c("D:/cpr/misc/books/funnel.png"))
 
 - Consistent data on electoral choices available from 1996 onwards.
 
-- High quality data gathered through a network of state representatives.
-
 - Emphasis on random sampling, representativeness and vote integrity (through hidden ballot).
 
 ---
@@ -182,24 +193,65 @@ knitr::include_graphics(c("D:/cpr/misc/books/funnel.png"))
 
 **Studying voting behaviour involves going beyond the question of who people vote for. Major themes in the questionnaire :**
 
-- Issue based voting 
-- Current events 
-- Public opinion on institutions  
-- Welfare scheme benefits and credit attribution 
-- Ideological and identity related questions 
-- Religiosity related questions 
-- Political participation
 - Voting choice and partisan affiliation
+- Issue and current events based voting
+- Public opinion on institutions  
+- Ideological position
+- Religiosity
+- Political participation and mobilisation
 - Leadership effect 
 - Demographic details 
 - Media exposure 
 
 
 
+
+
+---
+
+## What do we know about Indian voters from surveys?
+
+
+```{r image_1, fig.show = "hold", out.width = "47%",out.height= "47%", fig.align = "default"}
+
+knitr::include_graphics(c("D:/cpr/misc/books/indian_voter/1.png", "D:/cpr/misc/books/indian_voter/2.png","D:/cpr/misc/books/indian_voter/3.png","D:/cpr/misc/books/indian_voter/4.png"))
+
+```
+
+
+
+
+---
+
+```{r image_2, fig.show = "hold", out.width = "100%",out.height= "80%", fig.align = "default"}
+
+knitr::include_graphics(c("D:/cpr/misc/books/indian_voter/graphs_5_7_1.png"))
+
+```
+
+---
+
+```{r image_3, fig.show = "hold", out.width = "100%",out.height= "70%", fig.align = "default"}
+
+knitr::include_graphics(c("D:/cpr/misc/books/indian_voter/image_8_9.png"))
+
+```
+
+---
+
+```{r image_4, fig.show = "hold", out.width = "47%",out.height= "47%", fig.align = "default"}
+
+knitr::include_graphics(c("D:/cpr/misc/books/indian_voter/10.png", "D:/cpr/misc/books/indian_voter/11.png","D:/cpr/misc/books/indian_voter/12.png",
+                          "D:/cpr/misc/books/indian_voter/13.png"))
+
+```
+
 ---
 
 
-- **Limitations of survey research : **
+
+
+## Limitations of survey research
 
   - Biases associated with questionnaire design, sampling 
   
@@ -209,16 +261,19 @@ knitr::include_graphics(c("D:/cpr/misc/books/funnel.png"))
   
   - Expensive 
   
-  - Data crunching not a short-cut for in depth research! 
   
-- **What does the future hold? **
+  
+---
+  
+## What does the future hold? 
 
-  - Prohibitive costs reducing/technological changes, allows for greater frequency of large scale surveys 
+  - Technological changes allows for greater frequency of large scale surveys.
   
   - Survey experiments
   
-  - Longitudinal panel-based studies to understand nuanced changes in opinions
+  - Longitudinal panel-based studies to understand nuanced changes in opinions.
   
+  - More researchers with technical skills.
 
 ---
 
@@ -236,10 +291,13 @@ knitr::include_graphics(c("D:/cpr/misc/books/funnel.png"))
 - Lack of open data access 
 
 
+
+
+# Way forward 
+
 ---
 
-## Way forward for electoral studies in India 
-
+## Future promises for electoral studies in India 
 
 
 - Fill gaps in the data: Increasing ease of doing surveys allows for more data
@@ -249,3 +307,15 @@ knitr::include_graphics(c("D:/cpr/misc/books/funnel.png"))
 - Silent voters, swing voters, fluctuations, volatility - concepts developed elsewhere are even valid for the Indian context; only needs careful examination.
 
 - Increasing media exposure, political churn and demographic changes is already producing a new Indian voter and novel political engagements.
+
+
+
+---
+
+
+\begin{center} \LARGE  Thank you for the attention. \\ Any questions? \end{center}
+
+
+
+
+
