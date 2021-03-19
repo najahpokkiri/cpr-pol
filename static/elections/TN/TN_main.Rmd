@@ -1,0 +1,453 @@
+---
+title: "Tamil Nadu Analysis - 1"
+author: "Najah"
+date: "19/03/2021"
+params:
+  orig_date: 'Original Publish Date: 19 March, 2020'
+  update_date: !r paste("Updated on:", format(Sys.time(), '%d %B, %Y'))
+output:
+  html_document:
+    theme: flatly
+    toc: TRUE
+    toc_float: TRUE
+    toc_depth: 4
+    number_sections: false
+    fig_width: 6            
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{=html}
+<style>
+    body .main-container {
+        max-width: 1000px;
+    }
+</style>
+```
+
+------------------------------------------------------------------------
+
+### Document History
+
+`r params$orig_date`
+
+`r params$update_date`
+
+------------------------------------------------------------------------
+
+```{r set up, warning=FALSE, include=FALSE, message= FALSE }
+
+knitr::opts_chunk$set(cache = FALSE ,echo = FALSE, message=FALSE, warning = FALSE,fig.width = 16/2, fig.height = 9/2)
+
+library(data.table)
+library(tidyverse)
+library(kableExtra)
+library(cowplot)
+
+`%!in%` = Negate(`%in%`)
+
+select <- dplyr::select
+```
+
+
+
+
+```{r}
+
+
+## reading AE files
+
+
+tn_ae <- fread("D:/cpr/data/tcpd/states/Tamil_Nadu_2020.csv")
+
+names(tn_ae) <- tolower(names(tn_ae))
+
+
+
+## reading pc files
+
+ac_19 <- readxl::read_xls("D:/cpr/data/GE_PC_AC-main/2019_AC_PC.xls")
+
+
+
+tn_19 <- ac_19 %>% filter(`State-UT Code & Name` == "Tamil Nadu" ) %>% ungroup()
+
+names(tn_19) <- tolower(names(tn_19))
+
+
+
+
+tn_19 <- tn_19 %>% rename(state_name = `state-ut code & name`, pc_no = `pc no` , pc_name = `pc name`, constituency_no = `ac no`, constituency_name = `ac name`, electors = `total electors`, candidate = `candidate name`,votes = `votes secured evm`)
+
+tn_19<- tn_19 %>% group_by(year, constituency_no) %>% mutate(election_type = "GE",valid_votes=sum(votes, na.rm = TRUE), vote_share_percentage =( votes/valid_votes)*100,
+                                                                   turnout_percentage = (valid_votes/electors)*100) %>% ungroup()
+
+ tn_19  <- tn_19  %>% group_by(year, constituency_no) %>%  mutate(position = order(order(vote_share_percentage, decreasing=TRUE))) %>% ungroup()
+
+``` 
+ 
+```{r}
+
+
+ac_14 <-  readxl::read_xlsx("D:/cpr/data/GE_PC_AC-main/2014_AC_PC.xlsx")
+
+tn_14 <- ac_14 %>% filter(`State-UT Code & Name` == "Tamil Nadu" )
+
+names(tn_14) <- tolower(names(tn_14))
+
+
+
+tn_14 <- tn_14 %>% rename(state_name = `state-ut code & name`, pc_no = pcno, pc_name = `pc name`, constituency_no = `ac no`, constituency_name = `ac name`, electors = `total electors in ac`, candidate = `candidate name`,votes = `votessecured evm`)
+
+
+tn_14<- tn_14 %>% group_by(year, constituency_no) %>% mutate(election_type = "GE",valid_votes=sum(votes, na.rm = TRUE), vote_share_percentage =( votes/valid_votes)*100,
+                                                                   turnout_percentage = (valid_votes/electors)*100) %>% ungroup()
+
+ tn_14  <- tn_14  %>% group_by(year, constituency_no) %>%  mutate(position = order(order(vote_share_percentage, decreasing=TRUE))) %>% ungroup()
+ 
+#  
+# unique (tn_14$party[tn_14$position%in% c(1,2)])
+# 
+# unique (tn_14$front[tn_14$position%in% c(1,2)])
+
+# tn_14 <- tn_14 %>% mutate(front = case_when(party %in% c("INC","RSP", "KEC(M)","SJD", "IUML","CMPKSC") ~"UDF",
+#                                    party %in% c("CPI","CPM","JD(S)") ~"LDF",
+#                                    candidate %in% c("V.ABDURAHMAN","ADV.JOICE GEORGE", "INNOCENT","DR. CHRISTY FERNANDEZ",  "ADV. PEELIPOSE THOMAS")~"LDF",
+#                                    party %in% c("BJP","RSPK(B)" ) ~"NDA",
+#                  TRUE ~ "OTHERS"))
+
+# tn_14  %>% filter(position ==1 & party == "IND" & front%!in% c("NDA","LDF","UDF"))
+# #tn_14 %>% filter(grepl("peelipose", candidate, ignore.case = TRUE))
+# 
+# 
+# tn_14_19 <- rbindlist(list(tn_14,tn_19), use.names = FALSE)
+```
+
+```{r}
+
+
+# names(ae_kl) <- tolower(names(ae_kl))
+# 
+# kl_11<- ae_kl %>% filter(year %in% c(2011) & poll_no ==0 & party != "NOTA")
+
+ 
+ 
+# unique (tn_19$party[tn_19$position%in%c(1,2,3)])
+# 
+# grep("INC",tn_19$party)
+
+tn_19 <- tn_19 %>% mutate(front = case_when(party %in% c("INC","DMK","CPI","CPIM","IUML","VCK" ) ~"UPA",
+                                   party %in% c("ADMK", "PMK", "BJP","DMDK","TMC(M)" ) ~"NDA",
+                 TRUE ~ "OTHERS"))
+
+
+
+tn_19 <- tn_19 %>% ungroup() %>%  mutate(votes_state = sum(votes))
+#
+```
+
+
+# 2019 GE
+
+
+
+## Results{.tabset}
+
+
+### Vote share - front
+
+
+```{r}
+
+
+tn_19 %>%ungroup() %>%  group_by(front) %>% summarise(vs = (sum(votes)/votes_state)*100 ) %>% distinct(front,.keep_all = TRUE) %>% kable(digits = 2, caption = "vote share in the state - GE 2019") %>% kable_styling(bootstrap_options = "striped")
+
+```
+
+
+
+---
+
+### Vote share - party
+
+
+```{r}
+
+
+tn_19 %>%ungroup() %>%  group_by(front,party) %>% summarise(vs = (sum(votes)/votes_state)*100 ) %>% distinct(party,.keep_all = TRUE) %>% filter(vs>2)%>%arrange(front,-vs) %>% kable(digits = 2, caption = "vote share in the state - GE 2019") %>% kable_styling(bootstrap_options = "striped")
+
+```
+
+---
+
+
+### Seat share - Front
+
+
+```{r}
+tn_19 %>% ungroup() %>% filter(position ==1) %>% group_by(front) %>% summarise(n_ac = n()) %>% kable(digits = 2, caption = "Leading ACs - GE 2019") %>% kable_styling(bootstrap_options = "striped")
+
+```
+
+---
+
+### Seat share - Party
+
+
+```{r}
+tn_19 %>% ungroup() %>% filter(position ==1) %>% group_by(party) %>% summarise(n_ac = n()) %>% arrange(-n_ac)%>% kable(digits = 2, caption = "Leading ACs - GE 2019") %>% kable_styling(bootstrap_options = "striped")
+```
+
+
+
+
+## Sub-region{.tabset}
+
+
+```{r}
+
+sub_reg <- read.csv("D:/cpr/elections/tn/sub_region.csv")
+
+names(sub_reg) <- tolower(names(sub_reg))
+
+
+#names(sub_reg)[1] <- "constituency_no"
+
+sub_reg %>% group_by(sub_region) %>% summarise(count = n()) %>% kable() %>% kable_styling(bootstrap_options ="striped" )
+
+
+
+```
+
+
+```{r}
+tn_19 <- tn_19 %>% inner_join(sub_reg, by = "constituency_no")
+
+tn_19 <- tn_19 %>% group_by(election_type, year, sub_region) %>% mutate(votes_reg = sum(votes))
+
+
+
+```
+
+### Vote share
+
+```{r}
+
+tn_19 %>%filter(front %in% c("UPA","NDA")) %>% group_by(year,sub_region, front) %>% summarise(vs = sum(votes)/votes_reg*100)%>%distinct(year, sub_region, front, .keep_all=TRUE) %>% 
+  ggplot(aes(factor(sub_region),vs, fill = factor(front), label = round(vs, 0) ))+
+  geom_bar(stat = "identity",position = "stack")+
+  geom_text(position= position_stack(vjust = .5), size = 3)+
+ scale_x_discrete(labels= c("Central","Chennai", "South", "West"))+
+    scale_fill_manual(values = c(
+                                "UPA" = "steelblue",
+                             
+                                "NDA" = "darkorange1"))+
+labs(title = "Sub-region wise vote share of major fronts",subtitle = "2019 GE",  x = "Sub-region", y = "Vote share (%)", fill = "Election Type" )+
+  
+
+  theme_minimal()+
+  
+  theme(aspect.ratio = 1,
+        plot.background = element_blank(),
+      
+         legend.title = element_blank(),
+           
+        axis.ticks = element_blank(),
+        panel.grid.major = element_line(),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+      
+        axis.line.x = element_line(),
+        axis.title.x = element_blank()
+       #axis.text.y = element_blank()
+  )  +
+  ylim(0,100)
+
+ggsave("D:/cpr/elections/kerala/front_vs_19.png", width = 6, height = 4)
+
+```
+
+
+
+### Seat share
+
+```{r}
+
+tn_19 %>%filter( position==1) %>% group_by(year,sub_region, front) %>% summarise(count = n())%>% 
+  ggplot(aes(factor(sub_region),count, fill = factor(front), label = round(count, 0) ))+
+  geom_bar(stat = "identity",position = "fill")+
+  geom_text(position= position_fill(vjust = .5), size = 3)+
+  scale_x_discrete(labels= c("Central","Chennai", "South", "West"))+
+    scale_fill_manual(values = c(
+                                "UPA" = "steelblue",
+                             
+                                "NDA" = "darkorange1"))+
+labs(title = "Sub-region wise leading seats",subtitle = "2019 GE",  x = "Sub-region", y = "N_seats", fill = "Election Type" )+
+  
+
+  theme_minimal()+
+  
+  theme(aspect.ratio = 1,
+        plot.background = element_blank(),
+      
+         legend.title = element_blank(),
+           
+        axis.ticks = element_blank(),
+        panel.grid.major = element_line(),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+      
+        axis.line.x = element_line(),
+        axis.title.x = element_blank(),
+       axis.text.y = element_blank()
+  )  
+
+```
+
+
+## Reservation
+
+
+```{r}
+res <-  tn_ae%>% filter(year==2011 & position==1) %>% select(constituency_no, constituency_type) %>% mutate(reservation = ifelse(constituency_type =="GEN","GEN", "SC/ST")) 
+
+table(res$reservation)
+```
+
+
+## Vote share correlation
+
+
+### Turnout
+
+
+```{r}
+
+pc_to <- readxl::read_xls("D:/cpr/data/election/2019/pc_turnnout_19.xls")
+
+pc_to_tn <- pc_to %>% filter(`State Name` == "Tamil Nadu")
+
+
+tn_19_to <-  tn_19 %>% group_by(pc_no.x, front)%>%summarise(vs = mean(vote_share_percentage)) %>% inner_join(pc_to_tn, by = c("pc_no.x"= "PC NO.")) %>% ungroup() 
+
+
+ggplot(tn_19_to %>% filter(front != "OTHERS"), aes(FEMALE_to,vs, color = front))+
+  geom_point(alpha = .5)+
+  geom_smooth(method = "lm", se = FALSE)+
+      scale_color_manual(values = c(
+                                "UPA" = "steelblue",
+                             
+                                "NDA" = "darkorange1"))+
+     labs(title = "Front vote share as a function of women turnout % ", y = "Vote share(%)",subtitle = "Tamil Nadu General election 2019", x = "Female turnout (%) ", color = "Front")+
+    theme_minimal()+
+  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
+        #legend.position = "bottom",
+        plot.background = element_blank(),
+        #plot.title = element_text( size = 18, family = "serif"),
+        plot.subtitle = element_text(  margin = margin(t = 0, r = 0, b = 20, l = 0)),
+     
+        axis.ticks = element_blank(),
+        panel.grid.major = element_line(color = "gray", size = .5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+       axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+        axis.line.x = element_line(),
+        #axis.title.x = element_blank()
+  )
+  
+
+```
+
+
+
+
+
+
+
+
+```{r}
+tn_19_res <- tn_19 %>% inner_join(res, by = c("constituency_no")) %>% ungroup()
+
+
+
+tn_19_res %>% filter(front!= "OTHERS") %>% group_by(reservation,front) %>% summarise(mean_vs = mean(vote_share_percentage)) %>% pivot_wider(values_from = mean_vs, names_from=front) %>% kable(digits = 2, caption = "Average vote share in wrt cosntituency type") %>% kable_styling(bootstrap_options = "striped")
+
+```
+
+
+```{r profile}
+
+
+tn_profile <- readxl::read_xls("D:/cpr/elections/TN/tn_ac_profile.xls")
+
+tn_19 <- tn_19 %>% inner_join(tn_profile, by = "constituency_no")
+
+
+```
+
+
+### Urban
+
+
+```{r }
+
+ggplot(tn_19 %>% filter(front != "OTHERS"), aes(    urban,vote_share_percentage, color = front))+
+  geom_point(alpha = .5)+
+  geom_smooth(method = "lm", se = FALSE)+
+      scale_color_manual(values = c("UPA" = "steelblue",
+                             
+                                "NDA" = "darkorange1"))+
+     labs(title = "Front vote share as a function of urban constituencts  ", y = "Vote share(%)",subtitle = "Tamil Nadu General election 2019", x = "Urban (%) ", color = "Front")+
+    theme_minimal()+
+  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
+        #legend.position = "bottom",
+        plot.background = element_blank(),
+        #plot.title = element_text( size = 18, family = "serif"),
+        plot.subtitle = element_text(  margin = margin(t = 0, r = 0, b = 20, l = 0)),
+     
+        axis.ticks = element_blank(),
+        panel.grid.major = element_line(color = "gray", size = .5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+       axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+        axis.line.x = element_line(),
+        #axis.title.x = element_blank()
+  )
+
+```
+
+
+### SC Voters
+
+
+```{r}
+
+ggplot(tn_19 %>% filter(front != "OTHERS"), aes(    sc,vote_share_percentage, color = front))+
+  geom_point(alpha = .5)+
+  geom_smooth(method = "lm", se = FALSE)+
+      scale_color_manual(values = c("UPA" = "steelblue",
+                             
+                                "NDA" = "darkorange1"))+
+     labs(title = "Front vote share as a function of SC constituencts  ", y = "Vote share(%)",subtitle = "Tamil Nadu General election 2019", x = "SC (%) ", color = "Front")+
+    theme_minimal()+
+  lims(x= c(0,50), y =c(0,80))+
+  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
+        #legend.position = "bottom",
+        plot.background = element_blank(),
+        #plot.title = element_text( size = 18, family = "serif"),
+        plot.subtitle = element_text(  margin = margin(t = 0, r = 0, b = 20, l = 0)),
+     
+        axis.ticks = element_blank(),
+        panel.grid.major = element_line(color = "gray", size = .5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+       axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+        axis.line.x = element_line(),
+        #axis.title.x = element_blank()
+  )
+
+```
+

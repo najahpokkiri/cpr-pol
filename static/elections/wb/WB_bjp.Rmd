@@ -315,6 +315,43 @@ wb_phase %>% group_by(phase_21) %>% tally() %>% kable() %>% kable_styling(bootst
 ```
 
 
+### seat share
+
+```{r}
+wb_el_phase %>% filter(year==2019 &position==1) %>% 
+  #filter(front_new %in% c("AITC"  , "BJP",   "LF+INC"  )) %>% 
+  group_by( phase_21, front_new) %>% summarise(count = n()) %>% 
+  ggplot(aes(factor(phase_21),count, fill =front_new, label = count))+
+  geom_bar(stat= "identity", position= "fill")+
+  geom_text(position = position_fill(vjust = .5))+
+scale_fill_manual(values = c("BJP" = "darkorange1",
+                                "LF+INC" = "red",
+                                "AITC" = "chartreuse4")) +
+labs(title = "Leading assembly segements: GE 2019",subtitle = "by  Assembly election 2021 phases ",  x = "Years", y = "Number of seats", fill = "Election Type" )+
+
+  theme_minimal()+
+  
+  theme(
+        plot.background = element_blank(),
+        legend.title = element_blank(),
+      
+         
+           
+        axis.ticks = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+      
+        axis.line.x = element_line(),
+        axis.title.x = element_blank(),
+       axis.text.y = element_blank()
+  ) 
+
+ggsave("D:/cpr/elections/wb/seats_phasege_21.png", width = 6, height = 4)
+```
+
+---
+
 ### vote share
 
 
