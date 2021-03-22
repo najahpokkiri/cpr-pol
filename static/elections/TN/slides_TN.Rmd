@@ -1,0 +1,119 @@
+---
+title: "How will Tamil Nadu vote in 2021?"
+subtitle : "Election Adda 2021"
+author: "Rahul Verma"
+institute: "Centre for Policy Research"
+date: "23rd March, 2021"
+output:
+  beamer_presentation:
+    theme: "CambridgeUS"
+    colortheme: "beaver"
+    fonttheme: "professionalfonts"
+    slide_level: 2
+header-includes:
+    - \titlegraphic{\centering \includegraphics[width=12cm]{D:/cpr/elections/assam/logo.jpg}}
+classoption: aspectratio=169
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(dev = 'pdf')
+```
+
+<!-- WB map -->
+
+
+```{r TN map, fig.show="hold", out.width= "50%", out.height="100%",fig.align='center'}
+
+ knitr::include_graphics(c("D:/cpr/elections/TN/tn_map.png"))
+
+```
+
+------------------------------------------------------------------------
+
+```{r sub region party, out.width= "80%",out.height = "100%", fig.show="hold",  echo = FALSE, fig.align='center'}
+
+knitr::include_graphics(c("D:/cpr/elections/TN/vs_hist.png" ))
+
+```
+
+
+------------------------------------------------------------------------
+
+```{r sub region front, out.width= "80%",out.height = "100%", fig.show="hold",  echo = FALSE, fig.align='center'}
+knitr::include_graphics(c("D:/cpr/elections/TN/won_map_19.png" ))
+```
+
+
+------------------------------------------------------------------------
+
+
+## Sub-regions
+
+```{r TN map sub, fig.show="hold", out.width= "90%", out.height="80%",fig.align='center'}
+ knitr::include_graphics(c("D:/cpr/elections/TN/tn_subreg_map.png"))
+```
+
+------------------------------------------------------------------------
+
+### Sub-region demographics
+
++---------------+-------+----------------------------------------------------------+
+| Sub region    | n\_ac | Districts                                                |
++===============+=======+==========================================================+
+| Upper North   | 32    | Tiruvallur, Chennai,                                     |
+|               |       |                                                          |
+|               |       | Kanchipuram, Vellore, Krishnagiri                        |
+|               |       |                                                          |
+|               |       | <br>                                                     |
++---------------+-------+----------------------------------------------------------+
+| North Central | 54    | Dharmapuri, Salem,                                       |
+|               |       |                                                          |
+|               |       | Tiruvannamalai, Villupuram, Cuddalore                    |
+|               |       |                                                          |
+|               |       | <br>                                                     |
++---------------+-------+----------------------------------------------------------+
+| Cauvery Delta | 42    | Karur, Karur, Tiruchirappalli, Pudukkottai, Perambalur,  |
+|               |       |                                                          |
+|               |       | Ariyalur, Nagapattinam, Thanjavur, Tiruvarur             |
+|               |       |                                                          |
+|               |       | <br>                                                     |
++---------------+-------+----------------------------------------------------------+
+| West          | 42    | Namakkal, Erode, Tirupur, Nilgiris, Coimbatore, Dindigul |
+|               |       |                                                          |
+|               |       | <br>                                                     |
++---------------+-------+----------------------------------------------------------+
+| South         | 54    | Sivaganga, Madurai, Theni, Virudhunagar,                 |
+|               |       |                                                          |
+|               |       | Ramanathapuram, Thoothukudi, Tirunelveli, Kanniyakumari  |
+|               |       |                                                          |
+|               |       | <br>                                                     |
++---------------+-------+----------------------------------------------------------+
+
+<!-- Table: sub-region demographics -->
+
+------------------------------------------------------------------------
+
+```{r vote & seat share, out.width= "49%",fig.show="hold",  echo = FALSE, fig.align='center'}
+knitr::include_graphics(c("D:/cpr/elections/TN/front_19_vs.png", "D:/cpr/elections/TN/front_19_seats.png"))
+```   
+
+
+
+------------------------------------------------------------------------
+
+```{r women voting,out.width= "80%",out.height = "100%", fig.show="hold",  echo = FALSE, fig.align='center'}
+
+knitr::include_graphics("D:/cpr/elections/tn/women_collage.png")
+
+```
+
+---
+
+### party column header is missing
+
+```{r caste, out.width= "80%",out.height = "100%", fig.show="hold",  echo = FALSE, fig.align='center', fig.cap = "Party missing in screenshot"}
+
+knitr::include_graphics(c("D:/cpr/elections/TN/caste_tn_csds.png" ))
+
+```

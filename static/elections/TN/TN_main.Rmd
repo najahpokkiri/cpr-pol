@@ -89,31 +89,33 @@ tn_19<- tn_19 %>% group_by(year, constituency_no) %>% mutate(election_type = "GE
 ```{r}
 
 
-ac_14 <-  readxl::read_xlsx("D:/cpr/data/GE_PC_AC-main/2014_AC_PC.xlsx")
-
-tn_14 <- ac_14 %>% filter(`State-UT Code & Name` == "Tamil Nadu" )
-
-names(tn_14) <- tolower(names(tn_14))
-
-
-
-tn_14 <- tn_14 %>% rename(state_name = `state-ut code & name`, pc_no = pcno, pc_name = `pc name`, constituency_no = `ac no`, constituency_name = `ac name`, electors = `total electors in ac`, candidate = `candidate name`,votes = `votessecured evm`)
-
-
-tn_14<- tn_14 %>% group_by(year, constituency_no) %>% mutate(election_type = "GE",valid_votes=sum(votes, na.rm = TRUE), vote_share_percentage =( votes/valid_votes)*100,
-                                                                   turnout_percentage = (valid_votes/electors)*100) %>% ungroup()
-
- tn_14  <- tn_14  %>% group_by(year, constituency_no) %>%  mutate(position = order(order(vote_share_percentage, decreasing=TRUE))) %>% ungroup()
- 
-#  
-# unique (tn_14$party[tn_14$position%in% c(1,2)])
+# ac_14 <-  readxl::read_xlsx("D:/cpr/data/GE_PC_AC-main/2014_AC_PC.xlsx")
 # 
-# unique (tn_14$front[tn_14$position%in% c(1,2)])
-
-# tn_14 <- tn_14 %>% mutate(front = case_when(party %in% c("INC","RSP", "KEC(M)","SJD", "IUML","CMPKSC") ~"UDF",
-#                                    party %in% c("CPI","CPM","JD(S)") ~"LDF",
-#                                    candidate %in% c("V.ABDURAHMAN","ADV.JOICE GEORGE", "INNOCENT","DR. CHRISTY FERNANDEZ",  "ADV. PEELIPOSE THOMAS")~"LDF",
-#                                    party %in% c("BJP","RSPK(B)" ) ~"NDA",
+# tn_14 <- ac_14 %>% filter(`State-UT Code & Name` == "Tamil Nadu" )
+# 
+# names(tn_14) <- tolower(names(tn_14))
+# 
+# 
+# 
+# tn_14 <- tn_14 %>% rename(state_name = `state-ut code & name`, pc_no = pcno, pc_name = `pc name`, constituency_no = `ac no`, constituency_name = `ac name`, electors = `total electors in ac`, candidate = `candidate name`,votes = `votessecured evm`)
+# 
+# 
+# tn_14<- tn_14 %>% group_by(year, constituency_no) %>% mutate(election_type = "GE",valid_votes=sum(votes, na.rm = TRUE), vote_share_percentage =( votes/valid_votes)*100,
+#                                                                    turnout_percentage = (valid_votes/electors)*100) %>% ungroup()
+# 
+#  tn_14  <- tn_14  %>% group_by(year, constituency_no) %>%  mutate(position = order(order(vote_share_percentage, decreasing=TRUE))) %>% ungroup()
+#  
+# #  
+#  unique (tn_14$party)
+# # 
+# # unique (tn_14$front[tn_14$position%in% c(1,2)])
+# 
+# tn_14 <- tn_14 %>% mutate(front = case_when(party %in% c("ADMK") ~"ADMK",
+#                                   party %in% c("DMK","IUML","MAMAK","VCK","PT")~"DMK front",
+#                                    
+#                                    party %in% c("BJP","PMK","DMDK" ) ~"NDA",
+#                                   party %in% c("CPI", "CPIM") ~"LEFT",
+#                                   party =="INC"~ "UPA",
 #                  TRUE ~ "OTHERS"))
 
 # tn_14  %>% filter(position ==1 & party == "IND" & front%!in% c("NDA","LDF","UDF"))
@@ -126,15 +128,6 @@ tn_14<- tn_14 %>% group_by(year, constituency_no) %>% mutate(election_type = "GE
 ```{r}
 
 
-# names(ae_kl) <- tolower(names(ae_kl))
-# 
-# kl_11<- ae_kl %>% filter(year %in% c(2011) & poll_no ==0 & party != "NOTA")
-
- 
- 
-# unique (tn_19$party[tn_19$position%in%c(1,2,3)])
-# 
-# grep("INC",tn_19$party)
 
 tn_19 <- tn_19 %>% mutate(front = case_when(party %in% c("INC","DMK","CPI","CPIM","IUML","VCK" ) ~"UPA",
                                    party %in% c("ADMK", "PMK", "BJP","DMDK","TMC(M)" ) ~"NDA",
@@ -213,17 +206,37 @@ names(sub_reg) <- tolower(names(sub_reg))
 
 #names(sub_reg)[1] <- "constituency_no"
 
-sub_reg %>% group_by(sub_region) %>% summarise(count = n()) %>% kable() %>% kable_styling(bootstrap_options ="striped" )
+sub_reg %>% group_by(sub_reg_1) %>% summarise(count = n()) %>% kable() %>% kable_styling(bootstrap_options ="striped" )
+
+
+# dt_table <- sub_reg %>% distinct(district_name, .keep_all = TRUE) %>% select(district_name, sub_reg_1) %>% arrange(sub_reg_1) %>% as.data.table()
+# 
+# write.csv(dt_table, "D:/cpr/elections/TN/districts.csv")
 
 
 
 ```
 
 
+
+---
+
+
+|  Sub Region               	| n_ac 	| Districts                                                                                              	|
+|-----------------	|------	|--------------------------------------------------------------------------------------------------------	|
+| Upper   North   	| 42   	| TIRUVALLUR, CHENNAI,   KANCHIPURAM, VELLORE, KRISHNAGIRI                                               	|
+| North   Central 	| 54   	| DHARMAPURI, SALEM,   TIRUVANNAMALAIVILLUPURAM, CUDDALORE                                               	|
+| Cauvery   Delta 	| 42   	| KARUR, KARUR, TIRUCHIRAPPALLI,   PUDUKKOTTAI, PERAMBALUR, ARIYALUR, NAGAPATTINAM, THANJAVUR, TIRUVARUR 	|
+| West            	| 42   	| NAMAKKAL, ERODE, TIRUPUR,   NILGIRIS, COIMBATORE, DINDIGUL                                             	|
+| South           	| 54   	| SIVAGANGA, MADURAI, THENI,   VIRUDHUNAGAR, RAMANATHAPURAM, THOOTHUKUDI, TIRUNELVELI, KANNIYAKUMARI     	|
+
+
+---
+
 ```{r}
 tn_19 <- tn_19 %>% inner_join(sub_reg, by = "constituency_no")
 
-tn_19 <- tn_19 %>% group_by(election_type, year, sub_region) %>% mutate(votes_reg = sum(votes))
+tn_19 <- tn_19 %>% group_by(election_type, year, sub_reg_1) %>% mutate(votes_reg = sum(votes))
 
 
 
@@ -233,15 +246,16 @@ tn_19 <- tn_19 %>% group_by(election_type, year, sub_region) %>% mutate(votes_re
 
 ```{r}
 
-tn_19 %>%filter(front %in% c("UPA","NDA")) %>% group_by(year,sub_region, front) %>% summarise(vs = sum(votes)/votes_reg*100)%>%distinct(year, sub_region, front, .keep_all=TRUE) %>% 
-  ggplot(aes(factor(sub_region),vs, fill = factor(front), label = round(vs, 0) ))+
+tn_19 %>%filter(front %in% c("UPA","NDA")) %>% group_by(year,sub_reg_1, front) %>% summarise(vs = sum(votes)/votes_reg*100)%>%distinct(year, sub_reg_1, front, .keep_all=TRUE) %>% 
+  ggplot(aes(factor(sub_reg_1, levels = c("Upper North","North Central", "Cauvery Delta","West","South")),vs, fill = factor(front), label = round(vs, 0) ))+
   geom_bar(stat = "identity",position = "stack")+
   geom_text(position= position_stack(vjust = .5), size = 3)+
- scale_x_discrete(labels= c("Central","Chennai", "South", "West"))+
+ scale_x_discrete(labels= c("Upper \n North","North \n Central", "Cauvery \n Delta","West","South"))+
     scale_fill_manual(values = c(
                                 "UPA" = "steelblue",
                              
-                                "NDA" = "darkorange1"))+
+                                "NDA" = "darkorange1"),
+                      labels = c( "ADMK Front","DMK Front"))+
 labs(title = "Sub-region wise vote share of major fronts",subtitle = "2019 GE",  x = "Sub-region", y = "Vote share (%)", fill = "Election Type" )+
   
 
@@ -263,7 +277,7 @@ labs(title = "Sub-region wise vote share of major fronts",subtitle = "2019 GE", 
   )  +
   ylim(0,100)
 
-ggsave("D:/cpr/elections/kerala/front_vs_19.png", width = 6, height = 4)
+ggsave("D:/cpr/elections/TN/front_19_vs.png", width = 6, height = 4)
 
 ```
 
@@ -273,15 +287,16 @@ ggsave("D:/cpr/elections/kerala/front_vs_19.png", width = 6, height = 4)
 
 ```{r}
 
-tn_19 %>%filter( position==1) %>% group_by(year,sub_region, front) %>% summarise(count = n())%>% 
-  ggplot(aes(factor(sub_region),count, fill = factor(front), label = round(count, 0) ))+
+tn_19 %>%filter( position==1) %>% group_by(year,sub_reg_1, front) %>% summarise(count = n())%>% 
+  ggplot(aes(factor(sub_reg_1, levels =  c("Upper North","North Central", "Cauvery Delta","West","South")),count, fill = factor(front), label = round(count, 0) ))+
   geom_bar(stat = "identity",position = "fill")+
   geom_text(position= position_fill(vjust = .5), size = 3)+
-  scale_x_discrete(labels= c("Central","Chennai", "South", "West"))+
+scale_x_discrete(labels= c("Upper \n North","North \n Central", "Cauvery \n Delta","West","South"))+
     scale_fill_manual(values = c(
                                 "UPA" = "steelblue",
                              
-                                "NDA" = "darkorange1"))+
+                                "NDA" = "darkorange1"),
+                      labels = c("ADMK Front","DMK Front"))+
 labs(title = "Sub-region wise leading seats",subtitle = "2019 GE",  x = "Sub-region", y = "N_seats", fill = "Election Type" )+
   
 
@@ -301,8 +316,124 @@ labs(title = "Sub-region wise leading seats",subtitle = "2019 GE",  x = "Sub-reg
         axis.title.x = element_blank(),
        axis.text.y = element_blank()
   )  
+ggsave("D:/cpr/elections/TN/front_19_seats.png", width = 6, height = 4)
 
 ```
+
+
+
+# Spatial distribution{.tabset}
+
+
+
+
+
+
+
+```{r results = 'hide'}
+library(sf)
+
+ac_shp <- st_read("D:/cpr/data/shape-file/maps-master/assembly-constituencies/India_AC.shp",quiet = TRUE)
+
+#unique(ac_shp$ST_NAME)
+
+ac_tn <- ac_shp %>% filter(ST_NAME == "TAMIL NADU")
+
+party_19 <-  tn_19%>% filter( position %in% c(1,2) ) %>% ungroup()%>% select(constituency_no, position,party) 
+
+party_19_ac <- inner_join(ac_tn, party_19, by = c("AC_NO"= "constituency_no"))
+```
+
+
+
+
+## sub_region
+
+
+```{r}
+
+
+subreg_map <- inner_join(ac_tn, sub_reg, by = c("AC_NO"= "constituency_no"))
+
+ggplot(subreg_map)+
+  geom_sf(aes(fill= factor(sub_reg_1)))+
+  colorspace::scale_fill_discrete_qualitative(palette= "Cold")+
+      theme_map()+
+    #labs(title ="Tamil Nadu : Sub Regions")+
+    theme(text = element_text(family = "serif"),
+          #legend.position = "bottom",
+          legend.title = element_blank())
+
+
+ggsave("D:/cpr/elections/TN/tn_subreg_map.png", height = 4, width = 6)
+
+```
+
+
+## Seats won
+
+```{r results = 'hide'}
+ggplot(party_19_ac)+
+  geom_sf(aes(fill= factor(party, level = c("INC",
+                               "DMK"  , 
+                               "CPI",
+                               "CPIM",
+                               "IUML" ,
+                               "VCK" ,
+                               "ADMK" , 
+                               "PMK" , 
+                               "BJP" ,
+                               "DMDK" ,
+                               "TMC(M)"  ,
+                               "IND" ,
+                               "MNM" ))), lwd = .7)+
+  facet_wrap(~position)+
+  scale_fill_manual(values = c("INC" = "skyblue",
+                               "DMK" ="steelblue" , 
+                               "CPI" = "royalblue",
+                               "CPIM" = "royalblue",
+                               "IUML" = "dodgerblue",
+                               "VCK" = "steelblue4",
+                               "ADMK" = "orangered", 
+                               "PMK" = "orange", 
+                               "BJP" = "darkorange1",
+                               "DMDK" = "orange3",
+                               "TMC(M)"  = "darkorange2",
+                               "IND" = "grey",
+                               "MNM" = "green"
+    
+                               ))+
+    theme_map()+
+    labs(title ="Assembly segments: first and second lead", subtitle = "GE 2019", fill = "Party")+
+    theme(text = element_text(family = "serif"),
+         # legend.position = "bottom",
+          legend.title = element_blank(),)
+
+ggsave("D:/cpr/elections/TN/won_map_19.png", width = 6, height = 4)
+
+
+```
+
+
+<!-- ## 2016 -->
+
+
+
+<!-- ```{r} -->
+<!-- ae_tn_win <- ae_tn %>% filter(position==1) -->
+
+<!-- ae_16_map<- inner_join(ac_tn, ae_tn_win, by = c("AC_NO"= "constituency_no")) -->
+
+
+<!-- ggplot(ae_16_map %>% filter(year ==2016))+ -->
+<!--   geom_sf(aes(fill = party))+ -->
+
+
+
+
+<!-- ``` -->
+
+
 
 
 ## Reservation
@@ -450,4 +581,148 @@ ggplot(tn_19 %>% filter(front != "OTHERS"), aes(    sc,vote_share_percentage, co
   )
 
 ```
+
+
+# Post 2010
+
+
+```{r}
+
+ae_tn <-read_csv("D:/cpr/data/tcpd/states/Tamil_Nadu_2020.csv")
+
+names(ae_tn)[1] <- "Election_Type"
+
+#ae_ge_kl <- rbind(ge_kl, ae_kl, use.names = TRUE, fill  = TRUE)
+
+
+names(ae_tn) <- tolower(names(ae_tn) )
+
+ae_tn<-  ae_tn %>% filter(poll_no ==0 & party != "NOTA" & year %in% c(2011,2016))
+
+
+ #unique(ae_tn$party[ae_tn$position%in% c(1,2,3,4) &ae_tn$year==2016 ])
+
+```
+
+
+
+
+
+
+<!-- fronts -->
+
+
+```{r}
+
+ae_tn<- ae_tn %>% mutate(front = case_when(party %in% c("AIADMK", "ADMK") & year ==2016 ~"ADMK",
+                 party %in% c ("DMK","PMK", "INC", "IUML", "MAMAK","PT")& year ==2016~"DMK",
+                 party %in% c("BJP", "MDMK") & year ==2016 ~ "NDA",
+                 party %in% c("CPI","CPIM", "DMDK","TMC(M)", "VCK", "DMDK") & year ==2016~ "LF",
+                 
+                 party %in% c("AIADMK", "ADMK","DMDK","CPI","CPIM","PT","DMDK") & year ==2011 ~"ADMK",
+                 party %in% c ("DMK","PMK", "INC","VCK", "IUML", "MAMAK")& year ==2011~"DMK",
+                 party %in% c("BJP") & year ==2011 ~ "NDA",
+                 TRUE ~ "OTHERS"))
+
+
+
+```
+
+
+
+## vote share
+
+
+```{r}
+
+ae_tn %>% filter(front %in% c("DMK","ADMK"))%>% group_by(year, front) %>% summarise(mean_vs = mean(vote_share_percentage, na.rm =TRUE)) %>% pivot_wider(values_from = mean_vs, names_from = front) %>% kable(digits = 2) %>% kable_styling(bootstrap_options = "striped")
+
+```
+
+## seat share
+
+
+```{r}
+
+ae_tn %>%filter(position ==1) %>% filter(front %in% c("DMK","ADMK"))%>% group_by(year, front) %>% summarise(count = n(), pc_seat = count/234*100) %>% kable(digits = 0) %>% kable_styling(bootstrap_options = "striped")
+```
+
+
+<!-- ## seat share -->
+
+
+
+
+<!-- ```{r} -->
+
+
+<!-- fam <- readxl::read_xlsx("D:/cpr/misc/family_size.xlsx") -->
+
+
+<!-- ``` -->
+
+
+<!-- ```{r} -->
+
+<!-- ggplot(fam, aes(n_adults,Percent, fill = factor(Location, levels = c("India","Delhi")), label = Frequency ))+ -->
+<!--   geom_bar(stat= "identity", position="dodge")+ -->
+<!--  colorspace::scale_fill_discrete_qualitative(palette= "Dark 2")+ -->
+<!--   #geom_text(position = position_dodge (width =1), size =3.5, vjust = -.2)+ -->
+<!--    labs(title = "Distribution of Family Size: India and Delhi", y = " % of families", x = "Number of adults", fill = "Election")+ -->
+<!--   # ylim(0,60)+ -->
+<!--   # scale_fill_manual(values = c("BJP" = "orange", -->
+<!--   #                               "AITC" = "darkgreen"))+ -->
+<!--   # scale_x_discrete(labels= areas)+ -->
+<!--     theme_minimal()+ -->
+<!--   theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"), -->
+<!--         legend.position = "bottom", -->
+<!--         plot.background = element_blank(), -->
+<!--         # plot.title = element_text( size = 18, family = "serif"), -->
+<!--         # axis.text.x = element_text( size = 10), -->
+<!--         legend.title = element_blank(), -->
+<!--         #legend.text = element_text(size = 12), -->
+<!--         axis.text = element_text(face = "italic"), -->
+<!--         #axis.title = element_text(vjust = -1, size = 15),         -->
+<!--         axis.ticks = element_blank(), -->
+<!--         panel.grid.major = element_line(color = "gray50", size = .5), -->
+<!--         panel.grid.minor = element_blank(), -->
+<!--         panel.grid.major.x = element_blank(), -->
+<!--         #  axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)), -->
+<!--         # axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)), -->
+<!--         axis.line.x = element_line(), -->
+
+<!--   )  -->
+
+<!--   #geom_histogram()+ -->
+<!--   #facet_wrap(~Location) -->
+
+<!-- ggsave("D:/cpr/misc/family.png", width = 6, height = 4) -->
+
+<!-- ``` -->
+
+##
+ 
+ 
+## vote share historical
+
+
+```{r}
+
+vs <- read.csv("D:/cpr/elections/TN/vote.csv")
+
+names(vs) <- c("party", "1967","1971","1980","1984","1989","1991","1996","2001","2006","2001","2016","2019")
+
+vs %>% ungroup() %>% pivot_longer(-vs$party)
+
+vs$
+```
+
+
+
+
+
+
+
+
+
 
