@@ -83,6 +83,8 @@ tn_19<- tn_19 %>% group_by(year, constituency_no) %>% mutate(election_type = "GE
                                                                    turnout_percentage = (valid_votes/electors)*100) %>% ungroup()
 
  tn_19  <- tn_19  %>% group_by(year, constituency_no) %>%  mutate(position = order(order(vote_share_percentage, decreasing=TRUE))) %>% ungroup()
+ 
+ tn_19 %>% filter(grepl("selam", pc_name, ignore.case = TRUE))
 
 ``` 
  
@@ -238,6 +240,7 @@ tn_19 <- tn_19 %>% inner_join(sub_reg, by = "constituency_no")
 
 tn_19 <- tn_19 %>% group_by(election_type, year, sub_reg_1) %>% mutate(votes_reg = sum(votes))
 
+# tn_19 %>% filter(position ==1) %>% group_by(sub_reg_1) %>% summarise(h= mean(hindu), sc = mean(sc)) %>% kable(digits = 0)
 
 
 ```
@@ -361,11 +364,12 @@ ggplot(subreg_map)+
       theme_map()+
     #labs(title ="Tamil Nadu : Sub Regions")+
     theme(text = element_text(family = "serif"),
-          #legend.position = "bottom",
+          legend.position="right", 
+          #legend.direction="vertical",
           legend.title = element_blank())
 
 
-ggsave("D:/cpr/elections/TN/tn_subreg_map.png", height = 4, width = 6)
+ggsave("D:/cpr/elections/TN/tn_subreg_map.png", height = 4, width = 4)
 
 ```
 
@@ -387,7 +391,7 @@ ggplot(party_19_ac)+
                                "TMC(M)"  ,
                                "IND" ,
                                "MNM" ))), lwd = .7)+
-  facet_wrap(~position)+
+  facet_grid(~position)+
   scale_fill_manual(values = c("INC" = "skyblue",
                                "DMK" ="steelblue" , 
                                "CPI" = "royalblue",
@@ -414,6 +418,164 @@ ggsave("D:/cpr/elections/TN/won_map_19.png", width = 6, height = 4)
 
 ```
 
+## party maps
+
+
+```{r}
+ae_16 <-  tn_ae %>% filter(year ==2016)
+
+
+tn_16_19 <- data.table::rbindlist(list(ae_16, tn_19),use.names = TRUE, fill = TRUE)
+
+tn_16_19_map <- inner_join(ac_tn, tn_16_19, by = c("AC_NO"= "constituency_no"))
+
+```
+
+
+
+## AMMK + DMDK
+
+
+```{r}
+
+# tn_mk <- tn_19 %>% filter(party %in% c("DMDK", "AMMK") )
+# 
+# 
+# 
+# tn_mk_map <- left_join(ac_tn, tn_mk, by = c("AC_NO"= "constituency_no"))
+# 
+# 
+# #tn_16_19_map$dmdk <- ifelse(tn_16_19_map$party =="DMDK",tn_16_19_map$vote_share_percentage,NA)
+# 
+# ggplot(tn_mk_map)+
+#   geom_sf(aes(fill= vote_share_percentage))+
+#   #facet_grid(~party)+
+#   scale_fill_continuous(low="blue", high="red",guide="colorbar",na.value="white")
+#   scale_fill_manual(values = c("DMDK" ="green",
+#                                "OTHERS" = "White"))+
+#   theme_map()+
+#     #labs(title ="DMK Seats")+
+#     theme(text = element_text(family = "serif"),
+#           legend.position = "none",
+#           legend.title = element_blank())
+
+
+```
+
+
+### DMK
+
+
+```{r}
+
+pos <- c(
+                    `1` = "First",
+                    `2` = "second",
+                    `2016` = "2016 AC",
+                    `2019` = "2019 AS lead"
+                    )
+
+tn_16_19_map$dmk <- ifelse(tn_16_19_map$party =="DMK","DMK","OTHERS")
+
+ggplot(tn_16_19_map %>% filter( position %in% c(1,2) ))+
+  geom_sf(aes(fill= factor(dmk)))+
+  facet_grid(~year +position,labeller = as_labeller(pos))+
+  scale_fill_manual(values = c("DMK" ="tomato2",
+                               "OTHERS" = "White"))+
+  theme_map()+
+    #labs(title ="DMK Seats")+
+    theme(text = element_text(family = "serif"),
+          legend.position = "none",
+          legend.title = element_blank())
+
+
+ggsave("D:/cpr/elections/TN/tn_dmk_map.png", height = 3, width = 8)
+
+```
+
+
+## AIDMK
+
+```{r}
+
+tn_16_19_map$admk <- ifelse(tn_16_19_map$party =="ADMK","ADMK","OTHERS")
+
+ggplot(tn_16_19_map %>% filter( position %in% c(1,2) ))+
+  geom_sf(aes(fill= factor(admk)))+
+  facet_grid(~year +position,labeller = as_labeller(pos))+
+  scale_fill_manual(values = c("ADMK" ="indianred2",
+                               "OTHERS" = "White"))+
+  theme_map()+
+    #labs(title ="Tamil Nadu : Sub Regions")+
+    theme(text = element_text(family = "serif"),
+          legend.position = "none",
+          legend.title = element_blank())
+
+
+
+
+ggsave("D:/cpr/elections/TN/tn_admk_map.png", height = 3, width = 8)
+
+#unique(tn_16_19_map$party[tn_16_19_map$position %in% c(1,2)])
+
+```
+
+
+
+## LF
+
+```{r}
+
+tn_16_19_map$lf <- ifelse(tn_16_19_map$party %in% c("CPI","CPM","CPI(ML)(L)","CPIM"),"LF","OTHERS")
+
+ggplot(tn_16_19_map %>% filter( position %in% c(1,2) ))+
+  geom_sf(aes(fill= factor(lf)))+
+  facet_grid(~year +position,labeller = as_labeller(pos))+
+  scale_fill_manual(values = c("LF" ="red",
+                               "OTHERS" = "White"))+
+  theme_map()+
+    #labs(title ="Tamil Nadu : Sub Regions")+
+    theme(text = element_text(family = "serif"),
+          legend.position = "none",
+          legend.title = element_blank())
+
+ggsave("D:/cpr/elections/TN/tn_lf_map.png", height = 3, width = 8)
+
+#ggsave("D:/cpr/elections/TN/tn_subreg_map.png", height = 4, width = 6)
+
+
+
+
+
+
+```
+
+
+## INC
+
+
+```{r}
+
+tn_16_19_map$inc <- ifelse(tn_16_19_map$party =="INC","INC","OTHERS")
+
+ggplot(tn_16_19_map %>% filter( position %in% c(1,2) ))+
+  geom_sf(aes(fill= factor(inc)))+
+  facet_grid(~year +position,labeller = as_labeller(pos))+
+  scale_fill_manual(values = c("INC" ="steelblue",
+                               "OTHERS" = "White"))+
+  theme_map()+
+    #labs(title ="Tamil Nadu : Sub Regions")+
+    theme(text = element_text(family = "serif"),
+          legend.position = "none",
+          legend.title = element_blank())
+
+
+ggsave("D:/cpr/elections/TN/tn_inc_map.png", height = 3, width = 8)
+
+#ggsave("D:/cpr/elections/TN/tn_subreg_map.png", height = 4, width = 6)
+
+```
+
 
 <!-- ## 2016 -->
 
@@ -436,6 +598,11 @@ ggsave("D:/cpr/elections/TN/won_map_19.png", width = 6, height = 4)
 
 
 
+
+
+
+# Vote share correlation
+
 ## Reservation
 
 
@@ -444,9 +611,6 @@ res <-  tn_ae%>% filter(year==2011 & position==1) %>% select(constituency_no, co
 
 table(res$reservation)
 ```
-
-
-## Vote share correlation
 
 
 ### Turnout
@@ -710,11 +874,58 @@ ae_tn %>%filter(position ==1) %>% filter(front %in% c("DMK","ADMK"))%>% group_by
 
 vs <- read.csv("D:/cpr/elections/TN/vote.csv")
 
-names(vs) <- c("party", "1967","1971","1980","1984","1989","1991","1996","2001","2006","2001","2016","2019")
+names(vs) <- c("party", "1967","1971","1980","1984","1989","1991","1996","2001","2006","2001","2011","2016","2019")
 
-vs %>% ungroup() %>% pivot_longer(-vs$party)
+vs_l <- vs %>%  pivot_longer(-c(1:1)) %>% mutate(name = as.numeric(name))
 
-vs$
+
+  ggplot(vs_l %>% filter(name>=1980),aes(name, value, color = party))+
+  geom_point()+
+  geom_line(size = 1)+
+  xlim(1980,2020)+
+  #colorspace::scale_colour_discrete_qualitative(palette = "Dark 2")+
+
+  labs(title = "Vote share of major parties",subtitle = "TN 1967:2019",  x = "Years", y = "Vote share (%)", fill = "Election Type" )+
+  scale_color_manual(values = c(
+                                "Congress" = "steelblue",
+                                "CPM" = "red",
+                                "Others" = "grey",
+                                 "CPI+CPM" = "red",
+                                "AIADMK" = "indianred3",
+                                "BJP" = "darkorange1",
+                                "DMK" = "magenta3"))+
+
+  theme_minimal()+
+  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
+        legend.position = "bottom",
+        plot.background = element_blank(),
+        plot.title = element_text( size = 18, family = "serif"),
+        plot.subtitle = element_text( size = 15,color = "grey50",
+                                     margin = margin(t = 0, r = 0, b = 20, l = 0)),
+        text = element_text(color = "gray20",family = "serif"),
+        axis.text.x = element_text( 
+                                   hjust = .5, vjust = 0),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 12),
+        axis.text = element_text(face = "italic", size = 10),
+        axis.title = element_text(vjust = -1, size = 15),        
+        axis.ticks = element_blank(),
+        panel.grid.major = element_line(color = "gray", size = .5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+         axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+       # axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+        axis.line.x = element_line(),
+        axis.title.x = element_blank()
+  ) 
+  
+  
+  
+    ggsave("D:/cpr/elections/TN/vs_hist.png", width = 6, height =4)
+  
+  
+  
+  
 ```
 
 

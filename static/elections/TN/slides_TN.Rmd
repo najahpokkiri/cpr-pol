@@ -15,105 +15,199 @@ header-includes:
 classoption: aspectratio=169
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+```{r setup, include=FALSE, }
+knitr::opts_chunk$set(echo = FALSE, cache= TRUE)
 knitr::opts_chunk$set(dev = 'pdf')
 ```
 
 <!-- WB map -->
 
+```{r TN map, fig.show="hold", out.width= "40%", out.height="100%",fig.align='center'}
 
-```{r TN map, fig.show="hold", out.width= "50%", out.height="100%",fig.align='center'}
+ knitr::include_graphics(c("D:/cpr/elections/TN/tn_map.png","D:/cpr/elections/TN/tn_subreg_map.png"))
+ 
 
- knitr::include_graphics(c("D:/cpr/elections/TN/tn_map.png"))
 
 ```
 
-------------------------------------------------------------------------
+<!-- ```{r sub region party, out.width= "80%",out.height = "100%", fig.show="hold",  echo = FALSE, fig.align='center'} -->
 
-```{r sub region party, out.width= "80%",out.height = "100%", fig.show="hold",  echo = FALSE, fig.align='center'}
+<!-- knitr::include_graphics(c("D:/cpr/elections/TN/vs_hist.png" )) -->
 
-knitr::include_graphics(c("D:/cpr/elections/TN/vs_hist.png" ))
-
-```
-
-
-------------------------------------------------------------------------
-
-```{r sub region front, out.width= "80%",out.height = "100%", fig.show="hold",  echo = FALSE, fig.align='center'}
-knitr::include_graphics(c("D:/cpr/elections/TN/won_map_19.png" ))
-```
-
-
-------------------------------------------------------------------------
-
-
-## Sub-regions
-
-```{r TN map sub, fig.show="hold", out.width= "90%", out.height="80%",fig.align='center'}
- knitr::include_graphics(c("D:/cpr/elections/TN/tn_subreg_map.png"))
-```
+<!-- ``` -->
 
 ------------------------------------------------------------------------
 
 ### Sub-region demographics
 
-+---------------+-------+----------------------------------------------------------+
-| Sub region    | n\_ac | Districts                                                |
-+===============+=======+==========================================================+
-| Upper North   | 32    | Tiruvallur, Chennai,                                     |
-|               |       |                                                          |
-|               |       | Kanchipuram, Vellore, Krishnagiri                        |
-|               |       |                                                          |
-|               |       | <br>                                                     |
-+---------------+-------+----------------------------------------------------------+
-| North Central | 54    | Dharmapuri, Salem,                                       |
-|               |       |                                                          |
-|               |       | Tiruvannamalai, Villupuram, Cuddalore                    |
-|               |       |                                                          |
-|               |       | <br>                                                     |
-+---------------+-------+----------------------------------------------------------+
-| Cauvery Delta | 42    | Karur, Karur, Tiruchirappalli, Pudukkottai, Perambalur,  |
-|               |       |                                                          |
-|               |       | Ariyalur, Nagapattinam, Thanjavur, Tiruvarur             |
-|               |       |                                                          |
-|               |       | <br>                                                     |
-+---------------+-------+----------------------------------------------------------+
-| West          | 42    | Namakkal, Erode, Tirupur, Nilgiris, Coimbatore, Dindigul |
-|               |       |                                                          |
-|               |       | <br>                                                     |
-+---------------+-------+----------------------------------------------------------+
-| South         | 54    | Sivaganga, Madurai, Theni, Virudhunagar,                 |
-|               |       |                                                          |
-|               |       | Ramanathapuram, Thoothukudi, Tirunelveli, Kanniyakumari  |
-|               |       |                                                          |
-|               |       | <br>                                                     |
-+---------------+-------+----------------------------------------------------------+
-
-<!-- Table: sub-region demographics -->
++---------------+-------+----------------------------------------------------------+-------------+
+| Sub region    | n\_ac | Districts                                                |             |
++===============+=======+==========================================================+=============+
+| Upper North   | 42    | Tiruvallur, Chennai,                                     | Hindus - 88 |
+|               |       |                                                          |             |
+|               |       | Kanchipuram, Vellore, Krishnagiri                        | SC - 17     |
+|               |       |                                                          |             |
+|               |       | <br>                                                     | <br>        |
++---------------+-------+----------------------------------------------------------+-------------+
+| North Central | 54    | Dharmapuri, Salem,                                       | Hindus - 93 |
+|               |       |                                                          |             |
+|               |       | Tiruvannamalai, Villupuram, Cuddalore                    | SC - 22     |
+|               |       |                                                          |             |
+|               |       | <br>                                                     | <br>        |
++---------------+-------+----------------------------------------------------------+-------------+
+| Cauvery Delta | 42    | Karur, Karur, Tiruchirappalli, Pudukkottai, Perambalur,  | Hindus - 89 |
+|               |       |                                                          |             |
+|               |       | Ariyalur, Nagapattinam, Thanjavur, Tiruvarur             | SC - 23     |
+|               |       |                                                          |             |
+|               |       | <br>                                                     | <br>        |
++---------------+-------+----------------------------------------------------------+-------------+
+| West          | 42    | Namakkal, Erode, Tirupur, Nilgiris, Coimbatore, Dindigul | Hindus - 91 |
+|               |       |                                                          |             |
+|               |       | <br>                                                     | SC - 18     |
++---------------+-------+----------------------------------------------------------+-------------+
+| South         | 54    | Sivaganga, Madurai, Theni, Virudhunagar,                 | Hindus - 83 |
+|               |       |                                                          |             |
+|               |       | Ramanathapuram, Thoothukudi, Tirunelveli, Kanniyakumari  | SC - 15     |
+|               |       |                                                          |             |
+|               |       | <br>                                                     |             |
++---------------+-------+----------------------------------------------------------+-------------+
 
 ------------------------------------------------------------------------
 
-```{r vote & seat share, out.width= "49%",fig.show="hold",  echo = FALSE, fig.align='center'}
-knitr::include_graphics(c("D:/cpr/elections/TN/front_19_vs.png", "D:/cpr/elections/TN/front_19_seats.png"))
-```   
+## Changing alliances
 
-
++------+------------------------+---------------------------------+----------------------------+--------+
+| Year | ADMK+                  | DMK+                            | Others                     | Others |
++======+========================+=================================+============================+========+
+| 2021 | AIADMK,                | DMK, INC,                       | AMMK, DMDK                 | MNM    |
+|      |                        |                                 |                            |        |
+|      | PMK, BJP, TMC          | Left, VCK, MDMK                 |                            |        |
++------+------------------------+---------------------------------+----------------------------+--------+
+| 2019 | AIADMK, BJP, PMK, DMDK | DMK, INC, Left, VCK, MDMK, IUML | AMMK                       | MNM    |
++------+------------------------+---------------------------------+----------------------------+--------+
+| 2016 | AIADMK                 | DMK, INC                        | DMDK, MDMK, Left, TMC, VCK | PMK    |
++------+------------------------+---------------------------------+----------------------------+--------+
+| 2011 | AIADMK, DMDK, Left     | DMK, INC, PMK, VCK              | BJP                        | MNM    |
++------+------------------------+---------------------------------+----------------------------+--------+
 
 ------------------------------------------------------------------------
 
-```{r women voting,out.width= "80%",out.height = "100%", fig.show="hold",  echo = FALSE, fig.align='center'}
+## Alliance vote shares
 
-knitr::include_graphics("D:/cpr/elections/tn/women_collage.png")
+| Year    | ADMK Alliance | DMK Alliance |
+|---------|---------------|--------------|
+| 2001 VS | 50.1          | 38.7         |
+| 2004 LS | 51.5          | 34.8         |
+| 2006 VS | 40.1          | 44.8         |
+| 2009 LS | 37.3          | 42.5         |
+| 2011 VS | 51.8          | 39.4         |
+| 2014 LS | 44.2          | 23.5         |
+| 2016 VS | 40.8          | 39.8         |
+| 2019 LS | 31.3          | 52.4         |
+
+------------------------------------------------------------------------
+
+```{r segemnts, fig.show="hold", out.width= "60%", out.height="80%",fig.align='center'}
+
+knitr::include_graphics(c("D:/cpr/elections/TN/table_segments.jpeg"))
+```
+
+------------------------------------------------------------------------
+
+## DMK
+
+```{r party dmk, out.width= "100%",out.height = "80%", fig.show="hold",  echo = FALSE, fig.align='center'}
+
+knitr::include_graphics("D:/cpr/elections/TN/tn_dmk_map.png")
 
 ```
 
----
+------------------------------------------------------------------------
 
-### party column header is missing
+## ADMK
 
-```{r caste, out.width= "80%",out.height = "100%", fig.show="hold",  echo = FALSE, fig.align='center', fig.cap = "Party missing in screenshot"}
+```{r party admk, out.width= "100%",out.height = "80%", fig.show="hold",  echo = FALSE, fig.align='center'}
 
-knitr::include_graphics(c("D:/cpr/elections/TN/caste_tn_csds.png" ))
+knitr::include_graphics("D:/cpr/elections/TN/tn_admk_map.png")
+
+```
+
+------------------------------------------------------------------------
+
+## INC
+
+```{r party inc, out.width= "100%",out.height = "80%", fig.show="hold",  echo = FALSE, fig.align='center'}
+
+knitr::include_graphics("D:/cpr/elections/TN/tn_inc_map.png")
+
+```
+
+------------------------------------------------------------------------
+
+### 2021 Seats allotment
+
+```{r divisions, out.width= "49%",fig.show="hold",  echo = FALSE, fig.align='center'}
+knitr::include_graphics(c("D:/cpr/elections/TN/2_alliance_1.jpeg", "D:/cpr/elections/TN/21_alliance_3.jpeg"))
+
+```
+
+<!-- ## Sub-regions -->
+
+<!-- ```{r TN map sub, fig.show="hold", out.width= "90%", out.height="80%",fig.align='center'} -->
+
+<!--  knitr::include_graphics(c("D:/cpr/elections/TN/tn_subreg_map.png")) -->
+
+<!-- ``` -->
+
+<!-- Table: sub-region demographics -->
+
+<!-- ```{r vote & seat share, out.width= "49%",fig.show="hold",  echo = FALSE, fig.align='center'} -->
+
+<!-- knitr::include_graphics(c("D:/cpr/elections/TN/front_19_vs.png", "D:/cpr/elections/TN/front_19_seats.png")) -->
+
+<!-- ``` -->
+
+<!-- ------------------------------------------------------------------------ -->
+
+<!-- ------------------------------------------------------------------------ -->
+
+<!-- ## Left Front -->
+
+<!-- ```{r party lf, out.width= "100%",out.height = "80%", fig.show="hold",  echo = FALSE, fig.align='center'} -->
+
+<!-- knitr::include_graphics("D:/cpr/elections/TN/tn_lf_map.png") -->
+
+<!-- ``` -->
+
+------------------------------------------------------------------------
+
+```{}
+```
+
+------------------------------------------------------------------------
+
+### Caste-wise voting pattern
+
+```{r caste, out.width= "80%",out.height = "100%", fig.show="hold",  echo = FALSE, fig.align='center'}
+
+knitr::include_graphics(c("D:/cpr/elections/TN/csds_caste_1.png" ))
+
+```
+
+------------------------------------------------------------------------
+
+## Dinakaran effect?
+
+```{r out.width= "80%",out.height = "80%",fig.show="hold",  echo = FALSE, fig.align='center'}
+
+knitr::include_graphics(c("D:/cpr/elections/TN/table_4_6.png"))
+
+```
+
+## Women voters in absence of Jaya
+
+```{r women voting,out.width= "80%",out.height = "80%", fig.show="hold",  echo = FALSE, fig.align='center'}
+
+knitr::include_graphics("D:/cpr/elections/tn/womne_collage_2.png")
 
 ```
