@@ -616,6 +616,50 @@ table(res$reservation)
 ### Turnout
 
 
+#### 2016
+
+
+```{r}
+
+to_16 <- read.csv("D:/cpr/elections/TN/turnout_16.csv")
+
+names(to_16)[1] <- "constituency_no"
+ae_16_admk <- ae_16 %>% filter(party =="ADMK")
+
+ae_16_admk_to <- inner_join(to_16, ae_16_admk, by ="constituency_no")
+
+ggplot(ae_16_admk_to , aes(female_turnout,vote_share_percentage))+
+  geom_point(alpha = .5)+
+  geom_smooth(method = "lm", se = FALSE)+
+     labs(title = "ADMK vote share as a function of women turnout % ", y = "Vote share(%)",subtitle = "Tamil Nadu Assembly election 2016", x = "Female turnout (%) ", color = "Front")+
+    theme_minimal()+
+  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
+        #legend.position = "bottom",
+        plot.background = element_blank(),
+        #plot.title = element_text( size = 18, family = "serif"),
+        plot.subtitle = element_text(  margin = margin(t = 0, r = 0, b = 20, l = 0)),
+     
+        axis.ticks = element_blank(),
+        panel.grid.major = element_line(color = "gray", size = .5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+       axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+        axis.line.x = element_line(),
+        #axis.title.x = element_blank()
+  )
+
+ggsave("D:/cpr/elections/TN/admk_vs_to.png", width = 6, height = 4)
+  
+
+```
+
+
+
+
+#### 2019
+
+
 ```{r}
 
 pc_to <- readxl::read_xls("D:/cpr/data/election/2019/pc_turnnout_19.xls")
