@@ -567,8 +567,48 @@ kl_el <- kl_el %>% mutate(party_1= case_when (party %in% c("MUL", "INL", "IUML")
                                                     party %in% c("KEC(J)",  "KEC(B)", "KEC(M)") ~"KEC",
                                                     TRUE ~party))
 
+front_vs <- kl_el %>% select(constituency_no,front, vote_share_percentage) %>% filter(front!= "OTHERS") %>%group_by(constituency_no, front)%>% mutate(rn = row_number()) %>% pivot_wider(names_from = c( front), values_from = vote_share_percentage) 
+
+
+
+cor(front_vs$LDF,front_vs$NDA,use = "complete.obs")
 
 ```
+
+
+## young candidates
+
+```{r}
+
+
+
+
+ae_16_kl <- read.csv("D:/Ashoka/Academics/Semester 4/Data driven elctoral analysis/Data Sets/AE.Kerala.csv")
+
+ae_kl_merge <- kl_el %>% filter(year ==2016) %>% inner_join(ae_16_kl, by = c("constituency_no" = "Constituency_No", "position" = "Position"))
+
+vs_16 <- kl_el %>% filter(year ==2016 & position ==1) %>% select(constituency_no, vote_share_percentage)
+
+names(vs_16) <- c("ac_16","vs_16")
+
+vs_11 <- kl_el %>% filter(year ==2011 & position ==1) %>% select(constituency_no, vote_share_percentage)
+
+names(vs_11) <- c("ac_11","vs_11")
+vs_11_16 <- cbind(vs_11, vs_16)
+
+ae_16_win <-ae_16_kl %>% filter(Position ==1 & Year ==2016) %>% arrange(Constituency_No) %>% select(Age)
+
+vs_11_16 <- vs_11_16 %>% mutate(vs_change = vs_16 -  vs_11)
+
+tab_age <- cbind(vs_11_16 ,ae_16_win)
+
+ggplot(tab_age , aes(Age, vs_change))+
+  geom_point()+
+  geom_smooth(method = "lm", se = FALSE)
+
+```
+
+
 
 # Front
 
@@ -646,7 +686,7 @@ labs(title = "Seat share of major fronts",subtitle = "Assembly segements - 1996:
          
            
         axis.ticks = element_blank(),
-        panel.grid.major = element_line(color = "gray50", size = .5),
+        panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.grid.major.x = element_blank(),
       

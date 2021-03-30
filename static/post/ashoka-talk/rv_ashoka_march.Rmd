@@ -1,9 +1,10 @@
 ---
 title: "Electoral Behaviour in India"
-# subtitle : "Election Adda 2021"
+#subtitle : "Department of Political Science, Univeristy of Delhi"
+#author: "Rahul Verma"
 author: "Rahul Verma"
 institute: "Centre for Policy Research"
-date: "18th March, 2021"
+date: "31st March, 2021"
 output:
   beamer_presentation:
     theme: "CambridgeUS"
@@ -12,15 +13,17 @@ output:
     toc: FALSE
     slide_level: 2
 header-includes:
-    - \titlegraphic{\centering \includegraphics[width=6cm]{D:/cpr/misc/cpr_logo2.png}}
+    #- \addtobeamertemplate{title page}{\begin{center}Department of Political Science, University of Delhi\end{center}}{}
+    - \titlegraphic{\centering \includegraphics[width=6cm]{D:/cpr/misc/cpr_logo2.png}}  
+    #- \setbeamerfont{institute}{size={\fontsize{8}{20}}}
+
 #classoption: aspectratio=169 
 
 ---
 
 
-
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, cache = FALSE)
 
 knitr::opts_chunk$set(dev = 'pdf')
 ```
@@ -76,7 +79,7 @@ knitr::include_graphics(c("D:/cpr/misc/books/books_collage_2.png"))
 
 
 
-## Major theories of voting behaviour 
+## Major theories of voting behaviour
 
 
 - Sociological Model: Identified with the Columbia school - focuses on influence of social factors like group affiliation (**The People’s Choice; Personal Influence**).
@@ -87,12 +90,12 @@ knitr::include_graphics(c("D:/cpr/misc/books/books_collage_2.png"))
 
 
 
-# How do Indians vote?  
+# How do Indians vote?
 
 ---
 
 
-## Major theories and framework  
+## Major theories and framework
 
 
 ###  Preferences and Political accountability
@@ -100,57 +103,57 @@ knitr::include_graphics(c("D:/cpr/misc/books/books_collage_2.png"))
 - Ethnicity, caste, religion
 
     - In-group favoritism - Ethnic voting
-  
-    - Co-religiosity and voting behaviour 
 
-- Clientelism/Patronage Politics: 
+    - Co-religiosity and voting behaviour
 
-    - Quid pro quo - Political parties earn support by the distribution of public or private goods to targeted groups of voters 
+- Clientelism/Patronage Politics:
+
+    - Quid pro quo - Political parties earn support by the distribution of public or private goods to targeted groups of voters
 
     - India as a patronage democracy -> ethnic favouritism .
-    
+
     - Brokers/ Intermediaries
-    
-      - *Naya Neta's* 
-    
-      - *You can’t buy a vote* 
-    
+
+      - *Naya Neta's*
+
+      - *You can’t buy a vote*
+
 ---
 
 - Programmatic Voting
 
     - Voters reward performance on civic/economic and developmental issues.
-    
-    - Public provisioning of private, tangible goods 
-    
+
+    - Public provisioning of private, tangible goods
+
     - Retrospective voting
 
-        - Voters make the government accountable by punishing/rewarding them based on their actions during the rule. 
-        
-    - Perspective voting
-    
+        - Voters make the government accountable by punishing/rewarding them based on their actions during the rule.
+
+    - Prospective voting
+
         - Voters prefer a party based on their promises that will be delivered once they are in rule.
 
 
-    
+
 - Personalistic voting
 
 
 
 ---
-    
+
 - Partisanship
 
-    - People identify with certain parties and their loyalty stays intact despite political circumstances. 
-    
+    - People identify with certain parties and their loyalty stays intact despite political circumstances.
+
 
 - Ideology
 
     - Spatial / Downsian model
-    
-         - preference based on ideological proximities between parties and voters ; Median voter theorem .
-    
-         - Ideology & Identity 
+
+         - Preference based on ideological proximities between parties and voters ; Median voter theorem .
+
+         - Ideology & Identity
 
 
 
@@ -161,25 +164,25 @@ knitr::include_graphics(c("D:/cpr/misc/books/books_collage_2.png"))
 - **Why use surveys? **
 
     - Is there utility beyond poll predictions? Use in academia, policy-making
-    
-    - Extensive thematic spread 
-    
-    - Consistency of questions gives temporal comparability 
+
+    - Extensive thematic spread
+
+    - Consistency of questions gives temporal comparability
 
 
 - **Kinds of surveys **
 
-  - Pre, Post and Exit 
+  - Pre, Post and Exit
 
 - Clarifies issues salient to making voting decisions - short term and long term factors.
 
 - Snapshot of group behaviour at macro level - group affiliation, groupthink, partisan sorting .
- 
+
 
 
 ---
 
-## National Election Studies 
+## National Election Studies
 
 - Conducted by the Lokniti-Centre for the Study of Developing Societies , NES are a series of nationally representative surveys conducted during before and after Lok Sabha elections.
 
@@ -189,19 +192,19 @@ knitr::include_graphics(c("D:/cpr/misc/books/books_collage_2.png"))
 
 ---
 
-## National Election Studies 
+## National Election Studies
 
 **Studying voting behaviour involves going beyond the question of who people vote for. Major themes in the questionnaire :**
 
 - Voting choice and partisan affiliation
 - Issue and current events based voting
-- Public opinion on institutions  
+- Public opinion on institutions
 - Ideological position
 - Religiosity
 - Political participation and mobilisation
-- Leadership effect 
-- Demographic details 
-- Media exposure 
+- Leadership effect
+- Demographic details
+- Media exposure
 
 
 
@@ -215,47 +218,47 @@ knitr::include_graphics(c("D:/cpr/misc/books/books_collage_2.png"))
 
 ## Limitations of survey research
 
-  - Biases associated with questionnaire design, sampling 
-  
-  - Sacrifice depth for scale 
-  
-  - Difficult to maintain comparability across waves 
-  
-  - Expensive 
-  
-  
-  
+  - Biases associated with questionnaire design, sampling
+
+  - Sacrifice depth for scale
+
+  - Difficult to maintain comparability across waves
+
+  - Expensive
+
+
+
 ---
-  
-## What does the future hold? 
+
+## What does the future hold?
 
   - Technological changes allows for greater frequency of large scale surveys.
-  
+
   - Survey experiments
-  
+
   - Longitudinal panel-based studies to understand nuanced changes in opinions.
-  
+
   - More researchers with technical skills.
 
 ---
 
 ## Why is it difficult to study Indian voters ?
 
-  
+
 - Conceptual limitations: diverse country, post-colonial experiment, nascent democracy
 
-- Data paucity: lack of longitudinal data, methodological concerns 
+- Data paucity: lack of longitudinal data, methodological concerns
 
-- False binary of methods : conversation between disciplines needs to move beyond simple criticism and towards greater synthesis and rigour 
+- False binary of methods : conversation between disciplines needs to move beyond simple criticism and towards greater synthesis and rigour
 
-- Lack of trained data researchers 
+- Lack of trained data researchers
 
-- Lack of open data access 
-
-
+- Lack of open data access
 
 
-# Way forward 
+
+
+# Way forward
 
 ---
 
@@ -300,7 +303,7 @@ knitr::include_graphics(c("D:/cpr/misc/books/indian_voter/10.png", "D:/cpr/misc/
 
 
 
-## Future promises for electoral studies in India 
+## Future promises for electoral studies in India
 
 
 - Fill gaps in the data: Increasing ease of doing surveys allows for more data
