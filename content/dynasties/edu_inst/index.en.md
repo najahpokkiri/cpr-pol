@@ -136,12 +136,17 @@ Average number of colleges built every year in a constituency is 1.37
 ---
 
 
-## post 2009
+
+
+**Distribution of number of colleges in a constituency**
+
+**Post 2009**
 
 <img src="index.en_files/figure-html/unnamed-chunk-9-1.png" width="768" />
 
+---
 
-## pre 2009
+**Pre 2009**
 
 <img src="index.en_files/figure-html/unnamed-chunk-10-1.png" width="768" />
 

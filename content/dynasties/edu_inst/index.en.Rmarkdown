@@ -204,7 +204,11 @@ ggplot(dyn_up_college, aes(n_colleges, color =year_el))+
 ---
 
 
-## post 2009
+
+
+**Distribution of number of colleges in a constituency**
+
+**Post 2009**
 
 ```{r}
 
@@ -215,8 +219,9 @@ ggplot( aes(count))+
 
 ```
 
+---
 
-## pre 2009
+**Pre 2009**
 
 ```{r}
 
