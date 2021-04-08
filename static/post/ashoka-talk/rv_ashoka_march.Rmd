@@ -4,7 +4,7 @@ title: "Electoral Behaviour in India"
 #author: "Rahul Verma"
 author: "Rahul Verma"
 institute: "Centre for Policy Research"
-date: "31st March, 2021"
+date: "4th April, 2021"
 output:
   beamer_presentation:
     theme: "CambridgeUS"
