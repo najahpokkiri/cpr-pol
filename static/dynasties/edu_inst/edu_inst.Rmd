@@ -446,21 +446,46 @@ Inorder to use the adr variables in the model, I have to limit the years to post
 
 
 
-shrug_adr_all<- fread("D:/cpr/data/shrug/shrug/shrug-v1.4.samosa-affidavits-csv/affidavits_clean.csv")
-
-shrug_adr <- shrug_adr_all %>% filter(grepl("-09-", ac_id))
-
-
-shrug_adr <- shrug_adr %>% mutate(ac_no = as.numeric(str_sub(ac_id, -3)), .after = ac_id)
-
-shrug_adr_up <- shrug_adr %>% filter(year %in% c(2007, 2012, 2017) & winner ==1)
-
-
-# str_sub(head(shrug_adr$ac_id), -3)
+# shrug_adr_all<- fread("D:/cpr/data/shrug/shrug/shrug-v1.4.samosa-affidavits-csv/affidavits_clean.csv")
 # 
-# str(shrug_adr)
+# shrug_adr <- shrug_adr_all %>% filter(grepl("-09-", ac_id))
+# 
+# 
+# shrug_adr <- shrug_adr %>% mutate(ac_no = as.numeric(str_sub(ac_id, -3)), .after = ac_id)
+# 
+# shrug_adr_up <- shrug_adr %>% filter(year %in% c(2007, 2012, 2017) & winner ==1)
 
-dyn_up_college_adr <- inner_join(dyn_up_college, shrug_adr_up, by =c("year_el" = "year", "AC_NO"= "ac_no"))
+# 
+# adr_12 <- fread("D:/cpr/UP/up-dynasties/dyn_other_data/adr/up_12_adr.csv")
+# 
+# adr_12 <- adr_12 %>% filter(Position ==1)%>% select(c(Year, Constituency_No,12:12,23:23,30:30,75:76))
+# 
+# 
+# 
+# adr_17 <- fread("D:/cpr/UP/up-dynasties/dyn_other_data/adr/up_17_adr.csv")
+# 
+# adr_17 <- adr_17 %>% filter(Position ==1)%>% select(c(Year, Constituency_No,8:8,19:19,26:26,71:72))
+# 
+# write.csv(adr_17,"D:/cpr/UP/up-dynasties/dyn_other_data/adr/up_17_adr_s.csv")
+# 
+# write.csv(adr_12,"D:/cpr/UP/up-dynasties/dyn_other_data/adr/up_12_adr_s.csv")
+
+
+# rbindlist(list(adr_12, adr_17), use.names = TRUE, fill = TRUE)
+# 
+# rbind(adr_12, adr_17)
+
+
+ adr_up<- fread("D:/cpr/UP/up-dynasties/dyn_other_data/adr/up_12_adr_S.csv")
+
+
+
+
+dyn_up_college_adr <- inner_join(dyn_up_college, adr_up, by =c("year_el" = "Year", "AC_NO"= "Constituency_No"))
+
+dyn_up_college_adr$total_immovable_assets_totals <- ifelse(dyn_up_college_adr$total_immovable_assets_totals ==0,1,dyn_up_college_adr$total_immovable_assets_totals )
+
+dyn_up_college_adr$total_movable_assets_totals <- ifelse(dyn_up_college_adr$total_movable_assets_totals ==0,1,dyn_up_college_adr$total_movable_assets_totals )
 
 ```
 
@@ -482,14 +507,14 @@ dyn_up_college_adr$caste_non_yadav_obc <- ifelse(dyn_up_college_adr$caste_groups
 
 
 
-fit.poisson <- glm(data = dyn_up_college_adr, n_colleges ~ dyn_cum_2+caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  + ed+ assets + num_crim+ 
+fit.poisson <- glm(data = dyn_up_college_adr, n_colleges ~ dyn_cum_2+caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  + log(total_immovable_assets_totals) + log(total_movable_assets_totals)+ serious_crime+non_serious_crime+
                      factor(year_el ), family =  "quasipoisson")
 
 
 #summary(fit.poisson)
 
 stargazer(fit.poisson,title="Regression Results - UP  colleges: adr variables - Dynast 2 ",type = "html",
-align=TRUE,  no.space=TRUE, keep = c("dyn_cum_2" ,    "ed", "num_crim", "assets",      "caste_uc", "caste_yadav"   ,      "caste_non_yadav_obc" ,"caste_dalit"   ,"caste_muslim" ),omit.stat=c("LL","ser","f"),add.lines=list(c('Year fixed effects', 'Yes','Yes','Yes','Yes' )))
+align=TRUE,  no.space=TRUE, keep = c("dyn_cum_2" ,         "caste_uc", "caste_yadav"   ,      "caste_non_yadav_obc" ,"caste_dalit"   ,"caste_muslim" ,"serious_crime ","non_serious_crime","log(total_movable_assets_totals)","log(total_immovable_assets_totals)" ),omit.stat=c("LL","ser","f"),add.lines=list(c('Year fixed effects', 'Yes','Yes','Yes','Yes' )))
 
 
 ```
@@ -632,21 +657,6 @@ dyn_in_college$n_private <- replace_na(dyn_in_college$n_private, 0)
 
 
 
-## adr
-
-
-
-shrug_adr_in <- shrug_adr_all %>% mutate(ac_no = as.numeric(str_sub(ac_id, -3)), .after = ac_id)
-
-shrug_adr_in<- shrug_adr_in %>% filter(year %in% c(2009, 2014) & winner ==1)
-
-
-dyn_in_college_adr <- inner_join(dyn_in_college, shrug_adr_in, by =c("State"="pc01_state_name","year_el" = "year", "AC_NO"= "ac_no"))
-
-
-
-
-
 ```
 
 
@@ -764,13 +774,58 @@ add.lines=list(c('Year fixed effects', 'Yes','Yes','Yes','Yes' ), c('State fixed
 
 ### with adr
 
+```{r}
+
+## adr
+
+
+# 
+# shrug_adr_in <- shrug_adr_all %>% mutate(ac_no = as.numeric(str_sub(ac_id, -3)), .after = ac_id)
+# 
+# shrug_adr_in<- shrug_adr_in %>% filter(year %in% c(2009, 2014) & winner ==1)
+
+
+adr <- fread("D:/cpr/UP/up-dynasties/dyn_other_data/adr/adr_tcpd_09_14_19.csv")
+
+adr_in <- adr %>% filter(Position ==1) %>% select(c(12:12,18:19,5:10,55:61))
+
+
+adr_in$total_assets <- as.numeric(adr_in$total_assets)
+
+adr_in$term_duration <- ifelse(adr_in$Year==2019,2,5)
+
+
+
+adr_in <- adr_in %>% mutate(edu = case_when(education %in% c("5th Pass","10th Pass","8th Pass") ~"10",
+                                  education == "12th Pass" ~"12",
+                                  education %in% c("Graduate","Graduate Professional") ~"14",
+                                  education == "Post Graduate" ~ "16",
+                                  education == "Doctorate" ~"18",
+                                  education %in% c("Literate","Others") ~"5",
+                                  TRUE ~ "0"
+                                  
+                                  
+                                  ))
+
+adr_in$edu <- as.numeric(adr_in$edu )
+
+
+dyn_in_college_adr <- inner_join(dyn_in_college, adr_in, by =c("State"="StateName","year_el" = "Year", "AC_NO"= "Constituency_No"))
+
+# dyn_in_college_adr <- inner_join(dyn_in_college, shrug_adr_in, by =c("State"="pc01_state_name","year_el" = "year", "AC_NO"= "ac_no"))
+
+
+
+```
+
+
 ```{r, results = "asis"}
 
-fit.poisson <- glm(data = dyn_in_college_adr, n_colleges ~ dyn+ ed+ assets + num_crim+ 
+fit.poisson <- glm(data = dyn_in_college_adr, n_colleges ~ dyn+ log(total_assets)+ edu+serious_crime + non_serious_crime+term_duration+
                      factor(year_el )+ State, family =  "quasipoisson")
 
 
 stargazer(fit.poisson,title="Regression Results - India  all colleges with adr ",type = "html",
-align=TRUE,  no.space=TRUE, keep = c("dyn" ,"ed","assets","num_crim"),omit.stat=c("LL","ser","f"),
+align=TRUE,  no.space=TRUE, keep = c("dyn" ,"total_assets", "edu","serious_crime", "non_serious_crime"),omit.stat=c("LL","ser","f"),
 add.lines=list(c('Year fixed effects', 'Yes','Yes','Yes','Yes' ), c('State fixed effects', 'Yes','Yes','Yes','Yes')))
 ```
