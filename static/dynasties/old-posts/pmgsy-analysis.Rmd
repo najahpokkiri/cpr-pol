@@ -1,0 +1,309 @@
+---
+title: "PMGSY Analysis"
+author: ""
+date: "2020-06-19"
+params:
+  orig_date: "Original Publish Date: 19 June, 2020"
+  update_date: !r paste("Updated on:", format(Sys.time(), '%d %B, %Y'))
+output:
+  html_document:
+    theme: readable
+    toc: TRUE
+    toc_float: TRUE
+    toc_depth: 5
+    number_sections: false
+    fig_width: 6            
+editor_options: 
+  chunk_output_type: inline
+
+---
+
+---
+
+### Document History
+
+`r params$orig_date`
+
+`r params$update_date`
+
+---
+```{r set up, warning=FALSE, include=FALSE, message= FALSE}
+
+knitr::opts_chunk$set(cache = FALSE,echo = FALSE, message=FALSE, warning = FALSE)
+
+##fig.width = 16/2, fig.height = 9/2
+
+library(tidyverse)
+library(data.table)
+library(knitr)
+library(kableExtra)
+library(scales)
+library(gridExtra)
+`%!in%` = Negate(`%in%`)
+```
+
+
+# PMGSY roads
+
+```{r file config}
+
+
+dyn <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/dyn_ae_ge.csv")
+pmgsy<- fread("D:/cpr/UP/up-dynasties/dyn_other_data/pmgsy.csv", stringsAsFactors = FALSE)
+
+#glimpse(pmgsy)
+
+
+names(pmgsy) <- tolower(names(pmgsy))
+
+pmgsy <- pmgsy %>% select(year, everything())%>%  select(- c(2:78)) %>% rename(constituency_no = `pc no`) %>% filter(year != 2014)
+
+dyn_ge_w <- dyn %>% filter(election_type == "GE" & position==1)
+
+
+dyn_pmgsy <- merge(dyn_ge_w,pmgsy, by = c("year", "constituency_no"))
+
+dyn_pmgsy$dyn_cum_2_text <- ifelse(dyn_pmgsy$dyn_cum_2 ==0, "Non-family","Family")
+
+#summary(pwd)
+
+dyn_pmgsy$fam_exp_cum_cat <- factor(dyn_pmgsy$fam_exp_cum_cat, levels=c("[0,1)","[1,6)","[6,11)","[11,21)","[21,Inf]"))
+
+
+names(dyn_pmgsy) <- make.unique(names(dyn_pmgsy))
+
+dyn_pmgsy$fam_rel_id_uniq <-  paste(dyn_pmgsy$family_id, dyn_pmgsy$rel_id_uniq,sep = "")
+
+dyn_pmgsy  <- dyn_pmgsy %>% group_by(fam_rel_id_uniq) %>% mutate(n_proj_ind = n())
+
+
+
+```
+
+## Summary stats
+
+
+
+
+
+
+```{r}
+
+
+dyn_pmgsy %>% group_by(year) %>% summarise(count = n(), sum(`road length (kms)`), sum(sanctionedcostnew)) %>% kable(caption = "PMGSY across years" ,col.names = c ("Loksabha Term", "Number of projects", "Length coverd (Kms)", "Total sanctioned amount (Lakhs)"),digits = 0)%>% kable_styling(bootstrap_options = "striped")
+
+
+```
+
+## Constituency type
+
+```{r}
+
+
+dyn_pmgsy$sanc_cost_rup <-(dyn_pmgsy$sanctionedcostnew)*100000
+
+dyn_pmgsy <- dyn_pmgsy %>% group_by(year,constituency_no) %>% mutate(ac_proj_no = n())
+
+
+ 
+
+#  dyn_pmgsy  %>% group_by(dyn_cum_2_text) %>% summarise(mean_proj = mean(ac_proj_no), mean_cost = mean(sanc_cost_rup ), mean_rd_len = mean(`road length (kms)`))
+# 
+# #,sum_rd = sum(`road length (kms)`),sum_cost = sum(`sanction cost`), cost_p_km = (sum_rd/sum_cost)*100000) 
+# 
+# 
+# Entity <- c("Non-family", "Family")
+#  
+#  cbind(Entity,dyn_pmgsy_mean) %>% select(-dyn_cum_2) %>%  kable(caption = "PMGSY summary wrt constituency type", col.names = c ("Type of constituency", "Average number of projects","Avergae expenditure per project", "Average road length (km)"),digits = 1)%>% kable_styling(bootstrap_options = "striped")
+
+ #summary(pmgsy)
+ 
+ 
+ dyn_pmgsy %>% group_by(dyn_cum_2_text) %>% summarise(sum = sum(`road length (kms)`), count = n_distinct(constituency_no),mean_proj_con = n()/count,mean_proj = mean(`road length (kms)`), mean_con = sum/count) %>% select(dyn_cum_2_text,mean_proj_con,mean_proj, mean_con) %>% kable(caption = "PMGSY summary stats wrt constituency type", col.names = c("Constituency Type","Average number of projects"," Average length per project", "Average length over all"),digits = 1)%>% kable_styling(bootstrap_options = "striped")
+
+
+
+
+
+```
+
+
+
+
+
+
+## Experience categories 
+
+
+```{r}
+
+dyn_pmgsy  <- dyn_pmgsy %>% group_by(fam_rel_id_uniq) %>% mutate(n_proj_ind = n())
+
+
+dyn_pmgsy  %>% group_by(fam_exp_cum_cat) %>% summarise(mean_proj = mean(n_proj_ind), mean_cost = sum(sanctionedcostnew)/n_distinct(fam_rel_id_uniq), mean_rd_len =sum(`road length (kms)`)/n_distinct(fam_rel_id_uniq)) %>% kable(caption = "PMGSY road stats wrt to experience categories", col.names = c("Expereince Category", "Average number of projects", "Average cost (Lakhs)", "Average road length"), digits = 0) %>% kable_styling(bootstrap_options = "striped")
+```
+
+ 
+## Caste
+
+
+```{r}
+
+#summarise(proj =n()/n_distinct(constituency_no), len = sum(`road length`)/n_distinct(constituency_no)) 
+
+dyn_pmgsy  <- dyn_pmgsy %>% group_by(fam_rel_id_uniq) %>% mutate(n_proj_ind = n())
+
+
+dyn_pmgsy  %>% group_by(caste_groups) %>% summarise(mean_proj = mean(n_proj_ind), mean_cost = sum(sanctionedcostnew)/n_distinct(fam_rel_id_uniq), mean_rd_len =sum(`road length (kms)`)/n_distinct(fam_rel_id_uniq)) %>% arrange(-mean_proj) %>% kable(caption = "PMGSY road stats wrt to caste groups", col.names = c("Caste group", "Average number of projects", "Average cost", "Average road length"), digits = 0) %>% kable_styling(bootstrap_options = "striped")
+
+
+
+
+
+```
+
+
+
+
+
+## Contractors
+
+
+
+
+### Constituency type
+
+```{r}
+
+
+dyn_pmgsy <- dyn_pmgsy %>% group_by(constituency_no) %>% mutate(cont_uniq = n_distinct(`contractor name`))
+
+
+dyn_pmgsy  <- dyn_pmgsy %>% group_by(fam_rel_id_uniq) %>% mutate(n_cont_ind = n_distinct(`contractor name`))
+
+dyn_pmgsy %>% group_by(dyn_cum_2_text) %>% summarise(mean(n_cont_ind),sum(sanctionedcostnew)/n_distinct(`contractor name`)) %>% 
+kable(caption = "PMGSY average number of contractors and amount sanctioned  wrt constituency type", col.names = c ("Type of constituency", "Average number of unique contractors", "AAvergae amount sanctioned to a unique contractor (Lakhs)"),digits = 0)%>% kable_styling(bootstrap_options = "striped")
+
+```
+
+### Experience categories
+
+```{r}
+dyn_pmgsy %>% group_by(fam_exp_cum_cat) %>% summarise(mean(n_cont_ind),sum(sanctionedcostnew)/n_distinct(`contractor name`)) %>% 
+kable(caption = "PMGSY average number of contractors and amount sanctioned  wrt experience category", col.names = c ("Experience category", "Average number of unique contractors", "Avergae amount sanctioned to a unique contractor (Lakhs)"),digits = 0)%>% kable_styling(bootstrap_options = "striped")
+```
+
+
+
+### Caste
+
+```{r}
+
+
+
+dyn_pmgsy %>% group_by(caste_groups) %>% summarise(mean(n_cont_ind),sum(sanctionedcostnew)/n_distinct(`contractor name`)) %>% 
+kable(caption = "PMGSY average number of contractors and amount sanctioned  wrt caste group of the politician", col.names = c ("TCaste group", "Average number of unique contractors", "Avergae amount sanctioned to unique contractors (Lakhs)"),digits = 0)%>% kable_styling(bootstrap_options = "striped")
+
+
+
+```
+
+
+# PWD roads
+
+
+```{r}
+pwd<- fread("D:/cpr/UP/up-dynasties/dyn_other_data/roads-uppwd.csv", stringsAsFactors = FALSE)
+
+#dyn_cum_2 fam_exp_cum_cat mean(\road length`)`glimpse(pwd)
+
+
+names(pwd) <- tolower(names(pwd))
+
+names(pwd) <- make.unique(names(pwd))
+
+pwd <- pwd %>% select(`ac no`, everything())%>% select(c(1:11)) %>% rename(constituency_no = `ac no`)
+
+dyn_ae_w <- dyn %>% filter(year == 2017 & election_type == "AE" & position==1)
+
+#dyn_ae_w %>% group_by(constituency_no)
+
+
+dyn_pwd <- merge(dyn_ae_w,pwd, by = c( "constituency_no"))
+
+dyn_pwd$dyn_cum_2_text <- ifelse(dyn_pwd$dyn_cum_2 ==0, "Non-family","Family")
+
+
+names(dyn_pwd) <- make.unique(names(dyn_pwd))
+
+#summary(pwd)
+
+dyn_pwd$fam_exp_cum_cat <- factor(dyn_pwd$fam_exp_cum_cat, levels=c("[0,1)","[1,6)","[6,11)","[11,21)","[21,Inf]"))
+```
+
+## summary stats
+
+```{r summary stats}
+
+#unique(dyn_pwd$department)
+
+dyn_pwd %>% group_by(year) %>% summarise(count = n(),total_road_len =sum(`road length`), mean_len_proj = total_road_len/count,proj_con =n()/n_distinct(constituency_no), len_con = sum(`road length`)/n_distinct(constituency_no)) %>%  kable(caption = "Summary of PMGSY", col.names = c ("Year", "Number of projects","Total length", "Average road length per project (km)","Average number of projects per constituency","Average road length per constituency (km)"),digits = 1)%>% kable_styling(bootstrap_options = "striped")
+
+
+```
+
+
+## Family type
+
+
+
+```{r}
+
+
+dyn_pwd  <- dyn_pwd  %>% group_by(constituency_no) %>% mutate(ac_proj_no = n())
+
+
+dyn_pwd %>% group_by(dyn_cum_2_text) %>% summarise(sum = sum(`road length`), count = n_distinct(constituency_no),mean_proj_con = n()/count,mean_proj = mean(`road length`), mean_con = sum/count) %>% select(dyn_cum_2_text,mean_proj_con,mean_proj, mean_con) %>% kable(caption = "Average number of projects and length of the road wrt constituency type", col.names = c("Constituency Type","Number of projects","Length per project", "Length over all"),digits = 1)%>% kable_styling(bootstrap_options = "striped")
+
+
+
+
+
+
+```
+
+
+
+
+
+
+
+## Experience 
+
+
+
+
+
+
+```{r}
+
+
+dyn_pwd %>% group_by(fam_exp_cum_cat) %>% summarise(proj =n()/n_distinct(constituency_no), len = sum(`road length`)/n_distinct(constituency_no)) %>% select(fam_exp_cum_cat,proj, len) %>% kable(caption = "Average number of projects and length of the road wrt experience category", col.names = c("Experience category","Number of projects","Length over all"),digits = 1)%>% kable_styling(bootstrap_options = "striped")
+```
+
+
+```{r}
+dyn_pwd %>% group_by(dyn_cum_2_text,fam_exp_cum_cat) %>% summarise(proj =n()/n_distinct(constituency_no), len = sum(`road length`)/n_distinct(constituency_no)) %>% select(dyn_cum_2_text,fam_exp_cum_cat,proj, len) %>% kable(caption = "Average number of projects and length of the road wrt experience category", col.names = c("Constituency type","Experience category","Number of projects","Length over all"),digits = 1)%>% kable_styling(bootstrap_options = "striped")
+
+
+
+```
+
+## caste
+
+```{r}
+ dyn_pwd %>% group_by(caste_groups) %>% summarise(proj =n()/n_distinct(constituency_no), len = sum(`road length`)/n_distinct(constituency_no)) %>% arrange(-proj) %>% kable(caption = "PWD road stats wrt to caste groups", col.names = c("Caste group", "Average number of projects", "Average over all road length"), digits = 0) %>% kable_styling(bootstrap_options = "striped")
+
+
+ 
+```

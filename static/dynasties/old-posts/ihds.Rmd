@@ -1,0 +1,865 @@
+---
+title: 'ihds'
+date: "2020-09-15"
+params:
+  orig_date: "Original Publish Date: 14 September, 2020"
+  update_date: !r paste("Updated on:", format(Sys.time(), '%d %B, %Y'))
+output:
+  blogdown::html_page:
+    toc: true
+editor_options: 
+  chunk_output_type: inline
+---
+
+
+```{r set up, warning=FALSE, include=FALSE, message= FALSE}
+
+knitr::opts_chunk$set(cache = FALSE,echo = FALSE, message=FALSE, warning = FALSE,
+                      fig.width = 16/2, fig.height = 9/2)
+
+
+
+
+library(tidyverse)
+library(data.table)
+library(knitr)
+library(kableExtra)
+library(cowplot)
+ library(corrplot)
+
+
+`%!in%` = Negate(`%in%`)
+
+select <- dplyr::select
+```
+
+---
+
+### Document History
+
+`r params$orig_date`
+
+`r params$update_date`
+
+---
+
+
+# IHDS 2011-12
+
+covers 1503 villages
+
+ **Questionnaire modules**
+
+
+
+Part  Number  |    File Name     |     Questionnaire (pdf)
+------------  |    ---------     |    --------------
+DS1|             Individual |        Education and Health
+DS2 |             Household  |        Income & Social Capital
+DS3 |              Eligible |         Women Education and Health
+DS4 |             Birth     |         History Education and Health
+DS5 |             Medical  |          Staff Medical Facility
+DS6 |             Medical   |         Facilities Medical Facility
+DS7 |             Non Resident|       Income & Social Capital
+DS8 |             School |            Staff Primary School
+DS9 |             School   |          Facilities Primary School
+DS10 |            Wage and Salary |  Income & Social Capital
+DS11 |            Tracking|         Tracking Sheet
+DS12 |            Village |           Village
+DS13 |             Village |        Panchayat Village
+DS14 |            Village |         Respondent Village
+
+## DS14 village short
+
+
+
+
+```{r}
+
+vil_short <- fread("D:/cpr/data/ihds/ICPSR_36151/DS0014/36151-0014-Data.tsv")
+
+dim(vil_short)
+
+glimpse(vil_short)
+
+  prop.table(table(vil_short$VR3))
+  
+names(vil_short)
+
+uniqueN(vil_short$IDPSU)
+
+
+```
+
+\## DS13 Village Panchayat
+
+Total samples: 
+
+
+
+```{r}
+vp <- fread("D:/cpr/data/ihds/ICPSR_36151/DS0013/36151-0013-Data.tsv")
+
+dim(vp)
+
+names(vp)
+
+glimpse(vp)
+
+uniqueN(vp$IDPSU)
+
+table(vp$NPANCH)
+
+table(vp$PSUID)
+
+vp %>% group_by(STATEID,DISTID, PSUID) %>% mutate(n_p = n()) %>% distinct(STATEID,DISTID, PSUID,.keep_all = TRUE) %>% ungroup()%>% select(n_p, NPANCH)
+
+```
+
+
+
+ **House hold members in the previous village councils wrt caste**
+
+
+```{r}
+
+caste_rel <- vp %>% group_by(VG6,VG10) %>% summarise(count = n()) %>% group_by(VG6) %>% mutate(sum = sum(count), prop = count/sum) %>% ungroup()%>% mutate(VG10= replace_na(VG10, "NR"),VG6= replace_na(VG6, "NR")) %>% reshape2::dcast(VG6 ~VG10)
+
+caste_rel$caste <- case_when(caste_rel$VG6 == 1 ~ "Brahmin",
+                             caste_rel$VG6 == 2 ~ "Forward/General",
+                             caste_rel$VG6 == 3 ~ "OBC",
+                             caste_rel$VG6 == 4 ~ "SC",
+                             caste_rel$VG6 ==  5 ~ "ST",
+                              caste_rel$VG6 ==6 ~ "Others", 
+                             TRUE ~"NR")
+
+caste_rel %>% select(caste,`1`) %>% arrange(- `1`)%>% kable(digits = 2, col.names = c("caste", "Proportion"), caption = "Proportion of village panchayat members with a family member in previous sessions wrt caste")
+
+
+```
+
+
+
+ **House hold members in the previous village councils wrt position**
+
+```{r}
+
+pos_rel <- vp %>% group_by(VG3,VG10) %>% summarise(count = n()) %>% group_by(VG3) %>% mutate(sum = sum(count), prop = count/sum) %>% filter(VG10 == 1, VG10 != "NR", VG3 != "NR")%>% ungroup() %>% reshape2::dcast(. ~VG3) %>% select(2:4)
+
+
+
+pos_rel %>%  kable(digits = 2, col.names = c( "Pradhan" ,"Vice Pradhan", "Members"), caption = "Proportion of village panchayat members with one or more family member in previous sessions wrt position")
+
+```
+
+
+
+ **House hold members in the previous village councils wrt position and caste**
+
+
+```{r}
+
+caste_rel <- vp %>% group_by(VG3,VG6,VG10) %>% summarise(count = n()) %>% group_by(VG3,VG6) %>% mutate(sum = sum(count), prop = count/sum) %>% filter(VG10 == 1, VG6 != "NR", VG10 != "NR", VG3 != "NR")%>% ungroup()%>% mutate(VG10= replace_na(VG10, "NR"),VG6= replace_na(VG6, "NR"),VG3= replace_na(VG3, "NR")) %>% reshape2::dcast(VG6 ~VG3)
+
+caste_rel$caste <- case_when(caste_rel$VG6 == 1 ~ "Brahmin",
+                             caste_rel$VG6 == 2 ~ "Forward/General",
+                             caste_rel$VG6 == 3 ~ "OBC",
+                             caste_rel$VG6 == 4 ~ "SC",
+                             caste_rel$VG6 ==  5 ~ "ST",
+                              caste_rel$VG6 ==6 ~ "Others", 
+                             TRUE ~"NR")
+
+caste_rel %>% select(caste,`1`, `2`, `3`) %>%  kable(digits = 2, col.names = c("caste", "Pradhan" ,"Vice Pradhan", "Members"), caption = "Proportion of village panchayat members with one or more household member in previous sessions wrt position & caste")
+
+```
+
+
+
+
+## DS12 village 
+
+
+
+```{r}
+
+village <- fread("D:/cpr/data/ihds/ICPSR_36151/DS0012/36151-0012-Data.tsv")
+
+dim(village)
+
+names(village)
+
+glimpse(village)
+
+vil_1 <- fread("D:/cpr/data/ihds/ICPSR_22626/DS0007/22626-0007-Data.tsv")
+
+
+names(vil_1)
+
+village_1 <- vil_1 %>% select(stateid, distid , psuid, popcat)
+
+##mergin first wave to get the population
+
+names(village_1) <- toupper(names(village_1))
+
+vil_1_2 <- merge(village, village_1, by =c("STATEID", "DISTID", "PSUID")) 
+
+
+
+```
+
+
+village administration composition
+
+
+```{r}
+
+
+admin <- data.frame(village$VG14A,village$VG15A,village$VG16A,village$VG17A,village$VG18A,village$VG19A,village$VG20A,village$VG21A,village$VG22A,village$VG23A,village$VG24A)
+
+names(admin) <- c("Lekhpal","Gram_sevak", "Panchayat_secretary", "Pradhan", "MLA", "MP","School_HM", "PDS_owner","ANM", "Ang_worker", "Asha_worker")
+
+
+
+admin_long <- admin %>% pivot_longer(1:11, values_to = "caste", names_to = "position")
+
+admin_select <- admin_long %>% group_by(position, caste) %>% summarise(count = n() ) %>% ungroup() %>% group_by(position) %>% 
+  mutate(sum = sum(count), prop = count/sum) %>% select(position, caste, prop)
+
+admin_select$caste <- replace_na(admin_select$caste,9)
+
+
+ggplot(admin_select, aes(position,prop,fill = factor(caste)))+
+  geom_bar(stat = "identity",position = position_stack(reverse = T))+
+  
+  scale_fill_discrete(name = "Caste", labels = c("Brahmin", "Forward", "OBC", "SC", "ST", "Others","Vacant", "NA"))+
+  theme_minimal()+
+  theme(axis.text.x = element_text(angle = 90))
+  
+
+```
+
+
+
+
+```{r}
+
+head(village$VG18A)
+
+```
+
+
+
+
+creating a score on village level dynasticism
+
+```{r}
+
+glimpse(vp)
+
+names(vp_uniq)
+
+uniqueN(vp$IDPSU)
+
+vp <- vp %>% group_by(IDPSU) %>% mutate(count = n(), sum = sum(VG10), vil_dyn = sum/count)
+
+vp_uniq <- vp %>% arrange(IDPSU, VG3)%>% distinct(IDPSU, .keep_all = TRUE)%>% select(-count, -sum)
+
+vil_vp <- merge(vil_1_2, vp_uniq,by = c("STATEID", "DISTID", "PSUID"))
+```
+
+check out the variables and run regression
+
+
+```{r}
+
+head(vil_vp$TOT)
+
+glimpse(village)
+
+```
+
+
+
+```{r regression varibles}
+
+dynasticism <- vil_vp$vil_dyn
+
+
+y_nrega <- vil_vp$VN1
+
+#hq_distance <- vil_vp$VI12A
+
+p_electricity <- vil_vp$VI4A
+
+p_mobile_phone <- vil_vp$VI7
+
+n_pds <- vil_vp$VI9
+
+y_caste_assoc <- vil_vp$VI16H
+
+y_shg <- vil_vp$VI16D
+
+y_youth_club <- vil_vp$VI16B
+
+y_trade_union <- vil_vp$VI16C
+
+n_associations <- vil_vp$VI16A + vil_vp$VI16B + vil_vp$VI16C + vil_vp$VI16D + vil_vp$VI16E + vil_vp$VI16F + vil_vp$VI16G +vil_vp$VI16H + vil_vp$VI16I + vil_vp$VI16J + vil_vp$VI16K
+
+n_employement_schemes <- vil_vp$VI18A1 + vil_vp$VI18A2+vil_vp$VI18A3
+
+n_public_schemes <- vil_vp$VI18B + vil_vp$VI18C + vil_vp$VI18D + vil_vp$VI18E + vil_vp$VI18F + vil_vp$VI18G +vil_vp$VI18H + vil_vp$VI18I + vil_vp$VI18J + vil_vp$VI18K +vil_vp$VI18L + vil_vp$VI18M + vil_vp$VI18N +vil_vp$VI18O + vil_vp$VI18P + vil_vp$VI18Q + vil_vp$VI18R+vil_vp$VI18S +  vil_vp$VI18U + vil_vp$VI18V +vil_vp$VI18W + vil_vp$VI18X 
+
+y_health_insurance_progs <- vil_vp$VI18T
+
+n_anganawadi_progs <- vil_vp$VI19B + vil_vp$VI19C + vil_vp$VI19D + vil_vp$VI19E + vil_vp$VI19F 
+
+n_anganawadi_govt <- vil_vp$VSA1
+
+n_anganawadi_pvt <- vil_vp$VSC1
+
+n_anganawadi <- n_anganawadi_govt+ n_anganawadi_pvt
+
+n_schools_govt <-  vil_vp$VSA2 + vil_vp$VSA3 + vil_vp$VSA4 + vil_vp$VSA5
+
+n_schools_pvt <-  vil_vp$VSC2 + vil_vp$VSC3 + vil_vp$VSC4 + vil_vp$VSC5
+
+n_schools <- n_schools_govt + n_schools_pvt
+
+n_colleges_govt <- vil_vp$VSA6 + vil_vp$VSA7
+
+n_colleges_pvt <- vil_vp$VSC6 + vil_vp$VSC7
+
+n_colleges <- n_colleges_govt + n_colleges_pvt
+
+n_school_girls <- vil_vp$VSA9 + vil_vp$VSC9
+
+n_college_girls <- vil_vp$VSA10 + vil_vp$VSA10
+
+n_med_facility <- vil_vp$VMA1 + vil_vp$VMA2 + vil_vp$VMA3 + vil_vp$VMA4 + vil_vp$VMA5 + vil_vp$VMA6 + vil_vp$VMA7 +vil_vp$VMA8 + vil_vp$VMA9 + vil_vp$VMA10+ vil_vp$VMA11 +vil_vp$VMA12
+
+n_draught <- vil_vp$VG1A + vil_vp$VG1B + vil_vp$VG1C + vil_vp$VG1D + vil_vp$VG1E +vil_vp$VG1F + vil_vp$VG1G
+
+n_flooding <- vil_vp$VG2A + vil_vp$VG2B + vil_vp$VG2C + vil_vp$VG2D + vil_vp$VG2E +vil_vp$VG2F + vil_vp$VG2G
+
+n_epidemic <- vil_vp$VG3A + vil_vp$VG3B + vil_vp$VG3C + vil_vp$VG3D + vil_vp$VG3E +vil_vp$VG3F + vil_vp$VG3G
+
+n_earth_quake <- vil_vp$VG4A + vil_vp$VG4B + vil_vp$VG4C + vil_vp$VG4D + vil_vp$VG4E +vil_vp$VG4F + vil_vp$VG4G
+
+n_cyclone <- vil_vp$VG5A + vil_vp$VG5B + vil_vp$VG5C + vil_vp$VG5D + vil_vp$VG5E +vil_vp$VG5F + vil_vp$VG5G
+
+n_tsunami<- vil_vp$VG6A + vil_vp$VG6B + vil_vp$VG6C + vil_vp$VG6D + vil_vp$VG6E +vil_vp$VG6F + vil_vp$VG6G
+
+n_hailstorm<- vil_vp$VG7A + vil_vp$VG7B + vil_vp$VG7C + vil_vp$VG7D + vil_vp$VG7E +vil_vp$VG7F + vil_vp$VG7G
+
+n_calamities <-  n_draught + n_flooding + n_epidemic + n_earth_quake + n_cyclone + n_tsunami + n_hailstorm
+
+reservation <- ifelse(vil_vp$VG11.y==1,"GEN", ifelse(vil_vp$VG11.y==2, "Women","SC/ST"))
+
+p_UC <- vil_vp$VH1A+vil_vp$VH1B
+
+p_brahmin <- vil_vp$VH1A
+
+p_fw_gen <- vil_vp$VH1B
+
+p_obc <- vil_vp$VH1C
+ 
+
+caste_pradhan <- case_when(vil_vp$VG6 %in% c(1,2) ~"UC",
+                           vil_vp$VG6 %in% c(4,5) ~"SC/ST",
+                           vil_vp$VG6 == 3 ~ "OBC",
+                           TRUE ~ "OTHERS")
+caste_pradhan <- relevel(as.factor(caste_pradhan), ref = "OTHERS")
+
+pop_cat <- case_when(vil_vp$POPCAT == 1 ~ "small",
+                     vil_vp$POPCAT == 2 ~ "medium",
+                     TRUE ~ "large")
+#y_liquor_store <- ifelse(vil_vp$VI15J==0,1,0)
+```
+
+
+```{r correlation test}
+
+var<- data.frame( p_electricity , p_mobile_phone , n_pds,n_associations,n_public_schemes, n_employement_schemes + n_anganawadi  + n_school_girls)
+
+corr <- cor(var,use = "complete.obs")
+
+corrplot(corr)
+```
+
+
+```{r regression }
+fit <- lm(dynasticism ~ p_mobile_phone +  p_electricity +p_mobile_phone + n_pds + n_associations +y_health_insurance_progs + n_public_schemes+ n_employement_schemes +  n_schools + n_med_facility + caste_pradhan + n_calamities +pop_cat )
+
+
+
+
+
+summary(fit)
+
+table(vil_vp$VI16C)
+
+table(is.na(vil_vp$VH1A))
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## DS002 household
+
+```{r}
+
+
+glimpse(hh)
+
+## reading household file
+
+
+hh <- fread("D:/cpr/data/ihds/ICPSR_36151/DS0002/36151-0002-Data.tsv")
+
+## merging hh with village
+
+# hh_vil <- merge(hh,village, by = c("STATEID", "DISTID", "PSUID"))
+
+## merging hh and village with village panchayat
+
+hh_vil_vp <- merge(hh, vil_vp, by = c("STATEID", "DISTID", "PSUID","IDPSU"), allow.cartesian = TRUE)
+
+# hh_vil_vp %>% distinct(STATEID.y,DISTID.y,VILL)
+# 
+# hh_vil_vp %>% group_by(VG3,VG10.y) %>% summarise(count = n()) %>% group_by(VG3) %>% mutate(sum = sum(count), prop = count/sum) %>% filter(VG10.y == 1, VG10.y != "NR", VG3 != "NR")%>% ungroup() %>% reshape2::dcast(. ~VG3) %>% select(2:4)
+
+
+
+
+```
+
+dynasticism
+
+```{r}
+
+##meetings
+
+prop.table(table(hh$ME13))
+
+prop.table(table(hh$ME14))
+
+
+prop.table(table(hh$ME14A))
+
+
+```
+
+
+
+
+```{r}
+
+dynasticism <- hh_vil_vp$vil_dyn
+
+
+
+
+hq_distance <- hh_vil_vp$VI12A
+
+
+n_pds <- hh_vil_vp$VI9
+
+
+
+n_anganawadi_govt <- hh_vil_vp$VSA1
+
+n_anganawadi_pvt <- hh_vil_vp$VSC1
+
+n_anganawadi <- n_anganawadi_govt+ n_anganawadi_pvt
+
+n_schools_govt <-  hh_vil_vp$VSA2 + hh_vil_vp$VSA3 + hh_vil_vp$VSA4 + hh_vil_vp$VSA5
+
+n_schools_pvt <-  hh_vil_vp$VSC2 + hh_vil_vp$VSC3 + hh_vil_vp$VSC4 + hh_vil_vp$VSC5
+
+n_schools <- n_schools_govt + n_schools_pvt
+
+n_colleges_govt <- hh_vil_vp$VSA6 + hh_vil_vp$VSA7
+
+n_colleges_pvt <- hh_vil_vp$VSC6 + hh_vil_vp$VSC7
+
+n_colleges <- n_colleges_govt + n_colleges_pvt
+
+n_school_girls <- hh_vil_vp$VSA9 + hh_vil_vp$VSC9
+
+n_college_girls <- hh_vil_vp$VSA10 + hh_vil_vp$VSA10
+
+n_med_facility <- hh_vil_vp$VMA1 + hh_vil_vp$VMA2 + hh_vil_vp$VMA3 + hh_vil_vp$VMA4 + hh_vil_vp$VMA5 + hh_vil_vp$VMA6 + hh_vil_vp$VMA7 +hh_vil_vp$VMA8 + hh_vil_vp$VMA9 + hh_vil_vp$VMA10+ hh_vil_vp$VMA11 +hh_vil_vp$VMA12
+
+n_draught <- hh_vil_vp$VG1A + hh_vil_vp$VG1B + hh_vil_vp$VG1C + hh_vil_vp$VG1D + hh_vil_vp$VG1E +hh_vil_vp$VG1F + hh_vil_vp$VG1G
+
+n_flooding <- hh_vil_vp$VG2A + hh_vil_vp$VG2B + hh_vil_vp$VG2C + hh_vil_vp$VG2D + hh_vil_vp$VG2E +hh_vil_vp$VG2F + hh_vil_vp$VG2G
+
+n_epidemic <- hh_vil_vp$VG3A + hh_vil_vp$VG3B + hh_vil_vp$VG3C + hh_vil_vp$VG3D + hh_vil_vp$VG3E +hh_vil_vp$VG3F + hh_vil_vp$VG3G
+
+n_earth_quake <- hh_vil_vp$VG4A + hh_vil_vp$VG4B + hh_vil_vp$VG4C + hh_vil_vp$VG4D + hh_vil_vp$VG4E +hh_vil_vp$VG4F + hh_vil_vp$VG4G
+
+n_cyclone <- hh_vil_vp$VG5A + hh_vil_vp$VG5B + hh_vil_vp$VG5C + hh_vil_vp$VG5D + hh_vil_vp$VG5E +hh_vil_vp$VG5F + hh_vil_vp$VG5G
+
+n_tsunami<- hh_vil_vp$VG6A + hh_vil_vp$VG6B + hh_vil_vp$VG6C + hh_vil_vp$VG6D + hh_vil_vp$VG6E +hh_vil_vp$VG6F + hh_vil_vp$VG6G
+
+n_hailstorm<- hh_vil_vp$VG7A + hh_vil_vp$VG7B + hh_vil_vp$VG7C + hh_vil_vp$VG7D + hh_vil_vp$VG7E +hh_vil_vp$VG7F + hh_vil_vp$VG7G
+
+n_calamities <-  n_draught + n_flooding + n_epidemic + n_earth_quake + n_cyclone + n_tsunami + n_hailstorm
+
+
+y_mahila_mandal  <- hh_vil_vp$ME1
+
+y_youth_club <- hh_vil_vp$ME2
+
+business_union <-  hh_vil_vp$ME3
+
+y_shg <- hh_vil_vp$ME4
+
+
+savings_group <- hh_vil_vp$ME5
+
+festival_society <- 
+
+y_caste_assoc <- vil_vp$VI16H
+
+
+
+
+
+y_trade_union <- vil_vp$VI16C
+
+n_associations <- vil_vp$VI16A + vil_vp$VI16B + vil_vp$VI16C + vil_vp$VI16D + vil_vp$VI16E + vil_vp$VI16F + vil_vp$VI16G +vil_vp$VI16H + vil_vp$VI16I + vil_vp$VI16J + vil_vp$VI16K
+
+n_employement_schemes <- vil_vp$VI18A1 + vil_vp$VI18A2+vil_vp$VI18A3
+
+
+
+
+
+p_UC <- hh_vil_vp$VH1A+hh_vil_vp$VH1B
+
+
+p_obc <- hh_vil_vp$VH1C
+ 
+
+caste_pradhan <- case_when(hh_vil_vp$VG6 %in% c(1,2) ~"UC",
+                           hh_vil_vp$VG6 %in% c(4,5) ~"SC/ST",
+                           hh_vil_vp$VG6 == 3 ~ "OBC",
+                           TRUE ~ "OTHERS")
+caste_pradhan <- relevel(as.factor(caste_pradhan), ref = "OTHERS")
+
+pop_cat <- case_when(hh_vil_vp$POPCAT == 1 ~ "small",
+                     hh_vil_vp$POPCAT == 2 ~ "medium",
+                     TRUE ~ "large")
+#y_liquor_store <- ifelse(hh_vil_vp$VI15J==0,1,0)
+
+pol_party_mem <- hh_vil_vp$ME11 
+
+pucca_road_dist <- hh_vil_vp$VI3A
+
+
+
+```
+
+
+### correlation plot
+
+
+```{r corr test}
+
+var<- data.frame(  n_pds,n_associations + n_anganawadi  + n_school_girls)
+
+corr <- cor(var,use = "complete.obs")
+
+corrplot(corr)
+
+```
+
+
+### models
+
+
+```{r pol part membership}
+
+
+fit_pol_party <- glm(pol_party_mem ~ pucca_road_dist+ n_flooding +n_pds + n_schools+ caste_pradhan + pop_cat +dynasticism, family = binomial(link = "probit"))
+
+summary(fit_pol_party)
+
+```
+
+
+```{r models}
+
+
+table(hh_vil_vp$ME11)
+
+table(is.na(hh_vil_vp$ME11))
+
+```
+
+
+## DS01 Individuals
+
+```{r}
+
+
+## reading individual file
+
+
+ind <- fread("D:/cpr/data/ihds/ICPSR_36151/DS0001/36151-0001-Data.tsv ")
+
+## merging individual to hh
+
+
+ind_hh_vil_vp <- merge(ind,hh_vil_vp, by = c("STATEID", "DISTID", "PSUID", "HHID","HHSPLITID"), allow.cartesian = TRUE)
+
+ind_hh_vil_vp <- ind_hh_vil_vp %>% filter(!is.na(WT.x))
+
+
+```
+
+### variables
+
+```{r ind model variables}
+
+dynasticism <- ind_hh_vil_vp$vil_dyn
+
+
+
+
+hq_distance <- ind_hh_vil_vp$VI12A
+
+
+n_pds <- ind_hh_vil_vp$VI9
+
+
+
+n_anganawadi_govt <- ind_hh_vil_vp$VSA1
+
+n_anganawadi_pvt <- ind_hh_vil_vp$VSC1
+
+n_anganawadi <- n_anganawadi_govt+ n_anganawadi_pvt
+
+n_schools_govt <-  ind_hh_vil_vp$VSA2 + ind_hh_vil_vp$VSA3 + ind_hh_vil_vp$VSA4 + ind_hh_vil_vp$VSA5
+
+n_schools_pvt <-  ind_hh_vil_vp$VSC2 + ind_hh_vil_vp$VSC3 + ind_hh_vil_vp$VSC4 + ind_hh_vil_vp$VSC5
+
+n_schools <- n_schools_govt + n_schools_pvt
+
+n_colleges_govt <- ind_hh_vil_vp$VSA6 + ind_hh_vil_vp$VSA7
+
+n_colleges_pvt <- ind_hh_vil_vp$VSC6 + ind_hh_vil_vp$VSC7
+
+n_colleges <- n_colleges_govt + n_colleges_pvt
+
+n_school_girls <- ind_hh_vil_vp$VSA9 + ind_hh_vil_vp$VSC9
+
+n_college_girls <- ind_hh_vil_vp$VSA10 + ind_hh_vil_vp$VSA10
+
+n_med_facility <- ind_hh_vil_vp$VMA1 + ind_hh_vil_vp$VMA2 + ind_hh_vil_vp$VMA3 + ind_hh_vil_vp$VMA4 + ind_hh_vil_vp$VMA5 + ind_hh_vil_vp$VMA6 + ind_hh_vil_vp$VMA7 +ind_hh_vil_vp$VMA8 + ind_hh_vil_vp$VMA9 + ind_hh_vil_vp$VMA10+ ind_hh_vil_vp$VMA11 +ind_hh_vil_vp$VMA12
+
+n_draught <- ind_hh_vil_vp$VG1A + ind_hh_vil_vp$VG1B + ind_hh_vil_vp$VG1C + ind_hh_vil_vp$VG1D + ind_hh_vil_vp$VG1E +ind_hh_vil_vp$VG1F + ind_hh_vil_vp$VG1G
+
+n_flooding <- ind_hh_vil_vp$VG2A + ind_hh_vil_vp$VG2B + ind_hh_vil_vp$VG2C + ind_hh_vil_vp$VG2D + ind_hh_vil_vp$VG2E +ind_hh_vil_vp$VG2F + ind_hh_vil_vp$VG2G
+
+n_epidemic <- ind_hh_vil_vp$VG3A + ind_hh_vil_vp$VG3B + ind_hh_vil_vp$VG3C + ind_hh_vil_vp$VG3D + ind_hh_vil_vp$VG3E +ind_hh_vil_vp$VG3F + ind_hh_vil_vp$VG3G
+
+n_earth_quake <- ind_hh_vil_vp$VG4A + ind_hh_vil_vp$VG4B + ind_hh_vil_vp$VG4C + ind_hh_vil_vp$VG4D + ind_hh_vil_vp$VG4E +ind_hh_vil_vp$VG4F + ind_hh_vil_vp$VG4G
+
+n_cyclone <- ind_hh_vil_vp$VG5A + ind_hh_vil_vp$VG5B + ind_hh_vil_vp$VG5C + ind_hh_vil_vp$VG5D + ind_hh_vil_vp$VG5E +ind_hh_vil_vp$VG5F + ind_hh_vil_vp$VG5G
+
+n_tsunami<- ind_hh_vil_vp$VG6A + ind_hh_vil_vp$VG6B + ind_hh_vil_vp$VG6C + ind_hh_vil_vp$VG6D + ind_hh_vil_vp$VG6E +ind_hh_vil_vp$VG6F + ind_hh_vil_vp$VG6G
+
+n_hailstorm<- ind_hh_vil_vp$VG7A + ind_hh_vil_vp$VG7B + ind_hh_vil_vp$VG7C + ind_hh_vil_vp$VG7D + ind_hh_vil_vp$VG7E +ind_hh_vil_vp$VG7F + ind_hh_vil_vp$VG7G
+
+n_calamities <-  n_draught + n_flooding + n_epidemic + n_earth_quake + n_cyclone + n_tsunami + n_hailstorm
+
+
+y_mahila_mandal  <- ind_hh_vil_vp$ME1
+
+y_youth_club <- ind_hh_vil_vp$ME2
+
+y_business_union <-  ind_hh_vil_vp$ME3
+
+y_shg <- ind_hh_vil_vp$ME4
+
+
+y_savings_group <- ind_hh_vil_vp$ME5
+
+y_religious_group <- ind_hh_vil_vp$ME6
+
+y_festival_society <- ind_hh_vil_vp$ME7
+
+y_caste_assoc <- ind_hh_vil_vp$ME8
+
+y_ngo <- ind_hh_vil_vp$ME9
+
+y_coop <- ind_hh_vil_vp$ME10
+
+y_pol_party <- ind_hh_vil_vp$ME11
+
+y_club <- ind_hh_vil_vp$ME12
+
+
+n_associations <- ind_hh_vil_vp$ME1 + ind_hh_vil_vp$ME2 + ind_hh_vil_vp$ME3 + ind_hh_vil_vp$ME4 + ind_hh_vil_vp$ME5 + ind_hh_vil_vp$ME6 + ind_hh_vil_vp$ME7 + ind_hh_vil_vp$ME8 + ind_hh_vil_vp$ME9 + ind_hh_vil_vp$ME10 +  ind_hh_vil_vp$ME12
+
+#n_employement_schemes <- vil_vp$VI18A1 + vil_vp$VI18A2+vil_vp$VI18A3
+
+
+
+
+
+
+p_UC <- ind_hh_vil_vp$VH1A+ind_hh_vil_vp$VH1B
+
+
+p_obc <- ind_hh_vil_vp$VH1C
+ 
+
+caste_pradhan <- case_when(ind_hh_vil_vp$VG6 %in% c(1,2) ~"UC",
+                           ind_hh_vil_vp$VG6 %in% c(4,5) ~"SC/ST",
+                           ind_hh_vil_vp$VG6 == 3 ~ "OBC",
+                           TRUE ~ "OTHERS")
+caste_pradhan <- relevel(as.factor(caste_pradhan), ref = "OTHERS")
+
+pop_cat <- case_when(ind_hh_vil_vp$POPCAT == 1 ~ "small",
+                     ind_hh_vil_vp$POPCAT == 2 ~ "medium",
+                     TRUE ~ "large")
+#y_liquor_store <- ifelse(ind_hh_vil_vp$VI15J==0,1,0)
+
+pol_party_mem <- ind_hh_vil_vp$ME11 
+
+pucca_road_dist <- ind_hh_vil_vp$VI3A
+
+weight_ind <- ind_hh_vil_vp$WT.x
+
+
+
+
+
+
+
+
+```
+
+taking village level aggregtes
+
+
+
+```{r}
+trust_pol <- hh %>% group_by(IDPSU, CI1) %>% summarise (count = n()) %>% group_by(IDPSU) %>% mutate(sum = sum(count), prop_pol = count/sum) %>% filter(CI1 == 1) %>% select(IDPSU, prop_pol)
+
+# trust_pol <-  hh %>% group_by(IDPSU, CI1) %>% mutate(count = n()) %>% group_by(IDPSU) %>% mutate(sum = sum(count), prop_pol = count/sum) %>% filter(CI1 == 1) %>% distinct(IDPSU, .keep_all = TRUE)%>%  select(STATEID,DISTID,PSUID,IDPSU, prop_pol)
+
+trust_lb <- hh %>% group_by(IDPSU, CI6) %>% summarise (count = n()) %>% group_by(IDPSU) %>% mutate(sum = sum(count), prop_lb = count/sum) %>% filter(CI6 == 1) %>% select(IDPSU, prop_lb)
+
+trust_gov <- hh %>% group_by(IDPSU, CI4) %>% summarise (count = n()) %>% group_by(IDPSU) %>% mutate(sum = sum(count), prop_state_gov = count/sum) %>% filter(CI4 == 1) %>% select(IDPSU, prop_state_gov)
+
+trust_1 <- merge(trust_pol, trust_lb, by = "IDPSU")
+
+trust <- merge(trust_1, trust_gov, by = "IDPSU")
+
+
+vp_trust <- merge(trust,vp_uniq, by = "IDPSU" )
+
+vp_trust_pop <- merge(vp_trust, village_1, by = c("STATEID","DISTID","PSUID"))
+
+
+
+
+fit <- lm(data = vp_trust_pop, vil_dyn ~ prop_lb +prop_state_gov + prop_pol+ POPCAT)
+
+trust_df <- data.frame(vp_trust_pop$prop_lb, vp_trust_pop$prop_state_gov ,vp_trust_pop$prop_pol)
+
+corr <- cor(trust_df)
+
+corrplot(corr)
+
+summary(fit)
+
+
+names(vp_trust)
+names(vil_1_2)
+```
+
+
+
+
+### correlation plot
+
+
+```{r ind corr test}
+
+var<- data.frame(  pucca_road_dist, n_flooding , n_associations , n_pds , n_schools, dynasticism)
+
+head(var)
+
+corr <- cor(var,use = "complete.obs")
+
+corrplot(corr)
+
+```
+
+
+### models
+
+
+```{r ind pol part membership}
+
+
+fit_pol_party <- glm(pol_party_mem ~ pucca_road_dist+ n_flooding + n_associations + n_pds + n_schools+ caste_pradhan + pop_cat +dynasticism , family = binomial(link = "probit"))
+
+fit_pol_party <- zelig(pol_party_mem ~ pucca_road_dist+ n_flooding + n_associations + n_pds + n_schools+ caste_pradhan + pop_cat +dynasticism,,weights = weight_ind, model = "probit.survey", data = ind_hh_vil_vp)
+
+
+
+table(is.na(weight_ind))
+summary(fit_pol_party)
+
+
+
+
+library(Zelig) 
+ z.out <- zelig(Y ~ X1 + X2, model = "probit.survey", data = mydata)
+ x.out <- setx(z.out)
+ s.out <- sim(z.out, x = x.out)
+
+
+
+
+```
+
+
+```{r models}
+
+
+table(hh_vil_vp$ME11)
+
+table(is.na(hh_vil_vp$ME11))
+
+```
+
+## Relavant variables and questions
+
+dataset     | level    | variable_id | variable name | description 
+----------    ------    ------------   ------------    -----------
+
+
+
+
+
+
+

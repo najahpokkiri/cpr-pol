@@ -1,0 +1,171 @@
+---
+title: "NREGA Analysis"
+author: ""
+date: "2020-06-20"
+params:
+  orig_date: "Original Publish Date: 06 June, 2020"
+  update_date: !r paste("Updated on:", format(Sys.time(), '%d %B, %Y'))
+output:
+  html_document:
+    theme: readable
+    toc: TRUE
+    toc_float: TRUE
+    toc_depth: 5
+    number_sections: false
+    fig_width: 6            
+editor_options: 
+  chunk_output_type: inline
+
+---
+
+---
+
+### Document History
+
+`r params$orig_date`
+
+`r params$update_date`
+
+---
+
+```{r set up, warning=FALSE, include=FALSE, message= FALSE}
+
+knitr::opts_chunk$set(cache = FALSE,echo = FALSE, message=FALSE, warning = FALSE)
+
+##fig.width = 16/2, fig.height = 9/2
+
+library(tidyverse)
+library(data.table)
+library(knitr)
+library(kableExtra)
+library(scales)
+library(gridExtra)
+`%!in%` = Negate(`%in%`)
+
+select <- dplyr::select
+```
+
+
+```{r file config}
+
+
+dyn <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/dyn_ae_ge.csv")
+
+
+nrega <- fread("D:/cpr/UP/up-dynasties/dyn_other_data/nrega.csv", stringsAsFactors = FALSE)
+
+dyn_ge_w_09 <- dyn %>% filter(year == 2009 &position == 1)
+
+
+#glimpse(nrega)
+
+# 
+names(nrega) <- tolower(names(nrega))
+# 
+nrega <- nrega %>% select(- c(343:417)) %>%   rename(constituency_no = `pc no`) %>%select(constituency_no,worked, workdays,workdays_jc,disbursed_all,ratio) 
+
+# 
+# dyn_ge_w <- dyn %>% filter(election_type == "GE" & position==1)
+# 
+# 
+dyn_nrega <- merge(dyn_ge_w_09,nrega, by = c("constituency_no"))
+# 
+# 
+names(dyn_nrega) <- make.unique(names(dyn_nrega))
+
+
+#summary(nrega)
+
+dyn_nrega$dyn_cum_2_text <- ifelse(dyn_nrega$dyn_cum_2 ==0, "Non-family","Family")
+
+dyn_nrega$fam_rel_id_uniq <-  paste(dyn_nrega$family_id, dyn_nrega$rel_id_uniq,sep = "")
+
+
+dyn_nrega$fam_exp_cum_cat <- factor(dyn_nrega$fam_exp_cum_cat, levels=c("[0,1)","[1,6)","[6,11)","[11,21)","[21,Inf]"))
+
+ dyn_nrega  <- dyn_nrega%>% group_by(fam_rel_id_uniq) %>% mutate(n_proj_ind = n())
+```
+Variable summary
+
+Workdays - total days worked under NREGS
+
+– Coded as: log(Workdays + 1)
+
+Worked - number of individuals who worked under NREGS
+
+– Coded as: log(Worked + 1)
+
+ Deposits - sum of disbursements to laborers’ bank and post office accounts
+ 
+– Coded as: log(Bank Deposits + Post office Deposits + 1)
+
+
+```{r}
+
+# dyn_nrega %>% group_by(dyn_cum_2_text) %>% summarise(n()/n_distinct(constituency_no))
+# 
+# 
+# dyn_nrega %>% group_by(dyn_cum_2) %>% summarise(n())
+
+
+dyn_nrega %>% group_by(year) %>% summarise(count = n(),total_workdays =sum(workdays), mean_len_proj = total_workdays/count,proj_con =n()/n_distinct(constituency_no), len_con = sum(workdays)/n_distinct(constituency_no)) %>%  kable(caption = "Summary of NREGA", col.names = c ("Year", "Total number of projects","Total days", "Average days per project","Average number of projects per constituency","Average days per constituency "),digits = 1)%>% kable_styling(bootstrap_options = "striped")
+
+```
+
+
+
+### Constituency type
+
+```{r}
+
+
+ dyn_nrega %>% group_by(dyn_cum_2_text) %>%
+   summarise(sum = sum(workdays), count = n_distinct(constituency_no),mean_proj_con = n()/count, mean_con = sum/count, mean_workers_con = sum(worked)/count, mean_disbursed = sum(disbursed_all)/count) %>% select(dyn_cum_2_text,mean_proj_con, mean_con,,mean_workers_con,mean_disbursed ) %>%
+  kable(caption = "NREGA summary stats wrt constituency type", col.names = c("Caste group","Average number of projects", "Average days ",  "Average number of poeple", "Average money disbursed"),digits = 1)%>% kable_styling(bootstrap_options = "striped")
+
+```
+
+
+
+
+### experience
+
+```{r}
+
+
+
+# 
+ dyn_nrega  <- dyn_nrega%>% group_by(fam_rel_id_uniq) %>% mutate(n_proj_ind = n())
+
+
+ dyn_nrega  %>% group_by(fam_exp_cum_cat) %>% summarise(mean_proj = mean(n_proj_ind), mean_rd_len =sum(workdays)/n_distinct(fam_rel_id_uniq),mean_workers_con = sum(worked)/n_distinct(fam_rel_id_uniq),mean_disbursed = sum(disbursed_all)/n_distinct(fam_rel_id_uniq)) %>%  kable(caption = "NREGA road stats wrt to experience categories", col.names = c("Experience category", "Average number of projects",  "Average days ",  "Average number of poeple", "Average money disbursed"), digits = 0) %>% kable_styling(bootstrap_options = "striped")
+```
+
+### caste
+
+```{r}
+#dyn_nrega %>% group_by(caste_groups) %>% summarise(mean(workdays))
+
+
+dyn_nrega  <- dyn_nrega%>% group_by(fam_rel_id_uniq) %>% mutate(n_proj_ind = n())
+
+
+ dyn_nrega  %>% group_by(caste_groups) %>% summarise(mean_proj = mean(n_proj_ind), mean_rd_len =sum(workdays)/n_distinct(fam_rel_id_uniq),mean_workers_con = sum(worked)/n_distinct(fam_rel_id_uniq),mean_disbursed = sum(disbursed_all)/n_distinct(fam_rel_id_uniq)) %>% arrange(-mean_proj) %>% kable(caption = "NREGA road stats wrt to caste groups", col.names = c("Caste group", "Average number of projects",  "Average days ",  "Average number of poeple", "Average money disbursed"), digits = 0) %>% kable_styling(bootstrap_options = "striped")
+
+
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+

@@ -75,7 +75,7 @@ college_up <- college_up %>% filter(year_estd>=1974 & Management != "University"
 
 ```{r}
 
-# DT::datatable(head(college_up))
+ DT::datatable(head(college_up))
 
 ```
 
