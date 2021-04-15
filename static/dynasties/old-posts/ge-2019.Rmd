@@ -141,7 +141,7 @@ kable(table[,10:16], digits = 2) %>%  kable_styling(bootstrap_options = "striped
 <!-- # Vote share linear model -->
 
 ```{r linear}
-fit <- lm(vote.share.pc ~ bjp +  incumbent+  turncoat +caste+ sex + terms + dynast + assets  + serious.case+ education+age+ dynast*serious.case )
+fit <- lm(vote.share.pc ~ bjp +  incumbent+  turncoat +caste+ sex + terms + dynast + assets  + serious.case+ education+age+ dynast*serious.case + state)
 
 #summary(fit)
 
@@ -158,7 +158,7 @@ fit <- lm(vote.share.pc ~ bjp +  incumbent+  turncoat +caste+ sex + terms + dyna
 
 
 
-fit.logit <- glm(winner ~bjp +  incumbent+  turncoat +caste+ sex + terms + dynast + assets  + serious.case+ education+age+ dynast*serious.case ,family =  binomial(link = "probit"))
+fit.logit <- glm(winner ~bjp +  incumbent+  turncoat +caste+ sex + terms + dynast + assets  + serious.case+ education+age+ dynast*serious.case+state ,family =  binomial(link = "probit"))
 
 
 #summary(fit.logit)
@@ -174,87 +174,11 @@ fit.logit <- glm(winner ~bjp +  incumbent+  turncoat +caste+ sex + terms + dynas
 
 ```{r turnout, results = "asis"}
 
-fit.turnout <-  lm(turnout ~ bjp +  incumbent+  turncoat +caste+ sex + terms + dynast + assets  + serious.case+ education+age+enop +reservation+ dynast*serious.case)
+fit.turnout <-  lm(turnout ~ bjp +  incumbent+  turncoat +caste+ sex + terms + dynast + assets  + serious.case+ education+age+enop +reservation+ dynast*serious.case + state)
 
-stargazer(fit, fit.turnout, fit.logit, align = TRUE, no.space = TRUE, type = "html")
+stargazer(fit, fit.turnout, fit.logit, align = TRUE, no.space = TRUE, type = "html", keep = c("bjp", "incumbentTRUE" , "turncoatTRUE ","casteUC+IC " , "sexM" , "terms" , "dynast",
+    "assets" , "serious.caseTRUE", "educationHIGHER" ,"age" ,"enop","reservationSC/ST", "dynast:serious.caseTRUE"),omit.stat=c("LL","ser","f"),add.lines=list(c('State fixed effects', 'Yes','Yes','Yes' )))
 
-# fit.turnout$fitted.values
-# 
-# #summary(fit_turnout)
-# 
-# library(sjPlot)
-# sjt.lm(fit, fit.logit, fit.turnout)
-# stargazer(fit, fit.logit, fit.turnout,  omit= c("factor(state)Andhra_Pradesh",          
-# "factor(state)Arunachal_Pradesh",     
-# "factor(state)Assam",                
-# "factor(state)Bihar",                   
-# "factor(state)Chandigarh",            
-# "factor(state)Dadra_&_Nagar_Haveli", 
-# "factor(state)Daman_&_Diu" ,          
-# "factor(state)Delhi",               
-# "factor(state)Goa",                     
-# "factor(state)Gujarat",                 
-# "factor(state)Haryana",                
-# "factor(state)Himachal_Pradesh",         
-# "factor(state)Jammu_&_Kashmir",          
-# "factor(state)Jharkhand",               
-# "factor(state)Karnataka",               
-# "factor(state)Kerala",                 
-# "factor(state)Lakshadweep",              
-# "factor(state)Madhya_Pradesh",          
-# "factor(state)Maharashtra",             
-# "factor(state)Manipur",                  
-# "factor(state)Meghalaya",               
-# "factor(state)Mizoram",                 
-# "factor(state)Nagaland",                 
-# "factor(state)Odisha",                   
-# "factor(state)Puducherry",                
-# "factor(state)Punjab",                   
-# "factor(state)Rajasthan",               
-# "factor(state)Sikkim",                  
-# "factor(state)Tamil_Nadu",              
-# "factor(state)Telangana",               
-# "factor(state)Tripura",                
-# "factor(state)Uttar_Pradesh",         
-# "factor(state)Uttarakhand",            
-# "factor(state)West_Bengal"),type = "html")
-# # , title="Regression Results",type = "html",
-# # align=TRUE, dep.var.labels=c("Vote share percentage","Winner", "Turnout percentage"),
-# # omit.stat=c("LL","ser","f"), no.space=TRUE
-# c("factor(state)Andhra_Pradesh",          
-# "factor(state)Arunachal_Pradesh",     
-# "factor(state)Assam",                
-# "factor(state)Bihar",                   
-# "factor(state)Chandigarh",            
-# "factor(state)Dadra_&_Nagar_Haveli", 
-# "factor(state)Daman_&_Diu" ,          
-# "factor(state)Delhi",               
-# "factor(state)Goa",                     
-# "factor(state)Gujarat",                 
-# "factor(state)Haryana",                
-# "factor(state)Himachal_Pradesh",         
-# "factor(state)Jammu_&_Kashmir",          
-# "factor(state)Jharkhand",               
-# "factor(state)Karnataka",               
-# "factor(state)Kerala",                 
-# "factor(state)Lakshadweep",              
-# "factor(state)Madhya_Pradesh",          
-# "factor(state)Maharashtra",             
-# "factor(state)Manipur",                  
-# "factor(state)Meghalaya",               
-# "factor(state)Mizoram",                 
-# "factor(state)Nagaland",                 
-# "factor(state)Odisha",                   
-# "factor(state)Puducherry",                
-# "factor(state)Punjab",                   
-# "factor(state)Rajasthan",               
-# "factor(state)Sikkim",                  
-# "factor(state)Tamil_Nadu",              
-# "factor(state)Telangana",               
-# "factor(state)Tripura",                
-# "factor(state)Uttar_Pradesh",         
-# "factor(state)Uttarakhand",            
-# "factor(state)West_Bengal")
 
 ```
 

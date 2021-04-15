@@ -15,7 +15,7 @@ output:
     toc_float: TRUE
     toc_depth: 5
     number_sections: false
-    fig_width: 6            
+    fig_width: 5         
 editor_options: 
   chunk_output_type: inline
 
@@ -141,9 +141,27 @@ dyn_ae_ge_uniq_fam <- dyn_ae_ge_uniq %>% filter(dyn_tot_2 ==1)
 ```
 
 
-# Summary statistics
+## Summary statistics
 
-##  AE - GE 
+
+**Entries from different levels**
+
+
+
+### Local body
+
+
+The  dynasty dataset includes winners from local body elections  for  all the local body institutions except GP - Block Panchayats, Zilla Panchayats , Nagar Panchayts and Nagar Nigams from the year 1995. 
+
+```{r}
+
+dyn %>% filter(election_type %!in% c("AE","GE")) %>% group_by(election_type) %>% summarise(count = n()) %>% kable() %>%kable_styling(full_width = F)
+
+```
+
+
+
+###  AE - GE 
 
 This universe includes winners and runner-ups in the general and assembly elections from the year 1977 to 2019. 
 
@@ -155,31 +173,31 @@ This universe includes winners and runner-ups in the general and assembly electi
 
 The following section provides the year  and election level wise break-up  of the observations 
 
-### obs. break-up{.tabset .tabset-fade .tabset-pills}
+#### obs. break-up{.tabset .tabset-fade .tabset-pills}
 
 
 
 
-#### Assembly Elections
+##### Assembly Elections
 
 ```{r AE summary}
 
-dyn %>% filter(election_type =="AE" ) %>% count(year) %>%  kable(col.names = c ("Year", "Count"))%>% kable_styling(bootstrap_options = "striped")
+dyn %>% filter(election_type =="AE" ) %>% count(year) %>%  kable(col.names = c ("Year", "Count"))%>% kable_styling(full_width = F)
 
 ```
 
 ---
 
-#### General Elections
+##### General Elections
 
 ```{r GE summary}
-dyn %>% filter(election_type == "GE") %>% count(year) %>% kable(col.names = c ("Year", "Count"))%>% kable_styling(bootstrap_options = "striped")
+dyn %>% filter(election_type == "GE") %>% count(year) %>% kable(col.names = c ("Year", "Count"))%>%kable_styling(full_width = F)
 ```
 
 ---
 
 
-## Levels
+### Levels
 
 Families are spread at multiple office levels. While majority them are present only at the assembly election level, there are  a quite a few of them which is spanned across multiple level of office. The following table summarises that -
 
@@ -187,7 +205,7 @@ Families are spread at multiple office levels. While majority them are present o
 ```{r}
 
 
-dyn_ae_ge_uniq_fam %>% group_by(level) %>% summarise(count = n()) %>% arrange(-count)%>% kable(caption = "Linkages of families(Category 2)") %>% kable_styling(bootstrap_options = "striped")
+dyn_ae_ge_uniq_fam %>% group_by(level) %>% summarise(count = n()) %>% arrange(-count)%>% kable(caption = "Linkages of families(Category 2)")%>%kable_styling(full_width = F)
 
 
 ```
@@ -277,14 +295,14 @@ dyn_test <- dyn_ae_ge%>% mutate(contest_type_1 =case_when(position ==1 &dyn_cum_
 ```{r break up of contest types count}
 dyn_ae_ge$contest_type <- dyn_test$contest_type
 
-dyn_ae_ge %>% filter(position ==1& year != 1974) %>% group_by(year, contest_type) %>% summarise(count = n())  %>% select(year, contest_type, count) %>% spread(contest_type, count) %>% kable(digits = 2)%>% kable_styling(bootstrap_options = "striped")
+dyn_ae_ge %>% filter(position ==1& year != 1974) %>% group_by(election_id, contest_type) %>% summarise(count = n())  %>% select(election_id, contest_type, count) %>% spread(contest_type, count) %>% kable(digits = 2)%>%kable_styling(full_width = F)
 ```
 
 ### Percentage
 
 
 ```{r break up of contest types prop}
-dyn_ae_ge %>% filter(position ==1& year != 1974) %>% group_by(year, contest_type) %>% summarise(count = n()) %>% group_by(year) %>% mutate(sum = sum(count), prop = count/sum) %>% select(year, contest_type, prop) %>% spread(contest_type, prop) %>% kable(digits = 2)%>% kable_styling(bootstrap_options = "striped")
+dyn_ae_ge %>% filter(position ==1& year != 1974) %>% group_by(election_id, contest_type) %>% summarise(count = n()) %>% group_by(election_id) %>% mutate(sum = sum(count), prop = count/sum) %>% select(election_id, contest_type, prop) %>% spread(contest_type, prop) %>% kable(digits = 2)%>%kable_styling(full_width = F)
 ```
 
 ---
@@ -296,7 +314,7 @@ dyn_ae_ge %>% filter(position ==1& year != 1974) %>% group_by(year, contest_type
 This table shows the count of the unique individuals with regards to the number of elections they have **won**
 
 ```{r}
-dyn_ae_ge_uniq_ind %>% group_by(n_elections_won) %>% summarise(n_individuals = n()) %>% kable(caption = "Break-up of unique individuals wrt to elections won") %>% kable_styling(bootstrap_options = "striped")
+dyn_ae_ge_uniq_ind %>% group_by(n_elections_won) %>% summarise(n_individuals = n()) %>% kable(caption = "Break-up of unique individuals wrt to elections won") %>%kable_styling(full_width = F)
 ```
 
 ### treemap  - individuals
@@ -368,8 +386,41 @@ ggplot(dyn_ae_ge_fam_uniq)+
 
 
 
+---
+
+## Strike rate
+
+
+```{r}
+dyn_ae_ge %>% group_by(election_type, dyn_cum_2,year) %>% summarise(count = sum(position%in% c(1,2) ),won = sum(position==1), strike = won/count*100) %>%
+  ggplot(aes(year, strike, group = dyn_cum_2, color = factor(dyn_cum_2)) )+
+  
+  geom_line()+
+  ylim(0,80)+
+  geom_point(color = "black", alpha = .5)+
+  facet_wrap(~election_type, ncol =1)+
+  labs(title = "Strike rate", x = "Year", y = "Strike rate (%)", color = "Election type")+
+  colorspace::scale_colour_discrete_diverging(palette = "Blue-Red",labels = c("non-Dynast","Dynast"))+
+  theme_bw()
+
+ # colorspace::hcl_palettes(plot = TRUE)
+```
+
+
+<!-- # ```{r} -->
+<!-- # dyn_ae_ge <- dyn_ae_ge%>% mutate(contest_type_1 =case_when(position ==1 &dyn_cum_2 ==0 ~1, -->
+<!-- #                                                                                                                         position ==2 &dyn_cum_2 ==0 ~2, -->
+<!-- #                                                                                                                         position ==1 &dyn_cum_2 ==1 ~3, -->
+<!-- #                                                                                                                         position ==2 &dyn_cum_2 ==1 ~5)) %>% group_by( election_type,year,constituency_no) %>% mutate(sum_cont_type = sum(contest_type_1)) %>% mutate(contest_type =ifelse(sum_cont_type ==3, "non-fam v/s non-fam",ifelse(sum_cont_type ==5, "non-fam v/s non-fam", ifelse(sum_cont_type ==6, "non-fam v/s fam", ifelse(sum_cont_type ==8, "fam v/s fam", "NA"))))) -->
+<!-- #  -->
+<!-- #  -->
+<!-- # dyn_ae_ge %>% group_by(election_type, contest_type, dyn_cum_2) %>% summarise(count_dyn = sum(position %in% c(1,2 ) & dyn_cum_2 ==1),won_dyn = sum(position==1 &dyn_cum_2 ==1), strike = won_dyn/count_dyn*100)  -->
+<!-- # ``` -->
+
 
 ---
+
+
 
 
 ## Elections contested{.tabset .tabset-fade .tabset-pills}
@@ -380,7 +431,7 @@ This table shows the count of the unique individuals with regards to the number 
 
 
 ```{r}
-dyn_ae_ge_uniq_ind %>% group_by(n_elections_contested) %>% summarise(n_individuals = n()) %>% kable(caption = "Break-up of unique individuals wrt to elections contested") %>% kable_styling(bootstrap_options = "striped")
+dyn_ae_ge_uniq_ind %>% group_by(n_elections_contested) %>% summarise(n_individuals = n()) %>% kable(caption = "Break-up of unique individuals wrt to elections contested")%>%kable_styling(full_width = F)
 
 
 ```
@@ -451,9 +502,12 @@ ggplot(dyn_ae_ge_fam_uniq)+
 
 ```
 
+
+
+
+
+
 ---
-
-
 ## Retention
 
 This chart depicts the retention  of candidates after each election year.
@@ -509,7 +563,7 @@ dyn_ae_ge %>%distinct(family_id, .keep_all = TRUE) %>%  group_by(starting_decade
 
 
 
-# Land distribution {.tabset .tabset-fade .tabset-pills}
+## Land distribution {.tabset .tabset-fade .tabset-pills}
 
 The dataset contains a variable named land which records the land owned by the candidate/family. The information is recorded in *bhigas*.
 
@@ -759,7 +813,6 @@ Others
 
 
 
-## Families
 
 ```{r}
 dyn_indus <- read.csv("D:/cpr/UP/up-dynasties/ae_ge_indus.csv")
@@ -779,7 +832,7 @@ dyn_indus_ae_ge <- dyn_indus_ae_ge %>% mutate(indus_2_c = ifelse(indus_2>0,1,0),
 ### Family{.tabset .tabset-fade .tabset-pills}
 
 
-####x Average
+#### Average
 
 Ownership of industries among families and non-families
 
