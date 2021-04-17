@@ -14,7 +14,7 @@ output:
     toc: TRUE
     toc_float: TRUE
     toc_depth: 5
-    number_sections: false
+    number_sections: TRUE
     fig_width: 6            
 editor_options: 
   chunk_output_type: inline
@@ -195,13 +195,13 @@ dyn_up_college$n_private <- replace_na(dyn_up_college$n_private, 0)
 Average number of colleges built every year in a constituency is `r {round(mean(dyn_up_college$n_colleges),2)}`
 
 
-### Distribution of number of colleges established every election year in a constituency
+<!-- ### Distribution of number of colleges established every election year in a constituency -->
 
-```{r}
-ggplot(dyn_up_college, aes(n_colleges, color =year_el))+
-  geom_density()
+<!-- ```{r} -->
+<!-- ggplot(dyn_up_college, aes(n_colleges, color =year_el))+ -->
+<!--   geom_density() -->
 
-```
+<!-- ``` -->
 
 
 ---
@@ -210,6 +210,9 @@ ggplot(dyn_up_college, aes(n_colleges, color =year_el))+
 
 
 ### Distribution of number of colleges in a constituency{.tabset}
+
+
+This density chart shows the distribution of the number of colleges built in different constituencies during last 10 years
 
 #### Post 2009
 
@@ -238,27 +241,21 @@ ggplot( aes(count))+
 
 
 
-### spatial distribution
-
 
 ## regressions{.tabset}
-
-
-### dynast definitions
-
-
-
-```{r }
-knitr::include_graphics("D:/cpr/misc/dyn_def.jpeg")
-```
-
 
 
 
 
 ### Dynast definition 2{.tabset}
 
-#### All colleges
+regression run on dynast definition 2
+
+#### All years{.tabset}
+
+In this regression we look at colleges built during the rule of MLAs selected during the election cycles starting from 1974 to 2017
+
+##### All colleges
 
 ```{r}
 # fit.3 <- glm(linkage_down ~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land + dynast+ post_90 +n_elections_w , family = binomial(link = "probit"))
@@ -316,7 +313,7 @@ align=TRUE,  no.space=TRUE, keep = c("dyn_cum_2" ,          "caste_uc", "caste_y
 
 
 
-#### Private colleges
+##### Private colleges
 
 
 ```{r}
@@ -352,77 +349,96 @@ align=TRUE,  no.space=TRUE, keep = c("dyn_cum_2" ,          "caste_uc", "caste_y
 
 ```
 
+#### Post 1991{.tabset}
 
-### Dyn defnition 3{.tabset}
+- Tried post 1991 and 1996. Dynast co-effient on both are negative. The model below is post 1991.
 
-#### All college
+
+
+
+##### All colleges
 
 ```{r}
+# fit.3 <- glm(linkage_down ~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land + dynast+ post_90 +n_elections_w , family = binomial(link = "probit"))
+
+
+dyn_up_college_91 <- dyn_up_college%>% filter(year_el>= 1991)
+
+
+dyn_up_college_91$caste_uc <- ifelse(dyn_up_college_91$caste_groups == "Upper Caste", 1,0)
+dyn_up_college_91$caste_yadav <- ifelse(dyn_up_college_91$caste_groups == "Yadav", 1,0)
+dyn_up_college_91$caste_muslim <- ifelse(dyn_up_college_91$caste_groups == "Muslim", 1,0)
+dyn_up_college_91$caste_dalit <- ifelse(dyn_up_college_91$caste_groups == "Dalit", 1,0)
+dyn_up_college_91$caste_non_yadav_obc <- ifelse(dyn_up_college_91$caste_groups == "Non-Yadav OBC", 1,0)
+
+
+## UP Models
 
 
 ## linear
 
-# fit.lm <- lm(data = dyn_up_college, n_college ~ dyn_cum_3+ factor(year_el ))
+# fit.lm <- lm(data = dyn_up_college_91, n_college ~ dyn_cum_2+ factor(year_el ))
 # 
 # 
 # ()
 
 
-fit.linear <- lm(data = dyn_up_college, n_colleges ~ dyn_cum_3+caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +factor(year_el ))
+fit.linear <- lm(data = dyn_up_college_91, n_colleges ~ dyn_cum_2+term_duration+caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +factor(year_el ))
 
-fit.logit <- glm(data = dyn_up_college, n_colleges ~ dyn_cum_3+caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +factor(year_el ))
+fit.logit <- glm(data = dyn_up_college_91, n_colleges ~ dyn_cum_2+caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +factor(year_el ))
 
 
 #summary(fit.logit)
 
 
-fit.poisson <- glm(data = dyn_up_college, n_colleges ~ dyn_cum_3+term_duration+caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +factor(year_el ), family =  "quasipoisson")
+fit.poisson <- glm(data = dyn_up_college_91, n_colleges ~ dyn_cum_2+term_duration+caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +factor(year_el ), family =  "quasipoisson")
 
 
 #summary(fit.poisson)
 
-dyn_up_college$n_college_bin <- ifelse(dyn_up_college$n_colleges ==0,0,1)
+dyn_up_college_91$n_college_bin <- ifelse(dyn_up_college_91$n_colleges ==0,0,1)
 
-fit.probit <- glm(data = dyn_up_college, n_college_bin ~ dyn_cum_3+caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +factor(year_el ),family = binomial(link = "probit"))
+fit.probit <- glm(data = dyn_up_college_91, n_college_bin ~ dyn_cum_2+caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +factor(year_el ),family = binomial(link = "probit"))
 
 # 
-# summary(fit.probit)
+summary(fit.probit)
 ```
-
 
 
 ```{r , results = "asis"}
 
-stargazer(fit.linear, fit.logit, fit.poisson,fit.probit,title="Regression Results - UP all colleges - Dynast 3 ",type = "html",
-align=TRUE,  no.space=TRUE, keep = c("dyn_cum_3" ,          "caste_uc", "caste_yadav"   ,      "caste_non_yadav_obc" ,"caste_dalit"   ,"caste_muslim" ),omit.stat=c("LL","ser","f"),add.lines=list(c('Year fixed effects', 'Yes','Yes','Yes','Yes' )))
+stargazer(fit.linear, fit.logit, fit.poisson,fit.probit,title="Regression Results - UP colleges - Dynast 2 ",type = "html",
+align=TRUE,  no.space=TRUE, keep = c("dyn_cum_2" ,          "caste_uc", "caste_yadav"   ,      "caste_non_yadav_obc" ,"caste_dalit"   ,"caste_muslim" ),omit.stat=c("LL","ser","f"),add.lines=list(c('Year fixed effects', 'Yes','Yes','Yes','Yes' )))
+
 
 
 ```
 
 
 
-#### Private colleges
+
+##### Private colleges
 
 
 ```{r}
 
 
-fit.linear <- lm(data = dyn_up_college, n_private ~ dyn_cum_3+caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +factor(year_el ))
+fit.linear <- lm(data = dyn_up_college_91, n_private ~ dyn_cum_2+caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +factor(year_el ))
 
-fit.logit <- glm(data = dyn_up_college, n_private ~ dyn_cum_3+caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +factor(year_el ))
+fit.logit <- glm(data = dyn_up_college_91, n_private ~ dyn_cum_2+caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +factor(year_el ))
 
 
 #summary(fit.logit)
 
 
-fit.poisson <- glm(data = dyn_up_college, n_private ~ dyn_cum_3+caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +factor(year_el ), family =  "quasipoisson")
+fit.poisson <- glm(data = dyn_up_college_91, n_private ~ dyn_cum_2+caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +factor(year_el ), family =  "quasipoisson")
 
 
 #summary(fit.poisson)
 
-dyn_up_college$n_college_bin <- ifelse(dyn_up_college$n_private ==0,0,1)
+dyn_up_college_91$n_college_bin <- ifelse(dyn_up_college_91$n_private ==0,0,1)
 
-fit.probit <- glm(data = dyn_up_college, n_college_bin ~ dyn_cum_3+caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +factor(year_el ),family = binomial(link = "probit"))
+fit.probit <- glm(data = dyn_up_college_91, n_college_bin ~ dyn_cum_2+caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +factor(year_el ),family = binomial(link = "probit"))
 
 # 
 # summary(fit.probit)
@@ -431,11 +447,96 @@ fit.probit <- glm(data = dyn_up_college, n_college_bin ~ dyn_cum_3+caste_uc+ cas
 
 ```{r , results = "asis"}
 
-stargazer(fit.linear, fit.logit, fit.poisson,fit.probit,title="Regression Results - UP private colleges - Dynast 3 ",type = "html",
+stargazer(fit.linear, fit.logit, fit.poisson,fit.probit,title="Regression Results - UP private colleges - Dynast 2 ",type = "html",
 align=TRUE,  no.space=TRUE, keep = c("dyn_cum_2" ,          "caste_uc", "caste_yadav"   ,      "caste_non_yadav_obc" ,"caste_dalit"   ,"caste_muslim" ),omit.stat=c("LL","ser","f"),add.lines=list(c('Year fixed effects', 'Yes','Yes','Yes','Yes' )))
 
 
 ```
+
+
+<!-- ### Dyn defnition 3{.tabset} -->
+
+<!-- #### All college -->
+
+<!-- ```{r} -->
+
+
+<!-- ## linear -->
+
+<!-- # fit.lm <- lm(data = dyn_up_college, n_college ~ dyn_cum_3+ factor(year_el )) -->
+<!-- #  -->
+<!-- #  -->
+<!-- # () -->
+
+
+<!-- fit.linear <- lm(data = dyn_up_college, n_colleges ~ dyn_cum_3+caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +factor(year_el )) -->
+
+<!-- fit.logit <- glm(data = dyn_up_college, n_colleges ~ dyn_cum_3+caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +factor(year_el )) -->
+
+
+<!-- #summary(fit.logit) -->
+
+
+<!-- fit.poisson <- glm(data = dyn_up_college, n_colleges ~ dyn_cum_3+term_duration+caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +factor(year_el ), family =  "quasipoisson") -->
+
+
+<!-- #summary(fit.poisson) -->
+
+<!-- dyn_up_college$n_college_bin <- ifelse(dyn_up_college$n_colleges ==0,0,1) -->
+
+<!-- fit.probit <- glm(data = dyn_up_college, n_college_bin ~ dyn_cum_3+caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +factor(year_el ),family = binomial(link = "probit")) -->
+
+<!-- #  -->
+<!-- # summary(fit.probit) -->
+<!-- ``` -->
+
+
+
+<!-- ```{r , results = "asis"} -->
+
+<!-- stargazer(fit.linear, fit.logit, fit.poisson,fit.probit,title="Regression Results - UP all colleges - Dynast 3 ",type = "html", -->
+<!-- align=TRUE,  no.space=TRUE, keep = c("dyn_cum_3" ,          "caste_uc", "caste_yadav"   ,      "caste_non_yadav_obc" ,"caste_dalit"   ,"caste_muslim" ),omit.stat=c("LL","ser","f"),add.lines=list(c('Year fixed effects', 'Yes','Yes','Yes','Yes' ))) -->
+
+
+<!-- ``` -->
+
+
+
+<!-- #### Private colleges -->
+
+
+<!-- ```{r} -->
+
+
+<!-- fit.linear <- lm(data = dyn_up_college, n_private ~ dyn_cum_3+caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +factor(year_el )) -->
+
+<!-- fit.logit <- glm(data = dyn_up_college, n_private ~ dyn_cum_3+caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +factor(year_el )) -->
+
+
+<!-- #summary(fit.logit) -->
+
+
+<!-- fit.poisson <- glm(data = dyn_up_college, n_private ~ dyn_cum_3+caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +factor(year_el ), family =  "quasipoisson") -->
+
+
+<!-- #summary(fit.poisson) -->
+
+<!-- dyn_up_college$n_college_bin <- ifelse(dyn_up_college$n_private ==0,0,1) -->
+
+<!-- fit.probit <- glm(data = dyn_up_college, n_college_bin ~ dyn_cum_3+caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +factor(year_el ),family = binomial(link = "probit")) -->
+
+<!-- #  -->
+<!-- # summary(fit.probit) -->
+<!-- ``` -->
+
+
+<!-- ```{r , results = "asis"} -->
+
+<!-- stargazer(fit.linear, fit.logit, fit.poisson,fit.probit,title="Regression Results - UP private colleges - Dynast 3 ",type = "html", -->
+<!-- align=TRUE,  no.space=TRUE, keep = c("dyn_cum_2" ,          "caste_uc", "caste_yadav"   ,      "caste_non_yadav_obc" ,"caste_dalit"   ,"caste_muslim" ),omit.stat=c("LL","ser","f"),add.lines=list(c('Year fixed effects', 'Yes','Yes','Yes','Yes' ))) -->
+
+
+<!-- ``` -->
 
 
 ### adr variables
@@ -688,6 +789,9 @@ ggplot( aes(count))+
 ## regressions {.tabset}
 
 
+All pan-india regressions are run on colleges built during 2009-19 at PC level.
+
+
 ### All colleges
 
 
@@ -773,6 +877,9 @@ add.lines=list(c('Year fixed effects', 'Yes','Yes','Yes','Yes' ), c('State fixed
 ---
 
 ### with adr
+
+
+
 
 ```{r}
 
