@@ -129,14 +129,14 @@ round(prop.table(table(ge_5pc$position)),2)
 
 ```{r}
 
-ge_5pc %>%  group_by(dynast, position) %>% summarise(count = n() ) %>% group_by(,position) %>% mutate(sum= sum(count), prop = count/sum) %>% filter(dynast == "Dynast") %>%reshape2::dcast(position  ~ dynast) %>% kable(digits = 2)
+ge_5pc %>%  group_by(dynast, position) %>% summarise(count = n() ) %>% group_by(,position) %>% mutate(sum= sum(count), prop = count/sum) %>% filter(dynast == "Dynast") %>%reshape2::dcast(position  ~ dynast) %>% kable(digits = 2) %>% kable_styling(full_width = F)
 
 ```
 
 ---
 
 ```{r eda}
-ge_5pc %>%  group_by(year,dynast, position) %>% summarise(count = n() ) %>% group_by(year,position) %>% mutate(sum= sum(count), prop = count/sum) %>% filter(dynast == "Dynast") %>%reshape2::dcast(position  ~ year) %>% replace(is.na(.),0)%>% kable(digits = 2)
+ge_5pc %>%  group_by(year,dynast, position) %>% summarise(count = n() ) %>% group_by(year,position) %>% mutate(sum= sum(count), prop = count/sum) %>% filter(dynast == "Dynast") %>%reshape2::dcast(position  ~ year) %>% replace(is.na(.),0)%>% kable(digits = 2) %>% kable_styling(full_width = F)
 
 
 ```
@@ -146,13 +146,13 @@ ge_5pc %>%  group_by(year,dynast, position) %>% summarise(count = n() ) %>% grou
 **Composition of positions within dynasts and non-dyansts**
 
 ```{r}
-ge_5pc %>% group_by(dynast, position) %>% summarise(count = n() ) %>% group_by(dynast) %>% mutate(sum= sum(count), prop = count/sum) %>% reshape2::dcast(dynast  ~position) %>% kable(digits = 2)
+ge_5pc %>% group_by(dynast, position) %>% summarise(count = n() ) %>% group_by(dynast) %>% mutate(sum= sum(count), prop = count/sum) %>% reshape2::dcast(dynast  ~position) %>% kable(digits = 2) %>% kable_styling(full_width = F)
 ```
 
 ---
 
 ```{r}
-ge_5pc %>%  group_by(year,dynast, position) %>% summarise(count = n() ) %>% group_by(year,dynast) %>% mutate(sum= sum(count), prop = count/sum) %>% filter(dynast == "Dynast") %>%reshape2::dcast(year  ~ position) %>% replace(is.na(.),0)%>% kable(digits = 2)
+ge_5pc %>%  group_by(year,dynast, position) %>% summarise(count = n() ) %>% group_by(year,dynast) %>% mutate(sum= sum(count), prop = count/sum) %>% filter(dynast == "Dynast") %>%reshape2::dcast(year  ~ position) %>% replace(is.na(.),0)%>% kable(digits = 2) %>% kable_styling(full_width = F)
 
 
 ```
@@ -164,14 +164,14 @@ ge_5pc %>%  group_by(year,dynast, position) %>% summarise(count = n() ) %>% grou
 
 ```{r}
 
-ge_5pc %>% group_by(dynast) %>%summarise(mean_vote_share = mean(vote_share_percentage)) %>% kable(digits = 0)
+ge_5pc %>% group_by(dynast) %>%summarise(mean_vote_share = mean(vote_share_percentage)) %>% kable(digits = 0) %>% kable_styling(full_width = F)
 
 ```
 
 ---
 
 ```{r}
-ge_5pc %>%  group_by(year,dynast) %>%  summarise(mean_vote_share = mean(vote_share_percentage))  %>%reshape2::dcast(dynast  ~ year) %>% replace(is.na(.),0)%>% kable(digits = 0)
+ge_5pc %>%  group_by(year,dynast) %>%  summarise(mean_vote_share = mean(vote_share_percentage))  %>%reshape2::dcast(dynast  ~ year) %>% replace(is.na(.),0)%>% kable(digits = 0) %>% kable_styling(full_width = F)
 
 ```
 
@@ -184,7 +184,7 @@ ge_5pc %>%  group_by(year,dynast) %>%  summarise(mean_vote_share = mean(vote_sha
 
 ```{r}
 
-ge_5pc%>%  group_by(dynast) %>% summarise(mean_turncoat = mean(turncoat)) %>% kable( digit = 2) 
+ge_5pc%>%  group_by(dynast) %>% summarise(mean_turncoat = mean(turncoat)) %>% kable( digit = 2)  %>% kable_styling(full_width = F)
 
 
 ```
@@ -193,7 +193,7 @@ ge_5pc%>%  group_by(dynast) %>% summarise(mean_turncoat = mean(turncoat)) %>% ka
 ---
 
 ```{r}
-ge_5pc %>%  group_by(year,dynast) %>%  summarise(mean_turncoat = mean(turncoat))  %>%reshape2::dcast(dynast  ~ year) %>% replace(is.na(.),0)%>% kable(digits = 2)
+ge_5pc %>%  group_by(year,dynast) %>%  summarise(mean_turncoat = mean(turncoat))  %>%reshape2::dcast(dynast  ~ year) %>% replace(is.na(.),0)%>% kable(digits = 2) %>% kable_styling(full_width = F)
 
 ```
 
@@ -205,7 +205,7 @@ ge_5pc %>%  group_by(year,dynast) %>%  summarise(mean_turncoat = mean(turncoat))
 
 ```{r}
 
-ge_5pc%>%  group_by(dynast) %>% summarise(mean_same_party = mean(same_party, na.rm = TRUE)) %>% kable( digit = 2) 
+ge_5pc%>%  group_by(dynast) %>% summarise(mean_same_party = mean(same_party, na.rm = TRUE)) %>% kable( digit = 2)  %>% kable_styling(full_width = F)
 
 
 ```
@@ -213,7 +213,7 @@ ge_5pc%>%  group_by(dynast) %>% summarise(mean_same_party = mean(same_party, na.
 ---
 
 ```{r}
-ge_5pc %>%  group_by(year,dynast) %>%  summarise(mean_turncoat =mean(same_party, na.rm = TRUE))  %>%reshape2::dcast(dynast  ~ year) %>% replace(is.na(.),0)%>% kable(digits = 2)
+ge_5pc %>%  group_by(year,dynast) %>%  summarise(mean_turncoat =mean(same_party, na.rm = TRUE))  %>%reshape2::dcast(dynast  ~ year) %>% replace(is.na(.),0)%>% kable(digits = 2) %>% kable_styling(full_width = F)
 ```
 
 ---
@@ -223,7 +223,7 @@ ge_5pc %>%  group_by(year,dynast) %>%  summarise(mean_turncoat =mean(same_party,
 
 ```{r}
 
-ge_5pc%>%  group_by(dynast) %>% summarise(mean_incumbent = mean(incumbent, na.rm = TRUE)) %>% kable( digit = 2) 
+ge_5pc%>%  group_by(dynast) %>% summarise(mean_incumbent = mean(incumbent, na.rm = TRUE)) %>% kable( digit = 2)  %>% kable_styling(full_width = F)
 
 
 
@@ -233,7 +233,7 @@ ge_5pc%>%  group_by(dynast) %>% summarise(mean_incumbent = mean(incumbent, na.rm
 
 ```{r}
 
-ge_5pc %>%  group_by(year,dynast) %>%  summarise(mean_incumbent = mean(incumbent, na.rm = TRUE))  %>%reshape2::dcast(dynast  ~ year) %>% replace(is.na(.),0)%>% kable(digits = 2)
+ge_5pc %>%  group_by(year,dynast) %>%  summarise(mean_incumbent = mean(incumbent, na.rm = TRUE))  %>%reshape2::dcast(dynast  ~ year) %>% replace(is.na(.),0)%>% kable(digits = 2) %>% kable_styling(full_width = F)
 
 ```
 
@@ -245,7 +245,7 @@ ge_5pc %>%  group_by(year,dynast) %>%  summarise(mean_incumbent = mean(incumbent
 
 ```{r}
 
-ge_5pc%>%  group_by(dynast) %>% summarise(mean_recontest = mean(recontest, na.rm = TRUE)) %>% kable( digit = 2) 
+ge_5pc%>%  group_by(dynast) %>% summarise(mean_recontest = mean(recontest, na.rm = TRUE)) %>% kable( digit = 2)  %>% kable_styling(full_width = F)
 
 ```
 
@@ -253,7 +253,7 @@ ge_5pc%>%  group_by(dynast) %>% summarise(mean_recontest = mean(recontest, na.rm
 ---
 ```{r}
 
-ge_5pc %>%  group_by(year,dynast) %>%  summarise(mean_recontest = mean(recontest, na.rm = TRUE))  %>%reshape2::dcast(dynast  ~ year) %>% replace(is.na(.),0)%>% kable(digits = 2)
+ge_5pc %>%  group_by(year,dynast) %>%  summarise(mean_recontest = mean(recontest, na.rm = TRUE))  %>%reshape2::dcast(dynast  ~ year) %>% replace(is.na(.),0)%>% kable(digits = 2) %>% kable_styling(full_width = F)
 
 ```
 
@@ -264,7 +264,7 @@ ge_5pc %>%  group_by(year,dynast) %>%  summarise(mean_recontest = mean(recontest
 
 ```{r}
 
-ge_5pc%>%  group_by(dynast) %>% summarise(mean_no_terms = mean(no_terms, na.rm = TRUE)) %>% kable( digit = 2) 
+ge_5pc%>%  group_by(dynast) %>% summarise(mean_no_terms = mean(no_terms, na.rm = TRUE)) %>% kable( digit = 2)  %>% kable_styling(full_width = F)
 
 
 ```
@@ -272,7 +272,7 @@ ge_5pc%>%  group_by(dynast) %>% summarise(mean_no_terms = mean(no_terms, na.rm =
 ---
 
 ```{r}
-ge_5pc %>%  group_by(year,dynast) %>%  summarise(mean_no_terms = mean(no_terms, na.rm = TRUE))  %>%reshape2::dcast(dynast  ~ year) %>% replace(is.na(.),0)%>% kable(digits = 2)
+ge_5pc %>%  group_by(year,dynast) %>%  summarise(mean_no_terms = mean(no_terms, na.rm = TRUE))  %>%reshape2::dcast(dynast  ~ year) %>% replace(is.na(.),0)%>% kable(digits = 2) %>% kable_styling(full_width = F)
 ```
 
 ---
@@ -282,7 +282,7 @@ ge_5pc %>%  group_by(year,dynast) %>%  summarise(mean_no_terms = mean(no_terms, 
 
 ```{r}
 
-ge_5pc%>%  group_by(dynast, constituency_type) %>% summarise(count  = n()) %>% group_by(dynast) %>% mutate(sum = sum(count), prop = count/sum) %>% reshape2::dcast(dynast ~ constituency_type) %>% kable(digits = 2)
+ge_5pc%>%  group_by(dynast, constituency_type) %>% summarise(count  = n()) %>% group_by(dynast) %>% mutate(sum = sum(count), prop = count/sum) %>% reshape2::dcast(dynast ~ constituency_type) %>% kable(digits = 2) %>% kable_styling(full_width = F)
 
 
 ```
@@ -290,7 +290,7 @@ ge_5pc%>%  group_by(dynast, constituency_type) %>% summarise(count  = n()) %>% g
 ---
 
 ```{r}
-ge_5pc%>%  group_by(year,dynast, constituency_type) %>% summarise(count  = n()) %>% group_by(dynast,year) %>% mutate(sum = sum(count), prop = count/sum) %>% reshape2::dcast(year +dynast  ~ constituency_type) %>% kable(digits = 2)
+ge_5pc%>%  group_by(year,dynast, constituency_type) %>% summarise(count  = n()) %>% group_by(dynast,year) %>% mutate(sum = sum(count), prop = count/sum) %>% reshape2::dcast(year +dynast  ~ constituency_type) %>% kable(digits = 2) %>% kable_styling(full_width = F)
 
 
 ```
@@ -351,14 +351,14 @@ round(prop.table(table(ae_5pc$position)),2)
 
 ```{r}
 
-ae_5pc %>%  group_by(dynast, position) %>% summarise(count = n() ) %>% group_by(,position) %>% mutate(sum= sum(count), prop = count/sum) %>% filter(dynast == "Dynast") %>%reshape2::dcast(position  ~ dynast) %>% kable(digits = 2)
+ae_5pc %>%  group_by(dynast, position) %>% summarise(count = n() ) %>% group_by(,position) %>% mutate(sum= sum(count), prop = count/sum) %>% filter(dynast == "Dynast") %>%reshape2::dcast(position  ~ dynast) %>% kable(digits = 2) %>% kable_styling(full_width = F)
 
 ```
 
 ---
 
 ```{r }
-ae_5pc %>%  group_by(year,dynast, position) %>% summarise(count = n() ) %>% group_by(year,position) %>% mutate(sum= sum(count), prop = count/sum) %>% filter(dynast == "Dynast") %>%reshape2::dcast(position  ~ year) %>% replace(is.na(.),0)%>% kable(digits = 2)
+ae_5pc %>%  group_by(year,dynast, position) %>% summarise(count = n() ) %>% group_by(year,position) %>% mutate(sum= sum(count), prop = count/sum) %>% filter(dynast == "Dynast") %>%reshape2::dcast(position  ~ year) %>% replace(is.na(.),0)%>% kable(digits = 2) %>% kable_styling(full_width = F)
 
 
 ```
@@ -368,13 +368,13 @@ ae_5pc %>%  group_by(year,dynast, position) %>% summarise(count = n() ) %>% grou
 **Composition of positions within dynasts and non-dyansts**
 
 ```{r}
-ae_5pc %>% group_by(dynast, position) %>% summarise(count = n() ) %>% group_by(dynast) %>% mutate(sum= sum(count), prop = count/sum) %>% reshape2::dcast(dynast  ~position) %>% kable(digits = 2)
+ae_5pc %>% group_by(dynast, position) %>% summarise(count = n() ) %>% group_by(dynast) %>% mutate(sum= sum(count), prop = count/sum) %>% reshape2::dcast(dynast  ~position) %>% kable(digits = 2) %>% kable_styling(full_width = F)
 ```
 
 ---
 
 ```{r}
-ae_5pc %>%  group_by(year,dynast, position) %>% summarise(count = n() ) %>% group_by(year,dynast) %>% mutate(sum= sum(count), prop = count/sum) %>% filter(dynast == "Dynast") %>%reshape2::dcast(year  ~ position) %>% replace(is.na(.),0)%>% kable(digits = 2)
+ae_5pc %>%  group_by(year,dynast, position) %>% summarise(count = n() ) %>% group_by(year,dynast) %>% mutate(sum= sum(count), prop = count/sum) %>% filter(dynast == "Dynast") %>%reshape2::dcast(year  ~ position) %>% replace(is.na(.),0)%>% kable(digits = 2) %>% kable_styling(full_width = F)
 
 
 ```
@@ -386,14 +386,14 @@ ae_5pc %>%  group_by(year,dynast, position) %>% summarise(count = n() ) %>% grou
 
 ```{r}
 
-ae_5pc %>% group_by(dynast) %>%summarise(mean_vote_share = mean(vote_share_percentage)) %>% kable(digits = 0)
+ae_5pc %>% group_by(dynast) %>%summarise(mean_vote_share = mean(vote_share_percentage)) %>% kable(digits = 0) %>% kable_styling(full_width = F)
 
 ```
 
 ---
 
 ```{r}
-ae_5pc %>%  group_by(year,dynast) %>%  summarise(mean_vote_share = mean(vote_share_percentage))  %>%reshape2::dcast(dynast  ~ year) %>% replace(is.na(.),0)%>% kable(digits = 0)
+ae_5pc %>%  group_by(year,dynast) %>%  summarise(mean_vote_share = mean(vote_share_percentage))  %>%reshape2::dcast(dynast  ~ year) %>% replace(is.na(.),0)%>% kable(digits = 0) %>% kable_styling(full_width = F)
 
 ```
 
@@ -406,7 +406,7 @@ ae_5pc %>%  group_by(year,dynast) %>%  summarise(mean_vote_share = mean(vote_sha
 
 ```{r}
 
-ae_5pc%>%  group_by(dynast) %>% summarise(mean_turncoat = mean(turncoat)) %>% kable( digit = 2) 
+ae_5pc%>%  group_by(dynast) %>% summarise(mean_turncoat = mean(turncoat)) %>% kable( digit = 2)  %>% kable_styling(full_width = F)
 
 
 ```
@@ -415,7 +415,7 @@ ae_5pc%>%  group_by(dynast) %>% summarise(mean_turncoat = mean(turncoat)) %>% ka
 ---
 
 ```{r}
-ae_5pc %>%  group_by(year,dynast) %>%  summarise(mean_turncoat = mean(turncoat))  %>%reshape2::dcast(dynast  ~ year) %>% replace(is.na(.),0)%>% kable(digits = 2)
+ae_5pc %>%  group_by(year,dynast) %>%  summarise(mean_turncoat = mean(turncoat))  %>%reshape2::dcast(dynast  ~ year) %>% replace(is.na(.),0)%>% kable(digits = 2) %>% kable_styling(full_width = F)
 
 ```
 
@@ -427,7 +427,7 @@ ae_5pc %>%  group_by(year,dynast) %>%  summarise(mean_turncoat = mean(turncoat))
 
 ```{r}
 
-ae_5pc%>%  group_by(dynast) %>% summarise(mean_same_party = mean(same_party, na.rm = TRUE)) %>% kable( digit = 2) 
+ae_5pc%>%  group_by(dynast) %>% summarise(mean_same_party = mean(same_party, na.rm = TRUE)) %>% kable( digit = 2)  %>% kable_styling(full_width = F)
 
 
 ```
@@ -435,7 +435,7 @@ ae_5pc%>%  group_by(dynast) %>% summarise(mean_same_party = mean(same_party, na.
 ---
 
 ```{r}
-ae_5pc %>%  group_by(year,dynast) %>%  summarise(mean_turncoat =mean(same_party, na.rm = TRUE))  %>%reshape2::dcast(dynast  ~ year) %>% replace(is.na(.),0)%>% kable(digits = 2)
+ae_5pc %>%  group_by(year,dynast) %>%  summarise(mean_turncoat =mean(same_party, na.rm = TRUE))  %>%reshape2::dcast(dynast  ~ year) %>% replace(is.na(.),0)%>% kable(digits = 2) %>% kable_styling(full_width = F)
 ```
 
 ---
@@ -445,7 +445,7 @@ ae_5pc %>%  group_by(year,dynast) %>%  summarise(mean_turncoat =mean(same_party,
 
 ```{r}
 
-ae_5pc%>%  group_by(dynast) %>% summarise(mean_incumbent = mean(incumbent, na.rm = TRUE)) %>% kable( digit = 2) 
+ae_5pc%>%  group_by(dynast) %>% summarise(mean_incumbent = mean(incumbent, na.rm = TRUE)) %>% kable( digit = 2)  %>% kable_styling(full_width = F)
 
 
 
@@ -455,7 +455,7 @@ ae_5pc%>%  group_by(dynast) %>% summarise(mean_incumbent = mean(incumbent, na.rm
 
 ```{r}
 
-ae_5pc %>%  group_by(year,dynast) %>%  summarise(mean_incumbent = mean(incumbent, na.rm = TRUE))  %>%reshape2::dcast(dynast  ~ year) %>% replace(is.na(.),0)%>% kable(digits = 2)
+ae_5pc %>%  group_by(year,dynast) %>%  summarise(mean_incumbent = mean(incumbent, na.rm = TRUE))  %>%reshape2::dcast(dynast  ~ year) %>% replace(is.na(.),0)%>% kable(digits = 2) %>% kable_styling(full_width = F)
 
 ```
 
@@ -467,7 +467,7 @@ ae_5pc %>%  group_by(year,dynast) %>%  summarise(mean_incumbent = mean(incumbent
 
 ```{r}
 
-ae_5pc%>%  group_by(dynast) %>% summarise(mean_recontest = mean(recontest, na.rm = TRUE)) %>% kable( digit = 2) 
+ae_5pc%>%  group_by(dynast) %>% summarise(mean_recontest = mean(recontest, na.rm = TRUE)) %>% kable( digit = 2)  %>% kable_styling(full_width = F)
 
 ```
 
@@ -475,7 +475,7 @@ ae_5pc%>%  group_by(dynast) %>% summarise(mean_recontest = mean(recontest, na.rm
 ---
 ```{r}
 
-ae_5pc %>%  group_by(year,dynast) %>%  summarise(mean_recontest = mean(recontest, na.rm = TRUE))  %>%reshape2::dcast(dynast  ~ year) %>% replace(is.na(.),0)%>% kable(digits = 2)
+ae_5pc %>%  group_by(year,dynast) %>%  summarise(mean_recontest = mean(recontest, na.rm = TRUE))  %>%reshape2::dcast(dynast  ~ year) %>% replace(is.na(.),0)%>% kable(digits = 2) %>% kable_styling(full_width = F)
 
 ```
 
@@ -486,7 +486,7 @@ ae_5pc %>%  group_by(year,dynast) %>%  summarise(mean_recontest = mean(recontest
 
 ```{r}
 
-ae_5pc%>%  group_by(dynast) %>% summarise(mean_no_terms = mean(no_terms, na.rm = TRUE)) %>% kable( digit = 2) 
+ae_5pc%>%  group_by(dynast) %>% summarise(mean_no_terms = mean(no_terms, na.rm = TRUE)) %>% kable( digit = 2)  %>% kable_styling(full_width = F)
 
 
 ```
@@ -494,7 +494,7 @@ ae_5pc%>%  group_by(dynast) %>% summarise(mean_no_terms = mean(no_terms, na.rm =
 ---
 
 ```{r}
-ae_5pc %>%  group_by(year,dynast) %>%  summarise(mean_no_terms = mean(no_terms, na.rm = TRUE))  %>%reshape2::dcast(dynast  ~ year) %>% replace(is.na(.),0)%>% kable(digits = 2)
+ae_5pc %>%  group_by(year,dynast) %>%  summarise(mean_no_terms = mean(no_terms, na.rm = TRUE))  %>%reshape2::dcast(dynast  ~ year) %>% replace(is.na(.),0)%>% kable(digits = 2) %>% kable_styling(full_width = F)
 ```
 
 ---
@@ -505,7 +505,7 @@ ae_5pc %>%  group_by(year,dynast) %>%  summarise(mean_no_terms = mean(no_terms, 
 ```{r}
 
 
-ae_5pc%>%  group_by(dynast, constituency_type) %>% summarise(count  = n()) %>% group_by(dynast) %>% mutate(sum = sum(count), prop = count/sum) %>% reshape2::dcast(dynast ~ constituency_type) %>% kable(digits = 2)
+ae_5pc%>%  group_by(dynast, constituency_type) %>% summarise(count  = n()) %>% group_by(dynast) %>% mutate(sum = sum(count), prop = count/sum) %>% reshape2::dcast(dynast ~ constituency_type) %>% kable(digits = 2) %>% kable_styling(full_width = F)
 
 
 ```
@@ -513,7 +513,7 @@ ae_5pc%>%  group_by(dynast, constituency_type) %>% summarise(count  = n()) %>% g
 ---
 
 ```{r}
-ae_5pc%>%  group_by(year,dynast, constituency_type) %>% summarise(count  = n()) %>% group_by(dynast,year) %>% mutate(sum = sum(count), prop = count/sum) %>% reshape2::dcast(year +dynast  ~ constituency_type) %>% kable(digits = 2)
+ae_5pc%>%  group_by(year,dynast, constituency_type) %>% summarise(count  = n()) %>% group_by(dynast,year) %>% mutate(sum = sum(count), prop = count/sum) %>% reshape2::dcast(year +dynast  ~ constituency_type) %>% kable(digits = 2) %>% kable_styling(full_width = F)
 
 
 ```

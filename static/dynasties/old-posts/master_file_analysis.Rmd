@@ -113,6 +113,8 @@ dyn_ae_ge$land <- as.numeric(dyn_ae_ge$land)
 ##creating a uniq id for all individuals
 
  dyn_ae_ge$fam_rel_uniq_id <- paste(dyn_ae_ge$family_id, dyn_ae_ge$rel_id_uniq, sep = "")
+ 
+ dyn_ae_ge <-  dyn_ae_ge %>% mutate(id = paste0(family_id, relative_id, rel_id_rep))
 
 
 dyn_ae_ge <- dyn_ae_ge %>% group_by(fam_rel_uniq_id) %>% mutate(n_elections_won = n_distinct(election_id[position ==1]))
@@ -154,11 +156,20 @@ dyn_ae_ge_uniq_fam <- dyn_ae_ge_uniq %>% filter(dyn_tot_2 ==1)
 The  dynasty dataset includes winners from local body elections  for  all the local body institutions except GP - Block Panchayats, Zilla Panchayats , Nagar Panchayts and Nagar Nigams from the year 1995. 
 
 ```{r}
+# 
+# dyn %>% filter(election_type %!in% c("AE","GE")) %>% group_by(election_type) %>% summarise(count = n()) %>% kable() %>%kable_styling(full_width = F)
 
-dyn %>% filter(election_type %!in% c("AE","GE")) %>% group_by(election_type) %>% summarise(count = n()) %>% kable() %>%kable_styling(full_width = F)
 
 ```
 
+
+| Urban/Rural      	| Local body            	| Observations 	|
+|------------------	|-----------------------	|--------------	|
+| Urban local body 	| Nagar Nigam           	| 60           	|
+| Urban local body 	| Nagar Palika Parishad 	| 970          	|
+| Urban locla body 	| Nagar Panchayat       	| 2105         	|
+| Rural local body 	| Zilla Panchayat       	| 339          	|
+| Rural local body 	| Block Panchayat       	| 3932         	|
 
 
 ###  AE - GE 
@@ -166,8 +177,19 @@ dyn %>% filter(election_type %!in% c("AE","GE")) %>% group_by(election_type) %>%
 This universe includes winners and runner-ups in the general and assembly elections from the year 1977 to 2019. 
 
 - Total observations: `r dim(dyn_ae_ge)[1]`
+
+- AE observations :`r (dim(dyn_ae_ge %>% filter(election_type=="AE") )[1])`
+
+- AE unique observations :`r (dim(dyn_ae_ge %>% filter(election_type=="AE") %>% distinct(id))[1])`
+
+- GE observations :`r (dim(dyn_ae_ge %>% filter(election_type=="GE"))[1])`
+
+- GE unique observations :`r (dim(dyn_ae_ge %>% filter(election_type=="GE") %>% distinct(id))[1])`
+
 - Number of unique individuals: `r dim(dyn_ae_ge_uniq_ind)[1]`
+
 - Number of unique families : `r (dim(dyn_ae_ge_uniq %>% filter(dyn_tot_2==1))[1])`
+
 
 
 
@@ -305,6 +327,28 @@ dyn_ae_ge %>% filter(position ==1& year != 1974) %>% group_by(election_id, conte
 dyn_ae_ge %>% filter(position ==1& year != 1974) %>% group_by(election_id, contest_type) %>% summarise(count = n()) %>% group_by(election_id) %>% mutate(sum = sum(count), prop = count/sum) %>% select(election_id, contest_type, prop) %>% spread(contest_type, prop) %>% kable(digits = 2)%>%kable_styling(full_width = F)
 ```
 
+
+
+---
+
+## seats contested by dynasts
+
+```{r}
+
+dyn_ae_ge %>% filter(position ==1& year != 1974) %>% group_by(year, election_type, contest_type) %>% summarise(count = n()) %>% group_by(election_type, year) %>% mutate(sum = sum(count), prop = count/sum) %>%  filter(contest_type== "non-fam v/s non-fam") %>% select(election_type, year,contest_type, prop) %>% mutate(dyn_prop = (1-prop)*100) %>% 
+  ggplot(aes(year, dyn_prop, color = election_type))+
+  geom_line()+
+  geom_point()+
+  labs(title = "Seats contested by dynasts in each elections", y = "Percentage", x ="Year")+
+  ylim(0,50)+
+  theme_minimal_hgrid()+
+  theme(legend.position = "bottom")
+
+
+
+```
+
+
 ---
 
 ## Elections won{.tabset .tabset-fade .tabset-pills}
@@ -395,8 +439,10 @@ ggplot(dyn_ae_ge_fam_uniq)+
 dyn_ae_ge %>% group_by(election_type, dyn_cum_2,year) %>% summarise(count = sum(position%in% c(1,2) ),won = sum(position==1), strike = won/count*100) %>%
   ggplot(aes(year, strike, group = dyn_cum_2, color = factor(dyn_cum_2)) )+
   
+  
   geom_line()+
   ylim(0,80)+
+  xlim(1975,2019)+
   geom_point(color = "black", alpha = .5)+
   facet_wrap(~election_type, ncol =1)+
   labs(title = "Strike rate", x = "Year", y = "Strike rate (%)", color = "Election type")+
@@ -508,6 +554,7 @@ ggplot(dyn_ae_ge_fam_uniq)+
 
 
 ---
+
 ## Retention
 
 This chart depicts the retention  of candidates after each election year.
@@ -759,10 +806,12 @@ tot <- length(dyn_ae_ge)
 
 dyn_ae_ge$edu_cat <- factor(dyn_ae_ge$edu_cat, levels = c("School", "College", "Both","0"))
 
+dyn_ae_ge$caste_groups <- factor(dyn_ae_ge$caste_groups, levels = c("Upper Caste","Yadav","Non-Yadav OBC","Dalit" , "Muslim"  ,"Others" ))
+
   dyn_ae_ge %>% group_by(edu_cat,caste_groups) %>% summarise(count = n()) %>%
     filter(edu_cat != "0") %>%
     group_by(edu_cat) %>% mutate(edu_tot=sum(count), prop = count/edu_tot) %>%
-    ggplot(aes(edu_cat, prop, fill = reorder(factor(caste_groups),prop),label = round(prop,2)))+
+    ggplot(aes(edu_cat, prop, fill = caste_groups,label = round(prop,2)))+
     geom_bar(stat= "identity", position ="stack")+
     geom_text(size = 3, position = position_stack(vjust = 0.5))+
     theme_minimal_hgrid()+
@@ -794,6 +843,9 @@ dyn_ae_ge$edu_cat <- factor(dyn_ae_ge$edu_cat, levels = c("School", "College", "
 
 
 ## Industries{.tabset .tabset-fade .tabset-pills}
+
+
+- Finding this out - next update
 
 The  dataset records the information regarding the candidate's family's ownership  of industries in 12 different categories. For the ease if analysis we clubbed them to 5 categories.
 
@@ -1060,6 +1112,8 @@ caste_groups_dyn_ae_ge_sum <- caste_comp_dyn_ae_ge %>%
 caste_dyn_ae_ge <- merge(caste_comp_dyn_ae_ge,caste_groups_dyn_ae_ge_sum, by = "dyn_tot_2")
 caste_dyn_ae_ge$prop <- caste_dyn_ae_ge$freq/caste_dyn_ae_ge$sum
 
+caste_dyn_ae_ge$caste_groups <- factor(caste_dyn_ae_ge$caste_groups, levels = c("Upper Caste","Yadav","Non-Yadav OBC","Dalit" , "Muslim"  ,"Others" ))
+
 #png("UP/graphs/caste_cat_stacked.png", width = 800, height = 600)
 
 ggplot(caste_dyn_ae_ge, aes(x = as.factor(dyn_tot_2), y = prop , fill = caste_groups, label = round(prop,2)))+
@@ -1151,6 +1205,9 @@ caste_groups_cat_sum <- caste_comp_exp %>%
 caste_cat <- merge(caste_comp_exp,caste_groups_cat_sum, by = "fam_exp_cat")
 caste_cat$prop <- caste_cat$freq/caste_cat$sum
 
+
+caste_cat$caste_groups <- factor(caste_cat$caste_groups, levels = c("Upper Caste","Yadav","Non-Yadav OBC","Dalit" , "Muslim"  ,"Others" ))
+
 #png("UP/graphs/caste_cat_stacked.png", width = 800, height = 600)
 
 ggplot(caste_cat, aes(x = fam_exp_cat, y = prop , fill = caste_groups, label = round(prop,2)))+
@@ -1175,4 +1232,19 @@ ggplot(caste_cat, aes(x = fam_exp_cat, y = prop , fill = caste_groups, label = r
         panel.grid.minor = element_blank()
   )
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

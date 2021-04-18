@@ -11,7 +11,7 @@ output:
     toc: TRUE
     toc_float: TRUE
     toc_depth: 5
-    number_sections: false
+    number_sections: TRUE
     fig_width: 6            
 editor_options: 
   chunk_output_type: inline
@@ -303,14 +303,17 @@ dyn_ae_ge_fam_uniq <- dyn_ae_ge_fam  %>% group_by(family_id)%>% arrange(election
 
 ```
 
-### Break-up of families
+
+## Elite types{.tabset}
+
+### Definitions
 
 
 ![](D:/cpr/UP/up-dynasties/dyn_other_data/def_2_elite.png)
 
 <!-- Eventhough we have 300 families in total, in this analysis has come down to 189. This is because, we are tracking families which are active before 2007. Then we asses how they have performed in last one decade or so to asses their performance. Criteria to be successful is that they have won one or more elections after 2007. -->
 
-
+### Break-up of elite categories
 
 ```{r}
 
@@ -318,10 +321,11 @@ dyn_ae_ge_fam_uniq <- dyn_ae_ge_fam  %>% group_by(family_id)%>% arrange(election
 dyn_ae_ge_fam_uniq %>% ungroup() %>%group_by(success_cat) %>% summarise(count = n()) %>% kable() %>% kable_styling(full_width = F)
 
 ```
+
 ### Life span
 
 ```{r}
-dyn_ae_ge_fam_uniq %>%  group_by(success_cat) %>% summarise(mean(life_span)) %>% kable(caption = "Average life span", digits = 0, col.names = c("Success", "Life span")) %>% kable_styling(bootstrap_options = "striped")
+dyn_ae_ge_fam_uniq %>%  group_by(success_cat) %>% summarise(mean(life_span)) %>% kable(caption = "Average life span", digits = 0, col.names = c("Success", "Life span")) %>% kable_styling(full_width = F)
 ```
 
 
@@ -335,6 +339,19 @@ This chart depicts how the life span of a family varies according to their caste
 
 
 
+
+
+
+---
+
+
+
+
+---
+
+## Viz {.tabset}
+
+### Life span wrt caste
 
 
 ```{r}
@@ -362,62 +379,136 @@ ggplot(dyn_ae_ge_fam_uniq %>% filter(caste_groups!= "Others"),aes(x = reorder(as
   ) 
 
 
-#dyn_ae_ge%>% filter(family_id == "f0009806")
-
-# 
-# 
-# # dyn_ae_ge_fam_uniq %>% filter(success_pre02 =="NaN")
-# 
-# 
-# 
-# 
-# 
-# 
-# dyn_ae_ge_fam_uniq$success_pre02_cat <- cut(dyn_ae_ge_fam_uniq$success_pre02, breaks = c(0,.34,.66, 1), labels = c("Declining", "Stable", "Rising"), include.lowest = TRUE)
-# 
-# dyn_ae_ge_fam_uniq$success_post02_cat <- cut(dyn_ae_ge_fam_uniq$success_post02 , breaks = c(0,.34,.66, 1), labels = c("Declining", "Stable", "Rising"), include.lowest = TRUE)
-# 
-# 
-# 
-# 
-# dyn_ae_ge_fam_uniq$success_cat_1 <- paste(dyn_ae_ge_fam_uniq$success_pre02_cat, dyn_ae_ge_fam_uniq$success_post02_cat)
-# 
-# dyn_ae_ge_fam_uniq  <- dyn_ae_ge_fam_uniq %>% mutate(success_cat = case_when(success_cat_1 == "Declining Declining" ~ "Declining",
-#                                                       success_cat_1 == "Rising Rising" ~ "Rising",
-#                                                       success_cat_1 == "Stable Stable" ~ "Stable",
-#                                                       TRUE ~ success_cat_1 ))
-# 
-# table(dyn_ae_ge_fam_uniq$success_cat )
-# dyn_ae_ge_fam_uniq$duration <- dyn_ae_ge_fam_uniq$last_year - dyn_ae_ge_fam_uniq$first_year 
-# median(dyn_ae_ge_fam_uniq$duration)
-# 
-# 
-# 
-# prop.table(table(cut(dyn_ae_ge_fam_uniq$success, breaks = c(0,.34,.67,1))))
-# 
-# # 
-# # hist(dyn_ae_ge_fam_uniq$duration)
-# # 
-# # ggplot(dyn_ae_ge_fam %>% filter(level == "AE") , aes(year, factor(position), color = family_id))+
-# #   geom_bump()
-# 
-# dyn_ae_ge_fam_uniq %>% select(family_id,first_year, last_year) %>% melt(id = "family_id", measure = 2:3) %>% 
-#   ggplot(aes(factor(value),family_id, group = variable, color =family_id                                                                       )) +
-#   geom_point()+
-#   geom_line()+
-#   theme(legend.position = "none")
-# 
-# # dyn_ae_ge_fam_uniq %>% filter(duration >29) %>% select(patriarch_name, family_id,first_year, last_year, duration)
-
-#minister_duration <- dyn_ae_ge_fam_uniq$min_dur_yr %>% replace_na(0)
+```
 
 
-#dyn_ae_ge_fam %>% group_by(family_id) %>% filter(min(year)>2002 ) %>% filter(n_el_w >0)%>% distinct(family_id)
+
+
+### caste composition of elite categories
+
+```{r}
+# dyn_lb  <- dyn_lb %>% mutate(level_log = ifelse(level == "LB",FALSE,TRUE))
+# 
+# dyn_lb_uniq <- dyn_lb %>% arrange (-year) %>%  distinct(family_id, .keep_all = TRUE)
+# 
+# count_tot  <-  dim(dyn_lb_uniq %>% filter(dyn_tot ==1))[1]
+# dyn_lb_uniq %>% filter(dyn_tot ==1) %>% group_by(level_log) %>% summarise(prop = n()/count_tot) %>% kable(caption = "Family linkages", col.names = c("Connection", "Proportion"), digits = 2) %>% kable_styling(bootstrap_options = "striped")
+
+
+dyn_ae_ge_fam_uniq$caste_groups <- factor(dyn_ae_ge_fam_uniq$caste_groups, levels = c("Upper Caste","Yadav","Non-Yadav OBC","Dalit" , "Muslim"  ,"Others" ))
+
+
+
+dyn_ae_ge_fam_uniq %>% filter(caste_groups!= "NA") %>% group_by(success_cat, caste_groups) %>% summarise( count = n()) %>% group_by(success_cat) %>% mutate(sum = sum(count), prop = count/sum) %>% select(success_cat, caste_groups, prop) %>% 
+  ggplot(aes(factor(success_cat), prop, fill = caste_groups,label = round(prop,2)))+
+   geom_bar(stat="identity", position = "stack")+
+    geom_text(size = 2.5, position = position_stack(vjust = 0.5))+ 
+  colorspace::scale_fill_discrete_qualitative(palette= "dark3" )+
+  coord_fixed(ratio =5)+
+    theme_minimal()+
+      
+    labs(title = "Caste composition among families wrt success  ",x = "", y = "Proportion", fill = "") +
+    theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
+  theme(plot.background = element_blank(),
+        axis.line.x = element_line(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.y = element_blank()
+  ) 
+```
+
+
+
+
+### Ownership of edu categories wrt elite categories
+
+
+```{r}
+dyn_ae_ge_fam_uniq$edu <- as.numeric(paste(dyn_ae_ge_fam_uniq$school, dyn_ae_ge_fam_uniq$college, sep = ""))
+
+
+# dyn_lb_uniq <- dyn_lb %>% arrange (-year) %>%  distinct(family_id, .keep_all = TRUE)
+
+
+edu_tab <- dyn_ae_ge_fam_uniq %>%  filter(!is.na(edu)) %>% group_by(success_cat,edu) %>% summarise(count = n())  %>% group_by(success_cat) %>% mutate(sum = sum(count),prop= count/sum) %>% filter(edu!= 0) %>%  arrange(edu, -prop) 
+
+#edu_tab$id=rep(c(1:3),3)
+
+edu_tab$success_cat <- factor(edu_tab$success_cat , levels = c("Stable","Rising", "Declining"))
+
+
+ggplot(edu_tab , aes(x= reorder(as.factor(edu),-prop), prop )) +   
+  geom_bar(aes(fill = as.factor(success_cat)), position = "dodge", stat="identity")+
+  theme_minimal()+
+  scale_x_discrete(labels=(c( "School" ,"College","Both")))+
+  #scale_fill_manual (labels = c("Stable", "Rising", "Declining"))+
+  labs(title = "Ownership of educational institutions wrt success", 
+       x = "", y = "Proportion") +
+  theme(legend.position = "top",plot.title = element_text(hjust = 0.5))+
+  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
+        plot.title = element_text(hjust = 0.5, size = 18, family = "serif", 
+                                  margin = margin(t = 0, r = 0, b = 20, l = 0)), 
+        text = element_text(color = "gray20",family = "serif"),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 12),
+        axis.text = element_text(face = "italic", size = 14),
+        axis.title.x = element_text(vjust = -1, size = 16),
+        axis.title.y = element_text(vjust = 2, size =16),
+        axis.ticks.y = element_blank(),
+        axis.line= element_line(color = "gray40", size = .5),
+        axis.line.y = element_blank(),
+        panel.grid.major = element_line(color = "gray50", size = .5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank()
+          
+  ) 
 
 ```
 
+### Land wrt elite cat.
+
+```{r}
+dyn_ae_ge_fam_uniq$land <- as.numeric(dyn_ae_ge_fam_uniq$land)
+
+ggplot(dyn_ae_ge_fam_uniq, aes(success_cat,land))+
+  geom_boxplot()+
+    geom_boxplot(outlier.shape = NA)+
+  ylim(0,1000)+
+  theme_minimal()
+
+
+```
+
+
+
+---
+## variable sumamry
+
+```{r}
+
+dyn_ae_ge_fam_uniq$minister_dur <- dyn_ae_ge_fam_uniq$minister_dur %>% replace_na(0)
+
+dyn_ae_ge_fam_uniq$land <- as.numeric(dyn_ae_ge_fam_uniq$land)
+
+dyn_ae_ge_fam_uniq$school <- as.numeric(dyn_ae_ge_fam_uniq$school)%>% replace_na(0)
+
+dyn_ae_ge_fam_uniq$college<- as.numeric(dyn_ae_ge_fam_uniq$college)%>% replace_na(0)
+
+dyn_ae_ge_fam_uniq$n_sc_minster <- dyn_ae_ge_fam_uniq$n_sc_minster%>% replace_na(0)
+
+dyn_ae_ge_fam_uniq %>% group_by(success_cat) %>% summarise(mean(land, na.rm = TRUE),mean(indus_count),mean(n_sc_minster), mean(minister_dur), mean(school), mean(college)) %>% kable(col.names = c("Success","land", "industires", "N_minister", "Minister duration (months)", "school", "college"), digits = 2) %>% kable_styling(bootstrap_options = "striped")
+
+#dyn_ae_ge_fam_uniq %>% filter(success_diff_cat == "Stable") 
+```
+
+
 ---
 
+
+## Regressions {.tabset}
+
+
+This is a multinomial logit model that regresses three success categories. Rising families are the refrence ones. Results do not have any constituency variable here since this is regressed at family level.
 
 
 ```{r, results= "asis"}
@@ -498,46 +589,11 @@ success_cat <- dyn_ae_ge_fam_uniq$success_cat
 
 
 
-
-
-
----
-
-Summary of the two categories -
-
-
-```{r}
-
-dyn_ae_ge_fam_uniq$minister_dur <- dyn_ae_ge_fam_uniq$minister_dur %>% replace_na(0)
-
-dyn_ae_ge_fam_uniq$land <- as.numeric(dyn_ae_ge_fam_uniq$land)
-
-dyn_ae_ge_fam_uniq$school <- as.numeric(dyn_ae_ge_fam_uniq$school)%>% replace_na(0)
-
-dyn_ae_ge_fam_uniq$college<- as.numeric(dyn_ae_ge_fam_uniq$college)%>% replace_na(0)
-
-dyn_ae_ge_fam_uniq$n_sc_minster <- dyn_ae_ge_fam_uniq$n_sc_minster%>% replace_na(0)
-
-dyn_ae_ge_fam_uniq %>% group_by(success_cat) %>% summarise(mean(land, na.rm = TRUE),mean(indus_count),mean(n_sc_minster), mean(minister_dur), mean(school), mean(college)) %>% kable(col.names = c("Success","land", "industires", "N_minister", "Minister duration (months)", "school", "college"), digits = 2) %>% kable_styling(bootstrap_options = "striped")
-
-#dyn_ae_ge_fam_uniq %>% filter(success_diff_cat == "Stable") 
-```
-
----
-
-## Multinom
-
-
-This is a multinomial logit model that regresses three success categories. Rising families are the refrence ones. Results do not have any constituency variable here since this is regressed at family level.
+### Multinom. ref. - Rising
 
 
 ```{r message = FALSE, warning = FALSE, echo = FALSE}
-# fit.1 <- glm(Declining ~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land + linkage_down, family= binomial(link = "probit") )
-# 
-# 
-# fit.2 <- glm(Rising ~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land + linkage_down, family= binomial(link = "probit") )
-# 
-# fit.3 <- glm(Stable ~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land + linkage_down, family= binomial(link = "probit") )
+
 
 success_cat<-factor( success_cat,levels = c( "Rising","Stable","Declining"))
 
@@ -551,9 +607,28 @@ fit.multinom <- multinom(success_cat~  caste_uc+ caste_yadav+caste_non_yadav_obc
 stargazer(fit.multinom, type="html")
 ```
 
+
+### Multinom. ref. - Stable
+
+
+```{r message = FALSE, warning = FALSE, echo = FALSE}
+
+
+success_cat<-factor( success_cat,levels = c( "Stable","Rising","Declining"))
+
+library("nnet")
+
+fit.multinom <- multinom(success_cat~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land + linkage_down)
+```
+
+```{r, results= "asis"}
+stargazer(fit.multinom, type="html")
+```
+
 ---
 
-## probit
+
+### probit
 
 
 ```{r, results="asis"}
@@ -580,89 +655,7 @@ fit.3 <- glm(Stable ~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit +
 <!-- # ``` -->
 
 
-## caste composition
 
-```{r}
-# dyn_lb  <- dyn_lb %>% mutate(level_log = ifelse(level == "LB",FALSE,TRUE))
-# 
-# dyn_lb_uniq <- dyn_lb %>% arrange (-year) %>%  distinct(family_id, .keep_all = TRUE)
-# 
-# count_tot  <-  dim(dyn_lb_uniq %>% filter(dyn_tot ==1))[1]
-# dyn_lb_uniq %>% filter(dyn_tot ==1) %>% group_by(level_log) %>% summarise(prop = n()/count_tot) %>% kable(caption = "Family linkages", col.names = c("Connection", "Proportion"), digits = 2) %>% kable_styling(bootstrap_options = "striped")
-
-
-
-
-dyn_ae_ge_fam_uniq %>% filter(caste_groups!= "NA") %>% group_by(success_cat, caste_groups) %>% summarise( count = n()) %>% group_by(success_cat) %>% mutate(sum = sum(count), prop = count/sum) %>% select(success_cat, caste_groups, prop) %>% 
-  ggplot(aes(factor(success_cat), prop, fill = caste_groups,label = round(prop,2)))+
-   geom_bar(stat="identity", position = "stack")+
-    geom_text(size = 3, position = position_stack(vjust = 0.5))+ 
-    theme_minimal()+
-    labs(title = "Caste composition \n among families wrt success  ",x = "", y = "Proportion", fill = "") +
-    theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
-  theme(plot.background = element_blank(),
-        plot.title = element_text(hjust = 0.5, size = 18, family = "serif"), 
-        text = element_text(color = "gray20"),
-        legend.title = element_blank(),
-        legend.text = element_text(size = 14,family = "serif"),
-        axis.text = element_text(face = "italic", size = 14),
-        axis.text.y = element_blank(),
-        axis.title.x = element_text(vjust = -1, size = 16),
-        axis.title.y = element_blank(),
-        axis.ticks.y = element_blank(),
-        axis.line= element_line(color = "gray40", size = .5),
-        axis.line.y = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank()
-  ) 
-```
-
-
-
-
-## Educational institutions
-
-
-```{r}
-dyn_ae_ge_fam_uniq$edu <- as.numeric(paste(dyn_ae_ge_fam_uniq$school, dyn_ae_ge_fam_uniq$college, sep = ""))
-
-
-# dyn_lb_uniq <- dyn_lb %>% arrange (-year) %>%  distinct(family_id, .keep_all = TRUE)
-
-
-edu_tab <- dyn_ae_ge_fam_uniq %>%  filter(!is.na(edu)) %>% group_by(success_cat,edu) %>% summarise(count = n())  %>% group_by(success_cat) %>% mutate(sum = sum(count),prop= count/sum) %>% filter(edu!= 0) %>%  arrange(edu, -prop) 
-
-#edu_tab$id=rep(c(1:3),3)
-
-edu_tab$success_cat <- factor(edu_tab$success_cat , levels = c("Stable","Rising", "Declining"))
-
-
-ggplot(edu_tab , aes(x= reorder(as.factor(edu),-prop), prop )) +   
-  geom_bar(aes(fill = as.factor(success_cat)), position = "dodge", stat="identity")+
-  theme_minimal()+
-  scale_x_discrete(labels=(c( "School" ,"College","Both")))+
-  #scale_fill_manual (labels = c("Stable", "Rising", "Declining"))+
-  labs(title = "Ownership of educational institutions wrt success", 
-       x = "", y = "Proportion") +
-  theme(legend.position = "top",plot.title = element_text(hjust = 0.5))+
-  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
-        plot.title = element_text(hjust = 0.5, size = 18, family = "serif", 
-                                  margin = margin(t = 0, r = 0, b = 20, l = 0)), 
-        text = element_text(color = "gray20",family = "serif"),
-        legend.title = element_blank(),
-        legend.text = element_text(size = 12),
-        axis.text = element_text(face = "italic", size = 14),
-        axis.title.x = element_text(vjust = -1, size = 16),
-        axis.title.y = element_text(vjust = 2, size =16),
-        axis.ticks.y = element_blank(),
-        axis.line= element_line(color = "gray40", size = .5),
-        axis.line.y = element_blank(),
-        panel.grid.major = element_line(color = "gray50", size = .5),
-        panel.grid.minor = element_blank(),
-        panel.grid.major.x = element_blank()
-          
-  ) 
-```
 
 
 <!-- ## Post_90 -->
