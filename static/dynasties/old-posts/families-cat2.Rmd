@@ -551,6 +551,26 @@ fit.multinom <- multinom(success_cat~  caste_uc+ caste_yadav+caste_non_yadav_obc
 stargazer(fit.multinom, type="html")
 ```
 
+---
+
+## probit
+
+
+```{r, results="asis"}
+
+fit.1 <- glm(Declining ~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land + linkage_down, family= binomial(link = "probit") )
+
+
+fit.2 <- glm(Rising ~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land + linkage_down, family= binomial(link = "probit") )
+
+fit.3 <- glm(Stable ~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land + linkage_down, family= binomial(link = "probit") )
+
+
+ stargazer(fit.1,fit.2,fit.3,title="Regression Results - Success of dynasties ",type = "html",
+            align=TRUE,  no.space=TRUE)
+
+```
+
 
 <!-- # ```{r, results= "asis"} -->
 <!-- # #summary(fit.1) -->
