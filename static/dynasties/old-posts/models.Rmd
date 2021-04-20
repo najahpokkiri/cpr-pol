@@ -195,7 +195,7 @@ dyn_ae_ge <-  merge(dyn_ae_ge,inv, by = c("election_type","year","constituency_n
 ```
 
 
-
+# Dynast winner {.tabset}
 
 
 
@@ -886,4 +886,73 @@ align=TRUE, dep.var.labels=c("Dynast","Winner", "Linkage","Vote Share Percentage
 
 
 
+
+
+
+----
+
+---
+
+# Development
+
+----
+
+## Night lights
+
+
+
+
+
+
+
+```{r}
+
+nl <- read.csv("D:/projects & works/CPR_Verma/dyn_dev.csv")
+
+nl <- nl %>% filter(position==1) %>% select(year, ac07_id,term_growth, annual_growth)  
+
+dyn_all <- fread("D:/cpr/UP/up-dynasties/dyn_other_data/dyn_all.csv")
+
+dyn_ae <- dyn_all %>% filter(election_type=="AE" & position==1)
+
+nl_dyn <- left_join(nl, dyn_ae, by = c("year", "ac07_id" ="constituency_no"))
+
+names(nl_dyn)
+
+n_college <- read.csv("D:/cpr/data/controls/up_college_ctrl.csv")
+
+
+
+nl_dyn <- left_join(nl_dyn, n_college, by = c("year", "ac07_id" = "constituency_no"))
+
+```
+
+
+
+
+```{r, results = "asis"}
+
+## variables from last year
+
+# fit <- lm(data= nl_dyn,term_growth ~ dyn_cum_2+ sex + constituency_type +turnout_percentage+ enop+ term_duration+factor(year) +caste_groups+incumbent+turnout_percentage+margin_percentage+no_terms+log(electors) +college_cumsum+ factor(ac07_id))
+# 
+# summary(fit)
+
+library(lfe)
+
+
+fit.felm <- felm(term_growth ~ dyn_cum_2+ sex + constituency_type +turnout_percentage+ enop+ term_duration +incumbent+turnout_percentage+margin_percentage+no_terms+log(electors) |factor(year)+factor(district_name)|0|district_name, data = nl_dyn)
+
+# summary(fit)
+
+
+#stargazer(fit.felm)
+
+
+stargazer(fit.felm,title="Regression Results - UP  Night lights - Dynast 2 ",type = "html",
+align=TRUE,  no.space=TRUE,add.lines=list(c('Year fixed effects', 'Yes' ), c('District fixed effects', 'Yes'), c("SE clustering" ,"District level")))
+
+
+
+```
 

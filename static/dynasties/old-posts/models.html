@@ -1531,9 +1531,11 @@ div.tocify {
 <div id="document-history" class="section level3">
 <h3>Document History</h3>
 <p>Original Publish Date: 16 July, 2020</p>
-<p>Updated on: 13 April, 2021</p>
+<p>Updated on: 20 April, 2021</p>
 <hr />
 </div>
+<div id="dynast-winner" class="section level1 tabset">
+<h1 class="tabset">Dynast winner</h1>
 <div id="ae-all" class="section level2">
 <h2>AE All</h2>
 <table style="text-align:center">
@@ -4398,6 +4400,308 @@ F Statistic
 <!-- align=TRUE,dep.var.labels=c("Dynast - 1/0","Dynast - 1/0","Dynast - 1/0"), -->
 <!-- omit.stat=c("LL","ser","f"), no.space=TRUE) -->
 <!-- ``` -->
+<hr />
+<hr />
+</div>
+</div>
+<div id="development" class="section level1">
+<h1>Development</h1>
+<hr />
+<div id="night-lights" class="section level2">
+<h2>Night lights</h2>
+<pre><code>##   [1] &quot;year&quot;                   &quot;ac07_id&quot;                &quot;term_growth&quot;           
+##   [4] &quot;annual_growth&quot;          &quot;V1&quot;                     &quot;election_type&quot;         
+##   [7] &quot;position&quot;               &quot;family_id&quot;              &quot;caste_id&quot;              
+##  [10] &quot;ï..si.no&quot;               &quot;s.no&quot;                   &quot;election_id&quot;           
+##  [13] &quot;dist_cen_21&quot;            &quot;district_name&quot;          &quot;dist_cen_11&quot;           
+##  [16] &quot;dist_cen_01&quot;            &quot;con_id_uniq&quot;            &quot;delimid&quot;               
+##  [19] &quot;pc_no&quot;                  &quot;pc_name&quot;                &quot;lb_cen_11&quot;             
+##  [22] &quot;constituency_name&quot;      &quot;assembly_no&quot;            &quot;month&quot;                 
+##  [25] &quot;poll_no&quot;                &quot;candidate_name&quot;         &quot;pid&quot;                   
+##  [28] &quot;sex&quot;                    &quot;party&quot;                  &quot;relative_id&quot;           
+##  [31] &quot;rel_id_rep&quot;             &quot;fam_size_tot&quot;           &quot;fam_size_cum&quot;          
+##  [34] &quot;dyn_cum&quot;                &quot;fam_size_cum_1&quot;         &quot;fam_size_tot_all&quot;      
+##  [37] &quot;patriarch_name&quot;         &quot;patriarch_alive&quot;        &quot;religion&quot;              
+##  [40] &quot;land&quot;                   &quot;indus_1&quot;                &quot;school&quot;                
+##  [43] &quot;college&quot;                &quot;ind_2&quot;                  &quot;ind_3&quot;                 
+##  [46] &quot;ind_4&quot;                  &quot;bp_c&quot;                   &quot;bp_r&quot;                  
+##  [49] &quot;criminal_cases&quot;         &quot;other_invovemet&quot;        &quot;other_rel_invl&quot;        
+##  [52] &quot;votes&quot;                  &quot;candidate_type&quot;         &quot;valid_votes&quot;           
+##  [55] &quot;electors&quot;               &quot;constituency_type&quot;      &quot;sub_region&quot;            
+##  [58] &quot;n_cand&quot;                 &quot;turnout_percentage&quot;     &quot;vote_share_percentage&quot; 
+##  [61] &quot;deposit_lost&quot;           &quot;margin&quot;                 &quot;margin_percentage&quot;     
+##  [64] &quot;enop&quot;                   &quot;term_duration&quot;          &quot;party_type_tcpd&quot;       
+##  [67] &quot;party_id&quot;               &quot;last_poll&quot;              &quot;contested&quot;             
+##  [70] &quot;last_party&quot;             &quot;last_party_id&quot;          &quot;last_constituency_name&quot;
+##  [73] &quot;same_constituency&quot;      &quot;same_party&quot;             &quot;no_terms&quot;              
+##  [76] &quot;turncoat&quot;               &quot;incumbent&quot;              &quot;recontest&quot;             
+##  [79] &quot;misc&quot;                   &quot;reservation_code&quot;       &quot;any_time_mp&quot;           
+##  [82] &quot;any_time_mla&quot;           &quot;any_time_zila&quot;          &quot;any_time_village&quot;      
+##  [85] &quot;minister_or_any_post&quot;   &quot;post_relative&quot;          &quot;status&quot;                
+##  [88] &quot;dyn_cum_1&quot;              &quot;dyn_cum_2&quot;              &quot;dyn_cum_3&quot;             
+##  [91] &quot;dyn_cum_4&quot;              &quot;dyn_cum_5&quot;              &quot;rel_id_uniq&quot;           
+##  [94] &quot;fam_exp_tot&quot;            &quot;fam_exp_cum&quot;            &quot;fam_exp_tot_cat&quot;       
+##  [97] &quot;fam_exp_cum_cat&quot;        &quot;caste_name&quot;             &quot;caste_groups&quot;          
+## [100] &quot;max_year&quot;               &quot;election_level&quot;         &quot;level&quot;                 
+## [103] &quot;level_cum&quot;              &quot;level_log_cum&quot;          &quot;dyn_tot_1&quot;             
+## [106] &quot;dyn_tot_2&quot;              &quot;dyn_tot_3&quot;              &quot;dyn_tot_4&quot;             
+## [109] &quot;dyn_tot_5&quot;</code></pre>
+<table style="text-align:center">
+<caption>
+<strong>Regression Results - UP Night lights - Dynast 2</strong>
+</caption>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+<em>Dependent variable:</em>
+</td>
+</tr>
+<tr>
+<td>
+</td>
+<td colspan="1" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+term_growth
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+dyn_cum_2
+</td>
+<td>
+-21.867
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(16.687)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+sexM
+</td>
+<td>
+4.135
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(13.674)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+constituency_typeSC
+</td>
+<td>
+-17.668
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(17.199)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+turnout_percentage
+</td>
+<td>
+2.493
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(1.658)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+enop
+</td>
+<td>
+9.571
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(8.060)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+term_duration
+</td>
+<td>
+5.688
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(6.488)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+incumbent
+</td>
+<td>
+-48.456
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(49.934)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+margin_percentage
+</td>
+<td>
+-0.462
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(1.010)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+no_terms
+</td>
+<td>
+12.546
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(16.851)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+log(electors)
+</td>
+<td>
+-59.461
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(44.695)
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Year fixed effects
+</td>
+<td>
+Yes
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+District fixed effects
+</td>
+<td>
+Yes
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+SE clustering
+</td>
+<td>
+District level
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Observations
+</td>
+<td>
+1,572
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+R<sup>2</sup>
+</td>
+<td>
+0.080
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Adjusted R<sup>2</sup>
+</td>
+<td>
+0.026
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Residual Std. Error
+</td>
+<td>
+347.486 (df = 1484)
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td style="text-align:right">
+<sup><em></sup>p&lt;0.1; <sup><strong></sup>p&lt;0.05; <sup></strong></em></sup>p&lt;0.01
+</td>
+</tr>
+</table>
+</div>
 </div>
 
 

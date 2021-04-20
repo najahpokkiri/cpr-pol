@@ -340,7 +340,7 @@ dyn_ae_ge %>% filter(position ==1& year != 1974) %>% group_by(year, election_typ
   geom_line()+
   geom_point()+
   labs(title = "Seats contested by dynasts in each elections", y = "Percentage", x ="Year")+
-  ylim(0,50)+
+  ylim(0,60)+
   theme_minimal_hgrid()+
   theme(legend.position = "bottom")
 

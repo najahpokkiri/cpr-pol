@@ -190,6 +190,18 @@ dyn_up_college$n_private <- replace_na(dyn_up_college$n_private, 0)
 
 ```
 
+
+
+```{r}
+
+## control
+
+# dyn_college <- dyn_up_college %>% select(election_type, year_el, AC_NO, n_colleges) %>% arrange(year_el)%>% group_by( AC_NO)%>% mutate(college_cumsum = cumsum(n_colleges))  %>% rename(constituency_no = AC_NO, year = year_el)
+# 
+# write.csv(dyn_college, "D:/cpr/data/controls/up_college_ctrl.csv")
+
+```
+
 ---
 
 Average number of colleges built every year in a constituency is `r {round(mean(dyn_up_college$n_colleges),2)}`
@@ -400,12 +412,13 @@ dyn_up_college_91$n_college_bin <- ifelse(dyn_up_college_91$n_colleges ==0,0,1)
 
 fit.probit <- glm(data = dyn_up_college_91, n_college_bin ~ dyn_cum_2+caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +factor(year_el ),family = binomial(link = "probit"))
 
-# 
-summary(fit.probit)
+
+#summary(fit.probit)
+
 ```
 
 
-```{r , results = "asis"}
+```{r }
 
 stargazer(fit.linear, fit.logit, fit.poisson,fit.probit,title="Regression Results - UP colleges - Dynast 2 ",type = "html",
 align=TRUE,  no.space=TRUE, keep = c("dyn_cum_2" ,          "caste_uc", "caste_yadav"   ,      "caste_non_yadav_obc" ,"caste_dalit"   ,"caste_muslim" ),omit.stat=c("LL","ser","f"),add.lines=list(c('Year fixed effects', 'Yes','Yes','Yes','Yes' )))
@@ -452,6 +465,75 @@ align=TRUE,  no.space=TRUE, keep = c("dyn_cum_2" ,          "caste_uc", "caste_y
 
 
 ```
+
+
+#### 1993-2012 with night lights
+
+
+
+
+
+
+```{r}
+
+
+nl <- read.csv("D:/cpr/data/controls/nl_94_13.csv")
+
+
+dyn_up_college_nl <- inner_join(dyn_up_college, nl, by = c("year_el" = "year", "AC_NO"= "constituency_no"))
+
+
+schools <- read.csv("D:/cpr/data/controls/schools_ae_level_cumsum.csv")
+
+school <- schools %>% select(year, constituency_no, n_schools = cumsum)
+
+
+dyn_up_college_nl_sc <- inner_join(dyn_up_college_nl, schools, by = c("year_el"="year", "AC_NO"= "constituency_no"))
+# 
+#  fit.poisson <- glm(data = dyn_up_college_nl_sc, n_colleges ~ dyn_cum_2+ incumbent+margin_percentage+ turnout_percentage+enop+ term_duration+n_schools+ nl_tot+constituency_type+log(electors)+no_terms+enop*margin_percentage+log(electors)*factor(year_el)+factor(year_el) + district_name, family =  "quasipoisson")
+# 
+# 
+# summary(fit.poisson)
+```
+
+
+```{r}
+library(corrplot)
+
+cor_dat <- dyn_up_college_nl_sc %>% select(n_colleges, dyn_cum_2, n_schools,incumbent,margin_percentage, turnout_percentage,enop, term_duration, nl_tot,year_el,electors)
+
+corr <- cor(cor_dat)
+
+
+corrplot(corr, method="circle")
+```
+
+----
+
+
+
+```{r, results = "asis"}
+
+
+library(fixest)
+
+fe1 = fepois(n_colleges ~ dyn_cum_2+ incumbent+margin_percentage+ turnout_percentage+enop+ term_duration+n_schools+ nl_tot+constituency_type+log(electors)+no_terms|year_el + district_name, data = dyn_up_college_nl_sc,cluster = ~ district_name)
+
+ # summary(fe1) %>% kable() %>% kabl
+
+ 
+ 
+# 
+# stargazer(fe1)
+
+
+
+
+
+etable(fe1) %>% kable(caption = "UP colleges - Poisson model") %>% kable_styling(full_width = F)
+
+```
+
 
 
 <!-- ### Dyn defnition 3{.tabset} -->
@@ -874,9 +956,15 @@ add.lines=list(c('Year fixed effects', 'Yes','Yes','Yes','Yes' ), c('State fixed
 
 ```
 
+
+
+---
+### 
+
+
 ---
 
-### with adr
+### Model with controls - 2009 :2019
 
 
 
@@ -894,7 +982,9 @@ add.lines=list(c('Year fixed effects', 'Yes','Yes','Yes','Yes' ), c('State fixed
 
 adr <- fread("D:/cpr/UP/up-dynasties/dyn_other_data/adr/adr_tcpd_09_14_19.csv")
 
-adr_in <- adr %>% filter(Position ==1) %>% select(c(12:12,18:19,5:10,55:61))
+names(adr) <- tolower(names(adr))
+
+adr_in <- adr %>% filter(position ==1) #%>% select(c(12:12,18:19,5:10,55:61))
 
 
 adr_in$total_assets <- as.numeric(adr_in$total_assets)
@@ -917,22 +1007,43 @@ adr_in <- adr_in %>% mutate(edu = case_when(education %in% c("5th Pass","10th Pa
 adr_in$edu <- as.numeric(adr_in$edu )
 
 
-dyn_in_college_adr <- inner_join(dyn_in_college, adr_in, by =c("State"="StateName","year_el" = "Year", "AC_NO"= "Constituency_No"))
+dyn_in_college_adr <- inner_join(dyn_in_college, adr_in, by =c("State"="statename","year_el" = "year", "AC_NO"= "constituency_no"))
+
+
+
 
 # dyn_in_college_adr <- inner_join(dyn_in_college, shrug_adr_in, by =c("State"="pc01_state_name","year_el" = "year", "AC_NO"= "ac_no"))
 
-
+# tcpd_dyn <- fread("D:/cpr/data/tcpd/TCPD_GE_all.csv")
+# 
+# 
+# inner_join(dyn_in)
 
 ```
 
 
 ```{r, results = "asis"}
 
-fit.poisson <- glm(data = dyn_in_college_adr, n_colleges ~ dyn+ log(total_assets)+ edu+serious_crime + non_serious_crime+term_duration+
-                     factor(year_el )+ State, family =  "quasipoisson")
 
 
-stargazer(fit.poisson,title="Regression Results - India  all colleges with adr ",type = "html",
-align=TRUE,  no.space=TRUE, keep = c("dyn" ,"total_assets", "edu","serious_crime", "non_serious_crime"),omit.stat=c("LL","ser","f"),
-add.lines=list(c('Year fixed effects', 'Yes','Yes','Yes','Yes' ), c('State fixed effects', 'Yes','Yes','Yes','Yes')))
+
+
+
+
+fe2 <- fepois(n_colleges ~ dyn+ incumbent+margin_percentage+ turnout_percentage+enop+ +constituency_type+log(electors)+no_terms+log(total_assets)+serious_crime+non_serious_crime+edu+ position |year_el + State, data = dyn_in_college_adr,cluster = ~ State)
+
+#summary(fe2)
+
+etable(fe2) %>% kable(caption = "India colleges - Poisson model") %>% kable_styling(full_width = F)
+
+# fit.poisson <- glm(data = dyn_in_college_adr, n_colleges ~ dyn+ log(total_assets)+ edu+serious_crime + non_serious_crime+term_duration+
+#                      factor(year_el )+ State, family =  "quasipoisson")
+# 
+# names(dyn_in_college)
+# 
+# 
+# 
+# stargazer(fit.poisson,title="Regression Results - India  all colleges with adr ",type = "html",
+# align=TRUE,  no.space=TRUE, keep = c("dyn" ,"total_assets", "edu","serious_crime", "non_serious_crime"),omit.stat=c("LL","ser","f"),
+# add.lines=list(c('Year fixed effects', 'Yes','Yes','Yes','Yes' ), c('State fixed effects', 'Yes','Yes','Yes','Yes')))
 ```
