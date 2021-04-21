@@ -1755,32 +1755,34 @@ div.tocify {
 <div id="document-history" class="section level3">
 <h3>Document History</h3>
 <p>Original Publish Date: 09 August, 2020</p>
-<p>Updated on: 18 April, 2021</p>
+<p>Updated on: 21 April, 2021</p>
 <hr />
 <p>We will be using the dynasties data for last few elections from UP in this post.</p>
 </div>
-<div id="ge" class="section level1">
-<h1>GE</h1>
-<div id="basic-summary-of-the-data" class="section level2">
-<h2>Basic summary of the data</h2>
+<div id="ge" class="section level1 tabset">
+<h1 class="tabset">GE</h1>
+<div id="basic-summary-of-the-data" class="section level3">
+<h3>Basic summary of the data</h3>
 <p>Type of election - General elections</p>
 <p>State - Uttar Pradesh</p>
 <p>Year - 2009:20019</p>
 <p>at 5% percentage vote share</p>
 <ul>
 <li><p>Number of observations - 787</p></li>
-<li><p>Average vote share percentage - 29%</p></li>
+<li><p>Average vote share percentage - 32%</p></li>
 <li><p>Distribution of the positions -</p></li>
 </ul>
 <pre><code>## 
-##    1    2    3    4    5 
-## 0.31 0.31 0.24 0.13 0.02</code></pre>
+##    1    2    3 
+## 0.36 0.36 0.28</code></pre>
 <ul>
-<li>Proportion of dynasts in the data - 0.34</li>
+<li>Proportion of dynasts in the data - 0.36</li>
 </ul>
-<div id="dynasts" class="section level3">
-<h3>Dynasts</h3>
-<p><strong>Proportion of positions won by dynast candidates</strong></p>
+</div>
+<div id="dynasts" class="section level3 tabset">
+<h3 class="tabset">Dynasts</h3>
+<div id="proportion-of-positions-won-by-dynast-candidates" class="section level4">
+<h4>Proportion of positions won by dynast candidates</h4>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
@@ -1817,353 +1819,84 @@ Dynast
 0.36
 </td>
 </tr>
-<tr>
-<td style="text-align:right;">
-4
-</td>
-<td style="text-align:right;">
-0.18
-</td>
-</tr>
-<tr>
-<td style="text-align:right;">
-5
-</td>
-<td style="text-align:right;">
-0.19
-</td>
-</tr>
 </tbody>
 </table>
 <hr />
+<!-- ```{r eda} -->
+<!-- ge_5pc %>%  group_by(year,dynast, position) %>% summarise(count = n() ) %>% group_by(year,position) %>% mutate(sum= sum(count), prop = count/sum) %>% filter(dynast == "Dynast") %>%reshape2::dcast(position  ~ year) %>% replace(is.na(.),0)%>% kable(digits = 2) %>% kable_styling(full_width = F) -->
+<!-- ``` -->
+<hr />
+</div>
+<div id="by-position" class="section level4">
+<h4>By position</h4>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
-<th style="text-align:right;">
-position
+<th style="text-align:left;">
+dynast
 </th>
 <th style="text-align:right;">
-2009
+1
 </th>
 <th style="text-align:right;">
-2014
+2
 </th>
 <th style="text-align:right;">
-2019
+3
 </th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align:right;">
-1
+<td style="text-align:left;">
+Dynast
 </td>
 <td style="text-align:right;">
-0.48
+0.41
 </td>
 <td style="text-align:right;">
-0.37
-</td>
-<td style="text-align:right;">
-0.40
-</td>
-</tr>
-<tr>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-0.27
-</td>
-<td style="text-align:right;">
-0.36
+0.30
 </td>
 <td style="text-align:right;">
 0.29
 </td>
 </tr>
 <tr>
-<td style="text-align:right;">
-3
-</td>
-<td style="text-align:right;">
-0.30
+<td style="text-align:left;">
+Non-Dynast
 </td>
 <td style="text-align:right;">
 0.33
 </td>
 <td style="text-align:right;">
-0.59
-</td>
-</tr>
-<tr>
-<td style="text-align:right;">
-4
-</td>
-<td style="text-align:right;">
-0.11
-</td>
-<td style="text-align:right;">
-0.26
-</td>
-<td style="text-align:right;">
-1.00
-</td>
-</tr>
-<tr>
-<td style="text-align:right;">
-5
-</td>
-<td style="text-align:right;">
-0.00
-</td>
-<td style="text-align:right;">
-1.00
-</td>
-<td style="text-align:right;">
-0.00
-</td>
-</tr>
-</tbody>
-</table>
-<hr />
-<p><strong>Composition of positions within dynasts and non-dyansts</strong></p>
-<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<thead>
-<tr>
-<th style="text-align:left;">
-dynast
-</th>
-<th style="text-align:right;">
-1
-</th>
-<th style="text-align:right;">
-2
-</th>
-<th style="text-align:right;">
-3
-</th>
-<th style="text-align:right;">
-4
-</th>
-<th style="text-align:right;">
-5
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left;">
-Dynast
-</td>
-<td style="text-align:right;">
-0.38
+0.39
 </td>
 <td style="text-align:right;">
 0.28
 </td>
-<td style="text-align:right;">
-0.26
-</td>
-<td style="text-align:right;">
-0.07
-</td>
-<td style="text-align:right;">
-0.01
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Non-Dynast
-</td>
-<td style="text-align:right;">
-0.27
-</td>
-<td style="text-align:right;">
-0.32
-</td>
-<td style="text-align:right;">
-0.23
-</td>
-<td style="text-align:right;">
-0.16
-</td>
-<td style="text-align:right;">
-0.02
-</td>
 </tr>
 </tbody>
 </table>
 <hr />
-<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<thead>
-<tr>
-<th style="text-align:right;">
-year
-</th>
-<th style="text-align:right;">
-1
-</th>
-<th style="text-align:right;">
-2
-</th>
-<th style="text-align:right;">
-3
-</th>
-<th style="text-align:right;">
-4
-</th>
-<th style="text-align:right;">
-5
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:right;">
-2009
-</td>
-<td style="text-align:right;">
-0.42
-</td>
-<td style="text-align:right;">
-0.24
-</td>
-<td style="text-align:right;">
-0.26
-</td>
-<td style="text-align:right;">
-0.08
-</td>
-<td style="text-align:right;">
-0.00
-</td>
-</tr>
-<tr>
-<td style="text-align:right;">
-2014
-</td>
-<td style="text-align:right;">
-0.30
-</td>
-<td style="text-align:right;">
-0.29
-</td>
-<td style="text-align:right;">
-0.27
-</td>
-<td style="text-align:right;">
-0.10
-</td>
-<td style="text-align:right;">
-0.03
-</td>
-</tr>
-<tr>
-<td style="text-align:right;">
-2019
-</td>
-<td style="text-align:right;">
-0.43
-</td>
-<td style="text-align:right;">
-0.31
-</td>
-<td style="text-align:right;">
-0.25
-</td>
-<td style="text-align:right;">
-0.01
-</td>
-<td style="text-align:right;">
-0.00
-</td>
-</tr>
-</tbody>
-</table>
+<!--  ```{r} -->
+<!--  ge_5pc %>%  group_by(year,dynast, position) %>% summarise(count = n() ) %>% group_by(year,dynast) %>% mutate(sum= sum(count), prop = count/sum) %>% filter(dynast == "Dynast") %>%reshape2::dcast(year  ~ position) %>% replace(is.na(.),0)%>% kable(digits = 2) %>% kable_styling(full_width = F) -->
+<!-- ``` -->
 <hr />
-<p><strong>Vote Share</strong></p>
-<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<thead>
-<tr>
-<th style="text-align:left;">
-dynast
-</th>
-<th style="text-align:right;">
-mean_vote_share
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left;">
-Dynast
-</td>
-<td style="text-align:right;">
-31
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Non-Dynast
-</td>
-<td style="text-align:right;">
-27
-</td>
-</tr>
-</tbody>
-</table>
+<!-- #### **Vote Share** -->
+<!-- ```{r} -->
+<!-- ge_5pc %>% group_by(dynast) %>%summarise(mean_vote_share = mean(vote_share_percentage)) %>% kable(digits = 0) %>% kable_styling(full_width = F) -->
+<!-- ``` -->
+<!-- --- -->
+<!-- ```{r} -->
+<!-- ge_5pc %>%  group_by(position,dynast) %>%  summarise(mean_vote_share = mean(vote_share_percentage))  %>%reshape2::dcast(dynast  ~ position) %>% replace(is.na(.),0)%>% kable(digits = 0) %>% kable_styling(full_width = F) -->
+<!-- ``` -->
 <hr />
-<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<thead>
-<tr>
-<th style="text-align:left;">
-dynast
-</th>
-<th style="text-align:right;">
-2009
-</th>
-<th style="text-align:right;">
-2014
-</th>
-<th style="text-align:right;">
-2019
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left;">
-Dynast
-</td>
-<td style="text-align:right;">
-29
-</td>
-<td style="text-align:right;">
-28
-</td>
-<td style="text-align:right;">
-38
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Non-Dynast
-</td>
-<td style="text-align:right;">
-21
-</td>
-<td style="text-align:right;">
-26
-</td>
-<td style="text-align:right;">
-40
-</td>
-</tr>
-</tbody>
-</table>
-<hr />
-<p><strong>Turncoats proportion wrt Politicians identity</strong></p>
+</div>
+</div>
+<div id="turncoats" class="section level3 tabset">
+<h3 class="tabset">Turncoats</h3>
+<div id="turncoats-proportion-wrt-politicians-identity" class="section level4">
+<h4>Turncoats proportion wrt Politicians identity</h4>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
@@ -2194,7 +1927,9 @@ Non-Dynast
 </tr>
 </tbody>
 </table>
-<hr />
+</div>
+<div id="by-posiiton" class="section level4">
+<h4>by posiiton</h4>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
@@ -2202,13 +1937,13 @@ Non-Dynast
 dynast
 </th>
 <th style="text-align:right;">
-2009
+1
 </th>
 <th style="text-align:right;">
-2014
+2
 </th>
 <th style="text-align:right;">
-2019
+3
 </th>
 </tr>
 </thead>
@@ -2218,13 +1953,13 @@ dynast
 Dynast
 </td>
 <td style="text-align:right;">
-0.14
+0.15
 </td>
 <td style="text-align:right;">
-0.09
+0.15
 </td>
 <td style="text-align:right;">
-0.17
+0.10
 </td>
 </tr>
 <tr>
@@ -2244,7 +1979,12 @@ Non-Dynast
 </tbody>
 </table>
 <hr />
-<p><strong>Party retention wrt Politicians identity</strong></p>
+</div>
+</div>
+<div id="same-party" class="section level3 tabset">
+<h3 class="tabset">Same party</h3>
+<div id="party-retention-wrt-politicians-identity" class="section level4">
+<h4>Party retention wrt Politicians identity</h4>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
@@ -2262,7 +2002,7 @@ mean_same_party
 Dynast
 </td>
 <td style="text-align:right;">
-0.75
+0.76
 </td>
 </tr>
 <tr>
@@ -2270,12 +2010,14 @@ Dynast
 Non-Dynast
 </td>
 <td style="text-align:right;">
-0.74
+0.75
 </td>
 </tr>
 </tbody>
 </table>
-<hr />
+</div>
+<div id="position" class="section level4">
+<h4>Position</h4>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
@@ -2283,13 +2025,13 @@ Non-Dynast
 dynast
 </th>
 <th style="text-align:right;">
-2009
+1
 </th>
 <th style="text-align:right;">
-2014
+2
 </th>
 <th style="text-align:right;">
-2019
+3
 </th>
 </tr>
 </thead>
@@ -2299,13 +2041,13 @@ dynast
 Dynast
 </td>
 <td style="text-align:right;">
+0.78
+</td>
+<td style="text-align:right;">
+0.74
+</td>
+<td style="text-align:right;">
 0.73
-</td>
-<td style="text-align:right;">
-0.80
-</td>
-<td style="text-align:right;">
-0.72
 </td>
 </tr>
 <tr>
@@ -2313,19 +2055,24 @@ Dynast
 Non-Dynast
 </td>
 <td style="text-align:right;">
-0.65
+0.75
 </td>
 <td style="text-align:right;">
-0.73
+0.71
 </td>
 <td style="text-align:right;">
-0.85
+0.80
 </td>
 </tr>
 </tbody>
 </table>
 <hr />
-<p><strong>Proportion of incumbents wrt Politicians identity</strong></p>
+</div>
+</div>
+<div id="incumbents" class="section level3 tabset">
+<h3 class="tabset">Incumbents</h3>
+<div id="proportion-of-incumbents-wrt-politicians-identity" class="section level4">
+<h4>Proportion of incumbents wrt Politicians identity</h4>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
@@ -2343,7 +2090,7 @@ mean_incumbent
 Dynast
 </td>
 <td style="text-align:right;">
-0.34
+0.35
 </td>
 </tr>
 <tr>
@@ -2351,12 +2098,14 @@ Dynast
 Non-Dynast
 </td>
 <td style="text-align:right;">
-0.16
+0.17
 </td>
 </tr>
 </tbody>
 </table>
-<hr />
+</div>
+<div id="by-position-1" class="section level4">
+<h4>By position</h4>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
@@ -2380,13 +2129,13 @@ dynast
 Dynast
 </td>
 <td style="text-align:right;">
-0.34
+0.36
+</td>
+<td style="text-align:right;">
+0.35
 </td>
 <td style="text-align:right;">
 0.34
-</td>
-<td style="text-align:right;">
-0.33
 </td>
 </tr>
 <tr>
@@ -2394,10 +2143,10 @@ Dynast
 Non-Dynast
 </td>
 <td style="text-align:right;">
-0.14
+0.16
 </td>
 <td style="text-align:right;">
-0.12
+0.10
 </td>
 <td style="text-align:right;">
 0.27
@@ -2406,7 +2155,12 @@ Non-Dynast
 </tbody>
 </table>
 <hr />
-<p><strong>Proportion of re-contestants wrt Politicians identity</strong></p>
+</div>
+</div>
+<div id="recontest" class="section level3 tabset">
+<h3 class="tabset">Recontest</h3>
+<div id="proportion-of-re-contestants-wrt-politicians-identity" class="section level4">
+<h4>Proportion of re-contestants wrt Politicians identity</h4>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
@@ -2424,7 +2178,7 @@ mean_recontest
 Dynast
 </td>
 <td style="text-align:right;">
-0.48
+0.50
 </td>
 </tr>
 <tr>
@@ -2432,12 +2186,17 @@ Dynast
 Non-Dynast
 </td>
 <td style="text-align:right;">
-0.34
+0.36
 </td>
 </tr>
 </tbody>
 </table>
-<p><strong>Number of terms wrt Politicians identity</strong></p>
+</div>
+</div>
+<div id="number-of-terms" class="section level3 tabset">
+<h3 class="tabset">Number of terms</h3>
+<div id="number-of-terms-wrt-politicians-identity" class="section level4">
+<h4>Number of terms wrt Politicians identity</h4>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
@@ -2455,7 +2214,7 @@ mean_no_terms
 Dynast
 </td>
 <td style="text-align:right;">
-1.49
+1.54
 </td>
 </tr>
 <tr>
@@ -2463,12 +2222,14 @@ Dynast
 Non-Dynast
 </td>
 <td style="text-align:right;">
-0.79
+0.87
 </td>
 </tr>
 </tbody>
 </table>
-<hr />
+</div>
+<div id="by-posiiton-1" class="section level4">
+<h4>By posiiton</h4>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
@@ -2492,13 +2253,13 @@ dynast
 Dynast
 </td>
 <td style="text-align:right;">
-1.57
+1.62
 </td>
 <td style="text-align:right;">
-1.33
+1.40
 </td>
 <td style="text-align:right;">
-1.60
+1.61
 </td>
 </tr>
 <tr>
@@ -2506,10 +2267,10 @@ Dynast
 Non-Dynast
 </td>
 <td style="text-align:right;">
-0.67
+0.79
 </td>
 <td style="text-align:right;">
-0.74
+0.77
 </td>
 <td style="text-align:right;">
 1.08
@@ -2518,7 +2279,12 @@ Non-Dynast
 </tbody>
 </table>
 <hr />
-<p><strong>Constituency type wrt Politicians identity</strong></p>
+</div>
+</div>
+<div id="constituency-type" class="section level3 tabset">
+<h3 class="tabset">Constituency type</h3>
+<div id="constituency-type-wrt-politicians-identity" class="section level4">
+<h4>Constituency type wrt Politicians identity</h4>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
@@ -2550,15 +2316,17 @@ Dynast
 Non-Dynast
 </td>
 <td style="text-align:right;">
-0.77
+0.76
 </td>
 <td style="text-align:right;">
-0.23
+0.24
 </td>
 </tr>
 </tbody>
 </table>
-<hr />
+</div>
+<div id="by-position-2" class="section level4">
+<h4>By position</h4>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
@@ -2580,34 +2348,6 @@ SC
 <tr>
 <td style="text-align:right;">
 2009
-</td>
-<td style="text-align:left;">
-Dynast
-</td>
-<td style="text-align:right;">
-0.86
-</td>
-<td style="text-align:right;">
-0.14
-</td>
-</tr>
-<tr>
-<td style="text-align:right;">
-2009
-</td>
-<td style="text-align:left;">
-Non-Dynast
-</td>
-<td style="text-align:right;">
-0.77
-</td>
-<td style="text-align:right;">
-0.23
-</td>
-</tr>
-<tr>
-<td style="text-align:right;">
-2014
 </td>
 <td style="text-align:left;">
 Dynast
@@ -2621,16 +2361,44 @@ Dynast
 </tr>
 <tr>
 <td style="text-align:right;">
+2009
+</td>
+<td style="text-align:left;">
+Non-Dynast
+</td>
+<td style="text-align:right;">
+0.74
+</td>
+<td style="text-align:right;">
+0.26
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2014
+</td>
+<td style="text-align:left;">
+Dynast
+</td>
+<td style="text-align:right;">
+0.87
+</td>
+<td style="text-align:right;">
+0.13
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
 2014
 </td>
 <td style="text-align:left;">
 Non-Dynast
 </td>
 <td style="text-align:right;">
-0.76
+0.75
 </td>
 <td style="text-align:right;">
-0.24
+0.25
 </td>
 </tr>
 <tr>
@@ -2641,10 +2409,10 @@ Non-Dynast
 Dynast
 </td>
 <td style="text-align:right;">
-0.83
+0.82
 </td>
 <td style="text-align:right;">
-0.17
+0.18
 </td>
 </tr>
 <tr>
@@ -2667,28 +2435,30 @@ Non-Dynast
 </div>
 </div>
 </div>
-<div id="ae" class="section level1">
-<h1>AE</h1>
-<div id="basic-summary-of-the-data-1" class="section level2">
-<h2>Basic summary of the data</h2>
+<div id="ae" class="section level1 tabset">
+<h1 class="tabset">AE</h1>
+<div id="basic-summary-of-the-data-1" class="section level3">
+<h3>Basic summary of the data</h3>
 <p>Type of election - Assembly elections</p>
 <p>State - Uttar Pradesh</p>
 <p>at 5% percentage vote share</p>
 <ul>
 <li><p>Number of observations - 2960</p></li>
-<li><p>Average vote share percentage - 25.22</p></li>
+<li><p>Average vote share percentage - 28.74</p></li>
 <li><p>Distribution of the positions -</p></li>
 </ul>
 <pre><code>## 
-##    1    2    3    4    5    6    7 
-## 0.27 0.27 0.27 0.14 0.04 0.01 0.00</code></pre>
+##    1    2    3 
+## 0.34 0.34 0.33</code></pre>
 <ul>
-<li>Proportion of dynasts - 0.16</li>
+<li>Proportion of dynasts - 0.18</li>
 </ul>
 <hr />
-<div id="dynasts-1" class="section level3">
-<h3>Dynasts</h3>
-<p><strong>Proportion of positions won by dynast candidates</strong></p>
+</div>
+<div id="dynasts-1" class="section level3 tabset">
+<h3 class="tabset">Dynasts</h3>
+<div id="proportion-of-positions-won-by-dynast-candidates-1" class="section level4">
+<h4>Proportion of positions won by dynast candidates</h4>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
@@ -2725,352 +2495,85 @@ Dynast
 0.13
 </td>
 </tr>
-<tr>
-<td style="text-align:right;">
-4
-</td>
-<td style="text-align:right;">
-0.08
-</td>
-</tr>
-<tr>
-<td style="text-align:right;">
-5
-</td>
-<td style="text-align:right;">
-0.08
-</td>
-</tr>
-<tr>
-<td style="text-align:right;">
-6
-</td>
-<td style="text-align:right;">
-0.06
-</td>
-</tr>
 </tbody>
 </table>
+<!-- --- -->
+<!-- #### By position -->
+<!-- ```{r } -->
+<!-- ae_5pc %>%  group_by(year,dynast, position) %>% summarise(count = n() ) %>% group_by(year,position) %>% mutate(sum= sum(count), prop = count/sum) %>% filter(dynast == "Dynast") %>%reshape2::dcast(position  ~ year) %>% replace(is.na(.),0)%>% kable(digits = 2) %>% kable_styling(full_width = F) -->
+<!-- ``` -->
 <hr />
+</div>
+<div id="by-position-3" class="section level4">
+<h4>By position</h4>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
-<th style="text-align:right;">
-position
+<th style="text-align:left;">
+dynast
 </th>
 <th style="text-align:right;">
-2012
+1
 </th>
 <th style="text-align:right;">
-2017
+2
+</th>
+<th style="text-align:right;">
+3
 </th>
 </tr>
 </thead>
 <tbody>
 <tr>
+<td style="text-align:left;">
+Dynast
+</td>
 <td style="text-align:right;">
-1
+0.39
+</td>
+<td style="text-align:right;">
+0.37
 </td>
 <td style="text-align:right;">
 0.24
 </td>
-<td style="text-align:right;">
-0.19
-</td>
-</tr>
-<tr>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-0.19
-</td>
-<td style="text-align:right;">
-0.22
-</td>
-</tr>
-<tr>
-<td style="text-align:right;">
-3
-</td>
-<td style="text-align:right;">
-0.15
-</td>
-<td style="text-align:right;">
-0.12
-</td>
-</tr>
-<tr>
-<td style="text-align:right;">
-4
-</td>
-<td style="text-align:right;">
-0.08
-</td>
-<td style="text-align:right;">
-0.07
-</td>
-</tr>
-<tr>
-<td style="text-align:right;">
-5
-</td>
-<td style="text-align:right;">
-0.08
-</td>
-<td style="text-align:right;">
-0.11
-</td>
-</tr>
-<tr>
-<td style="text-align:right;">
-6
-</td>
-<td style="text-align:right;">
-0.06
-</td>
-<td style="text-align:right;">
-0.00
-</td>
-</tr>
-</tbody>
-</table>
-<hr />
-<p><strong>Composition of positions within dynasts and non-dyansts</strong></p>
-<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<thead>
-<tr>
-<th style="text-align:left;">
-dynast
-</th>
-<th style="text-align:right;">
-1
-</th>
-<th style="text-align:right;">
-2
-</th>
-<th style="text-align:right;">
-3
-</th>
-<th style="text-align:right;">
-4
-</th>
-<th style="text-align:right;">
-5
-</th>
-<th style="text-align:right;">
-6
-</th>
-<th style="text-align:right;">
-7
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left;">
-Dynast
-</td>
-<td style="text-align:right;">
-0.36
-</td>
-<td style="text-align:right;">
-0.34
-</td>
-<td style="text-align:right;">
-0.21
-</td>
-<td style="text-align:right;">
-0.07
-</td>
-<td style="text-align:right;">
-0.02
-</td>
-<td style="text-align:right;">
-0.00
-</td>
-<td style="text-align:right;">
-NA
-</td>
 </tr>
 <tr>
 <td style="text-align:left;">
 Non-Dynast
 </td>
 <td style="text-align:right;">
-0.26
+0.32
 </td>
 <td style="text-align:right;">
-0.26
-</td>
-<td style="text-align:right;">
-0.28
-</td>
-<td style="text-align:right;">
-0.15
-</td>
-<td style="text-align:right;">
-0.05
-</td>
-<td style="text-align:right;">
-0.01
-</td>
-<td style="text-align:right;">
-0
-</td>
-</tr>
-</tbody>
-</table>
-<hr />
-<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<thead>
-<tr>
-<th style="text-align:right;">
-year
-</th>
-<th style="text-align:right;">
-1
-</th>
-<th style="text-align:right;">
-2
-</th>
-<th style="text-align:right;">
-3
-</th>
-<th style="text-align:right;">
-4
-</th>
-<th style="text-align:right;">
-5
-</th>
-<th style="text-align:right;">
-6
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:right;">
-2012
-</td>
-<td style="text-align:right;">
-0.36
-</td>
-<td style="text-align:right;">
-0.28
-</td>
-<td style="text-align:right;">
-0.22
-</td>
-<td style="text-align:right;">
-0.10
-</td>
-<td style="text-align:right;">
-0.03
-</td>
-<td style="text-align:right;">
-0
-</td>
-</tr>
-<tr>
-<td style="text-align:right;">
-2017
+0.33
 </td>
 <td style="text-align:right;">
 0.35
 </td>
-<td style="text-align:right;">
-0.41
-</td>
-<td style="text-align:right;">
-0.21
-</td>
-<td style="text-align:right;">
-0.03
-</td>
-<td style="text-align:right;">
-0.00
-</td>
-<td style="text-align:right;">
-0
-</td>
 </tr>
 </tbody>
 </table>
 <hr />
-<p><strong>Vote Share</strong></p>
-<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<thead>
-<tr>
-<th style="text-align:left;">
-dynast
-</th>
-<th style="text-align:right;">
-mean_vote_share
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left;">
-Dynast
-</td>
-<td style="text-align:right;">
-29
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Non-Dynast
-</td>
-<td style="text-align:right;">
-24
-</td>
-</tr>
-</tbody>
-</table>
+<!-- ```{r} -->
+<!-- ae_5pc %>%  group_by(year,dynast, position) %>% summarise(count = n() ) %>% group_by(year,dynast) %>% mutate(sum= sum(count), prop = count/sum) %>% filter(dynast == "Dynast") %>%reshape2::dcast(year  ~ position) %>% replace(is.na(.),0)%>% kable(digits = 2) %>% kable_styling(full_width = F) -->
+<!-- ``` -->
 <hr />
-<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<thead>
-<tr>
-<th style="text-align:left;">
-dynast
-</th>
-<th style="text-align:right;">
-2012
-</th>
-<th style="text-align:right;">
-2017
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left;">
-Dynast
-</td>
-<td style="text-align:right;">
-27
-</td>
-<td style="text-align:right;">
-32
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Non-Dynast
-</td>
-<td style="text-align:right;">
-21
-</td>
-<td style="text-align:right;">
-29
-</td>
-</tr>
-</tbody>
-</table>
+<!-- **Vote Share** -->
+<!-- ```{r} -->
+<!-- ae_5pc %>% group_by(dynast) %>%summarise(mean_vote_share = mean(vote_share_percentage)) %>% kable(digits = 0) %>% kable_styling(full_width = F) -->
+<!-- ``` -->
+<!-- --- -->
+<!-- ```{r} -->
+<!-- ae_5pc %>%  group_by(year,dynast) %>%  summarise(mean_vote_share = mean(vote_share_percentage))  %>%reshape2::dcast(dynast  ~ year) %>% replace(is.na(.),0)%>% kable(digits = 0) %>% kable_styling(full_width = F) -->
+<!-- ``` -->
 <hr />
-<p><strong>Turncoats proportion wrt Politicians identity</strong></p>
+</div>
+</div>
+<div id="turncoat" class="section level3 tabset">
+<h3 class="tabset">Turncoat</h3>
+<div id="turncoats-proportion-wrt-politicians-identity-1" class="section level4">
+<h4>Turncoats proportion wrt Politicians identity</h4>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
@@ -3101,7 +2604,9 @@ Non-Dynast
 </tr>
 </tbody>
 </table>
-<hr />
+</div>
+<div id="by-position-4" class="section level4">
+<h4>By position</h4>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
@@ -3109,10 +2614,13 @@ Non-Dynast
 dynast
 </th>
 <th style="text-align:right;">
-2012
+1
 </th>
 <th style="text-align:right;">
-2017
+2
+</th>
+<th style="text-align:right;">
+3
 </th>
 </tr>
 </thead>
@@ -3122,10 +2630,13 @@ dynast
 Dynast
 </td>
 <td style="text-align:right;">
-0.14
+0.13
 </td>
 <td style="text-align:right;">
 0.15
+</td>
+<td style="text-align:right;">
+0.13
 </td>
 </tr>
 <tr>
@@ -3133,16 +2644,24 @@ Dynast
 Non-Dynast
 </td>
 <td style="text-align:right;">
+0.14
+</td>
+<td style="text-align:right;">
 0.11
 </td>
 <td style="text-align:right;">
-0.13
+0.12
 </td>
 </tr>
 </tbody>
 </table>
 <hr />
-<p><strong>Party retention wrt Politicians identity</strong></p>
+</div>
+</div>
+<div id="same-party-1" class="section level3 tabset">
+<h3 class="tabset">Same Party</h3>
+<div id="party-retention-wrt-politicians-identity-1" class="section level4">
+<h4>Party retention wrt Politicians identity</h4>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
@@ -3160,7 +2679,7 @@ mean_same_party
 Dynast
 </td>
 <td style="text-align:right;">
-0.67
+0.68
 </td>
 </tr>
 <tr>
@@ -3168,12 +2687,14 @@ Dynast
 Non-Dynast
 </td>
 <td style="text-align:right;">
-0.66
+0.70
 </td>
 </tr>
 </tbody>
 </table>
-<hr />
+</div>
+<div id="by-position-5" class="section level4">
+<h4>By position</h4>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
@@ -3181,10 +2702,13 @@ Non-Dynast
 dynast
 </th>
 <th style="text-align:right;">
-2012
+1
 </th>
 <th style="text-align:right;">
-2017
+2
+</th>
+<th style="text-align:right;">
+3
 </th>
 </tr>
 </thead>
@@ -3194,10 +2718,13 @@ dynast
 Dynast
 </td>
 <td style="text-align:right;">
-0.66
+0.72
 </td>
 <td style="text-align:right;">
 0.68
+</td>
+<td style="text-align:right;">
+0.59
 </td>
 </tr>
 <tr>
@@ -3205,16 +2732,24 @@ Dynast
 Non-Dynast
 </td>
 <td style="text-align:right;">
-0.65
+0.70
 </td>
 <td style="text-align:right;">
-0.68
+0.77
+</td>
+<td style="text-align:right;">
+0.62
 </td>
 </tr>
 </tbody>
 </table>
 <hr />
-<p><strong>Proportion of incumbents wrt Politicians identity</strong></p>
+</div>
+</div>
+<div id="incumbency" class="section level3 tabset">
+<h3 class="tabset">Incumbency</h3>
+<div id="proportion-of-incumbents-wrt-politicians-identity-1" class="section level4">
+<h4>Proportion of incumbents wrt Politicians identity</h4>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
@@ -3232,7 +2767,7 @@ mean_incumbent
 Dynast
 </td>
 <td style="text-align:right;">
-0.21
+0.23
 </td>
 </tr>
 <tr>
@@ -3240,12 +2775,14 @@ Dynast
 Non-Dynast
 </td>
 <td style="text-align:right;">
-0.14
+0.16
 </td>
 </tr>
 </tbody>
 </table>
-<hr />
+</div>
+<div id="by-position-6" class="section level4">
+<h4>By position</h4>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
@@ -3253,10 +2790,13 @@ Non-Dynast
 dynast
 </th>
 <th style="text-align:right;">
-2012
+1
 </th>
 <th style="text-align:right;">
-2017
+2
+</th>
+<th style="text-align:right;">
+3
 </th>
 </tr>
 </thead>
@@ -3266,10 +2806,13 @@ dynast
 Dynast
 </td>
 <td style="text-align:right;">
-0.19
+0.27
 </td>
 <td style="text-align:right;">
-0.24
+0.25
+</td>
+<td style="text-align:right;">
+0.12
 </td>
 </tr>
 <tr>
@@ -3277,16 +2820,24 @@ Dynast
 Non-Dynast
 </td>
 <td style="text-align:right;">
-0.12
+0.18
 </td>
 <td style="text-align:right;">
-0.16
+0.22
+</td>
+<td style="text-align:right;">
+0.09
 </td>
 </tr>
 </tbody>
 </table>
 <hr />
-<p><strong>Proportion of re-contestants wrt Politicians identity</strong></p>
+</div>
+</div>
+<div id="recontest-1" class="section level3 tabset">
+<h3 class="tabset">Recontest</h3>
+<div id="proportion-of-re-contestants-wrt-politicians-identity-1" class="section level4">
+<h4>Proportion of re-contestants wrt Politicians identity</h4>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
@@ -3304,7 +2855,7 @@ mean_recontest
 Dynast
 </td>
 <td style="text-align:right;">
-0.42
+0.44
 </td>
 </tr>
 <tr>
@@ -3312,12 +2863,14 @@ Dynast
 Non-Dynast
 </td>
 <td style="text-align:right;">
-0.32
+0.36
 </td>
 </tr>
 </tbody>
 </table>
-<p><strong>Number of terms wrt Politicians identity</strong></p>
+</div>
+<div id="by-position-7" class="section level4">
+<h4>By position</h4>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
@@ -3325,7 +2878,13 @@ Non-Dynast
 dynast
 </th>
 <th style="text-align:right;">
-mean_no_terms
+1
+</th>
+<th style="text-align:right;">
+2
+</th>
+<th style="text-align:right;">
+3
 </th>
 </tr>
 </thead>
@@ -3335,7 +2894,13 @@ mean_no_terms
 Dynast
 </td>
 <td style="text-align:right;">
-1.05
+0.47
+</td>
+<td style="text-align:right;">
+0.46
+</td>
+<td style="text-align:right;">
+0.35
 </td>
 </tr>
 <tr>
@@ -3343,12 +2908,24 @@ Dynast
 Non-Dynast
 </td>
 <td style="text-align:right;">
-0.72
+0.41
+</td>
+<td style="text-align:right;">
+0.41
+</td>
+<td style="text-align:right;">
+0.27
 </td>
 </tr>
 </tbody>
 </table>
 <hr />
+</div>
+</div>
+<div id="number-of-terms-1" class="section level3 tabset">
+<h3 class="tabset">Number of terms</h3>
+<div id="number-of-terms-wrt-politicians-identity-1" class="section level4">
+<h4>Number of terms wrt Politicians identity</h4>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
@@ -3356,10 +2933,7 @@ Non-Dynast
 dynast
 </th>
 <th style="text-align:right;">
-2012
-</th>
-<th style="text-align:right;">
-2017
+mean_no_terms
 </th>
 </tr>
 </thead>
@@ -3371,8 +2945,50 @@ Dynast
 <td style="text-align:right;">
 1.10
 </td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Non-Dynast
+</td>
 <td style="text-align:right;">
-0.99
+0.86
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="by-position-8" class="section level4">
+<h4>By position</h4>
+<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+dynast
+</th>
+<th style="text-align:right;">
+1
+</th>
+<th style="text-align:right;">
+2
+</th>
+<th style="text-align:right;">
+3
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Dynast
+</td>
+<td style="text-align:right;">
+1.88
+</td>
+<td style="text-align:right;">
+0.69
+</td>
+<td style="text-align:right;">
+0.46
 </td>
 </tr>
 <tr>
@@ -3380,16 +2996,23 @@ Dynast
 Non-Dynast
 </td>
 <td style="text-align:right;">
-0.66
+1.63
 </td>
 <td style="text-align:right;">
-0.81
+0.59
+</td>
+<td style="text-align:right;">
+0.40
 </td>
 </tr>
 </tbody>
 </table>
-<hr />
-<p><strong>Constituency type wrt Politicians identity</strong></p>
+</div>
+</div>
+<div id="constituency-type-1" class="section level3 tabset">
+<h3 class="tabset">Constituency type</h3>
+<div id="constituency-type-wrt-politicians-identity-1" class="section level4">
+<h4>Constituency type wrt Politicians identity</h4>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
@@ -3421,20 +3044,22 @@ Dynast
 Non-Dynast
 </td>
 <td style="text-align:right;">
-0.78
+0.77
 </td>
 <td style="text-align:right;">
-0.22
+0.23
 </td>
 </tr>
 </tbody>
 </table>
-<hr />
+</div>
+<div id="by-position-9" class="section level4">
+<h4>By position</h4>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
 <th style="text-align:right;">
-year
+position
 </th>
 <th style="text-align:left;">
 dynast
@@ -3450,7 +3075,63 @@ SC
 <tbody>
 <tr>
 <td style="text-align:right;">
-2012
+1
+</td>
+<td style="text-align:left;">
+Dynast
+</td>
+<td style="text-align:right;">
+0.86
+</td>
+<td style="text-align:right;">
+0.14
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+Non-Dynast
+</td>
+<td style="text-align:right;">
+0.77
+</td>
+<td style="text-align:right;">
+0.23
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:left;">
+Dynast
+</td>
+<td style="text-align:right;">
+0.87
+</td>
+<td style="text-align:right;">
+0.13
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:left;">
+Non-Dynast
+</td>
+<td style="text-align:right;">
+0.77
+</td>
+<td style="text-align:right;">
+0.23
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+3
 </td>
 <td style="text-align:left;">
 Dynast
@@ -3464,7 +3145,7 @@ Dynast
 </tr>
 <tr>
 <td style="text-align:right;">
-2012
+3
 </td>
 <td style="text-align:left;">
 Non-Dynast
@@ -3476,37 +3157,8 @@ Non-Dynast
 0.22
 </td>
 </tr>
-<tr>
-<td style="text-align:right;">
-2017
-</td>
-<td style="text-align:left;">
-Dynast
-</td>
-<td style="text-align:right;">
-0.84
-</td>
-<td style="text-align:right;">
-0.16
-</td>
-</tr>
-<tr>
-<td style="text-align:right;">
-2017
-</td>
-<td style="text-align:left;">
-Non-Dynast
-</td>
-<td style="text-align:right;">
-0.79
-</td>
-<td style="text-align:right;">
-0.21
-</td>
-</tr>
 </tbody>
 </table>
-<hr />
 </div>
 </div>
 </div>

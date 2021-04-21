@@ -45,128 +45,78 @@ library(ggbump)
 select <- dplyr::select
 ```
 
-In this post we will be looking at dynasticism at the local level. We will be using two different definitions. 1 - category 2 - Where we only consider if an individual/set of individuals have connections to the ae-ge level. 2 - category 4 - We consider them as a dynast as long as they have/ have had members at one of the levels.
+<!-- In this post we will be looking at dynasticism at the local level. We will be using two different definitions. 1 - category 2 - Where we only consider if an individual/set of individuals have connections to the ae-ge level. 2 - category 4 - We consider them as a dynast as long as they have/ have had members at one of the levels. -->
 
 
+
+**Break-up of dynast representatives in local body data**
 
 ```{r}
-
 dyn_all <-  read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/dyn_all.csv")
 
-dyn_lb <- dyn_all %>% filter(election_type %!in% c("AE", "GE") & year >2001)
+
+dyn_lb <- dyn_all %>% filter(election_type %!in% c("AE", "GE"))
 
 
-
-dyn_ulb <- dyn_lb %>% filter(election_type %in% c("NP", "NPP", "NN"))
-
-dyn_nn <- dyn_lb %>% filter(election_type == "NN")
-
-dyn_np <- dyn_lb %>% filter(election_type == "NP")
-
-dyn_npp <- dyn_lb %>% filter(election_type == "NPP")
-
-dyn_bp <- dyn_lb %>% filter(election_type == "BP")
-
-dyn_zp <- dyn_lb %>% filter(election_type == "ZP")
-
-dyn_rlb <- dyn_lb %>% filter(election_type %in% c("BP","ZP"))
+dyn_lb %>%filter(position ==1)%>% group_by(election_type) %>% summarise(count = n(), dyn= sum(dyn_cum_4), pc= round(dyn/count*100)) %>% 
+  select(election_type, pc) %>% kable(col.names = c("Election", "Dynast %")) %>% kable_styling(full_width = F)
 
 
 
 ```
 
 
+
+## Caste {.tabset}
+
+### All representatives
+
+
+
+
 ```{r}
 
-dyn_ae_ge_rec <- dyn_all %>% filter(election_type %in% c("AE", "GE") & year >2006)
+dyn_lb$caste_groups <- factor(dyn_lb$caste_groups, levels = c("Upper Caste","Yadav","Non-Yadav OBC","Dalit" , "Muslim"  ,"Others" ))
 
-dyn_ae_rec <- dyn_all %>% filter(election_type == "AE" & year >2006)
-
-dyn_ge_rec <- dyn_all %>% filter(election_type == "GE" & year >2006)
+dyn_lb %>% filter(election_type!= "NN" & !is.na(caste_groups)) %>% group_by(election_type, caste_groups) %>% summarise(count = n()) %>% group_by(election_type) %>% mutate(sum = sum(count), pc = count/sum*100) %>% 
+  ggplot(aes(election_type,pc, fill = caste_groups))+
+      geom_bar(stat= "identity") +
+    geom_text(size = 2.5, position = position_stack(vjust = 0.5), aes(label =round( pc,0)))+
+    colorspace::scale_fill_discrete_qualitative(palette= "dark3" )+
+    theme_minimal()+
+labs(title = "Caste composition of local body representatives ",x = "", y = "" ,fill = "Caste Groups", subtitle = "In percentage")+
+    theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
+  theme(plot.background = element_blank(),
+        axis.line.x = element_line(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.y = element_blank()
+  ) 
 
 ```
 
-## Winners and runner-ups
 
-**Category 4**
-
-level   Proportion of dynasts
------- --------------------
-AE-GE  `r data.frame(round(prop.table(table(dyn_ae_ge_rec$dyn_cum_4)),2))[2,2]`
-AE      `r data.frame(round(prop.table(table(dyn_ae_rec$dyn_cum_4)),2))[2,2]`
-GE      `r data.frame(round(prop.table(table(dyn_ge_rec$dyn_cum_4)),2))[2,2]`
-
-
-
-
-**Category 2**
-
-level   Proportion of dynasts
------- --------------------
-AE-GE  `r data.frame(round(prop.table(table(dyn_ae_ge_rec$dyn_cum_2)),2))[2,2]`
-AE      `r data.frame(round(prop.table(table(dyn_ae_rec$dyn_cum_2)),2))[2,2]`
-GE      `r data.frame(round(prop.table(table(dyn_ge_rec$dyn_cum_2)),2))[2,2]`
-
-
-**Category 4**
-
-level                 Proportion of dynasts
-----------------     ------------------
-All LB                  `r data.frame(round(prop.table(table(dyn_lb$dyn_cum_4)),2))[2,2]`
-ULB                     `r data.frame(round(prop.table(table(dyn_ulb$dyn_cum_4)),2))[2,2]`
-RLB                     `r data.frame(round(prop.table(table(dyn_rlb$dyn_cum_4)),2))[2,2]`
-NN                      `r data.frame(round(prop.table(table(dyn_nn$dyn_cum_4)),2))[2,2]`
-NP                      `r data.frame(round(prop.table(table(dyn_np$dyn_cum_4)),2))[2,2]`
-NPP                     `r data.frame(round(prop.table(table(dyn_npp$dyn_cum_4)),2))[2,2] `
-BP                      `r data.frame(round(prop.table(table(dyn_bp$dyn_cum_4)),2))[2,2]`
-ZP                      `r data.frame(round(prop.table(table(dyn_zp$dyn_cum_4)),2))[2,2]`
+### Families
 
 
 ```{r}
 
-dyn_ae_ge_rec <- dyn_all %>% filter(election_type %in% c("AE", "GE") & year >2006 & position ==1)
+dyn_lb$caste_groups <- factor(dyn_lb$caste_groups, levels = c("Upper Caste","Yadav","Non-Yadav OBC","Dalit" , "Muslim"  ,"Others" ))
 
-dyn_ae_rec <- dyn_all %>% filter(election_type == "AE" & year >2006 & position ==1)
-
-dyn_ge_rec <- dyn_all %>% filter(election_type == "GE" & year >2006 & position ==1)
-
-
-```
-
-## Winners
-
-**Category 4**
-
-level   Proportion of dynasts
------- --------------------
-AE-GE  `r data.frame(round(prop.table(table(dyn_ae_ge_rec$dyn_cum_4)),2))[2,2]`
-AE      `r data.frame(round(prop.table(table(dyn_ae_rec$dyn_cum_4)),2))[2,2]`
-GE      `r data.frame(round(prop.table(table(dyn_ge_rec$dyn_cum_4)),2))[2,2]`
-
-
-
-
-**Category 2**
-
-level   Proportion of dynasts
------- --------------------
-AE-GE  `r data.frame(round(prop.table(table(dyn_ae_ge_rec$dyn_cum_2)),2))[2,2]`
-AE      `r data.frame(round(prop.table(table(dyn_ae_rec$dyn_cum_2)),2))[2,2]`
-GE      `r data.frame(round(prop.table(table(dyn_ge_rec$dyn_cum_2)),2))[2,2]`
-
-
-
-```{r}
-
-## extending the second category to local body
-
-##dyn_all %>% group_by(family_id)
-
-
-
-
-
-
+dyn_lb %>% filter(election_type!= "NN" & !is.na(caste_groups)& dyn_cum_4 == 1) %>% group_by(election_type, caste_groups) %>% summarise(count = n()) %>% group_by(election_type) %>% mutate(sum = sum(count), pc = count/sum*100) %>% 
+  ggplot(aes(election_type,pc, fill = caste_groups))+
+      geom_bar(stat= "identity") +
+    geom_text(size = 2.5, position = position_stack(vjust = 0.5), aes(label =ifelse(pc>4,round(pc,0),"")))+
+    colorspace::scale_fill_discrete_qualitative(palette= "dark3" )+
+    theme_minimal()+
+labs(title = "Caste composition of local body representatives ",x = "", y = "" ,fill = "Caste Groups", subtitle = "In percentage")+
+  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
+  theme(plot.background = element_blank(),
+        axis.line.x = element_line(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.y = element_blank()
+  ) 
 
 ```
 

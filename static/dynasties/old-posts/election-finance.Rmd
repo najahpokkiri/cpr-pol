@@ -41,12 +41,17 @@ library(kableExtra)
 library(scales)
 library(gridExtra)
 `%!in%` = Negate(`%in%`)
+library(DT)
 
 select <- dplyr::select
 ```
 
 
-# Election finance wrt family type
+
+
+
+
+
 
 ```{r file config}
 dyn <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/dyn_ae_ge.csv")
@@ -91,14 +96,66 @@ dyn_el_fin <- merge(fin_12_17,dyn_ae_12_17_w, by = c("year", "constituency_no"))
 
 
 
+## Data summary {.tabset}
 
 
-```{r summary}
+### Preview
+
+```{r}
+DT::datatable(head(fin_12_17))
+```
+### Main variables
+
+
+```{r}
+
+names(fin_12_17)
+
+```
+### Observations
+
+
+```{r}
+
+fin_12_17 %>% filter(year!=1)%>% group_by(year) %>% summarise(n_obs = n()) %>% kable() %>% kable_styling(full_width = F)
+
+```
+
+### dynasts
+
+```{r}
+
+dyn_ae_12_17_w %>% filter(year!=1)%>% group_by(year, dyn_cum_text) %>% summarise(n_obs = n())%>% kable() %>% kable_styling(full_width = F)
 
 ```
 
 
-## Funding
+
+### Missing observations - obs that is zero
+
+
+```{r}
+
+fin_12_17 %>% filter(year!=1)%>% group_by(year)%>% summarise(zero_fund_own= sum(ifelse(fund_own ==0, TRUE, FALSE)),
+                        zero_fund_party = sum(ifelse(fund_party ==0, TRUE, FALSE)),
+                        zero_fund_donations = sum(ifelse(fund_donations ==0, TRUE, FALSE))
+                        ) %>% kable() %>% kable_styling(full_width = F)
+
+
+```
+
+
+
+## Election finance wrt family type {.tabset}
+
+
+
+
+
+
+
+
+### Funding table
 
 
 ```{r}
@@ -109,7 +166,7 @@ dyn_el_fin %>% filter (fund_tot_calc >0) %>% group_by(dyn_cum_text) %>% summaris
 
 ```
 
-
+### Funding chart
 
 ```{r}
 
@@ -117,71 +174,65 @@ dyn_el_fin %>% filter (exp_tot_calc>0) %>% group_by(dyn_cum_text) %>% summarise(
   ggplot(aes(factor(dyn_cum_text), prop, fill = variable,label = round(prop,1)))+
    geom_bar(stat="identity", position = "stack")+
     geom_text(size = 3, position = position_stack(vjust = 0.5))+ 
+    labs(title = " Election funding composition \n among families and non-families ",x = "", y = "Proportion", fill = "") +
+     colorspace::scale_fill_discrete_qualitative(palette= "dark3" )+
+  coord_fixed(ratio =4)+
     theme_minimal()+
-    labs(title = " Election funding composition \n among families and non-families ",x = "", y = "Proportion", fill = "Type of work") +
     theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
   theme(plot.background = element_blank(),
-        plot.title = element_text(hjust = 0.5, size = 18, family = "serif"), 
-        text = element_text(color = "gray20"),
-        legend.title = element_blank(),
-        legend.text = element_text(size = 14,family = "serif"),
-        axis.text = element_text(face = "italic", size = 14),
-        axis.text.y = element_blank(),
-        axis.title.x = element_text(vjust = -1, size = 16),
-        axis.title.y = element_blank(),
-        axis.ticks.y = element_blank(),
-        axis.line= element_line(color = "gray40", size = .5),
-        axis.line.y = element_blank(),
+        axis.line.x = element_line(),
         panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank()
+        panel.grid.minor = element_blank(),
+        axis.text.y = element_blank()
   ) 
 
 
 
 
-```
-
-
-
-## Expenditure
-
-```{r}
-
-
-
-dyn_el_fin %>% group_by(dyn_cum_text) %>% summarise( Total_expenditure = mean(exp_tot_given), Media = mean(exp_media), Vehicles = mean(exp_vehicles_travel), Materials = mean(exp_materials), Meetings = mean(exp_meetings), Workers = mean(exp_workers), Misc = mean(exp_misc), Missing = mean(exp_missing)) %>% kable(caption = "Election Expenditure - Averages", col.names = c( "Politician's identity", "Total Expenditure",  "Media","Vehicles","Materials", "Meetings","Campaigns", "Miscellanious", "Missing"), digits = 0) %>% kable_styling(bootstrap_options = "striped")
 
 ```
 
 
 
-```{r}
-dyn_el_fin %>% group_by(dyn_cum_text) %>% summarise( Media = mean(exp_media), Vehicles = mean(exp_vehicles_travel), Materials = mean(exp_materials), Meetings = mean(exp_meetings), Workers = mean(exp_workers), Misc = mean(exp_misc), Missing = mean(exp_missing)) %>% melt(id = 1:1, measure = 2:8) %>% group_by(dyn_cum_text) %>% mutate(sum = sum(value), prop = value/sum) %>% select(dyn_cum_text, variable, prop) %>% 
-     ggplot(aes(factor(dyn_cum_text), prop, fill = variable,label = round(prop,2)))+
-   geom_bar(stat="identity", position = "stack")+
-    geom_text(size = 3, position = position_stack(vjust = 0.5))+ 
-    theme_minimal()+
-    labs(title = " Election expenditure composition \n among families and non-families ",x = "", y = "Proportion", fill = "Type of work") +
-    theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
-  theme(plot.background = element_blank(),
-        plot.title = element_text(hjust = 0.5, size = 18, family = "serif"), 
-        text = element_text(color = "gray20"),
-        legend.title = element_blank(),
-        legend.text = element_text(size = 14,family = "serif"),
-        axis.text = element_text(face = "italic", size = 14),
-        axis.text.y = element_blank(),
-        axis.title.x = element_text(vjust = -1, size = 16),
-        axis.title.y = element_blank(),
-        axis.ticks.y = element_blank(),
-        axis.line= element_line(color = "gray40", size = .5),
-        axis.line.y = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank()
-  ) 
-```
+<!-- ## Expenditure -->
+
+<!-- ```{r} -->
 
 
-# Election finance wrt to criminality
+
+<!-- dyn_el_fin %>% group_by(dyn_cum_text) %>% summarise( Total_expenditure = mean(exp_tot_given), Media = mean(exp_media), Vehicles = mean(exp_vehicles_travel), Materials = mean(exp_materials), Meetings = mean(exp_meetings), Workers = mean(exp_workers), Misc = mean(exp_misc), Missing = mean(exp_missing)) %>% kable(caption = "Election Expenditure - Averages", col.names = c( "Politician's identity", "Total Expenditure",  "Media","Vehicles","Materials", "Meetings","Campaigns", "Miscellanious", "Missing"), digits = 0) %>% kable_styling(bootstrap_options = "striped") -->
+
+<!-- ``` -->
+
+
+
+<!-- ```{r} -->
+<!-- dyn_el_fin %>% group_by(dyn_cum_text) %>% summarise( Media = mean(exp_media), Vehicles = mean(exp_vehicles_travel), Materials = mean(exp_materials), Meetings = mean(exp_meetings), Workers = mean(exp_workers), Misc = mean(exp_misc), Missing = mean(exp_missing)) %>% melt(id = 1:1, measure = 2:8) %>% group_by(dyn_cum_text) %>% mutate(sum = sum(value), prop = value/sum) %>% select(dyn_cum_text, variable, prop) %>%  -->
+<!--      ggplot(aes(factor(dyn_cum_text), prop, fill = variable,label = round(prop,2)))+ -->
+<!--    geom_bar(stat="identity", position = "stack")+ -->
+<!--     geom_text(size = 3, position = position_stack(vjust = 0.5))+  -->
+<!--     theme_minimal()+ -->
+<!--     labs(title = " Election expenditure composition \n among families and non-families ",x = "", y = "Proportion", fill = "Type of work") + -->
+<!--     theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+ -->
+<!--   theme(plot.background = element_blank(), -->
+<!--         plot.title = element_text(hjust = 0.5, size = 18, family = "serif"),  -->
+<!--         text = element_text(color = "gray20"), -->
+<!--         legend.title = element_blank(), -->
+<!--         legend.text = element_text(size = 14,family = "serif"), -->
+<!--         axis.text = element_text(face = "italic", size = 14), -->
+<!--         axis.text.y = element_blank(), -->
+<!--         axis.title.x = element_text(vjust = -1, size = 16), -->
+<!--         axis.title.y = element_blank(), -->
+<!--         axis.ticks.y = element_blank(), -->
+<!--         axis.line= element_line(color = "gray40", size = .5), -->
+<!--         axis.line.y = element_blank(), -->
+<!--         panel.grid.major = element_blank(), -->
+<!--         panel.grid.minor = element_blank() -->
+<!--   )  -->
+<!-- ``` -->
+
+
+## Election finance wrt to criminality {.tabset}
 
 
 ```{r adr}
@@ -239,18 +290,32 @@ adr_ae <- adr %>% filter(year %in% c(2012,2017))
 
 fin_crime <- merge(fin_12_17, adr_ae, by = c("constituency_no", "year"))
 
+
+
+
+
 #summary(fin_crime)
 
 fin_crime$serious_crime_log <- ifelse(fin_crime$serious_crime !=0, TRUE, FALSE)
-
-table(fin_crime$serious_crime_log) %>% kable(caption = "Summary of the criminality variable",col.names= c("Criminality", "Count")) %>% kable_styling(bootstrap_options = "striped")
 
 
 
 
 ```
 
-## Funding
+### Summary
+
+```{r}
+
+table(fin_crime$serious_crime_log) %>% kable(caption = "Summary of the criminality variable",col.names= c("Criminality", "Count")) %>% kable_styling(bootstrap_options = "striped")
+
+```
+
+
+
+
+
+### Funding - table
 
 
 ```{r}
@@ -258,6 +323,9 @@ table(fin_crime$serious_crime_log) %>% kable(caption = "Summary of the criminali
 fin_crime%>% filter (fund_tot_calc>0) %>% group_by(serious_crime_log) %>% summarise(mean(fund_tot_given),mean(fund_own), mean(fund_party), mean(fund_donations)) %>%  kable(caption = "Election Funding - Averages", col.names = c( "Politician's criminality", "Total fund", "Candidate", "Party", "Donations"), digits = 0) %>% kable_styling(bootstrap_options = "striped")
 
 ```
+
+
+### Chart
 
 
 ```{r}
@@ -268,69 +336,127 @@ fin_crime %>%filter (fund_tot_calc>0) %>%  group_by(serious_crime_log) %>% summa
   ggplot(aes(factor(serious_crime_log), prop, fill = variable,label = round(prop,1)))+
    geom_bar(stat="identity", position = "stack")+
     geom_text(size = 3, position = position_stack(vjust = 0.5))+ 
+    labs(title = " Election funding composition \n among criminals and non-criminals ",x = "", y = "Proportion", fill = "") +
+   colorspace::scale_fill_discrete_qualitative(palette= "dark3" )+
+  coord_fixed(ratio =4)+
     theme_minimal()+
-    labs(title = " Election funding composition \n among criminals and non-criminals ",x = "", y = "Proportion", fill = "Type of work") +
     theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
   theme(plot.background = element_blank(),
-        plot.title = element_text(hjust = 0.5, size = 18, family = "serif"), 
-        text = element_text(color = "gray20"),
-        legend.title = element_blank(),
-        legend.text = element_text(size = 14,family = "serif"),
-        axis.text = element_text(face = "italic", size = 14),
-        axis.text.y = element_blank(),
-        axis.title.x = element_text(vjust = -1, size = 16),
-        axis.title.y = element_blank(),
-        axis.ticks.y = element_blank(),
-        axis.line= element_line(color = "gray40", size = .5),
-        axis.line.y = element_blank(),
+        axis.line.x = element_line(),
         panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank()
+        panel.grid.minor = element_blank(),
+        axis.text.y = element_blank()
   ) 
-
 ```
 
 
 
-## Expenditure
+<!-- ## Expenditure -->
+
+<!-- ```{r} -->
+
+<!-- fin_crime %>% filter(exp_tot_calc>0) %>% group_by(serious_crime_log) %>% summarise( Total_expenditure = mean(exp_tot_given), Media = mean(exp_media), Vehicles = mean(exp_vehicles_travel), Materials = mean(exp_materials), Meetings = mean(exp_meetings), Workers = mean(exp_workers), Misc = mean(exp_misc), Missing = mean(exp_missing)) %>% kable(caption = "Election Expenditure - Averages", col.names = c( "Politician's criminality", "Total Expenditure",  "Media","Vehicles","Materials", "Meetings","Campaigns", "Miscellanious", "Missing"), digits = 0) %>% kable_styling(bootstrap_options = "striped") -->
+
+<!-- ``` -->
+
+
+
+<!-- ```{r} -->
+
+<!-- fin_crime %>% group_by(serious_crime_log) %>% summarise(  Media = mean(exp_media), Vehicles = mean(exp_vehicles_travel), Materials = mean(exp_materials), Meetings = mean(exp_meetings), Workers = mean(exp_workers), Misc = mean(exp_misc), Missing = mean(exp_missing)) %>% melt(id = 1:1, measure = 2:8) %>% group_by(serious_crime_log) %>% mutate(sum = sum(value), prop = value/sum) %>% select(serious_crime_log, variable, prop) %>%  -->
+<!--      ggplot(aes(factor(serious_crime_log), prop, fill = variable,label = round(prop,2)))+ -->
+<!--    geom_bar(stat="identity", position = "stack")+ -->
+<!--     geom_text(size = 3, position = position_stack(vjust = 0.5))+  -->
+<!--     theme_minimal()+ -->
+<!--     labs(title = " Election expenditure composition \n among criminals and non-criminals ",x = "", y = "Proportion", fill = "Type of work") + -->
+<!--     theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+ -->
+<!--   theme(plot.background = element_blank(), -->
+<!--         plot.title = element_text(hjust = 0.5, size = 18, family = "serif"),  -->
+<!--         text = element_text(color = "gray20"), -->
+<!--         legend.title = element_blank(), -->
+<!--         legend.text = element_text(size = 14,family = "serif"), -->
+<!--         axis.text = element_text(face = "italic", size = 14), -->
+<!--         axis.text.y = element_blank(), -->
+<!--         axis.title.x = element_text(vjust = -1, size = 16), -->
+<!--         axis.title.y = element_blank(), -->
+<!--         axis.ticks.y = element_blank(), -->
+<!--         axis.line= element_line(color = "gray40", size = .5), -->
+<!--         axis.line.y = element_blank(), -->
+<!--         panel.grid.major = element_blank(), -->
+<!--         panel.grid.minor = element_blank() -->
+<!--   )  -->
+
+<!-- ``` -->
+
+
+
+----
+
+
+## Criminal dynasts {.tabset}
+
+
+
+
+
 
 ```{r}
 
-fin_crime %>% filter(exp_tot_calc>0) %>% group_by(serious_crime_log) %>% summarise( Total_expenditure = mean(exp_tot_given), Media = mean(exp_media), Vehicles = mean(exp_vehicles_travel), Materials = mean(exp_materials), Meetings = mean(exp_meetings), Workers = mean(exp_workers), Misc = mean(exp_misc), Missing = mean(exp_missing)) %>% kable(caption = "Election Expenditure - Averages", col.names = c( "Politician's criminality", "Total Expenditure",  "Media","Vehicles","Materials", "Meetings","Campaigns", "Miscellanious", "Missing"), digits = 0) %>% kable_styling(bootstrap_options = "striped")
+dyn_fin_crime <- merge(dyn_el_fin, adr_ae, by = c("constituency_no", "year"))
+
+
+dyn_fin_crime$serious_crime_log <- ifelse(dyn_fin_crime$serious_crime !=0, TRUE, FALSE)
+
+dyn_fin_crime<- dyn_fin_crime %>% mutate(dyn_crim = paste0(dyn_cum_text,serious_crime_log))
+
+dyn_fin_crime_fam <- dyn_fin_crime %>% filter(dyn_crim %in% c("FamilyFALSE", "FamilyTRUE"))
+
+#dyn_fin_crime %>% mutate(dyn_crim = paste0(dyn_cum_text,serious_crime_log)) %>% select(dyn_crim)
+```
+
+### summary
+
+```{r}
+
+dyn_fin_crime %>% filter(year!=1)%>% group_by(year, dyn_crim) %>% summarise(n_obs = n()) %>% pivot_wider(names_from = dyn_crim, values_from= n_obs) %>% kable(col.names = c("Year","Dynast non-criminal", "Dynast criminal", "Non-dynast non-criminal", "Non-dynast criminal")) %>% kable_styling(full_width =F)
+
 
 ```
 
+### Table
 
 
 ```{r}
+dyn_fin_crime_fam %>% filter (fund_tot_calc >0) %>% group_by(dyn_crim) %>% summarise(mean(fund_tot_given),mean(fund_own), mean(fund_party), mean(fund_donations)) %>%  kable(caption = "Election Funding - Averages", col.names = c( "Family Criminal", "Total fund", "Candidate", "Party", "Donations"), digits = 0) %>% kable_styling(bootstrap_options = "striped")
+```
 
-fin_crime %>% group_by(serious_crime_log) %>% summarise(  Media = mean(exp_media), Vehicles = mean(exp_vehicles_travel), Materials = mean(exp_materials), Meetings = mean(exp_meetings), Workers = mean(exp_workers), Misc = mean(exp_misc), Missing = mean(exp_missing)) %>% melt(id = 1:1, measure = 2:8) %>% group_by(serious_crime_log) %>% mutate(sum = sum(value), prop = value/sum) %>% select(serious_crime_log, variable, prop) %>% 
-     ggplot(aes(factor(serious_crime_log), prop, fill = variable,label = round(prop,2)))+
+### Chart
+
+```{r}
+dyn_fin_crime_fam %>% filter (fund_tot_calc >0) %>% group_by(dyn_crim) %>% summarise(candidate = mean(fund_own), party = mean(fund_party), donations =mean(fund_donations)) %>% melt(id = 1:1, measure = 2:4) %>% group_by(dyn_crim) %>% mutate(sum = sum(value), prop = value/sum) %>% select(dyn_crim, variable, prop) %>% 
+  ggplot(aes(factor(dyn_crim), prop, fill = variable,label = round(prop,2)))+
    geom_bar(stat="identity", position = "stack")+
+  scale_x_discrete(labels = c("Dynast  \n non-criminal", "Dynast \n criminal" ))+
     geom_text(size = 3, position = position_stack(vjust = 0.5))+ 
+    labs(title = " Election funding composition \n among criminal dynasts  and non-criminal dynasts ",x = "", y = "Proportion", fill = "") +
+   colorspace::scale_fill_discrete_qualitative(palette= "dark3" )+
+  coord_fixed(ratio =4)+
     theme_minimal()+
-    labs(title = " Election expenditure composition \n among criminals and non-criminals ",x = "", y = "Proportion", fill = "Type of work") +
     theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
   theme(plot.background = element_blank(),
-        plot.title = element_text(hjust = 0.5, size = 18, family = "serif"), 
-        text = element_text(color = "gray20"),
-        legend.title = element_blank(),
-        legend.text = element_text(size = 14,family = "serif"),
-        axis.text = element_text(face = "italic", size = 14),
-        axis.text.y = element_blank(),
-        axis.title.x = element_text(vjust = -1, size = 16),
-        axis.title.y = element_blank(),
-        axis.ticks.y = element_blank(),
-        axis.line= element_line(color = "gray40", size = .5),
-        axis.line.y = element_blank(),
+        axis.line.x = element_line(),
         panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank()
+        panel.grid.minor = element_blank(),
+        axis.text.y = element_blank()
   ) 
 
 ```
 
-# Election finance wrt caste group
+----
 
-## Funding
+## Election finance wrt caste group {.tabset}
+
+### Funding - table
 
 
 ```{r}
@@ -341,7 +467,7 @@ dyn_el_fin %>% filter (fund_tot_calc >0) %>% group_by(caste_groups) %>% summaris
 
 ```
 
-
+### Chart
 
 ```{r}
 
@@ -375,39 +501,39 @@ dyn_el_fin %>% filter (exp_tot_calc>0) %>% group_by(caste_groups) %>% summarise(
 
 
 
-## Expenditure
+<!-- ## Expenditure -->
 
-```{r}
-
-
-
-dyn_el_fin %>% group_by(caste_groups) %>% summarise( Total_expenditure = mean(exp_tot_given), Media = mean(exp_media), Vehicles = mean(exp_vehicles_travel), Materials = mean(exp_materials), Meetings = mean(exp_meetings), Workers = mean(exp_workers), Misc = mean(exp_misc), Missing = mean(exp_missing)) %>% kable(caption = "Election Expenditure - Averages", col.names = c( "Politician's caste group", "Total Expenditure",  "Media","Vehicles","Materials", "Meetings","Campaigns", "Miscellanious", "Missing"), digits = 0) %>% kable_styling(bootstrap_options = "striped")
-
-```
+<!-- ```{r} -->
 
 
 
-```{r}
-dyn_el_fin %>% group_by(caste_groups) %>% summarise( Media = mean(exp_media), Vehicles = mean(exp_vehicles_travel), Materials = mean(exp_materials), Meetings = mean(exp_meetings), Workers = mean(exp_workers), Misc = mean(exp_misc), Missing = mean(exp_missing)) %>% melt(id = 1:1, measure = 2:8) %>% group_by(caste_groups) %>% mutate(sum = sum(value), prop = value/sum) %>% select(caste_groups, variable, prop) %>% 
-  ggplot(aes(factor(caste_groups), prop, fill = variable,label = round(prop,2)))+
-  geom_bar(stat="identity", position = "stack")+
-  geom_text(size = 3, position = position_stack(vjust = 0.5))+ 
-  theme_minimal()+
-  labs(title = " Election expenditure composition wrt caste groups",x = "", y = "Proportion", fill = "Type of work") +
-  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
-  theme(plot.background = element_blank(),
-        plot.title = element_text(hjust = 0.5, size = 18, family = "serif"), 
-        text = element_text(color = "gray20"),
-        legend.title = element_blank(),
-        legend.text = element_text(size = 14,family = "serif"),
-        axis.text = element_text(face = "italic", size = 11),
-        axis.text.y = element_blank(),
-        axis.title.x = element_text(vjust = -1, size = 16),
-        axis.title.y = element_blank(),
-        axis.ticks.y = element_blank(),
-        axis.line= element_line(color = "gray40", size = .5),
-        axis.line.y = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank()
-  ) 
-```
+<!-- dyn_el_fin %>% group_by(caste_groups) %>% summarise( Total_expenditure = mean(exp_tot_given), Media = mean(exp_media), Vehicles = mean(exp_vehicles_travel), Materials = mean(exp_materials), Meetings = mean(exp_meetings), Workers = mean(exp_workers), Misc = mean(exp_misc), Missing = mean(exp_missing)) %>% kable(caption = "Election Expenditure - Averages", col.names = c( "Politician's caste group", "Total Expenditure",  "Media","Vehicles","Materials", "Meetings","Campaigns", "Miscellanious", "Missing"), digits = 0) %>% kable_styling(bootstrap_options = "striped") -->
+
+<!-- ``` -->
+
+
+
+<!-- ```{r} -->
+<!-- dyn_el_fin %>% group_by(caste_groups) %>% summarise( Media = mean(exp_media), Vehicles = mean(exp_vehicles_travel), Materials = mean(exp_materials), Meetings = mean(exp_meetings), Workers = mean(exp_workers), Misc = mean(exp_misc), Missing = mean(exp_missing)) %>% melt(id = 1:1, measure = 2:8) %>% group_by(caste_groups) %>% mutate(sum = sum(value), prop = value/sum) %>% select(caste_groups, variable, prop) %>%  -->
+<!--   ggplot(aes(factor(caste_groups), prop, fill = variable,label = round(prop,2)))+ -->
+<!--   geom_bar(stat="identity", position = "stack")+ -->
+<!--   geom_text(size = 3, position = position_stack(vjust = 0.5))+  -->
+<!--   theme_minimal()+ -->
+<!--   labs(title = " Election expenditure composition wrt caste groups",x = "", y = "Proportion", fill = "Type of work") + -->
+<!--   theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+ -->
+<!--   theme(plot.background = element_blank(), -->
+<!--         plot.title = element_text(hjust = 0.5, size = 18, family = "serif"),  -->
+<!--         text = element_text(color = "gray20"), -->
+<!--         legend.title = element_blank(), -->
+<!--         legend.text = element_text(size = 14,family = "serif"), -->
+<!--         axis.text = element_text(face = "italic", size = 11), -->
+<!--         axis.text.y = element_blank(), -->
+<!--         axis.title.x = element_text(vjust = -1, size = 16), -->
+<!--         axis.title.y = element_blank(), -->
+<!--         axis.ticks.y = element_blank(), -->
+<!--         axis.line= element_line(color = "gray40", size = .5), -->
+<!--         axis.line.y = element_blank(), -->
+<!--         panel.grid.major = element_blank(), -->
+<!--         panel.grid.minor = element_blank() -->
+<!--   )  -->
+<!-- ``` -->

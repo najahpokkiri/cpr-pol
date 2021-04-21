@@ -1090,55 +1090,7 @@ ggplot(dyn_ae_ge_ind_exp_tab, aes(as.factor(ind_2),prop)) +
 ## Political experience{.tabset .tabset-fade .tabset-pills}
 
 
-### Family
 
-Political experience composition among families and non-families.
-
-```{r ae ge families caste}
-
-dyn_ae_ge_caste <- dyn_ae_ge_uniq %>% filter(fam_exp_tot > 1)
-caste_comp_dyn_ae_ge <- dyn_ae_ge_caste %>%
-    group_by(dyn_tot_2,caste_groups)%>%
-    summarise(freq = n()) %>% filter(!is.na(dyn_tot_2) & !is.na(caste_groups))
-
-
-caste_groups_dyn_ae_ge_sum <- caste_comp_dyn_ae_ge %>%
-    group_by(dyn_tot_2) %>%
-    summarise(sum =sum(freq))
-
-
-
-
-caste_dyn_ae_ge <- merge(caste_comp_dyn_ae_ge,caste_groups_dyn_ae_ge_sum, by = "dyn_tot_2")
-caste_dyn_ae_ge$prop <- caste_dyn_ae_ge$freq/caste_dyn_ae_ge$sum
-
-caste_dyn_ae_ge$caste_groups <- factor(caste_dyn_ae_ge$caste_groups, levels = c("Upper Caste","Yadav","Non-Yadav OBC","Dalit" , "Muslim"  ,"Others" ))
-
-#png("UP/graphs/caste_cat_stacked.png", width = 800, height = 600)
-
-ggplot(caste_dyn_ae_ge, aes(x = as.factor(dyn_tot_2), y = prop , fill = caste_groups, label = round(prop,2)))+
-    geom_bar(stat= "identity") +
-    geom_text(size = 3, position = position_stack(vjust = 0.5))+
-    theme_minimal()+
-    scale_x_discrete(labels = c("Non-Families","Families"))+
-    labs(title = "Caste composition among successful \n non-families and families ",x = "", y = "Proportion of families", fill = "Caste Groups") +
-  theme(plot.background = element_blank(),
-        plot.title = element_text(hjust = 0.5, size = 18, family = "serif"),
-        text = element_text(color = "gray20"),
-        legend.title = element_blank(),
-        legend.text = element_text(size = 14),
-        axis.text = element_text(face = "italic", size = 14),
-        axis.text.y = element_blank(),
-        axis.title.x = element_text(vjust = -1, size = 16),
-        axis.title.y = element_blank(),
-        axis.ticks.y = element_blank(),
-        axis.line= element_line(color = "gray40", size = .5),
-        axis.line.y = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank()
-  )
-
-```
 
 ```{r ae ge pol exp 1}
 dyn_ae_ge <- dyn_ae_ge %>% mutate(fam_exp_cat = cut(fam_exp_tot,c(0,1,6,16,Inf),include.lowest = TRUE, right =FALSE))
@@ -1235,14 +1187,110 @@ ggplot(caste_cat, aes(x = fam_exp_cat, y = prop , fill = caste_groups, label = r
 
 
 
+## Caste {.tabset .tabset-fade .tabset-pills}
+
+
+### Family v/s non-family
+
+
+
+```{r ae ge families caste}
+
+dyn_ae_ge_caste <- dyn_ae_ge_uniq %>% filter(fam_exp_tot > 1)
+caste_comp_dyn_ae_ge <- dyn_ae_ge_caste %>%
+    group_by(dyn_tot_2,caste_groups)%>%
+    summarise(freq = n()) %>% filter(!is.na(dyn_tot_2) & !is.na(caste_groups))
+
+
+caste_groups_dyn_ae_ge_sum <- caste_comp_dyn_ae_ge %>%
+    group_by(dyn_tot_2) %>%
+    summarise(sum =sum(freq))
 
 
 
 
+caste_dyn_ae_ge <- merge(caste_comp_dyn_ae_ge,caste_groups_dyn_ae_ge_sum, by = "dyn_tot_2")
+caste_dyn_ae_ge$prop <- caste_dyn_ae_ge$freq/caste_dyn_ae_ge$sum
+
+caste_dyn_ae_ge$caste_groups <- factor(caste_dyn_ae_ge$caste_groups, levels = c("Upper Caste","Yadav","Non-Yadav OBC","Dalit" , "Muslim"  ,"Others" ))
+
+#png("UP/graphs/caste_cat_stacked.png", width = 800, height = 600)
+
+ggplot(caste_dyn_ae_ge, aes(x = as.factor(dyn_tot_2), y = prop , fill = caste_groups, label  =ifelse(prop*100>4,round(prop*100,0),"")))+
+    geom_bar(stat= "identity") +
+    geom_text(size = 2.5, position = position_stack(vjust = 0.5))+
+    scale_x_discrete(labels = c("Non-Families","Families"))+
+    colorspace::scale_fill_discrete_qualitative(palette= "dark3" )+
+  coord_fixed(ratio =4)+
+    theme_minimal()+
+labs(title = "Caste composition among successful \n non-families and families ",x = "", y = "Proportion of families", fill = "Caste Groups")+
+    theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
+  theme(plot.background = element_blank(),
+        axis.line.x = element_line(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.y = element_blank()
+  ) 
+
+
+```
+
+
+### Year sections - caste composition
 
 
 
+```{r}
 
+dyn_ae_ge %>% filter(year>=1977)%>%  mutate(period = case_when(year >=1977 & year <= 1984 ~"1974-84",
+                                                                                          year>1984 & year<=2009 ~"1989-09",
+                                                                                          year >2009 & year <2020 ~"2014-19",
+                                                                                          TRUE ~"Others")) %>% 
+  group_by(election_type, period, caste_groups) %>% summarise(count = n()) %>% group_by(election_type, period) %>%  mutate(sum = sum(count), pc = round((count/sum)*100),0) %>% 
+  ggplot(aes(period, pc, fill = caste_groups))+
+  geom_area()+
+  #geom_bar(position = "fill", stat = "identity")+
+  facet_wrap(~election_type)+
+  geom_text(aes(label =pc ), position = position_fill(vjust = 0.5), size = 2.5)+
+      theme_minimal()+
+labs(title = "Caste composition of MLAs and MPs ",x = "", y = "", fill = "Caste Groups", subtitle = "in percentage")+
+    theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
+  colorspace::scale_fill_discrete_qualitative(palette= "dark3" )+
+  theme(plot.background = element_blank(),
+        axis.line.x = element_line(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.y = element_blank()
+  ) 
+  
+  
+    
+```
+
+### Caste composition - wrt year -Area chart
+
+```{r}
+
+dyn_ae_ge %>% filter(year>=1977) %>% 
+  group_by(election_type, year, caste_groups) %>% summarise(count = n()) %>% group_by(election_type, year) %>%  mutate(sum = sum(count), pc = count/sum*100) %>% 
+  ggplot(aes(year, pc, fill = caste_groups))+
+  geom_area()+
+  #geom_bar(position = "fill", stat = "identity")+
+  facet_wrap(~election_type)+
+  #geom_text(aes(label =pc ), position = position_fill(vjust = 0.5), size = 2.5)+
+      theme_minimal()+
+labs(title = "Caste composition of MLAs and MPs ",x = "", y = "", fill = "Caste Groups")+
+    theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
+  colorspace::scale_fill_discrete_qualitative(palette= "dark3" )+
+  theme(legend.position = "bottom",
+  plot.background = element_blank(),
+        axis.line.x = element_line(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.y = element_blank()
+  ) 
+
+```
 
 
 
