@@ -14,7 +14,7 @@ output:
     toc: TRUE
     toc_float: TRUE
     toc_depth: 5
-    number_sections: false
+    number_sections: TRUE
     fig_width: 5         
 editor_options: 
   chunk_output_type: inline
@@ -1248,8 +1248,8 @@ dyn_ae_ge %>% filter(year>=1977)%>%  mutate(period = case_when(year >=1977 & yea
                                                                                           TRUE ~"Others")) %>% 
   group_by(election_type, period, caste_groups) %>% summarise(count = n()) %>% group_by(election_type, period) %>%  mutate(sum = sum(count), pc = round((count/sum)*100),0) %>% 
   ggplot(aes(period, pc, fill = caste_groups))+
-  geom_area()+
-  #geom_bar(position = "fill", stat = "identity")+
+  #geom_area()+
+  geom_bar(position = "fill", stat = "identity")+
   facet_wrap(~election_type)+
   geom_text(aes(label =pc ), position = position_fill(vjust = 0.5), size = 2.5)+
       theme_minimal()+
