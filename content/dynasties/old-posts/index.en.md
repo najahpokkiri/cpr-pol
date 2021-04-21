@@ -76,6 +76,8 @@ Most of the files are just the replication of posts from the old site. All the p
 
 * [Local bodies contd.](../../dynasties/old-posts/local_body_ext.html)
 
+* [Candidate quality.](../../dynasties/old-posts/cand_quality.html)
+
 
 
 
