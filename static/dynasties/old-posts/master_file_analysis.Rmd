@@ -75,7 +75,10 @@ For the purpose of this analysis we will be using the second definition.
 
 
 ```{r reading file}
+
+
 dyn <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/dyn_all.csv")
+
 
 ```
 
@@ -191,7 +194,7 @@ This universe includes winners and runner-ups in the general and assembly electi
 - Number of unique families : `r (dim(dyn_ae_ge_uniq %>% filter(dyn_tot_2==1))[1])`
 
 
-#### Maps
+#### Maps {.tabset}
 
 ##### AC
 
@@ -274,7 +277,7 @@ The following section provides the year  and election level wise break-up  of th
 
 ##### Assembly Elections
 
-```{r AE summary}
+```{r }
 
 dyn %>% filter(election_type =="AE" ) %>% count(year) %>%  kable(col.names = c ("Year", "Count"))%>% kable_styling(full_width = F)
 
@@ -291,10 +294,26 @@ dyn %>% filter(election_type == "GE") %>% count(year) %>% kable(col.names = c ("
 ---
 
 
-### Levels
+### Levels{.tabset}
 
 Families are spread at multiple office levels. While majority them are present only at the assembly election level, there are  a quite a few of them which is spanned across multiple level of office. The following table summarises that -
 
+
+#### def 2
+
+```{r}
+
+
+dyn_all_uniq <- dyn%>% group_by(family_id) %>% filter(year == max(year)) %>% arrange(-year) %>% distinct(family_id, .keep_all = TRUE)
+
+dyn_all_uniq_fam <- dyn_all_uniq %>% filter(dyn_tot_2 ==1)
+
+dyn_all_uniq_fam %>% group_by(level) %>% summarise(count = n()) %>% arrange(-count)%>% kable(caption = "Linkages of families(Category 2)")%>%kable_styling(full_width = F)
+
+
+```
+
+#### def 4
 
 ```{r}
 
@@ -503,32 +522,32 @@ ggplot(dyn_ae_ge_fam_uniq, aes(n_el_w_fam))+
         plot.background = element_blank(),
         plot.title = element_text(hjust = 0.5, size = 20, face = "bold", family = "serif",
                                   margin = margin(t = 0, r = 0, b = 20, l = 0)))
+
+# 
+#dyn_ae_ge_fam_uniq %>% select(n_el_w_fam, n_el_c_fam) %>% filter(n_el_c_fam==0)
+# 
+#
 ```
+
+#### Both - contested and won
+
+```{r}
+n_val <- dyn_ae_ge_fam_uniq %>% select(n_el_w_fam, n_el_c_fam) %>% pivot_longer(cols = 2:3)
+# 
+ggplot(n_val, aes(value, fill =name ))+
+ geom_density(alpha = .5)+
+  theme_minimal()+
+  scale_fill_discrete(labels = c("Contested", "Won"))+
+  labs(fill = "", title= "Families contested and won")
+```
+
 
 
 
 
 ---
 
-## Strike rate
 
-
-```{r}
-dyn_ae_ge %>% group_by(election_type, dyn_cum_2,year) %>% summarise(count = sum(position%in% c(1,2) ),won = sum(position==1), strike = won/count*100) %>%
-  ggplot(aes(year, strike, group = dyn_cum_2, color = factor(dyn_cum_2)) )+
-  
-  
-  geom_line()+
-  ylim(0,80)+
-  xlim(1975,2019)+
-  geom_point(color = "black", alpha = .5)+
-  facet_wrap(~election_type, ncol =1)+
-  labs(title = "Strike rate", x = "Year", y = "Strike rate (%)", color = "Election type")+
-  colorspace::scale_colour_discrete_diverging(palette = "Blue-Red",labels = c("non-Dynast","Dynast"))+
-  theme_bw()
-
- # colorspace::hcl_palettes(plot = TRUE)
-```
 
 
 <!-- # ```{r} -->
@@ -570,6 +589,7 @@ meanx <- mean(dyn_ae_ge_fam_uniq$n_el_c_fam)
 
  ggplot(dyn_ae_ge_fam_uniq )+
   geom_density(aes(x=n_el_c_fam, y = ..density..),size = .7, color = 'black')+
+   ylim(0,.3)+
 
   geom_vline(xintercept = medx, color = "red")+
   geom_vline(xintercept = meanx, color = "blue")+
@@ -588,6 +608,29 @@ meanx <- mean(dyn_ae_ge_fam_uniq$n_el_c_fam)
 
 ---
 
+
+## Strike rate
+
+
+```{r}
+dyn_ae_ge %>% group_by(election_type, dyn_cum_2,year) %>% summarise(count = sum(position%in% c(1,2) ),won = sum(position==1), strike = won/count*100) %>%
+  ggplot(aes(year, strike, group = dyn_cum_2, color = factor(dyn_cum_2)) )+
+  
+  
+  geom_line()+
+  ylim(0,80)+
+  xlim(1975,2019)+
+  geom_point(color = "black", alpha = .5)+
+  facet_wrap(~election_type, ncol =1)+
+  labs(title = "Strike rate", x = "Year", y = "Strike rate (%)", color = "Election type")+
+  colorspace::scale_colour_discrete_diverging(palette = "Blue-Red",labels = c("non-Dynast","Dynast"))+
+  theme_bw()
+
+ # colorspace::hcl_palettes(plot = TRUE)
+```
+
+
+---
 
 ## Life span
 
@@ -791,12 +834,17 @@ This barplot depicts the difference in the ownership of educational institutions
 ```{r ae ge education family }
 
 
+#  dyn_ae_ge$school <- ifelse(is.na(dyn_ae_ge$school),"",dyn_ae_ge$school )
+# # 
+# # 
+# dyn_ae_ge$college <- ifelse(is.na(dyn_ae_ge$college),"",dyn_ae_ge$college )
 
 dyn_ae_ge$edu <- as.numeric(paste(dyn_ae_ge$school, dyn_ae_ge$college, sep = ""))
 
 dyn_ae_ge_uniq <- dyn_ae_ge %>%
   filter(relative_id ==1) %>%
   distinct( family_id, .keep_all = T)
+
 
 
 edu_tab <- dyn_ae_ge_uniq %>%  filter(!is.na(edu)) %>% group_by(dyn_tot_2,edu) %>% summarise(count = n())  %>% group_by(dyn_tot_2) %>% mutate(sum = sum(count),prop= count/sum) %>% filter(edu!= 0) %>%  arrange(edu,-prop)

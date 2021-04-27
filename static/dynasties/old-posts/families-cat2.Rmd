@@ -56,85 +56,13 @@ The follwoing table shows the difference the longevity of these two groups
 
 
 
-<!-- ## 4th category -->
-
-<!-- ```{r} -->
-
-<!-- #dyn_fam <- dyn  %>% filter(dyn_tot_4 == 1) -->
-
-
-<!-- dyn <- dyn%>% mutate(id = paste0(family_id, relative_id, rel_id_rep)) -->
-
-<!-- dyn <- dyn %>%group_by(family_id)%>% mutate(n_pre_08 = n_distinct(id[year<= 2007]), n_post_08 = n_distinct(id[year>2007])) -->
-
-
-
-<!-- dyn_ae_ge_fam <- dyn  %>% filter(dyn_tot_4 == 1 & election_type %in% c("AE", "GE")) -->
-
-
-
-
-
-
-
-
-<!-- ``` -->
-
-
-
-
-<!-- ```{r} -->
-
-<!-- dyn_ae_ge_fam <- dyn_ae_ge_fam %>% mutate(success_cat = case_when(n_pre_08 >=2 & n_post_08==0 ~"Declining", -->
-<!--                                                                   n_pre_08>=2 & n_post_08 >0 ~"Stable", -->
-<!--                                                                   n_pre_08 <=1 & n_post_08 >=1 ~"Rising", -->
-<!--                                              TRUE~"OTHERS")) -->
-
-
-
-
-
-
-
-<!-- # dyn_ae_ge_fam <- dyn_ae_ge_fam  %>% -->
-<!-- #    mutate(across(c("district_name"), ~ifelse(.=="", NA, as.character(.)))) -->
-<!-- #  -->
-<!-- # dyn_ae_ge_fam$district_name <- replace_na(dyn_ae_ge_fam$district_name , "ZNA") -->
-
-<!-- dyn_ae_ge_fam_uniq <- dyn_ae_ge_fam  %>% group_by(family_id)%>% arrange(election_id)%>% distinct(family_id, .keep_all = TRUE) -->
-
-<!-- # dyn_ae_ge_fam_uniq %>% filter(success_cat=="OTHERS") -->
-
-<!-- table(dyn_ae_ge_fam_uniq$success_cat) -->
-
-
-<!-- ``` -->
-
-
-
-<!-- ## fam list -->
-
-<!-- ```{r} -->
-
-<!-- dyn_ae_ge_fam_uniq <- dyn_ae_ge_fam  %>% filter(election_type =="AE")%>% group_by(family_id)%>% arrange(-year)%>% distinct(family_id, .keep_all = TRUE) -->
-
-
-
-<!-- fam_list <- dyn_ae_ge_fam_uniq %>% filter(district_name %in% c("SAHARANPUR","GONDA")) %>% select(district_name, family_id, patriarch_name, success_cat) %>% arrange(district_name) -->
-
-<!-- write.csv(fam_list, "D:/cpr/UP/up-dynasties/dyn_other_data/fam_list_def_4.csv") -->
-
-<!-- ``` -->
-
-
-
-
-
 
 ```{r file config}
 dyn <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/dyn_all.csv")
 
-dyn_ae_ge <- dyn %>% filter(election_type %in% c("AE", "GE"))
+dyn_ae_ge <- dyn %>% filter(election_type %in% c("AE", "GE") & family_id != "")
+
+
 
 
 ```
@@ -420,7 +348,7 @@ ggplot(fam_tab %>% filter(diff>=0), aes(diff))+
   geom_density(size = .7, color = 'black')+
   labs(subtitle = "Years to second member entry", x = "Years")+
   #xlim(0,45)
-  ylim(.0,.15)+
+  #ylim(.0,.15)+
   geom_vline(xintercept = medx, color = "red")+
   geom_vline(xintercept = meanx, color = "blue")+
     geom_text(aes(x=(medx-.7), label="Median", y=0.01), colour="red", size =4, angle = 90) +
@@ -713,15 +641,23 @@ success_cat <- dyn_ae_ge_fam_uniq$success_cat
 ### 2nd member
 
 
-```{r}
+```{r results="asis"}
 
 
 library(lfe)
 
 fit.mem <- felm(second_mem_dur ~caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land + linkage_down)
-```
-```{r, results= "asis"}
-stargazer(fit.mem, type="html")
+
+
+
+stargazer(fit.mem, type="html", title = "What determines the years needed for the entry of the second member of a family",keep = c("second_mem_dur","minister_duration","industry", "school_college", "land", "linkage_down" ), add.lines = list (c("Caste control", "Yes")))
+
+# stargazer(fit.felm,title="Regression Results - UP  Night lights - Dynast 2 ",type = "text",
+# align=TRUE,  no.space=TRUE,add.lines=list(c('Year fixed effects', 'Yes' ), c('District fixed effects', 'Yes'), c("SE clustering" ,"District level")))
+# 
+# stargazer(fit.linear, fit.logit, fit.poisson,fit.probit,title="Regression Results - UP private colleges - Dynast 2 ",type = "html",
+# align=TRUE,  no.space=TRUE, keep = c("dyn_cum_2" ,          "caste_uc", "caste_yadav"   ,      "caste_non_yadav_obc" ,"caste_dalit"   ,"caste_muslim" ),omit.stat=c("LL","ser","f"),add.lines=list(c('Year fixed effects', 'Yes','Yes','Yes','Yes' )))
+
 ```
 
 
@@ -736,11 +672,14 @@ success_cat<-factor( success_cat,levels = c( "Rising","Stable","Declining"))
 library("nnet")
 
 fit.multinom <- multinom(success_cat~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land + linkage_down)
+
+
+
 ```
 
 
 ```{r, results= "asis"}
-stargazer(fit.multinom, type="html")
+stargazer(fit.multinom, type="html", keep = c("success_cat","minister_duration","industry", "school_college", "land", "linkage_down"),add.lines = list (c("Caste control", "Yes","Yes","Yes")))
 ```
 
 
@@ -758,7 +697,7 @@ fit.multinom <- multinom(success_cat~  caste_uc+ caste_yadav+caste_non_yadav_obc
 ```
 
 ```{r, results= "asis"}
-stargazer(fit.multinom, type="html")
+stargazer(fit.multinom, type="html", keep = c("success_cat","minister_duration","industry", "school_college", "land", "linkage_down"),add.lines = list (c("Caste control", "Yes","Yes","Yes")))
 ```
 
 ---
@@ -778,7 +717,7 @@ fit.3 <- glm(Stable ~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit +
 
 
  stargazer(fit.1,fit.2,fit.3,title="Regression Results - Success of dynasties ",type = "html",
-            align=TRUE,  no.space=TRUE)
+            align=TRUE,  no.space=TRUE,keep = c("minister_duration","industry", "school_college", "land", "linkage_down"),add.lines = list (c("Caste control", "Yes","Yes","Yes")))
 
 ```
 
