@@ -50,7 +50,9 @@ select <- dplyr::select
 
 In this post, we are trying to assess nature of candidates in dynast constituency and how it differs from a non-dynast constituency. In the analysis we exclude of the winner since our intention is to asses how having  important dynast candidate affect the general candidate characteristics in that particular constituency. 
 
+# UP
 
+## AE 2012 & 2017 {.tabset}
 
 
 
@@ -113,9 +115,7 @@ adr_dyn <- adr_dyn %>% group_by(election_type, year, constituency_no)%>% mutate(
 
 
 
-# UP
 
-## AE 2012 & 2017 {.tabset}
 
 ```{r ae level}
 
@@ -461,7 +461,23 @@ dyn_adr_ge %>% filter(education!= "") %>% group_by(dyn_con, education) %>% summa
 ```
 
 
+## Model
 
 
 
+```{r}
+ge_all <- fread("D:/cpr/data/tcpd/TCPD_GE_all.csv")
+
+names(ge_all) <- tolower(names(ge_all))
+
+merge(dyn_adr_ge, ge_all, by = c())
+
+```
+
+
+
+
+```{r}
+
+```
 

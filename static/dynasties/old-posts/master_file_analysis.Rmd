@@ -44,7 +44,7 @@ select <- dplyr::select
 
 ---
 
-### Document History
+#### Document History
 
 `r params$orig_date`
 
@@ -191,6 +191,78 @@ This universe includes winners and runner-ups in the general and assembly electi
 - Number of unique families : `r (dim(dyn_ae_ge_uniq %>% filter(dyn_tot_2==1))[1])`
 
 
+#### Maps
+
+##### AC
+
+```{r}
+
+library(sf)
+
+
+ac_shp <- st_read("D:/cpr/data/shape-file/maps-master/assembly-constituencies/India_AC.shp")
+
+
+
+
+ac_shp_up <- ac_shp %>% filter(ST_NAME == "UTTAR PRADESH")
+
+
+
+
+fam_ac <- dyn_ae_ge %>% filter(election_type =="AE"& dyn_cum_2==1) %>%arrange(-year) %>%distinct(family_id, .keep_all = TRUE) %>%  group_by(constituency_no) %>% summarise(n_fam = n())
+
+
+
+ac_shp_fam <- left_join(ac_shp_up, fam_ac, by = c("AC_NO" = "constituency_no"))
+
+ac_shp_fam$n_fam <- ifelse(is.na(ac_shp_fam$n_fam),0,ac_shp_fam$n_fam)
+
+
+library(cowplot)
+
+ggplot(ac_shp_fam)+
+  geom_sf(aes(fill = n_fam))+
+  scale_fill_gradientn(colours = c("white", "lightcyan", "steelblue4"), values = c(0,0.1,1))+
+  theme_map()+
+  labs(title = "Families in constituencies", fill = "Number of families")
+
+```
+
+##### PC
+
+```{r}
+
+pc_shp <- st_read("D:/cpr/data/shape-file/maps-master/parliamentary-constituencies/india_pc_2019.shp")
+
+
+
+
+pc_shp_up <- pc_shp %>% filter(ST_NAME == "UTTAR PRADESH")
+
+
+
+
+fam_pc <- dyn_ae_ge %>% filter(dyn_cum_2==1) %>%arrange(-year) %>%distinct(family_id, .keep_all = TRUE) %>%  group_by(pc_no) %>% summarise(n_fam = n())
+
+
+
+pc_shp_fam <- left_join(pc_shp_up, fam_pc, by = c("PC_CODE" = "pc_no"))
+
+pc_shp_fam$n_fam <- ifelse(is.na(pc_shp_fam$n_fam),0,pc_shp_fam$n_fam)
+
+
+library(cowplot)
+
+ggplot(pc_shp_fam)+
+  geom_sf(aes(fill = n_fam))+
+  scale_fill_gradientn(colours = c("white", "lightcyan", "steelblue4"), values = c(0,0.1,1))+
+  theme_map()+
+  labs(title = "Families in constituencies", fill = "Number of families")
+
+```
+
+
 
 
 The following section provides the year  and election level wise break-up  of the observations 
@@ -227,7 +299,11 @@ Families are spread at multiple office levels. While majority them are present o
 ```{r}
 
 
-dyn_ae_ge_uniq_fam %>% group_by(level) %>% summarise(count = n()) %>% arrange(-count)%>% kable(caption = "Linkages of families(Category 2)")%>%kable_styling(full_width = F)
+dyn_all_uniq <- dyn%>% group_by(family_id) %>% filter(year == max(year)) %>% arrange(-year) %>% distinct(family_id, .keep_all = TRUE)
+
+dyn_all_uniq_fam <- dyn_all_uniq %>% filter(dyn_tot_4 ==1)
+
+dyn_all_uniq_fam %>% group_by(level) %>% summarise(count = n()) %>% arrange(-count)%>% kable(caption = "Linkages of families(Category 2)")%>%kable_styling(full_width = F)
 
 
 ```
@@ -405,7 +481,7 @@ dyn_ae_ge_fam <- dyn_ae_ge %>% filter(dyn_tot_2 ==1)
 
 
 
-dyn_ae_ge_fam <- dyn_ae_ge_fam %>% group_by(family_id) %>% mutate(n_el_w_fam =n_distinct(year[position==1]), n_el_c_fam = n_distinct(year))
+dyn_ae_ge_fam <- dyn_ae_ge_fam %>% group_by(family_id) %>% mutate(n_el_w_fam =n_distinct(year[position==1 & dyn_cum_2==1]), n_el_c_fam = n_distinct(year[dyn_cum_2==1]))
 
 dyn_ae_ge_fam_uniq <- dyn_ae_ge_fam %>% arrange(-year) %>% distinct(family_id,  .keep_all = TRUE)
 
@@ -413,7 +489,9 @@ dyn_ae_ge_fam_uniq <- dyn_ae_ge_fam %>% arrange(-year) %>% distinct(family_id,  
 medx <- median(dyn_ae_ge_fam_uniq$n_el_w_fam)
 meanx <- mean(dyn_ae_ge_fam_uniq$n_el_w_fam)
 
-ggplot(dyn_ae_ge_fam_uniq)+
+library(cowplot)
+
+ggplot(dyn_ae_ge_fam_uniq, aes(n_el_w_fam))+
   geom_density(aes(x=n_el_w_fam, y = ..density..),size = .7, color = 'black')+
   geom_vline(xintercept = medx, color = "red")+
   geom_vline(xintercept = meanx, color = "blue")+
@@ -518,6 +596,16 @@ This section looks at the life span of families. Life span is calculated by comp
 
 ```{r}
 
+
+
+fam_tab <- rbind(dyn_ae_ge_fam %>% group_by(family_id) %>% filter( dyn_cum_2==0 ) %>% slice(which.max(year))%>% select(year, family_id,dyn_cum_2),
+
+dyn_ae_ge_fam %>% group_by(family_id) %>% filter(dyn_cum_2==1  ) %>% slice(which.min(year)) %>% select(year, family_id,dyn_cum_2 )) %>%pivot_wider(values_from = year, names_from= dyn_cum_2) 
+
+
+
+fam_tab <- fam_tab %>% mutate(`0` = ifelse(is.na(`0`), `1`,`0`), diff = `1`-`0`)
+
 dyn_ae_ge_fam <- dyn_ae_ge %>% filter(dyn_tot_2 ==1)
 
 
@@ -525,7 +613,9 @@ dyn_ae_ge_fam <- dyn_ae_ge_fam %>% group_by(family_id) %>% mutate(min_yr = min(y
 
 dyn_ae_ge_fam_uniq <- dyn_ae_ge_fam %>% arrange(-year) %>% distinct(family_id,  .keep_all = TRUE)
 
-dyn_ae_ge_fam_uniq$life_span <- dyn_ae_ge_fam_uniq$max_yr- dyn_ae_ge_fam_uniq$min_yr
+dyn_ae_ge_fam_uniq <- inner_join(dyn_ae_ge_fam_uniq, fam_tab, by = "family_id")
+
+dyn_ae_ge_fam_uniq$life_span <- dyn_ae_ge_fam_uniq$max_yr- dyn_ae_ge_fam_uniq$`0`
 
 
 medx <- median(dyn_ae_ge_fam_uniq$life_span)
@@ -535,8 +625,8 @@ ggplot(dyn_ae_ge_fam_uniq)+
   geom_density(aes(x=life_span, y = ..density..),size = 1, color = 'black')+
   geom_vline(xintercept = medx, color = "red")+
   geom_vline(xintercept = meanx, color = "blue")+
-  geom_text(aes(x=(medx+1), label="Median", y=0.01), colour="red", size =4, angle = 90 )+
-  geom_text(aes(x=(meanx -1), label="Mean", y = 0.01), colour="blue", size = 4, angle = 90)+
+  geom_text(aes(x=(medx+3), label="Median", y=0.01), colour="red", size =4, angle = 90 )+
+  geom_text(aes(x=(meanx -3), label="Mean", y = 0.01), colour="blue", size = 4, angle = 90)+
   theme_minimal_hgrid()+
   labs(title = "Life span of Families", x= "Year", y = "Density")+
   theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
@@ -1292,6 +1382,15 @@ labs(title = "Caste composition of MLAs and MPs ",x = "", y = "", fill = "Caste 
 
 ```
 
+```{r}
+
+dyn_ae_ge %>% filter(position==1) %>% 
+  ggplot(aes(factor(dyn_cum_2), turnout_percentage))+
+  geom_point()+
+  #geom_jitter()+
+  geom_smooth(se= FALSE, method = "lm")
+
+```
 
 
 
