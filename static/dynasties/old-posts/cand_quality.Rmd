@@ -373,111 +373,619 @@ adr_dyn_09_19%>% group_by(dyn_con) %>% filter(winner ==0) %>% summarise(mean(ser
 
 
 
-# India
+<!-- # India -->
 
 
-## GE 2009 &19 {.tabset}
+<!-- ## GE 2009 &19 {.tabset} -->
 
-Constituency type : 1 - Dynast constituency, 2- Non-dynast constituency
+<!-- Constituency type : 1 - Dynast constituency, 2- Non-dynast constituency -->
 
-```{r}
-
-ge <-fread("D:/cpr/UP/up-dynasties/dyn_other_data/tcpd_ge_09_14_19_dyn.csv")
-
-
-
-#names(ge)
-
-
-names(ge)[1] <- "State_Name"
-
-#names(ge) <- tolower(ge)
-
-ge$dynast <- ifelse(ge$dyn==1,1,0)
-
-adr_ge <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/adr/adr_tcpd_09_14_19.csv")
-
-#names(adr_ge)
-
-adr_ge<- adr_ge %>% select(2:10,55:61, State_Name, Year,Constituency_No, Position)
-
-#names(adr_ge) <- tolower(names(adr_ge))
-
-#ge_cen$Age <- NULL
-
-
-adr_ge$State_Name <- tolower(adr_ge$State_Name )
-
-ge$State_Name <- tolower(ge$State_Name)
-
-dyn_adr_ge <- merge(ge,adr_ge, by = c("State_Name","Year", "Constituency_No", "Position"))
-
-#ge_cen_adr <- ge_cen_adr %>% filter(total_assets>0)
-
-names(dyn_adr_ge) <- tolower(names(dyn_adr_ge))
-
-dyn_adr_ge<- dyn_adr_ge%>% group_by(year,constituency_no) %>% mutate(dyn_con= if_else(any(dyn ==1),1,0))
-
-
-```
-
-### Assets
-
-```{r}
-
-dyn_adr_ge$total_liabilities <- as.numeric(dyn_adr_ge$total_liabilities)
-
-dyn_adr_ge$total_assets <- as.numeric(dyn_adr_ge$total_assets)
-
-dyn_adr_ge %>%filter(dyn!=1) %>% group_by(dyn_con) %>% summarise(mean(total_assets, na.rm = TRUE), mean(total_liabilities, na.rm =TRUE)) %>% kable(caption = "Assets", col.names= c("Constituency Type", "Assets", "Total liabilities"), digitis = 0)%>% kable_styling(bootstrap_options = "striped")
-
-
-```
-
-
-### Criminality
-
-```{r}
-dyn_adr_ge %>%filter(dyn!=1) %>% group_by(dyn_con) %>% summarise(mean(non_serious_crime, na.rm =TRUE), mean(serious_crime, na.rm =TRUE)) %>% kable(caption = "Criminality", col.names= c("Constituency Type", "Non-serious crime", "Serious crime "), digits = 2)%>% kable_styling(bootstrap_options = "striped")
-
-
-```
-
-### Education
-
-```{r}
-#table(dyn_ge19$myneta_education)
-
-  dyn_adr_ge$education <- case_when(str_detect(dyn_adr_ge$education, "(Pass)| (Others) | (Literate) | (Illiterate)") ~ "School", str_detect(dyn_adr_ge$education,"(Doctorate)|(Post)") ~ "PG+", TRUE ~ "UG")
-
-dyn_adr_ge$education <- factor(dyn_adr_ge$education,levels =c( "School", "UG", "PG+"))
+<!-- ```{r} -->
+<!-- dyn_ge <-fread("D:/cpr/UP/up-dynasties/dyn_other_data/tcpd_ge_09_14_19_dyn.csv") -->
 
 
 
-dyn_adr_ge %>% filter(education!= "") %>% group_by(dyn_con, education) %>% summarise(count = n()) %>% group_by(dyn_con) %>% mutate(sum = sum(count), prop = count/sum) %>%arrange(education) %>% select(dyn_con, education, prop) %>% kable(caption = "Education", col.names= c("Constituency type", "Education", "Proportion"), digits = 2)%>% kable_styling(bootstrap_options = "striped")
+<!-- names(dyn_ge)[1] <- "State_Name" -->
+
+<!-- names(dyn_ge) <- tolower(names(dyn_ge)) -->
+
+<!-- dyn_ge$dynast <- ifelse(dyn_ge$dyn==1,1,0) -->
+
+<!-- adr_ge <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/adr/adr_tcpd_09_14_19.csv") -->
+
+<!-- #names(adr_ge) -->
+
+<!-- #adr_ge<- adr_ge %>% select(2:10,55:61, State_Name, Year,Constituency_No, Position) -->
+
+<!-- names(adr_ge) <- tolower(names(adr_ge)) -->
+
+<!-- #ge_cen$Age <- NULL -->
 
 
+<!-- adr_ge$state_name <- tolower(adr_ge$state_name ) -->
 
-```
+<!-- dyn_ge$state_name <- tolower(dyn_ge$state_name) -->
+
+<!-- dyn_ge <- dyn_ge %>% select(-c(pid, party, sex, candidate,constituency_name,constituency_type, vote_share_percentage)) -->
+
+<!-- dyn_adr_ge <- merge(dyn_ge,adr_ge, by = c("state_name","year", "constituency_no", "position")) -->
+
+<!-- #ge_cen_adr <- ge_cen_adr %>% filter(total_assets>0) -->
+<!-- #  -->
+<!-- # names(dyn_adr_ge) <- tolower(names(dyn_adr_ge)) -->
+
+<!-- dyn_adr_ge<- dyn_adr_ge%>% group_by(year,constituency_no) %>% mutate(dyn_con= if_else(any(dyn ==1),1,0)) -->
 
 
-## Model
+<!-- #write.csv(dyn_adr_ge, "D:/cpr/data/adr/dyn_adr_ge.csv" ) -->
 
 
-
-```{r}
-ge_all <- fread("D:/cpr/data/tcpd/TCPD_GE_all.csv")
-
-names(ge_all) <- tolower(names(ge_all))
-
-merge(dyn_adr_ge, ge_all, by = c())
-
-```
+<!-- ``` -->
 
 
 
 
-```{r}
+<!-- ```{r} -->
 
-```
+<!-- dyn_con <- dyn_adr_ge %>% group_by(year,state_name, constituency_no) %>% summarise(dyn_contest = ifelse(sum(dyn)>0,1,0)) -->
+
+<!-- dyn_adr_ge <- right_join(adr_ge,dyn_con, by = c("state_name","year", "constituency_no")) -->
+
+<!-- dyn_adr_ge$gender <- ifelse(dyn_adr_ge$sex=="M","M","F") -->
+
+
+
+<!-- dyn_adr_ge$reservation<- ifelse(dyn_adr_ge$constituency_type=="GEN","GEN","SC/ST") -->
+
+
+<!-- # library(fixest) -->
+<!-- # etable(feglm(dyn_contest~log(as.numeric(total_assets))+turnout_percentage+serious_crime+non_serious_crime+position+n_cand+no_terms+incumbent+relevel(as.factor(gender), ref = "M")+reservation|state_name +year, data = dyn_adr_ge,family = binomial(link = "probit") ) ) %>%  -->
+<!-- #   kable() -->
+
+
+<!-- ``` -->
+
+
+<!-- ## conlevle -->
+
+<!-- ###onstinous model -->
+
+<!-- ```{r} -->
+
+
+
+<!-- ##education -->
+
+
+
+<!-- adr_ge <- adr_ge %>% mutate(edu_yrs = case_when( -->
+<!--   education == "Doctorate" ~ "22", -->
+<!--   education =="Post Graduate" ~"17", -->
+<!--   education =="Graduate Professional" ~"16", -->
+<!--   education == "Graduate" ~"15", -->
+<!--   education =="12th Pass" ~"12", -->
+<!--   education =="10th Pass" ~"10", -->
+<!--   education == "8th Pass" ~"8", -->
+<!--   education =="5th Pass" ~"5", -->
+<!--   education %in% c("Literate", "Unknown", "Not Given") ~"2", -->
+<!--   education =="Illiterate" ~"0", -->
+<!--   education== "Others" ~"5", -->
+<!--   TRUE ~"NAN" -->
+<!--   )) -->
+<!-- adr_ge$edu_yrs <- as.numeric(adr_ge$edu_yrs) -->
+<!-- #  -->
+<!-- #  "Graduate Professional" "Graduate"              -->
+<!-- #  "12th Pass"             "10th Pass"             -->
+<!-- # "8th Pass"              "Post Graduate"         -->
+<!-- #  "Doctorate"             "Others"                -->
+<!-- #  "5th Pass"              "Illiterate"            -->
+<!-- # "Literate"              "Not Given"             -->
+<!-- #  "Unknown"  -->
+
+
+
+
+<!-- # dyn_con <- dyn_adr_ge %>% group_by(year,state_name, constituency_no) %>% summarise(dyn_contest = ifelse(sum(dyn)>0,1,0)) -->
+
+
+<!-- adr_ge$gender <- ifelse(adr_ge$sex=="M",1,0) -->
+
+
+<!-- dyn_adr_ge$reservation<- ifelse(dyn_adr_ge$constituency_type=="GEN","GEN","SC/ST") -->
+
+<!-- adr_ge_reg <- adr_ge %>% group_by(year, state_name, constituency_no) %>% mutate(mean_edu = mean(edu_yrs, na.rm = TRUE), median_assets = median(as.numeric(total_assets, na.rm = TRUE)), mean_male = mean(gender, na.rm = TRUE), mean_serious_crime = mean(serious_crime, na.rm = TRUE),mean_non_serious_crime = mean(non_serious_crime, na.rm = TRUE)) %>% distinct(year, state_name, constituency_no ,.keep_all= TRUE) -->
+
+
+
+<!-- dyn_con <- dyn_ge %>% group_by(year,state_name, constituency_no) %>% summarise(dyn_contest = ifelse(sum(dyn)>0,1,0)) -->
+
+<!-- adr_ge_reg <-  right_join(adr_ge_reg,dyn_con, by = c("state_name","year", "constituency_no")) -->
+
+<!-- adr_ge_reg$reservation<- ifelse(adr_ge_reg$constituency_type=="GEN","GEN","SC/ST") -->
+
+
+
+
+<!-- library(lfe) -->
+
+<!-- ## mean_edu -->
+
+
+<!-- summary(felm(mean_edu ~dyn_contest+turnout_percentage+median_assets+mean_male+mean_serious_crime+mean_non_serious_crime+reservation+enop|state_name +year, data =adr_ge_reg )) -->
+
+
+<!-- ## dynast contestant -->
+
+<!-- summary(felm(dyn_contest ~mean_edu+turnout_percentage+median_assets+mean_male+mean_serious_crime+mean_non_serious_crime+reservation+enop|state_name +year, data =adr_ge_reg )) -->
+
+<!-- ``` -->
+<!-- ### binary model -->
+
+
+<!-- ```{r} -->
+
+
+
+<!-- adr_ge_reg <- adr_ge %>% group_by(year, state_name, constituency_no) %>%mutate(mean_edu = mean(edu_yrs, na.rm = TRUE), prop_edu = sum(edu_yrs>mean_edu)/n_cand,  median_assets = median(as.numeric(total_assets, na.rm = TRUE)), prop_assets = sum(total_assets>median_assets)/n_cand, prop_male = mean(gender, na.rm = TRUE), prop_serious_crime= sum(serious_crime>0)/n_cand, prop_non_serious_crime = sum(non_serious_crime>0)/n_cand)   %>% distinct(year, state_name, constituency_no ,.keep_all= TRUE) -->
+
+
+<!-- dyn_con <- dyn_ge %>% group_by(year,state_name, constituency_no) %>% summarise(dyn_contest = ifelse(sum(dyn)>0,1,0)) -->
+
+<!-- adr_ge_reg <-  right_join(adr_ge_reg,dyn_con, by = c("state_name","year", "constituency_no")) -->
+
+<!-- adr_ge_reg$reservation<- ifelse(adr_ge_reg$constituency_type=="GEN","GEN","SC/ST") -->
+
+
+<!-- ## census -->
+
+<!-- cen <- read.csv("D:/cpr/data/census/pc_2011_census.csv") -->
+
+
+<!-- cen$st_name <- tolower(cen$st_name) -->
+
+<!-- adr_ge_reg <- inner_join(adr_ge_reg, cen, by = c("state_name"= "st_name", "constituency_no"="pc_code")) -->
+
+
+<!-- ## education -->
+
+
+<!-- summary(felm(prop_edu~dyn_contest+prop_assets+prop_male+prop_serious_crime+turnout_percentage+enop+reservation+WEALTHSCORE|state_name +year, data = adr_ge_reg )) -->
+
+
+<!-- ## assets -->
+
+
+<!-- summary(felm(prop_assets~prop_edu+dyn_contest+prop_male+prop_serious_crime+turnout_percentage+enop+reservation|state_name +year, data = adr_ge_reg )) -->
+
+
+<!-- ## serious crime -->
+
+<!-- summary(felm(prop_serious_crime~prop_edu+dyn_contest+prop_male+prop_assets+turnout_percentage+enop+reservation|state_name +year, data = adr_ge_reg )) -->
+
+
+<!-- ## dynast contestant -->
+
+<!-- summary(felm(dyn_contest~prop_serious_crime+prop_edu+prop_male+prop_assets+turnout_percentage+enop+reservation|state_name +year, data = adr_ge_reg )) -->
+
+<!-- # dyn_ae_ge %>% group_by(election_type, dyn_cum_2, position) %>% summarise(count=n()) %>%ungroup()%>% select(election_type, dyn_cum_2,position, count) %>% pivot_wider(names_from = c(election_type, position), values_from = count) %>% kable() %>% kable_styling(full_width = F) -->
+
+
+
+
+<!-- ``` -->
+
+
+
+
+<!-- ### Assets -->
+
+<!-- ```{r} -->
+
+<!-- dyn_adr_ge$total_liabilities <- as.numeric(dyn_adr_ge$total_liabilities) -->
+
+<!-- dyn_adr_ge$total_assets <- as.numeric(dyn_adr_ge$total_assets) -->
+
+<!-- dyn_adr_ge %>%filter(dyn!=1) %>% group_by(dyn_con) %>% summarise(mean(total_assets, na.rm = TRUE), mean(total_liabilities, na.rm =TRUE)) %>% kable(caption = "Assets", col.names= c("Constituency Type", "Assets", "Total liabilities"), digitis = 0)%>% kable_styling(bootstrap_options = "striped") -->
+
+
+<!-- ``` -->
+
+
+<!-- ### Criminality -->
+
+<!-- ```{r} -->
+<!-- dyn_adr_ge %>%filter(dyn!=1) %>% group_by(dyn_con) %>% summarise(mean(non_serious_crime, na.rm =TRUE), mean(serious_crime, na.rm =TRUE)) %>% kable(caption = "Criminality", col.names= c("Constituency Type", "Non-serious crime", "Serious crime "), digits = 2)%>% kable_styling(bootstrap_options = "striped") -->
+
+
+<!-- ``` -->
+
+<!-- ### Education -->
+
+<!-- ```{r} -->
+<!-- #table(dyn_ge19$myneta_education) -->
+
+<!--  dyn_adr_ge$education_1 <-  dyn_adr_ge$education -->
+
+<!--   dyn_adr_ge$education <- case_when(str_detect(dyn_adr_ge$education, "(Pass)| (Others) | (Literate) | (Illiterate)") ~ "School", str_detect(dyn_adr_ge$education,"(Doctorate)|(Post)") ~ "PG+", TRUE ~ "UG") -->
+
+<!-- dyn_adr_ge$education <- factor(dyn_adr_ge$education,levels =c( "School", "UG", "PG+")) -->
+
+
+
+<!-- dyn_adr_ge %>% filter(education!= "") %>% group_by(dyn_con, education) %>% summarise(count = n()) %>% group_by(dyn_con) %>% mutate(sum = sum(count), prop = count/sum) %>%arrange(education) %>% select(dyn_con, education, prop) %>% kable(caption = "Education", col.names= c("Constituency type", "Education", "Proportion"), digits = 2)%>% kable_styling(bootstrap_options = "striped") -->
+
+
+
+<!-- ``` -->
+
+
+<!-- ## Model -->
+
+
+
+<!-- ```{r} -->
+<!-- # ge_all <- fread("D:/cpr/data/tcpd/TCPD_GE_all.csv") -->
+<!-- #  -->
+<!-- # names(ge_all) <- tolower(names(ge_all)) -->
+<!-- #  -->
+<!-- #  -->
+<!-- #  -->
+<!-- # merge(dyn_ge, ge_all, by = c("state_name", "constituency_no")) -->
+
+<!-- ``` -->
+
+
+
+
+<!-- ```{r} -->
+
+<!-- names(dyn_adr_ge) -->
+
+
+
+<!-- dyn_adr_ge$total_assets <- as.numeric(dyn_adr_ge$total_assets) -->
+
+<!-- dyn_adr_ge %>% filter(is.numeric(total_assets) & !is.nan(total_assets)&!is.na(total_assets))%>% filter(between(total_assets, quantile(total_assets, .05), quantile(total_assets, .95))) %>%  -->
+<!--   ggplot(aes(total_assets))+ -->
+<!--   geom_histogram()+ -->
+<!--   scale_x_continuous(labels = unit_format(unit = "M", scale = 1e-6)) -->
+
+<!-- ``` -->
+
+
+<!-- # Index{.tabset} -->
+
+
+<!-- For the candidate with 5 percent vote -->
+
+
+<!-- ### education -->
+
+
+<!-- ```{r} -->
+
+<!-- #names(adr_ge) <- tolower(names(adr_ge)) -->
+
+<!-- dyn_adr_ge <- dyn_adr_ge %>% mutate(edu_val = case_when( -->
+<!--   education == "Doctorate" ~ "22", -->
+<!--   education =="Post Graduate" ~"17", -->
+<!--   education =="Graduate Professional" ~"16", -->
+<!--   education == "Graduate" ~"15", -->
+<!--   education =="12th Pass" ~"12", -->
+<!--   education =="10th Pass" ~"10", -->
+<!--   education == "8th Pass" ~"8", -->
+<!--   education =="5th Pass" ~"5", -->
+<!--   education %in% c("Literate", "Unknown", "Not Given") ~"2", -->
+<!--   education =="Illiterate" ~"0", -->
+<!--   education== "Others" ~"5", -->
+<!--   TRUE ~"NAN" -->
+<!--   )) -->
+
+<!-- dyn_adr_ge$edu_val <- as.numeric(dyn_adr_ge$edu_val ) -->
+
+
+
+
+
+<!-- dyn_adr_ge <- dyn_adr_ge %>% group_by(year, state_name,constituency_no) %>% mutate(edu_con = sum(edu_val), n_cand= n(), edu_point = edu_con/(n_cand*22)) %>% select(-c(edu_con, edu_val)) %>% ungroup() -->
+
+<!-- #  -->
+<!-- # dyn_adr_ge %>% group_by(year, state_name,constituency_no) %>% summarise(edu = sum(edu_val), count = n(), edu_point = edu/(count*22)) %>%  -->
+<!-- #    ggplot(aes(edu_point, fill = state_name))+ -->
+<!-- #    geom_density()+ -->
+<!-- #   theme(legend.position = "none") -->
+<!-- #  -->
+<!-- # ## state -->
+
+
+<!-- # dyn_adr_ge %>% distinct(year, state_name,constituency_no, .keep_all=TRUE) %>%  -->
+<!-- #   ggplot(aes(edu_point, fill = state_name))+ -->
+<!-- #   geom_density()+ -->
+<!-- #   theme(legend.position = "none") -->
+<!-- #  -->
+<!-- #  -->
+<!-- # ## India -->
+<!-- #  -->
+<!-- #  -->
+<!-- #  -->
+<!-- # dyn_adr_ge %>% group_by(year, state_name,constituency_no, .keep_all=TRUE) %>%  -->
+<!-- #   ggplot(aes(edu_point))+ -->
+<!-- #   geom_histogram(fill =" steelblue") -->
+<!-- #   theme_minimal() -->
+
+<!-- ``` -->
+
+<!-- ### Dynasticism -->
+
+
+<!-- ```{r} -->
+
+<!-- dyn_adr_ge <- dyn_adr_ge %>% group_by(state_name, year, constituency_no) %>% mutate(dyn_con = sum(dyn), dyn_point = dyn_con/n_cand)  %>% ungroup() -->
+
+
+<!-- dyn_adr_ge$dyn_inv <-1- dyn_adr_ge$dyn -->
+<!-- ## states -->
+
+
+<!-- dyn_adr_ge %>% distinct(year, state_name,constituency_no, .keep_all=TRUE) %>%  -->
+<!--   ggplot(aes(dyn_point, fill = state_name))+ -->
+<!--   geom_density()+ -->
+<!--    theme(legend.position = "none") -->
+
+
+<!-- ## India -->
+
+<!-- dyn_adr_ge %>% distinct(year, state_name,constituency_no, .keep_all=TRUE) %>%  -->
+<!--   ggplot(aes(dyn_point))+ -->
+<!--   geom_histogram(fill =" steelblue")+ -->
+<!--    theme(legend.position = "none")+ -->
+<!--   theme_minimal() -->
+
+
+<!-- ``` -->
+
+<!-- ## Income -->
+
+
+
+
+<!-- ```{r} -->
+
+
+
+<!-- library(DescTools) -->
+
+
+<!-- dyn_adr_ge <- dyn_adr_ge %>%  group_by(year, state_name,constituency_no) %>%  -->
+<!--   mutate(gini = Gini(total_assets,na.rm = TRUE)) %>% ungroup() %>% mutate(gini = ifelse(is.na(gini),.9,gini), gini_inv = 1-gini) -->
+
+<!-- ## need to match othe missing ones - what if many others are only one observations? -->
+<!-- #  -->
+<!-- # dyn_adr_ge %>% filter(state_name=="andhra pradesh" & year ==2009& constituency_no==2) -->
+<!-- #  -->
+<!-- # dyn_adr_ge %>% distinct(year, state_name,constituency_no, .keep_all=TRUE) %>% filter(n_cand==1) -->
+<!-- dyn_adr_ge %>% distinct(year, state_name,constituency_no, .keep_all=TRUE) %>%  -->
+<!--   ggplot(aes(gini))+ -->
+<!--   geom_histogram(fill =" steelblue")+ -->
+<!--    theme(legend.position = "none")+ -->
+<!--   theme_minimal() -->
+
+<!-- ``` -->
+
+
+<!-- ### Criminality -->
+
+
+<!-- ```{r} -->
+
+<!-- dyn_adr_ge <- dyn_adr_ge %>% mutate(serious_crime_log = ifelse(serious_crime==0,0,1),non_serious_crime_log = ifelse(non_serious_crime==0,0,1)) -->
+
+<!-- dyn_adr_ge <- dyn_adr_ge %>% group_by(state_name, year, constituency_no) %>% mutate(s_crime_con = sum(serious_crime_log), s_crime_point = s_crime_con/n_cand, -->
+<!--                                                                                     ns_crime_con = sum(non_serious_crime_log), ns_crime_point = ns_crime_con/n_cand -->
+<!--                                                                                     ) %>% select(-c( ns_crime_con, s_crime_con,serious_crime_log,non_serious_crime_log)) %>% ungroup() -->
+
+
+<!-- dyn_adr_ge <- dyn_adr_ge %>% mutate(ns_crime_inv = 1- ns_crime_point,s_crime_inv = 1- s_crime_point ) -->
+
+<!-- dyn_adr_ge %>% distinct(year, state_name,constituency_no, .keep_all=TRUE) %>%  -->
+<!--   ggplot(aes(s_crime_point))+ -->
+<!--   geom_histogram(fill =" steelblue", bins=5)+ -->
+<!--    theme(legend.position = "none")+ -->
+<!--   theme_minimal() -->
+
+<!-- dyn_adr_ge %>% distinct(year, state_name,constituency_no, .keep_all=TRUE) %>%  -->
+<!--   ggplot(aes(ns_crime_point))+ -->
+<!--   geom_histogram(fill =" steelblue", bins=5)+ -->
+<!--    theme(legend.position = "none")+ -->
+<!--   theme_minimal() -->
+<!-- ``` -->
+
+
+<!-- <!-- ## Gender --> -->
+
+
+<!-- <!-- ```{r} --> -->
+
+
+<!-- <!-- dyn_adr_ge$gender <- ifelse(dyn_adr_ge$sex =="M",1,0) --> -->
+
+<!-- <!-- dyn_adr_ge dyn_adr_ge %>% group_by(state_name, year, constituency_no) %>% mutate(gen_con = sum(gender), male = sum(gen_con)/n_cand) %>% select(-c(gen_con)) %>% ungroup() %>% filter(male>1) --> -->
+
+<!-- <!-- dyn_adr_ge %>% distinct(year, state_name,constituency_no, .keep_all=TRUE) %>%  --> -->
+<!-- <!--   ggplot(aes(male))+ --> -->
+<!-- <!--   geom_histogram(fill =" steelblue")+ --> -->
+<!-- <!--    theme(legend.position = "none")+ --> -->
+<!-- <!--   theme_minimal() --> -->
+
+<!-- <!-- c <- dyn_adr_ge %>% group_by(state_name, year, constituency_no) %>% summarise(gen_con = sum(gender), male = sum(gen_con)/n_cand)  --> -->
+
+<!-- <!-- ``` --> -->
+
+<!-- ## final one -->
+
+
+<!-- - education - 1 means most educated -->
+
+<!-- - gini inversed - 1 means highly diverse -->
+
+<!-- - dynasticism inversed - 1 means no dynasticism -->
+
+<!-- - criminality -->
+<!--         - serious inversed - 1 means there is no serious criminals -->
+<!--         - non-serious inversed - 1 means there is no non-serious criminals -->
+
+
+<!-- ```{r} -->
+
+<!-- dyn_adr_ge$div_point <- (dyn_adr_ge$edu_point +dyn_adr_ge$gini_inv + dyn_adr_ge$dyn_inv + dyn_adr_ge$s_crime_inv)/5 -->
+
+
+<!-- dyn_adr_ge %>% distinct(year, state_name,constituency_no, .keep_all=TRUE) %>%  -->
+<!--   ggplot(aes(div_point))+ -->
+<!--   geom_histogram() -->
+<!-- ``` -->
+
+<!-- ## model -->
+
+
+
+
+
+<!-- ```{r} -->
+
+<!-- df <- dyn_adr_ge %>% distinct(year, state_name,constituency_no, .keep_all=TRUE) %>% select(gini_inv, edu_point,dyn_inv,s_crime_inv) -->
+
+<!-- cor_df <- cor(df) -->
+<!-- library(corrplot) -->
+
+<!-- corrplot(cor_df, method = "circle") -->
+
+<!-- dyn_adr_ge_uniq <- dyn_adr_ge %>% distinct(year, state_name,constituency_no, .keep_all=TRUE) -->
+
+<!-- dyn_adr_ge_uniq$reservation <- ifelse(dyn_adr_ge_uniq$constituency_type =="GEN","GEN","SC/ST") -->
+<!-- ``` -->
+
+
+<!-- ```{r} -->
+
+<!-- dyn_adr_ge_earlier <- dyn_adr_ge_uniq %>%group_by(year, state_name, constituency_no) %>%  mutate(dyn_won_earlier = ifelse(position==1&dyn==1,1,0))%>% filter(year!= 2019)%>%  select(year, state_name, constituency_no, dyn_contest_earlier =dyn_con, dyn_won_earlier) %>% mutate(year_later = ifelse(year==2009, 2014,2019)) -->
+
+
+
+<!-- dyn_adr_ge_uniq_reg <- inner_join(dyn_adr_ge_uniq, dyn_adr_ge_earlier, by = c("year", "state_name", "constituency_no")) -->
+
+
+<!-- dyn_adr_ge_reg <- inner_join(dyn_adr_ge_uniq, dyn_adr_ge_earlier, by = c("year", "state_name", "constituency_no")) -->
+
+<!-- ``` -->
+
+
+
+<!-- ## All index -->
+
+
+<!-- ```{r} -->
+
+
+<!-- library(lfe) -->
+
+<!-- dyn_adr_ge_uniq_reg$dynast_contest <- ifelse(dyn_adr_ge_uniq_reg$dyn_con>0,1,0) -->
+
+<!-- summary(felm( turnout_percentage~ reservation+n_cand+dynast_contest|factor(year)+factor(state_name), data =dyn_adr_ge_uniq_reg )) -->
+
+<!-- ``` -->
+<!-- ## Dynasticim -->
+
+<!-- ```{r} -->
+
+<!-- summary(felm( dyn_inv~turnout_percentage + reservation+n_cand+dyn_won_earlier|factor(year)+factor(state_name), data =dyn_adr_ge_uniq_reg )) -->
+
+
+<!-- ``` -->
+<!-- ### gini -->
+
+<!-- ```{r} -->
+
+<!-- summary(felm( gini_inv~turnout_percentage + reservation+n_cand+dyn_won_earlier|factor(year)+factor(state_name), data =dyn_adr_ge_uniq_reg )) -->
+
+
+
+<!-- ``` -->
+
+<!-- ### education -->
+
+<!-- ```{r} -->
+<!-- summary(felm( edu_point~turnout_percentage + reservation+n_cand+dyn_won_earlier|factor(year)+factor(state_name), data =dyn_adr_ge_uniq_reg )) -->
+<!-- ``` -->
+
+<!-- ### criminality -->
+
+<!-- ```{r} -->
+
+<!-- summary(felm( s_crime_inv~turnout_percentage + reservation+n_cand+dyn_won_earlier|factor(year)+factor(state_name), data =dyn_adr_ge_uniq_reg )) -->
+
+<!-- ``` -->
+
+
+
+<!-- #### assets  -->
+
+
+
+<!-- ```{r} -->
+
+<!-- summary(felm( log(total_assets)~turnout_percentage + reservation+n_cand+dyn_won_earlier|factor(year), data =dyn_adr_ge_uniq_reg )) -->
+
+<!-- ``` -->
+
+<!-- ### Census -->
+
+<!-- ```{r} -->
+
+<!-- cen <- read.csv("D:/cpr/data/census/pc_2011_census.csv") -->
+
+
+<!-- cen$st_name <- tolower(cen$st_name) -->
+
+<!-- dyn_adr_ge_uniq_cen <- inner_join(dyn_adr_ge_uniq, cen, by = c("state_name"= "st_name", "constituency_no"="pc_code")) -->
+
+<!-- dyn_adr_ge_uniq_cen_reg <- inner_join(dyn_adr_ge_uniq_reg, cen, by = c("state_name"= "st_name", "constituency_no"="pc_code")) -->
+
+<!-- ``` -->
+
+
+
+
+
+
+
+<!-- ```{r} -->
+
+
+<!-- ggplot(dyn_adr_ge_uniq_cen, aes(factor(dyn_con), WEALTHSCORE))+ -->
+<!--   geom_boxplot() -->
+
+<!-- ``` -->
+
+
+
+
+<!-- ```{r} -->
+
+<!-- summary(felm(WEALTHSCORE ~turnout_percentage + reservation+n_cand+dyn_con|factor(year)+factor(constituency_no)+factor(state_name), data =dyn_adr_ge_uniq_cen )) -->
+
+
+<!-- ``` -->
+
+
+
+
+
+
+
+
+
+
+
+
 

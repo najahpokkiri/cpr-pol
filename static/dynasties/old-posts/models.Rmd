@@ -849,9 +849,9 @@ etable(fit.1,fit.2,fit.3,extraline=list("Caste control"=c("Yes",  "Yes", "Yes"))
 stargazer( fit.4,title="Regression Results - AE 2012:17 ",type = "html",
 align=TRUE, dep.var.labels=c( "Vote Share Percentage"), no.space=TRUE, omit= c("caste_uc","caste_yadav","caste_non_yadav_obc", "caste_muslim", "caste_dalit"))
 
-
-stargazer(fit.1, fit.2, fit.3,fit.4,title="Regression Results - AE & GE 2009:19 ",type = "html",
-align=TRUE, dep.var.labels=c("Dynast","Winner", "Linkage","Vote Share Percentage"), no.space=TRUE,add.lines=list(c('Constituency fixed effects', 'Yes' )))
+# 
+# stargazer(fit.1, fit.2, fit.3,fit.4,title="Regression Results - AE & GE 2009:19 ",type = "html",
+# align=TRUE, dep.var.labels=c("Dynast","Winner", "Linkage","Vote Share Percentage"), no.space=TRUE,add.lines=list(c('Constituency fixed effects', 'Yes' )))
 
 #summary(fit.3)
 ```

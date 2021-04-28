@@ -253,16 +253,6 @@ dyn_pwd %>% group_by(year) %>% summarise(count = n(),total_road_len =sum(`road l
 ```
 
 
-```{r}
-
-rsconnect::setAccountInfo(name='abdulnajah',
-			  token='6DA943DD5D7C28E16785B5B05DCA0934',
-			  secret='92SLUnp9wjwSBtUG4w1vzWMRy4ZysadY3NX7+doF')
-
-library(rsconnect)
-rsconnect::deployApp('path/to/your/app')
-
-```
 
 
 ## Family type

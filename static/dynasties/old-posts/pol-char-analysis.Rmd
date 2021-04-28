@@ -354,5 +354,37 @@ ggplot(dyn_rafael %>% filter(position==1  & year == 2017) , aes(partypercent, co
 
 ```
 
+<!-- # Demographics  -->
+
+
+<!-- ```{r} -->
+
+
+<!-- cen <- read.csv("D:/cpr/data/census/pc_2011_census.csv") -->
+
+
+<!-- cen$st_name <- tolower(cen$st_name) -->
+<!-- ## -->
+
+<!-- dyn_ge <-fread("D:/cpr/UP/up-dynasties/dyn_other_data/tcpd_ge_09_14_19_dyn.csv") -->
+
+
+
+<!-- names(dyn_ge)[1] <- "State_Name" -->
+
+<!-- names(dyn_ge) <- tolower(names(dyn_ge)) -->
+
+<!-- dyn_ge$dynast <- ifelse(dyn_ge$dyn==1,1,0) -->
+
+<!-- dyn_ae_ge <- inner_join(dyn_adr_ge, cen, by = c("state_name"= "st_name", "constituency_no"="pc_code")) -->
+
+<!-- dyn_adr_ge_uniq_cen_reg <- inner_join(dyn_adr_ge_uniq_reg, cen, by = c("state_name"= "st_name", "constituency_no"="pc_code")) -->
+
+
+<!-- ``` -->
+
+
+
+
 
 
