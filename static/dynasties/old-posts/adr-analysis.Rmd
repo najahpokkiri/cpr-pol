@@ -245,6 +245,77 @@ summarise(movable =sum(total_movable_assets_totals)/sum(total_assets),  immovabl
 
 ```
 
+##### Growth 
+
+```{r}
+adr_12 <- dyn_adr %>% filter(election_type=="AE" & dyn_cum_2 ==1 & year ==2012) %>% select(family_id, year,tot_12 = total_assets, immov_12=total_immovable_assets_totals, mov_12= total_movable_assets_totals) %>% distinct(family_id, .keep_all = TRUE)
+
+adr_17 <- dyn_adr %>% filter(election_type=="AE" & dyn_cum_2 ==1 & year ==2017)  %>% select(family_id, year,tot_17 = total_assets, immov_17 = total_immovable_assets_totals, mov_17 =total_movable_assets_totals, success_cat) %>% distinct(family_id, .keep_all = TRUE)
+
+
+
+ass_12_17 <- inner_join(adr_17,adr_12, by = "family_id") 
+
+ass_rates <- ass_12_17  %>% mutate(tot_change = (tot_17-tot_12)/tot_12 *100, mov_change = (mov_17-mov_12)/mov_12 *100, immov_change = (immov_17-immov_12)/immov_12 *100) %>% group_by(success_cat)
+
+
+ass_12_17  %>% mutate(tot_change = (tot_17-tot_12)/tot_12 *100, mov_change = (mov_17-mov_12)/mov_12 *100, immov_change = (immov_17-immov_12)/immov_12 *100) %>% group_by(success_cat) %>% summarise(obs = n(),
+                                                                                                                                                                                                    pc_change_tot = mean(tot_change), pc_change_mov = mean(mov_change), pct_change_immov = mean(immov_change, na.rm = TRUE)) %>% kable() %>% kable_styling(full_width = F)
+
+
+
+
+```
+
+
+---
+
+##### Plots {.tabset}
+
+
+###### Total
+
+
+```{r}
+ ggplot(ass_rates, aes(tot_change, fill = success_cat))+
+  geom_density(alpha = .5)+
+  theme_minimal()+
+  labs(title = "Percentage growth of total assets ", subtitle = "AE 2012-17")+
+  theme(legend.position = "none")
+```
+
+---
+
+###### Movable
+
+```{r}
+ ggplot(ass_rates, aes(mov_change, fill = success_cat))+
+  geom_density(alpha = .5)+
+  theme_minimal()+
+  labs(title = "Percentage growth of movable assets ", subtitle = "AE 2012-17")+
+  theme(legend.position = "none")
+```
+
+---
+
+###### Immovable
+
+```{r}
+ ggplot(ass_rates, aes(immov_change, fill = success_cat))+
+  geom_density(alpha = .5)+
+  theme_minimal()+
+  labs(title = "Percentage growth of immovable assets ", subtitle = "AE 2012-17")
+  
+
+# 
+# cowplot::plot_grid(tot, mov, immov)
+
+```
+
+---
+
+
+
 #### GE {.tabset}
 
 ##### Average
@@ -262,6 +333,27 @@ dyn_adr %>% filter(election_type=="GE" & dyn_cum_2 ==1) %>% group_by(success_cat
 summarise(movable =sum(total_movable_assets_totals)/sum(total_assets),  immovable =sum(total_immovable_assets_totals)/sum(total_assets))%>% kable(digits = 2) %>% kable_styling(full_width = F)
 
 ```
+
+
+
+<!-- ##### Growth -->
+
+<!-- ```{r} -->
+<!-- adr_09 <- dyn_adr %>% filter(election_type=="GE" & dyn_cum_2 ==1 & year ==2009) %>% select(family_id, year,tot_09 = total_assets, immov_09=total_immovable_assets_totals, mov_09= total_movable_assets_totals) %>% distinct(family_id, .keep_all = TRUE) -->
+
+<!-- adr_19 <- dyn_adr %>% filter(election_type=="GE" & dyn_cum_2 ==1 & year ==2019)  %>% select(family_id, year,tot_19 = total_assets, immov_19 = total_immovable_assets_totals, mov_19 =total_movable_assets_totals, success_cat) %>% distinct(family_id, .keep_all = TRUE) -->
+
+
+
+<!-- ass_12_17 <- inner_join(adr_17,adr_12, by = "family_id")  -->
+
+
+<!-- ass_12_17  %>% mutate(tot_change = (tot_17-tot_12)/tot_12 *100, mov_change = (mov_17-mov_12)/mov_12 *100, immov_change = (immov_17-immov_12)/immov_12 *100) %>% group_by(success_cat) %>% summarise(obs = n(), -->
+<!--                                                                                                                                                                                                     pc_change_tot = mean(tot_change), pc_change_mov = mean(mov_change), pct_change_immov = mean(immov_change, na.rm = TRUE)) -->
+
+<!-- ``` -->
+
+
 
 ###  Experience v/s assets
 
