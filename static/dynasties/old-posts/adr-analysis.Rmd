@@ -54,6 +54,26 @@ select <- dplyr::select
 
 dyn <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/dyn_ae_ge.csv")
 
+## family type
+
+
+
+dyn  <- dyn %>% mutate(id = paste0(family_id, relative_id, rel_id_rep))
+
+dyn <- dyn %>%group_by(family_id)%>% mutate(n_pre_08 = n_distinct(id[year<= 2007]), n_post_08 = n_distinct(id[year>2007]))
+
+
+
+
+
+
+dyn <- dyn %>% mutate(success_cat = case_when(n_pre_08 >=2 & n_post_08==0 & dyn_cum_2 ==1 ~"Declining",
+                                                                  n_pre_08>=2 & n_post_08 >0 & dyn_cum_2==1 ~"Stable",
+                                                                  n_pre_08 <=1 & n_post_08 >=1&dyn_cum_2 ==1 ~"Rising",
+                                             TRUE~"OTHERS"))
+
+
+
 
 
 
@@ -144,7 +164,7 @@ dyn_adr_uniq <- dyn_adr %>% group_by(family_id) %>% filter(year == max(year)) %>
 
 # ADR Analysis
 
-## Assets
+## Assets {.tabset}
 
 
 
@@ -158,6 +178,7 @@ dyn_adr_uniq_ind <- dyn_adr %>% group_by(fam_rel_id_uniq ) %>% filter(year == ma
 dyn_adr_uniq_ind_el <- dyn_adr %>% group_by(election_type, fam_rel_id_uniq ) %>% filter(year == max(year)) %>% 
   distinct(fam_rel_id_uniq, .keep_all = T)
 ```
+
 
 
 ### Family v/s non-family
@@ -199,6 +220,48 @@ ggplot(dyn_adr_uniq_ind_el_ass, aes(factor(dyn_cum_2),total_assets))+
 ```
 
 
+
+### Stable v/s rising {.tabset}
+
+#### AE {.tabset}
+
+##### Average
+
+
+```{r}
+
+dyn_adr %>% filter(election_type=="AE" & dyn_cum_2 ==1) %>% group_by(success_cat) %>% summarise(obs = n(),total_assets = mean(total_assets, trim = .05), movable_assets = mean(total_movable_assets_totals, trim = .05), immovable_assets= mean(total_immovable_assets_totals, trim= .05))%>% kable() %>% kable_styling(full_width = F)
+
+
+```
+
+
+#####  Proportion
+
+```{r}
+
+dyn_adr %>% filter(election_type=="AE" & dyn_cum_2 ==1) %>% group_by(success_cat) %>% 
+summarise(movable =sum(total_movable_assets_totals)/sum(total_assets),  immovable =sum(total_immovable_assets_totals)/sum(total_assets))%>% kable(digits = 2) %>% kable_styling(full_width = F)
+
+```
+
+#### GE {.tabset}
+
+##### Average
+
+```{r}
+dyn_adr %>% filter(election_type=="GE" & dyn_cum_2 ==1) %>% group_by(success_cat) %>% summarise(obs = n(),total_assets = mean(total_assets, trim = .05), movable_assets = mean(total_movable_assets_totals, trim = .05), immovable_assets= mean(total_immovable_assets_totals, trim= .05))%>% kable() %>% kable_styling(full_width = F)
+
+```
+
+#####  Proportion
+
+```{r}
+
+dyn_adr %>% filter(election_type=="GE" & dyn_cum_2 ==1) %>% group_by(success_cat) %>% 
+summarise(movable =sum(total_movable_assets_totals)/sum(total_assets),  immovable =sum(total_immovable_assets_totals)/sum(total_assets))%>% kable(digits = 2) %>% kable_styling(full_width = F)
+
+```
 
 ###  Experience v/s assets
 
@@ -287,14 +350,13 @@ exp_ass <- dyn_adr%>% filter(dyn_cum_2 ==1)%>% group_by(caste_groups,fam_exp_cum
 
 
 
-### Asset growth over time
 
 
 
-#### GE
+### GE{.tabset}
 
 
-##### Total assets
+#### Total assets
 
 ```{r ge all assets year break up}
 
@@ -325,7 +387,10 @@ ggplot(dyn_adr_ge, aes(factor(dyn_cum_2),total_assets))+
 ```
 
 
-#### Asset growth
+#### Asset growth over time {.tabset}
+
+
+##### Total Asset growth
 
 ```{r GE Asset growth}
 
@@ -439,9 +504,9 @@ ge_gr <- dyn_adr_ge_r %>%  group_by(dyn_cum_2_text,year) %>% summarise(mean_immo
 ```
 
 
-#### AE
+### AE {.tabset}
 
-##### Total assets
+#### Total assets
 
 ```{r}
 
@@ -472,7 +537,7 @@ ggplot(dyn_adr_ae, aes(factor(dyn_cum_2),total_assets))+
 ```
 
 
-#### Asset Growth
+#### Asset Growth {.tabset}
 
 ##### Total Assets
 
@@ -669,7 +734,7 @@ ggplot(mov_immov_m , aes(x =factor(dyn_cum_2_text) , y=  value, fill = variable)
 
 
 
-## Crime
+## Crime {.tabset}
 
 ### Political expereince
 
@@ -715,7 +780,7 @@ dyn_adr %>%  group_by( dyn_cum_2_text,fam_exp_cum_cat)%>% summarise(mean_sc= mea
 
 
 
-#### Family
+### Family
 
 ```{r serious crime}
 
@@ -762,10 +827,25 @@ dyn_crime_m <- melt(dyn_crime, measure = 2:3, id ="dyn_cum_2")
 
 ```
 
+### stable v/s rising {.tabset}
 
 
+#### AE
 
-#### caste v/s crime
+```{r}
+
+dyn_adr %>% filter(election_type=="AE" & dyn_cum_2 ==1) %>% group_by(success_cat) %>% summarise(obs = n(),mean_sc= mean(serious_crime), mean_nsc=mean(non_serious_crime))%>% kable(digits = 2) %>% kable_styling(full_width = F)
+
+```
+
+#### GE
+
+```{r}
+dyn_adr %>% filter(election_type=="GE" & dyn_cum_2 ==1) %>% group_by(success_cat) %>% summarise(obs = n(),mean_sc= mean(serious_crime), mean_nsc=mean(non_serious_crime))%>% kable(digits = 2) %>% kable_styling(full_width = F)
+```
+
+
+### caste v/s crime
 
 
 ```{r}
@@ -809,7 +889,7 @@ dyn_adr %>%  group_by(caste_groups)%>% summarise(mean_sc= mean(serious_crime), m
 
 
 
-## Perfromance
+## Perfromance {.tabset}
 
 
 ```{r config}
@@ -823,9 +903,7 @@ dyn_adr_ge_w_uniq <- dyn_adr_ge_w%>% group_by(fam_rel_id_uniq) %>% filter(year =
 
 
 
-
-
-##### All elections 
+### Summary
 
 ```{r}
 
@@ -849,10 +927,18 @@ cbind(fam, dyn_pp) %>% kable(caption = "Average performance of MPs in the Parlia
 
 ```
 
+### Stable v/s rising
 
-#### Attendance
+```{r}
+dyn_adr_ge_w%>% filter(election_type=="GE" & dyn_cum_2 ==1) %>% group_by(success_cat) %>% summarise(obs = n(), attendance = mean(attendance, na.rm = TRUE), debates = mean(debates, na.rm = TRUE), questions = mean(questions_asked, na.rm =TRUE)) %>% kable(digits =2) %>% kable_styling(full_width = F)
+```
 
-##### Family
+
+
+
+### Attendance
+
+
 
 
 ```{r}
@@ -890,12 +976,10 @@ ggplot(dyn_adr_ge_w %>% filter(year != 2019), aes(factor(dyn_cum_2), attendance,
 ```
 
 
-##### Politcal experience
 
 
-#### Debates
+### Debates
 
-##### Family
 
 ```{r}
 
@@ -934,13 +1018,9 @@ ggplot(dyn_adr_ge_w_p , aes(factor(dyn_cum_2), debates, group = factor(dyn_cum_2
 
 
 
-##### Politcal experience
+### Questions
 
 
-#### Questions
-
-
-##### Family
 
 ```{r}
 
