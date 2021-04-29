@@ -79,6 +79,21 @@ For the purpose of this analysis we will be using the second definition.
 
 dyn <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/dyn_all.csv")
 
+# dyn <- dyn %>% group_by(family_id) %>% 
+#   mutate(level1 = paste0(unique(election_level), collapse = '-'))
+# 
+# 
+# dyn <- dyn %>% mutate(level2 = case_when(level1 %in% c("AE-GE-LB","GE-AE-LB","GE-LB-AE","LB-AE-GE",  "AE-LB-GE" ) ~"GE-AE-LB",
+#                                   level1 %in% c("GE-AE","AE-GE")~"GE-AE",
+#                level1 %in% c("AE-LB","LB-AE")~"AE-LB",
+#                level1 %in% c("LB-GE","GE-LB")~"GE-LB",
+#                TRUE ~level1))
+# 
+
+
+
+
+
 
 ```
 
@@ -296,6 +311,10 @@ dyn %>% filter(election_type == "GE") %>% count(year) %>% kable(col.names = c ("
 
 ### Levels{.tabset}
 
+
+
+
+
 Families are spread at multiple office levels. While majority them are present only at the assembly election level, there are  a quite a few of them which is spanned across multiple level of office. The following table summarises that -
 
 
@@ -311,6 +330,8 @@ dyn_all_uniq_fam <- dyn_all_uniq %>% filter(dyn_tot_2 ==1)
 dyn_all_uniq_fam %>% group_by(level) %>% summarise(count = n()) %>% arrange(-count)%>% kable(caption = "Linkages of families(Category 2)")%>%kable_styling(full_width = F)
 
 
+
+
 ```
 
 #### def 4
@@ -322,7 +343,7 @@ dyn_all_uniq <- dyn%>% group_by(family_id) %>% filter(year == max(year)) %>% arr
 
 dyn_all_uniq_fam <- dyn_all_uniq %>% filter(dyn_tot_4 ==1)
 
-dyn_all_uniq_fam %>% group_by(level) %>% summarise(count = n()) %>% arrange(-count)%>% kable(caption = "Linkages of families(Category 2)")%>%kable_styling(full_width = F)
+dyn_all_uniq_fam %>% group_by(level) %>% summarise(count = n()) %>% arrange(-count)%>% kable(caption = "Linkages of families(Category 4)")%>%kable_styling(full_width = F)
 
 
 ```

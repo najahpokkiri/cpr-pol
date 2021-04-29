@@ -55,8 +55,7 @@ select <- dplyr::select
 dyn <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/dyn_ae_ge.csv")
 
 
-mplads <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/mplads-dataset.csv", stringsAsFactors = FALSE)
-
+mplads <- fread("D:/cpr/UP/up-dynasties/dyn_other_data/mplads-dataset.csv")
 
 
 
@@ -69,13 +68,13 @@ mplads$cost_cat <- cut(mplads$costnew, breaks = c(0,200000,500000,Inf), labels =
 dyn_ge_w <- dyn %>% filter(election_type == "GE" & position==1)
 
 
-dyn_mplads <- merge(dyn_ge_w,mplads, by = c("year", "constituency_no"))
+dyn_mplads <- merge(mplads,dyn_ge_w, by = c("year", "constituency_no"))
 
 
 names(dyn_mplads) <- make.unique(names(dyn_mplads))
 
 dyn_mplads$dyn_cum_2_text <- ifelse(dyn_mplads$dyn_cum_2 ==0, "Non-family","Family")
-unique(mplads$lsrs)
+#unique(mplads$lsrs)
 
 # dim(mplads)[1]
 # 
@@ -86,6 +85,11 @@ unique(mplads$lsrs)
 # unique(mplads$executingagency)
 #  
 # dyn_ge_w %>% filter(year %in% c(2009,2004) & position ==1) %>% group_by(dyn_cum_2, year) %>% summarise(n())
+
+
+# dim(dyn_mplads)
+# 
+#fwrite(dyn_mplads, "D:/cpr/UP/up-dynasties/dyn_other_data/mplads-dyn.csv")
 
 ```
 

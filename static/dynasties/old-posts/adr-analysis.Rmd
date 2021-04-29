@@ -47,6 +47,8 @@ library(gridExtra)
 `%!in%` = Negate(`%in%`)
 
 select <- dplyr::select
+
+"/" <- function(x,y) ifelse(y==0,0,base:::"/"(x,y))
 ```
 
 
@@ -256,7 +258,7 @@ adr_17 <- dyn_adr %>% filter(election_type=="AE" & dyn_cum_2 ==1 & year ==2017) 
 
 ass_12_17 <- inner_join(adr_17,adr_12, by = "family_id") 
 
-ass_rates <- ass_12_17  %>% mutate(tot_change = (tot_17-tot_12)/tot_12 *100, mov_change = (mov_17-mov_12)/mov_12 *100, immov_change = (immov_17-immov_12)/immov_12 *100) %>% group_by(success_cat)
+ass_rates <- ass_12_17  %>% mutate(tot_change = (tot_17-tot_12)/tot_12 *100, mov_change = (mov_17-mov_12)/mov_12 *100, immov_change = (immov_17-immov_12)/immov_12 *100) 
 
 
 ass_12_17  %>% mutate(tot_change = (tot_17-tot_12)/tot_12 *100, mov_change = (mov_17-mov_12)/mov_12 *100, immov_change = (immov_17-immov_12)/immov_12 *100) %>% group_by(success_cat) %>% summarise(obs = n(),
@@ -270,41 +272,27 @@ ass_12_17  %>% mutate(tot_change = (tot_17-tot_12)/tot_12 *100, mov_change = (mo
 
 ---
 
-##### Plots {.tabset}
+###### Plots
 
-
-###### Total
 
 
 ```{r}
- ggplot(ass_rates, aes(tot_change, fill = success_cat))+
+ cowplot::plot_grid(ggplot(ass_rates, aes(tot_change, fill = success_cat))+
   geom_density(alpha = .5)+
   theme_minimal()+
   labs(title = "Percentage growth of total assets ", subtitle = "AE 2012-17")+
-  theme(legend.position = "none")
-```
+  theme(legend.position = "none"),
 
----
-
-###### Movable
-
-```{r}
  ggplot(ass_rates, aes(mov_change, fill = success_cat))+
   geom_density(alpha = .5)+
   theme_minimal()+
   labs(title = "Percentage growth of movable assets ", subtitle = "AE 2012-17")+
-  theme(legend.position = "none")
-```
+  theme(legend.position = "none"),
 
----
-
-###### Immovable
-
-```{r}
  ggplot(ass_rates, aes(immov_change, fill = success_cat))+
   geom_density(alpha = .5)+
   theme_minimal()+
-  labs(title = "Percentage growth of immovable assets ", subtitle = "AE 2012-17")
+  labs(title = "Percentage growth of immovable assets ", subtitle = "AE 2012-17"))
   
 
 # 
@@ -336,22 +324,7 @@ summarise(movable =sum(total_movable_assets_totals)/sum(total_assets),  immovabl
 
 
 
-<!-- ##### Growth -->
 
-<!-- ```{r} -->
-<!-- adr_09 <- dyn_adr %>% filter(election_type=="GE" & dyn_cum_2 ==1 & year ==2009) %>% select(family_id, year,tot_09 = total_assets, immov_09=total_immovable_assets_totals, mov_09= total_movable_assets_totals) %>% distinct(family_id, .keep_all = TRUE) -->
-
-<!-- adr_19 <- dyn_adr %>% filter(election_type=="GE" & dyn_cum_2 ==1 & year ==2019)  %>% select(family_id, year,tot_19 = total_assets, immov_19 = total_immovable_assets_totals, mov_19 =total_movable_assets_totals, success_cat) %>% distinct(family_id, .keep_all = TRUE) -->
-
-
-
-<!-- ass_12_17 <- inner_join(adr_17,adr_12, by = "family_id")  -->
-
-
-<!-- ass_12_17  %>% mutate(tot_change = (tot_17-tot_12)/tot_12 *100, mov_change = (mov_17-mov_12)/mov_12 *100, immov_change = (immov_17-immov_12)/immov_12 *100) %>% group_by(success_cat) %>% summarise(obs = n(), -->
-<!--                                                                                                                                                                                                     pc_change_tot = mean(tot_change), pc_change_mov = mean(mov_change), pct_change_immov = mean(immov_change, na.rm = TRUE)) -->
-
-<!-- ``` -->
 
 
 
@@ -479,121 +452,223 @@ ggplot(dyn_adr_ge, aes(factor(dyn_cum_2),total_assets))+
 ```
 
 
-#### Asset growth over time {.tabset}
+
+#### Growth{.tabset}
 
 
-##### Total Asset growth
+##### 2009-19
 
-```{r GE Asset growth}
 
-#dyn_adr_ge$year <- factor(dyn_adr$year, levels = c("2009", "2012","2014","2017","2019"))
+```{r}
+adr_09 <- dyn_adr %>% filter(election_type=="GE" & year ==2009) %>% select(family_id, year,tot_09 = total_assets, immov_09=total_immovable_assets_totals, mov_09= total_movable_assets_totals) %>% distinct(family_id, .keep_all = TRUE)
 
-dyn_adr_ge_r <- dyn_adr_ge %>% group_by(fam_rel_id_uniq) %>% mutate(count_pid = n())  %>% filter(count_pid > 1)
-
-ge_gr <- dyn_adr_ge_r %>%  group_by(dyn_cum_2_text,year) %>% summarise(mean_assets = mean(total_assets, trim =.1) )
-
- ggplot(ge_gr,aes(factor(year, levels = c("2009", "2014","2019")), mean_assets,color = factor(dyn_cum_2_text), group = factor(dyn_cum_2_text)))+
-  geom_line()+
-  geom_point()+
-    theme_minimal()+
-    theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
-    scale_y_continuous(label = label_number_si())+
-    labs(title = "Average asset growth over years", subtitle = "General election", x = "Year", y = "Assets" )+
-  theme(legend.position = "top",
-        plot.background = element_blank(),
-        plot.title = element_text(family = "serif",hjust = 0.5, size = 20), 
-        plot.subtitle = element_text(hjust = 0.5, size = 15,
-                                     ),
-        text = element_text(color = "gray20", family = "serif"),
-        axis.text.x = element_text(
-                                   hjust = .5, vjust = 0),
-        legend.title = element_blank(),
-        legend.text = element_text(size = 15),
-        axis.text = element_text(face = "italic", size = 10),
-        axis.title.x = element_text(vjust = -.5,hjust = .5, size = 14,
-                                  margin = unit(c(3, 0, 0, 0), "mm")),
-        axis.title.y = element_text(vjust = -.5,hjust = .5, size = 14,
-                                  margin = unit(c(0, 3, 0, 0), "mm")),
-        axis.ticks = element_blank(),
-        )
+adr_19 <- dyn_adr %>% filter(election_type=="GE"  & year ==2019)  %>% select(family_id, year,tot_19 = total_assets, immov_19 = total_immovable_assets_totals, mov_19 =total_movable_assets_totals, dyn_cum_2) %>% distinct(family_id, .keep_all = TRUE)
 
 
 
+ass_09_19 <- inner_join(adr_09,adr_19, by = "family_id")
+
+
+ass_rates <- ass_09_19 %>% mutate(tot_change = (tot_19-tot_09)/tot_09 *100, mov_change = (mov_19-mov_09)/mov_09 *100, immov_change = (immov_19-immov_09)/immov_09 *100) %>% group_by(dyn_cum_2)
+
+ass_09_19 %>% mutate(tot_change = (tot_19-tot_09)/tot_09 *100, mov_change = (mov_19-mov_09)/mov_09 *100, immov_change = (immov_19-immov_09)/immov_09 *100) %>% group_by(dyn_cum_2) %>% summarise(obs = n(),
+                                                                                                                                                                                                    pc_change_tot = mean(tot_change, trim = .025), pc_change_mov = mean(mov_change, trim = .025), pct_change_immov = mean(immov_change, trim = .025, na.rm = TRUE))%>% kable() %>% kable_styling(full_width = F)
+
+
+
+#table(cut(ass_rates$immov_change, breaks = c(-Inf, 0,100,30,500,1000,2000, Inf)))
+```
+
+----
+
+```{r}
+
+ cowplot::plot_grid(ggplot(ass_rates %>% filter(between(tot_change, quantile(tot_change, .025), quantile(tot_change,.975))), aes(tot_change, fill = factor(dyn_cum_2)))+
+  geom_density(alpha = .5)+
+  theme_minimal()+
+  labs(title = "Percentage growth of total assets ", subtitle = "GE 2009:19")+
+  theme(legend.position = "none"),
+
+
+ ggplot(ass_rates %>% filter(between(mov_change, quantile(mov_change, .025), quantile(mov_change,.975))), aes(mov_change, fill = factor(dyn_cum_2)))+
+
+  geom_density(alpha = .5)+
+  theme_minimal()+
+  labs(title = "Percentage growth of movable assets ", subtitle = "GE 2009:19")+
+  theme(legend.position = "none")
+ ,
+ 
+ 
+  ggplot(ass_rates %>% filter(between(immov_change, quantile(immov_change, .025), quantile(immov_change,.975))), aes(immov_change, fill = factor(dyn_cum_2)))+
+  geom_density(alpha = .5)+
+      scale_fill_discrete(labels = c("Non-family", "Family"))+
+  theme_minimal()+
+  labs(title = "Percentage immovable of total assets ", subtitle = "AE 2012-17", fill = ""))
+```
+
+##### 2014-19
+
+
+```{r}
+adr_14 <- dyn_adr %>% filter(election_type=="GE" & year ==2014) %>% select(family_id, year,tot_14 = total_assets, immov_14=total_immovable_assets_totals, mov_14= total_movable_assets_totals) %>% distinct(family_id, .keep_all = TRUE)
+
+adr_19 <- dyn_adr %>% filter(election_type=="GE"  & year ==2019)  %>% select(family_id, year,tot_19 = total_assets, immov_19 = total_immovable_assets_totals, mov_19 =total_movable_assets_totals, dyn_cum_2) %>% distinct(family_id, .keep_all = TRUE)
+
+
+
+ass_14_19 <- inner_join(adr_14,adr_19, by = "family_id")
+
+
+ass_rates <- ass_14_19 %>% mutate(tot_change = (tot_19-tot_14)/tot_14 *100, mov_change = (mov_19-mov_14)/mov_14 *100, immov_change = (immov_19-immov_14)/immov_14 *100) %>% group_by(dyn_cum_2)
+
+ass_14_19 %>% mutate(tot_change = (tot_19-tot_14)/tot_14 *100, mov_change = (mov_19-mov_14)/mov_14 *100, immov_change = (immov_19-immov_14)/immov_14 *100) %>% group_by(dyn_cum_2) %>% summarise(obs = n(),
+                                                                                                                                                                                                    pc_change_tot = mean(tot_change, trim = .025), pc_change_mov = mean(mov_change, trim = .025), pct_change_immov = mean(immov_change, trim = .025, na.rm = TRUE)) %>% kable() %>% kable_styling(full_width = F)
+
+
+
+#table(cut(ass_rates$immov_change, breaks = c(-Inf, 0,100,30,500,1000,2000, Inf)))
+```
+
+----
+
+```{r}
+
+ cowplot::plot_grid(ggplot(ass_rates %>% filter(between(tot_change, quantile(tot_change, .025), quantile(tot_change,.975))), aes(tot_change, fill = factor(dyn_cum_2)))+
+  geom_density(alpha = .5)+
+  theme_minimal()+
+  labs(title = "Percentage growth of total assets ", subtitle = "GE 2014-19")+
+  theme(legend.position = "none"),
+
+
+ ggplot(ass_rates %>% filter(between(mov_change, quantile(mov_change, .025), quantile(mov_change,.975))), aes(mov_change, fill = factor(dyn_cum_2)))+
+
+  geom_density(alpha = .5)+
+  theme_minimal()+
+  labs(title = "Percentage growth of movable assets ", subtitle = "GE 2014-19")+
+  theme(legend.position = "none")
+ ,
+ 
+ 
+  ggplot(ass_rates %>% filter(between(immov_change, quantile(immov_change, .025), quantile(immov_change,.975))), aes(immov_change, fill = factor(dyn_cum_2)))+
+  geom_density(alpha = .5)+
+      scale_fill_discrete(labels = c("Non-family", "Family"))+
+  theme_minimal()+
+  labs(title = "Percentage immovable of total assets ",subtitle = "GE 2014-19", fill = ""))
 ```
 
 
+<!-- ##### Total Asset growth -->
+
+<!-- ```{r GE Asset growth} -->
+
+<!-- #dyn_adr_ge$year <- factor(dyn_adr$year, levels = c("2009", "2012","2014","2017","2019")) -->
+
+<!-- dyn_adr_ge_r <- dyn_adr_ge %>% group_by(fam_rel_id_uniq) %>% mutate(count_pid = n())  %>% filter(count_pid > 1) -->
+
+<!-- ge_gr <- dyn_adr_ge_r %>%  group_by(dyn_cum_2_text,year) %>% summarise(mean_assets = mean(total_assets, trim =.1) ) -->
+
+<!--  ggplot(ge_gr,aes(factor(year, levels = c("2009", "2014","2019")), mean_assets,color = factor(dyn_cum_2_text), group = factor(dyn_cum_2_text)))+ -->
+<!--   geom_line()+ -->
+<!--   geom_point()+ -->
+<!--     theme_minimal()+ -->
+<!--     theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+ -->
+<!--     scale_y_continuous(label = label_number_si())+ -->
+<!--     labs(title = "Average asset growth over years", subtitle = "General election", x = "Year", y = "Assets" )+ -->
+<!--   theme(legend.position = "top", -->
+<!--         plot.background = element_blank(), -->
+<!--         plot.title = element_text(family = "serif",hjust = 0.5, size = 20),  -->
+<!--         plot.subtitle = element_text(hjust = 0.5, size = 15, -->
+<!--                                      ), -->
+<!--         text = element_text(color = "gray20", family = "serif"), -->
+<!--         axis.text.x = element_text( -->
+<!--                                    hjust = .5, vjust = 0), -->
+<!--         legend.title = element_blank(), -->
+<!--         legend.text = element_text(size = 15), -->
+<!--         axis.text = element_text(face = "italic", size = 10), -->
+<!--         axis.title.x = element_text(vjust = -.5,hjust = .5, size = 14, -->
+<!--                                   margin = unit(c(3, 0, 0, 0), "mm")), -->
+<!--         axis.title.y = element_text(vjust = -.5,hjust = .5, size = 14, -->
+<!--                                   margin = unit(c(0, 3, 0, 0), "mm")), -->
+<!--         axis.ticks = element_blank(), -->
+<!--         ) -->
 
 
 
-##### Movable assets
-
-```{r ge movable assets}
-dyn_adr_ge_r <- dyn_adr_ge %>% group_by(fam_rel_id_uniq) %>% mutate(count_pid = n())  %>% filter(count_pid > 2)
-
-ge_gr <- dyn_adr_ge_r %>%  group_by(dyn_cum_2_text,year) %>% summarise(mean_mov_assets = mean(total_movable_assets_totals, trim =.1) )
-
- ggplot(ge_gr,aes(factor(year, levels = c("2009", "2014","2019")), mean_mov_assets,color = factor(dyn_cum_2_text), group = factor(dyn_cum_2_text)))+
-  geom_line()+
-  geom_point()+
-    theme_minimal()+
-    theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
-    scale_y_continuous(label = label_number_si())+
-    labs(title = "Average movable asset growth over years", subtitle = "General election", x = "Year", y = "Assets" )+
-  theme(legend.position = "top",
-        plot.background = element_blank(),
-        plot.title = element_text(family = "serif",hjust = 0.5, size = 20), 
-        plot.subtitle = element_text(hjust = 0.5, size = 15,
-                                     ),
-        text = element_text(color = "gray20", family = "serif"),
-        axis.text.x = element_text(
-                                   hjust = .5, vjust = 0),
-        legend.title = element_blank(),
-        legend.text = element_text(size = 15),
-        axis.text = element_text(face = "italic", size = 10),
-        axis.title.x = element_text(vjust = -.5,hjust = .5, size = 14,
-                                  margin = unit(c(3, 0, 0, 0), "mm")),
-        axis.title.y = element_text(vjust = -.5,hjust = .5, size = 14,
-                                  margin = unit(c(0, 3, 0, 0), "mm")),
-        axis.ticks = element_blank(),
-        )
-```
+<!-- ``` -->
 
 
-##### Immovable assets
-
-```{r ge immovable assets, fig.height=6, fig.width=8}
-dyn_adr_ge_r <- dyn_adr_ge %>% group_by(fam_rel_id_uniq) %>% mutate(count_pid = n())  %>% filter(count_pid > 2)
-
-ge_gr <- dyn_adr_ge_r %>%  group_by(dyn_cum_2_text,year) %>% summarise(mean_immov_assets = mean(total_immovable_assets_totals, trim =.1) )
-
- ggplot(ge_gr,aes(factor(year, levels = c("2009", "2014","2019")), mean_immov_assets,color = factor(dyn_cum_2_text), group = factor(dyn_cum_2_text)))+
-  geom_line()+
-  geom_point()+
-    theme_minimal()+
-    theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
-    scale_y_continuous(label = label_number_si())+
-    labs(title = "Average immovable asset growth over years", subtitle = "General election", x = "Year", y = "Assets" )+
-  theme(legend.position = "top",
-        plot.background = element_blank(),
-        plot.title = element_text(family = "serif",hjust = 0.5, size = 20), 
-        plot.subtitle = element_text(hjust = 0.5, size = 15,
-                                     ),
-        text = element_text(color = "gray20", family = "serif"),
-        axis.text.x = element_text(
-                                   hjust = .5, vjust = 0),
-        legend.title = element_blank(),
-        legend.text = element_text(size = 15),
-        axis.text = element_text(face = "italic", size = 10),
-        axis.title.x = element_text(vjust = -.5,hjust = .5, size = 14,
-                                  margin = unit(c(3, 0, 0, 0), "mm")),
-        axis.title.y = element_text(vjust = -.5,hjust = .5, size = 14,
-                                  margin = unit(c(0, 3, 0, 0), "mm")),
-        axis.ticks = element_blank(),
-        )
 
 
-#plot_grid(ge_ass_1, ge_ass_2, ge_ass_3)
-```
+
+<!-- ##### Movable assets -->
+
+<!-- ```{r ge movable assets} -->
+<!-- dyn_adr_ge_r <- dyn_adr_ge %>% group_by(fam_rel_id_uniq) %>% mutate(count_pid = n())  %>% filter(count_pid > 2) -->
+
+<!-- ge_gr <- dyn_adr_ge_r %>%  group_by(dyn_cum_2_text,year) %>% summarise(mean_mov_assets = mean(total_movable_assets_totals, trim =.1) ) -->
+
+<!--  ggplot(ge_gr,aes(factor(year, levels = c("2009", "2014","2019")), mean_mov_assets,color = factor(dyn_cum_2_text), group = factor(dyn_cum_2_text)))+ -->
+<!--   geom_line()+ -->
+<!--   geom_point()+ -->
+<!--     theme_minimal()+ -->
+<!--     theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+ -->
+<!--     scale_y_continuous(label = label_number_si())+ -->
+<!--     labs(title = "Average movable asset growth over years", subtitle = "General election", x = "Year", y = "Assets" )+ -->
+<!--   theme(legend.position = "top", -->
+<!--         plot.background = element_blank(), -->
+<!--         plot.title = element_text(family = "serif",hjust = 0.5, size = 20),  -->
+<!--         plot.subtitle = element_text(hjust = 0.5, size = 15, -->
+<!--                                      ), -->
+<!--         text = element_text(color = "gray20", family = "serif"), -->
+<!--         axis.text.x = element_text( -->
+<!--                                    hjust = .5, vjust = 0), -->
+<!--         legend.title = element_blank(), -->
+<!--         legend.text = element_text(size = 15), -->
+<!--         axis.text = element_text(face = "italic", size = 10), -->
+<!--         axis.title.x = element_text(vjust = -.5,hjust = .5, size = 14, -->
+<!--                                   margin = unit(c(3, 0, 0, 0), "mm")), -->
+<!--         axis.title.y = element_text(vjust = -.5,hjust = .5, size = 14, -->
+<!--                                   margin = unit(c(0, 3, 0, 0), "mm")), -->
+<!--         axis.ticks = element_blank(), -->
+<!--         ) -->
+<!-- ``` -->
+
+
+<!-- ##### Immovable assets -->
+
+<!-- ```{r ge immovable assets, fig.height=6, fig.width=8} -->
+<!-- dyn_adr_ge_r <- dyn_adr_ge %>% group_by(fam_rel_id_uniq) %>% mutate(count_pid = n())  %>% filter(count_pid > 2) -->
+
+<!-- ge_gr <- dyn_adr_ge_r %>%  group_by(dyn_cum_2_text,year) %>% summarise(mean_immov_assets = mean(total_immovable_assets_totals, trim =.1) ) -->
+
+<!--  ggplot(ge_gr,aes(factor(year, levels = c("2009", "2014","2019")), mean_immov_assets,color = factor(dyn_cum_2_text), group = factor(dyn_cum_2_text)))+ -->
+<!--   geom_line()+ -->
+<!--   geom_point()+ -->
+<!--     theme_minimal()+ -->
+<!--     theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+ -->
+<!--     scale_y_continuous(label = label_number_si())+ -->
+<!--     labs(title = "Average immovable asset growth over years", subtitle = "General election", x = "Year", y = "Assets" )+ -->
+<!--   theme(legend.position = "top", -->
+<!--         plot.background = element_blank(), -->
+<!--         plot.title = element_text(family = "serif",hjust = 0.5, size = 20),  -->
+<!--         plot.subtitle = element_text(hjust = 0.5, size = 15, -->
+<!--                                      ), -->
+<!--         text = element_text(color = "gray20", family = "serif"), -->
+<!--         axis.text.x = element_text( -->
+<!--                                    hjust = .5, vjust = 0), -->
+<!--         legend.title = element_blank(), -->
+<!--         legend.text = element_text(size = 15), -->
+<!--         axis.text = element_text(face = "italic", size = 10), -->
+<!--         axis.title.x = element_text(vjust = -.5,hjust = .5, size = 14, -->
+<!--                                   margin = unit(c(3, 0, 0, 0), "mm")), -->
+<!--         axis.title.y = element_text(vjust = -.5,hjust = .5, size = 14, -->
+<!--                                   margin = unit(c(0, 3, 0, 0), "mm")), -->
+<!--         axis.ticks = element_blank(), -->
+<!--         ) -->
+
+
+<!-- #plot_grid(ge_ass_1, ge_ass_2, ge_ass_3) -->
+<!-- ``` -->
 
 
 ### AE {.tabset}
@@ -631,113 +706,169 @@ ggplot(dyn_adr_ae, aes(factor(dyn_cum_2),total_assets))+
 
 #### Asset Growth {.tabset}
 
-##### Total Assets
+ets
 
-```{r AE Asset growth}
 
-dyn_adr_ae_r <- dyn_adr_ae %>% group_by(fam_rel_id_uniq) %>% mutate(count_pid = n())  %>% filter(count_pid > 1)
 
-ae_gr <- dyn_adr_ae_r %>% group_by(dyn_cum_2_text,year) %>% summarise(mean_assets = mean(total_assets, trim = .1)) 
+```{r}
+adr_12 <- dyn_adr %>% filter(election_type=="AE" & year ==2012) %>% select(family_id, year,tot_12 = total_assets, immov_12=total_immovable_assets_totals, mov_12= total_movable_assets_totals) %>% distinct(family_id, .keep_all = TRUE)
 
-ggplot(ae_gr,aes(factor(year, levels = c( "2012","2017")), mean_assets,color = factor(dyn_cum_2_text), group = factor(dyn_cum_2_text)))+
-  geom_line()+
-  geom_point()+
-    theme_minimal()+
-    theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
-    scale_y_continuous(label = label_number_si())+
-    labs(title = "Average asset growth over years", subtitle = "Assembly election", x = "Year", y = "Assets" )+
-  theme(legend.position = "top",
-        plot.background = element_blank(),
-        plot.title = element_text(family = "serif",hjust = 0.5, size = 20), 
-        plot.subtitle = element_text(hjust = 0.5, size = 15,
-                                     ),
-        text = element_text(color = "gray20", family = "serif"),
-        axis.text.x = element_text(
-                                   hjust = .5, vjust = 0),
-        legend.title = element_blank(),
-        legend.text = element_text(size = 15),
-        axis.text = element_text(face = "italic", size = 10),
-        axis.title.x = element_text(vjust = -.5,hjust = .5, size = 14,
-                                  margin = unit(c(3, 0, 0, 0), "mm")),
-        axis.title.y = element_text(vjust = -.5,hjust = .5, size = 14,
-                                  margin = unit(c(0, 3, 0, 0), "mm")),
-        axis.ticks = element_blank(),
-        )
+adr_17 <- dyn_adr %>% filter(election_type=="AE" & year ==2017)  %>% select(family_id, year,tot_17 = total_assets, immov_17 = total_immovable_assets_totals, mov_17 =total_movable_assets_totals, dyn_cum_2) %>% distinct(family_id, .keep_all = TRUE)
+
+
+
+ass_12_17 <- inner_join(adr_17,adr_12, by = "family_id") 
+
+ass_rates <- ass_12_17  %>% mutate(tot_change = (tot_17-tot_12)/tot_12 *100, mov_change = (mov_17-mov_12)/mov_12 *100, immov_change = (immov_17-immov_12)/immov_12 *100) 
+
+
+ass_12_17  %>% mutate(tot_change = (tot_17-tot_12)/tot_12 *100, mov_change = (mov_17-mov_12)/mov_12 *100, immov_change = (immov_17-immov_12)/immov_12 *100) %>% group_by(dyn_cum_2) %>% summarise(obs = n(),
+                                                                                                                                                                                                    pc_change_tot = mean(tot_change, trim = .025,na.rm =TRUE), pc_change_mov = mean(mov_change,trim = .025, na.rm = TRUE), pct_change_immov = mean(immov_change,trim = .025, na.rm = TRUE)) %>% kable() %>% kable_styling(full_width = F)
+
 
 
 
 ```
 
+---
+
+
+```{r}
 
 
 
-##### Movable assets
+library(cowplot)
 
-
-```{r ae movable assets}
-dyn_adr_ae_r <- dyn_adr_ae %>% group_by(fam_rel_id_uniq) %>% mutate(count_pid = n())  %>% filter(count_pid > 2)
-
-ae_gr <- dyn_adr_ae_r %>%  group_by(dyn_cum_2_text,year) %>% summarise(mean_mov_assets = mean(total_movable_assets_totals, trim =.1) )
-
-ggplot(ae_gr,aes(factor(year, levels = c("2012","2017")), mean_mov_assets,color = factor(dyn_cum_2_text), group = factor(dyn_cum_2_text)))+
-  geom_line()+
-  geom_point()+
+ cowplot::plot_grid(ggplot(ass_rates %>% filter(between(tot_change, quantile(tot_change, .025), quantile(tot_change,.975))), aes(tot_change, fill = factor(dyn_cum_2)))+
+  geom_density(alpha = .5)+
   theme_minimal()+
-  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
-  scale_y_continuous(label = label_number_si())+
-  labs(title = "Average movable asset growth over years", subtitle = "Assembly election", x = "Year", y = "Assets" )+
-  theme(legend.position = "top",
-        plot.background = element_blank(),
-        plot.title = element_text(family = "serif",hjust = 0.5, size = 20), 
-        plot.subtitle = element_text(hjust = 0.5, size = 15,
-        ),
-        text = element_text(color = "gray20", family = "serif"),
-        axis.text.x = element_text(
-          hjust = .5, vjust = 0),
-        legend.title = element_blank(),
-        legend.text = element_text(size = 15),
-        axis.text = element_text(face = "italic", size = 10),
-        axis.title.x = element_text(vjust = -.5,hjust = .5, size = 14,
-                                    margin = unit(c(3, 0, 0, 0), "mm")),
-        axis.title.y = element_text(vjust = -.5,hjust = .5, size = 14,
-                                    margin = unit(c(0, 3, 0, 0), "mm")),
-        axis.ticks = element_blank(),
-  )
-```
+  labs(title = "Percentage growth of total assets ", subtitle = "AE 2012-17")+
+  theme(legend.position = "none"),
 
 
-##### Immovable assets
+ ggplot(ass_rates %>% filter(between(mov_change, quantile(mov_change, .025), quantile(mov_change,.975))), aes(mov_change, fill = factor(dyn_cum_2)))+
 
-```{r ae immovable assets}
-dyn_adr_ae_r <- dyn_adr_ae %>% group_by(fam_rel_id_uniq) %>% mutate(count_pid = n())  %>% filter(count_pid > 2)
-
-ae_gr <- dyn_adr_ae_r %>%  group_by(dyn_cum_2_text,year) %>% summarise(mean_immov_assets = mean(total_immovable_assets_totals, trim =.1) )
-
-ggplot(ae_gr,aes(factor(year, levels = c("2012","2017")), mean_immov_assets,color = factor(dyn_cum_2_text), group = factor(dyn_cum_2_text)))+
-  geom_line()+
-  geom_point()+
+  geom_density(alpha = .5)+
   theme_minimal()+
-  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
-  scale_y_continuous(label = label_number_si())+
-  labs(title = "Average immmovable asset growth over years", subtitle = "Assembly election", x = "Year", y = "Assets" )+
-  theme(legend.position = "top",
-        plot.background = element_blank(),
-        plot.title = element_text(family = "serif",hjust = 0.5, size = 20), 
-        plot.subtitle = element_text(hjust = 0.5, size = 15,
-        ),
-        text = element_text(color = "gray20", family = "serif"),
-        axis.text.x = element_text(
-          hjust = .5, vjust = 0),
-        legend.title = element_blank(),
-        legend.text = element_text(size = 15),
-        axis.text = element_text(face = "italic", size = 10),
-        axis.title.x = element_text(vjust = -.5,hjust = .5, size = 14,
-                                    margin = unit(c(3, 0, 0, 0), "mm")),
-        axis.title.y = element_text(vjust = -.5,hjust = .5, size = 14,
-                                    margin = unit(c(0, 3, 0, 0), "mm")),
-        axis.ticks = element_blank(),
-  )
+  labs(title = "Percentage growth of movable assets ", subtitle = "AE 2012-17")+
+  theme(legend.position = "none")
+ ,
+ 
+ 
+  ggplot(ass_rates %>% filter(between(immov_change, quantile(immov_change, .025), quantile(immov_change,.975))), aes(immov_change, fill = factor(dyn_cum_2)))+
+  geom_density(alpha = .5)+
+      scale_fill_discrete(labels = c("Non-family", "Family"))+
+  theme_minimal()+
+  labs(title = "Percentage immovable of total assets ", subtitle = "AE 2012-17", fill = ""))
+   
 ```
+
+
+<!-- ```{r AE Asset growth} -->
+
+<!-- dyn_adr_ae_r <- dyn_adr_ae %>% group_by(fam_rel_id_uniq) %>% mutate(count_pid = n())  %>% filter(count_pid > 1) -->
+
+<!-- ae_gr <- dyn_adr_ae_r %>% group_by(dyn_cum_2_text,year) %>% summarise(mean_assets = mean(total_assets, trim = .1))  -->
+
+<!-- ggplot(ae_gr,aes(factor(year, levels = c( "2012","2017")), mean_assets,color = factor(dyn_cum_2_text), group = factor(dyn_cum_2_text)))+ -->
+<!--   geom_line()+ -->
+<!--   geom_point()+ -->
+<!--     theme_minimal()+ -->
+<!--     theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+ -->
+<!--     scale_y_continuous(label = label_number_si())+ -->
+<!--     labs(title = "Average asset growth over years", subtitle = "Assembly election", x = "Year", y = "Assets" )+ -->
+<!--   theme(legend.position = "top", -->
+<!--         plot.background = element_blank(), -->
+<!--         plot.title = element_text(family = "serif",hjust = 0.5, size = 20),  -->
+<!--         plot.subtitle = element_text(hjust = 0.5, size = 15, -->
+<!--                                      ), -->
+<!--         text = element_text(color = "gray20", family = "serif"), -->
+<!--         axis.text.x = element_text( -->
+<!--                                    hjust = .5, vjust = 0), -->
+<!--         legend.title = element_blank(), -->
+<!--         legend.text = element_text(size = 15), -->
+<!--         axis.text = element_text(face = "italic", size = 10), -->
+<!--         axis.title.x = element_text(vjust = -.5,hjust = .5, size = 14, -->
+<!--                                   margin = unit(c(3, 0, 0, 0), "mm")), -->
+<!--         axis.title.y = element_text(vjust = -.5,hjust = .5, size = 14, -->
+<!--                                   margin = unit(c(0, 3, 0, 0), "mm")), -->
+<!--         axis.ticks = element_blank(), -->
+<!--         ) -->
+
+
+
+<!-- ``` -->
+
+
+
+
+<!-- ##### Movable assets -->
+
+
+<!-- ```{r ae movable assets} -->
+<!-- dyn_adr_ae_r <- dyn_adr_ae %>% group_by(fam_rel_id_uniq) %>% mutate(count_pid = n())  %>% filter(count_pid > 2) -->
+
+<!-- ae_gr <- dyn_adr_ae_r %>%  group_by(dyn_cum_2_text,year) %>% summarise(mean_mov_assets = mean(total_movable_assets_totals, trim =.1) ) -->
+
+<!-- ggplot(ae_gr,aes(factor(year, levels = c("2012","2017")), mean_mov_assets,color = factor(dyn_cum_2_text), group = factor(dyn_cum_2_text)))+ -->
+<!--   geom_line()+ -->
+<!--   geom_point()+ -->
+<!--   theme_minimal()+ -->
+<!--   theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+ -->
+<!--   scale_y_continuous(label = label_number_si())+ -->
+<!--   labs(title = "Average movable asset growth over years", subtitle = "Assembly election", x = "Year", y = "Assets" )+ -->
+<!--   theme(legend.position = "top", -->
+<!--         plot.background = element_blank(), -->
+<!--         plot.title = element_text(family = "serif",hjust = 0.5, size = 20),  -->
+<!--         plot.subtitle = element_text(hjust = 0.5, size = 15, -->
+<!--         ), -->
+<!--         text = element_text(color = "gray20", family = "serif"), -->
+<!--         axis.text.x = element_text( -->
+<!--           hjust = .5, vjust = 0), -->
+<!--         legend.title = element_blank(), -->
+<!--         legend.text = element_text(size = 15), -->
+<!--         axis.text = element_text(face = "italic", size = 10), -->
+<!--         axis.title.x = element_text(vjust = -.5,hjust = .5, size = 14, -->
+<!--                                     margin = unit(c(3, 0, 0, 0), "mm")), -->
+<!--         axis.title.y = element_text(vjust = -.5,hjust = .5, size = 14, -->
+<!--                                     margin = unit(c(0, 3, 0, 0), "mm")), -->
+<!--         axis.ticks = element_blank(), -->
+<!--   ) -->
+<!-- ``` -->
+
+
+<!-- ##### Immovable assets -->
+
+<!-- ```{r ae immovable assets} -->
+<!-- dyn_adr_ae_r <- dyn_adr_ae %>% group_by(fam_rel_id_uniq) %>% mutate(count_pid = n())  %>% filter(count_pid > 2) -->
+
+<!-- ae_gr <- dyn_adr_ae_r %>%  group_by(dyn_cum_2_text,year) %>% summarise(mean_immov_assets = mean(total_immovable_assets_totals, trim =.1) ) -->
+
+<!-- ggplot(ae_gr,aes(factor(year, levels = c("2012","2017")), mean_immov_assets,color = factor(dyn_cum_2_text), group = factor(dyn_cum_2_text)))+ -->
+<!--   geom_line()+ -->
+<!--   geom_point()+ -->
+<!--   theme_minimal()+ -->
+<!--   theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+ -->
+<!--   scale_y_continuous(label = label_number_si())+ -->
+<!--   labs(title = "Average immmovable asset growth over years", subtitle = "Assembly election", x = "Year", y = "Assets" )+ -->
+<!--   theme(legend.position = "top", -->
+<!--         plot.background = element_blank(), -->
+<!--         plot.title = element_text(family = "serif",hjust = 0.5, size = 20),  -->
+<!--         plot.subtitle = element_text(hjust = 0.5, size = 15, -->
+<!--         ), -->
+<!--         text = element_text(color = "gray20", family = "serif"), -->
+<!--         axis.text.x = element_text( -->
+<!--           hjust = .5, vjust = 0), -->
+<!--         legend.title = element_blank(), -->
+<!--         legend.text = element_text(size = 15), -->
+<!--         axis.text = element_text(face = "italic", size = 10), -->
+<!--         axis.title.x = element_text(vjust = -.5,hjust = .5, size = 14, -->
+<!--                                     margin = unit(c(3, 0, 0, 0), "mm")), -->
+<!--         axis.title.y = element_text(vjust = -.5,hjust = .5, size = 14, -->
+<!--                                     margin = unit(c(0, 3, 0, 0), "mm")), -->
+<!--         axis.ticks = element_blank(), -->
+<!--   ) -->
+<!-- ``` -->
 
 ### Assets v/s caste
 
