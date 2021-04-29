@@ -331,6 +331,8 @@ dyn_all_uniq_fam %>% group_by(level) %>% summarise(count = n()) %>% arrange(-cou
 
 
 
+#dyn_all_uniq_fam %>% group_by(level) %>% summarise(count = n()) %>% arrange(-count)
+
 
 ```
 
@@ -386,14 +388,7 @@ ggplot(ae_dyn, aes(x = factor(year), y=prop, group = 1))+
   theme_minimal()+
   # theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
   theme(
-    # plot.margin = unit(c(.5,.5,.5,.5), "cm"),
-    #     plot.background = element_blank(),
-    #     plot.title = element_text(hjust = 0.5, size = 20, face = "bold", family = "serif"),
-    #     text = element_text(color = "gray20", family = "serif"),
-    #     legend.title = element_blank(),
-    #     legend.text = element_text(size = 15),
-    #     axis.text = element_text(face = "italic", size = 15),
-    #     axis.title = element_text(vjust = -1, size = 18),
+
         axis.line.x= element_line(color = "gray50", size = .5),
         panel.grid.major.x  = element_blank(),
         panel.grid.minor.x   = element_blank()
@@ -521,7 +516,7 @@ dyn_ae_ge_fam <- dyn_ae_ge %>% filter(dyn_tot_2 ==1)
 
 
 
-dyn_ae_ge_fam <- dyn_ae_ge_fam %>% group_by(family_id) %>% mutate(n_el_w_fam =n_distinct(year[position==1 & dyn_cum_2==1]), n_el_c_fam = n_distinct(year[dyn_cum_2==1]))
+dyn_ae_ge_fam <- dyn_ae_ge_fam %>% group_by(family_id) %>% mutate(n_el_w_fam =n_distinct(election_id[position==1 & dyn_cum_2==1]), n_el_c_fam = n_distinct(election_id[dyn_cum_2==1]))
 
 dyn_ae_ge_fam_uniq <- dyn_ae_ge_fam %>% arrange(-year) %>% distinct(family_id,  .keep_all = TRUE)
 
@@ -562,6 +557,36 @@ ggplot(n_val, aes(value, fill =name ))+
   labs(fill = "", title= "Families contested and won")
 ```
 
+
+
+
+
+<!-- ```{r} -->
+
+
+<!-- dyn_ae_ge <- dyn_ae_ge %>% group_by(family_id) %>% mutate(n_el_w =n_distinct(election_id[position==1]), n_el_c = n_distinct(election_id)) -->
+
+<!--   dyn_ae_ge %>% select(family_id,dyn_tot_2,n_el_w, n_el_c) %>% distinct(family_id, .keep_all = TRUE) %>% select(family_id, dyn_tot_2, n_el_c, n_el_w) %>% select(1:3) %>%  -->
+<!-- ggplot( aes(n_el_c, fill =factor(dyn_tot_2) ))+ -->
+<!--  geom_density(alpha = .5) -->
+
+
+<!--     dyn_ae_ge %>% select(family_id,dyn_tot_2,n_el_w, n_el_c) %>% filter(dyn_tot_2 ==0)%>% distinct(family_id, .keep_all = TRUE) %>% select(family_id, dyn_tot_2,  n_el_w,n_el_c) %>% select(1:3) %>% ungroup() %>%   -->
+<!-- ggplot( aes(n_el_w ))+ -->
+<!--       geom_density() -->
+<!--       geom_histogram() -->
+
+<!--  geom_density(alpha = .5) -->
+
+<!--  dyn_ae_ge %>% select(family_id,dyn_tot_2,n_el_w, n_el_c) %>% distinct(family_id, .keep_all = TRUE) %>% select(family_id, dyn_tot_2, n_el_c, n_el_w) %>% select(1:3) %>% group_by(dyn_tot_2,n_el_c) %>% summarise(count = n()) %>%  -->
+<!-- ggplot( aes(factor(dyn_tot_2),count,fill = factor(n_el_c )))+ -->
+<!--   geom_bar(stat = "identity", position = "dodge" ) -->
+<!--  geom_density(alpha = .5)+ -->
+<!--   theme_minimal()+ -->
+<!--   scale_fill_discrete(labels = c("Contested", "Won"))+ -->
+<!--   labs(fill = "", title= "Families contested and won") -->
+
+<!-- ``` -->
 
 
 
@@ -653,9 +678,14 @@ dyn_ae_ge %>% group_by(election_type, dyn_cum_2,year) %>% summarise(count = sum(
 
 ---
 
-## Life span
+## Life span {.tabset}
+
+### family
 
 This section looks at the life span of families. Life span is calculated by computing the difference in entry year of the family with the last appearance of a member from the same family. Life span is simply the longitudinal life of a family. This  is calculated by simply computing the difference in the entry year of a family with the year in which the last member has contested. The following graph is a density chart of the the life span of the unique families in the dataset.
+
+
+Life span in this context is the year difference between the election that the patriarch contested before the second member and the last election that contested by someone from the family.
 
 
 ```{r}
@@ -686,7 +716,7 @@ medx <- median(dyn_ae_ge_fam_uniq$life_span)
 meanx <- mean(dyn_ae_ge_fam_uniq$life_span)
 
 ggplot(dyn_ae_ge_fam_uniq)+
-  geom_density(aes(x=life_span, y = ..density..),size = 1, color = 'black')+
+  geom_density(aes(x=life_span+5, y = ..density..),size = 1, color = 'black')+
   geom_vline(xintercept = medx, color = "red")+
   geom_vline(xintercept = meanx, color = "blue")+
   geom_text(aes(x=(medx+3), label="Median", y=0.01), colour="red", size =4, angle = 90 )+
@@ -703,6 +733,101 @@ ggplot(dyn_ae_ge_fam_uniq)+
 ```
 
 
+
+### Individual life span
+
+life span in this context is the the year diffrence between the first and last election the candidate has appeared.
+
+
+```{r}
+
+dyn_non_fam <- dyn_ae_ge %>% filter(dyn_tot_2==0)%>% group_by(family_id) %>% summarise(max_year = max(year), min_year = min(year)) %>% mutate(life_span = max_year-min_year) 
+
+
+medx <- median(dyn_non_fam$life_span)
+meanx <- mean(dyn_non_fam$life_span)
+
+
+
+ggplot(dyn_non_fam)+
+  geom_density(aes(x=life_span+5, y = ..density..),size = 1, color = 'black')+
+  geom_vline(xintercept = medx, color = "red")+
+  geom_vline(xintercept = meanx, color = "blue")+
+  geom_text(aes(x=(medx+1), label="Median", y=0.01), colour="red", size =4, angle = 90 )+
+  geom_text(aes(x=(meanx -1), label="Mean", y = 0.01), colour="blue", size = 4, angle = 90)+
+  theme_minimal_hgrid()+
+  labs(title = "Life span of non-families", x= "Year", y = "Density")+
+  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
+        plot.background = element_blank(),
+        #plot.title = element_text(hjust = 0.5, size = 20, face = "bold", family = "serif",
+                                 # margin = margin(t = 0, r = 0, b = 20, l = 0))
+        )
+
+
+
+```
+
+
+
+## Experience {.tabset}
+
+### Family
+
+This variable takes into year that ruled by a dynast ruler
+
+
+```{r}
+
+
+#dyn_ae_ge_fam_uniq %>% select(family_id, fam_exp_tot)
+
+medx <- median(dyn_ae_ge_fam_uniq$fam_exp_tot)
+meanx <- mean(dyn_ae_ge_fam_uniq$fam_exp_tot)
+
+ggplot(dyn_ae_ge_fam_uniq)+
+  geom_density(aes(x=fam_exp_tot, y = ..density..),size = 1, color = 'black')+
+  geom_vline(xintercept = medx, color = "red")+
+  geom_vline(xintercept = meanx, color = "blue")+
+  geom_text(aes(x=(medx-3), label="Median", y=0.01), colour="red", size =4, angle = 90 )+
+  geom_text(aes(x=(meanx +3), label="Mean", y = 0.01), colour="blue", size = 4, angle = 90)+
+  theme_minimal_hgrid()+
+  labs(title = "Political experience of families", x= "Year", y = "Density")+
+  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
+        plot.background = element_blank(),
+        #plot.title = element_text(hjust = 0.5, size = 20, face = "bold", family = "serif",
+                                 # margin = margin(t = 0, r = 0, b = 20, l = 0))
+        )
+
+
+```
+
+
+### non-families
+
+
+```{r}
+dyn_non_fam <- dyn_ae_ge %>% filter(dyn_tot_2==0)
+
+
+medx <- median(dyn_non_fam$fam_exp_tot)
+meanx <- mean(dyn_non_fam$fam_exp_tot)
+
+
+
+ggplot(dyn_non_fam)+
+  geom_density(aes(x=fam_exp_tot, y = ..density..),size = 1, color = 'black')+
+  geom_vline(xintercept = medx, color = "red")+
+  geom_vline(xintercept = meanx, color = "blue")+
+  geom_text(aes(x=(medx-3), label="Median", y=0.01), colour="red", size =4, angle = 90 )+
+  geom_text(aes(x=(meanx +3), label="Mean", y = 0.01), colour="blue", size = 4, angle = 90)+
+  theme_minimal_hgrid()+
+  labs(title = "Political experience of non-families", x= "Year", y = "Density")+
+  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
+        plot.background = element_blank(),
+        #plot.title = element_text(hjust = 0.5, size = 20, face = "bold", family = "serif",
+                                 # margin = margin(t = 0, r = 0, b = 20, l = 0))
+        )
+```
 
 
 
