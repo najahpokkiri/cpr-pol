@@ -48,6 +48,11 @@ select <- dplyr::select
 <!-- In this post we will be looking at dynasticism at the local level. We will be using two different definitions. 1 - category 2 - Where we only consider if an individual/set of individuals have connections to the ae-ge level. 2 - category 4 - We consider them as a dynast as long as they have/ have had members at one of the levels. -->
 
 
+## Summary {.tabset}
+
+
+### All years
+
 
 **Break-up of dynast representatives in local body data**
 
@@ -61,6 +66,45 @@ dyn_lb <- dyn_all %>% filter(election_type %!in% c("AE", "GE"))
 dyn_lb %>%filter(position ==1)%>% group_by(election_type) %>% summarise(count = n(), dyn= sum(dyn_cum_4), pc= round(dyn/count*100)) %>% 
   select(election_type, pc) %>% kable(col.names = c("Election", "Dynast %")) %>% kable_styling(full_width = F)
 
+
+
+```
+
+### year by eyar
+
+
+```{r}
+
+cowplot::plot_grid(
+dyn_lb %>%filter(position ==1 & election_type %in% c("BP","ZP"))%>% group_by(election_type, year) %>% summarise(count = n(), dyn= sum(dyn_cum_4), pc= round(dyn/count*100)) %>% 
+  ggplot(aes(factor(year), pc, group=election_type, color = election_type))+
+  geom_line(size = 1)+
+  labs(title = "Dynasts in RLB", x= "Year", y = "Percentage")+
+  colorspace::scale_color_discrete_qualitative(palette = "dark3")+
+  geom_point()+
+  ylim(0,30)+
+  theme_minimal()+
+    theme(#legend.position = "bottom",
+        axis.line.x= element_line(color = "gray50", size = .5),
+        panel.grid.major.x  = element_blank(),
+        panel.grid.minor   = element_blank()
+        
+  ),
+
+dyn_lb %>%filter(position ==1 & election_type %!in% c("BP","ZP"))%>% group_by(election_type, year) %>% summarise(count = n(), dyn= sum(dyn_cum_4), pc= round(dyn/count*100)) %>% 
+  ggplot(aes(factor(year), pc, group=election_type, color = election_type))+
+  geom_line(size = 1)+
+  labs(title = "Dynasts in ULB", x= "Year", y = "Percentage")+
+  colorspace::scale_color_discrete_qualitative(palette = "dark3")+
+  geom_point()+
+  ylim(0,40)+
+  theme_minimal()+
+    theme(#legend.position = "bottom",
+        axis.line.x= element_line(color = "gray50", size = .5),
+        panel.grid.major.x  = element_blank(),
+        panel.grid.minor   = element_blank()
+        
+  ), ncol = 1)
 
 
 ```
