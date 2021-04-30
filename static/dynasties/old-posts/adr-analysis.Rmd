@@ -277,23 +277,20 @@ ass_12_17  %>% mutate(tot_change = (tot_17-tot_12)/tot_12 *100, mov_change = (mo
 
 
 ```{r}
- cowplot::plot_grid(ggplot(ass_rates, aes(tot_change, fill = success_cat))+
-  geom_density(alpha = .5)+
-  theme_minimal()+
-  labs(title = "Percentage growth of total assets ", subtitle = "AE 2012-17")+
-  theme(legend.position = "none"),
 
- ggplot(ass_rates, aes(mov_change, fill = success_cat))+
-  geom_density(alpha = .5)+
-  theme_minimal()+
-  labs(title = "Percentage growth of movable assets ", subtitle = "AE 2012-17")+
-  theme(legend.position = "none"),
+rates <- ass_rates %>%select(success_cat, mov_change, immov_change, tot_change) %>% pivot_longer(cols =2:4 )
 
- ggplot(ass_rates, aes(immov_change, fill = success_cat))+
-  geom_density(alpha = .5)+
+
+ggplot(rates %>% filter(value<600), aes(success_cat,value))+
+  geom_boxplot()+
+  facet_wrap(~name)+
   theme_minimal()+
-  labs(title = "Percentage growth of immovable assets ", subtitle = "AE 2012-17"))
-  
+  labs(title = "Percentage growth of  assets ", subtitle = "AE 2012-17")+
+  theme(legend.position = "none")
+
+
+
+
 
 # 
 # cowplot::plot_grid(tot, mov, immov)
@@ -483,27 +480,21 @@ ass_09_19 %>% mutate(tot_change = (tot_19-tot_09)/tot_09 *100, mov_change = (mov
 
 ```{r}
 
- cowplot::plot_grid(ggplot(ass_rates %>% filter(between(tot_change, quantile(tot_change, .025), quantile(tot_change,.975))), aes(tot_change, fill = factor(dyn_cum_2)))+
-  geom_density(alpha = .5)+
+
+rates <- ass_rates %>%select(dyn_cum_2, mov_change, immov_change, tot_change) %>% pivot_longer(cols =2:4 )
+
+
+ggplot(rates %>% filter(value<600), aes(factor(dyn_cum_2),value))+
+  geom_boxplot()+
+  facet_wrap(~name)+
   theme_minimal()+
-  labs(title = "Percentage growth of total assets ", subtitle = "GE 2009:19")+
-  theme(legend.position = "none"),
-
-
- ggplot(ass_rates %>% filter(between(mov_change, quantile(mov_change, .025), quantile(mov_change,.975))), aes(mov_change, fill = factor(dyn_cum_2)))+
-
-  geom_density(alpha = .5)+
-  theme_minimal()+
-  labs(title = "Percentage growth of movable assets ", subtitle = "GE 2009:19")+
+  scale_x_discrete(labels = c("non-family", "family"))+
+  labs(title = "Percentage growth of  assets ", subtitle = "GE 2009:19", x = "", y = "% growth")+
   theme(legend.position = "none")
- ,
- 
- 
-  ggplot(ass_rates %>% filter(between(immov_change, quantile(immov_change, .025), quantile(immov_change,.975))), aes(immov_change, fill = factor(dyn_cum_2)))+
-  geom_density(alpha = .5)+
-      scale_fill_discrete(labels = c("Non-family", "Family"))+
-  theme_minimal()+
-  labs(title = "Percentage immovable of total assets ", subtitle = "AE 2012-17", fill = ""))
+
+
+
+
 ```
 
 ##### 2014-19
@@ -533,27 +524,18 @@ ass_14_19 %>% mutate(tot_change = (tot_19-tot_14)/tot_14 *100, mov_change = (mov
 
 ```{r}
 
- cowplot::plot_grid(ggplot(ass_rates %>% filter(between(tot_change, quantile(tot_change, .025), quantile(tot_change,.975))), aes(tot_change, fill = factor(dyn_cum_2)))+
-  geom_density(alpha = .5)+
+
+rates <- ass_rates %>%select(dyn_cum_2, mov_change, immov_change, tot_change) %>% pivot_longer(cols =2:4 )
+
+
+ggplot(rates %>% filter(value<600), aes(factor(dyn_cum_2),value))+
+  geom_boxplot()+
+  facet_wrap(~name)+
   theme_minimal()+
-  labs(title = "Percentage growth of total assets ", subtitle = "GE 2014-19")+
-  theme(legend.position = "none"),
-
-
- ggplot(ass_rates %>% filter(between(mov_change, quantile(mov_change, .025), quantile(mov_change,.975))), aes(mov_change, fill = factor(dyn_cum_2)))+
-
-  geom_density(alpha = .5)+
-  theme_minimal()+
-  labs(title = "Percentage growth of movable assets ", subtitle = "GE 2014-19")+
+  scale_x_discrete(labels = c("non-family", "family"))+
+  labs(title = "Percentage growth of  assets ", subtitle = "GE 2014-19", x = "", y = "% growth")+
   theme(legend.position = "none")
- ,
- 
- 
-  ggplot(ass_rates %>% filter(between(immov_change, quantile(immov_change, .025), quantile(immov_change,.975))), aes(immov_change, fill = factor(dyn_cum_2)))+
-  geom_density(alpha = .5)+
-      scale_fill_discrete(labels = c("Non-family", "Family"))+
-  theme_minimal()+
-  labs(title = "Percentage immovable of total assets ",subtitle = "GE 2014-19", fill = ""))
+
 ```
 
 
@@ -706,7 +688,7 @@ ggplot(dyn_adr_ae, aes(factor(dyn_cum_2),total_assets))+
 
 #### Asset Growth {.tabset}
 
-ets
+
 
 
 
@@ -735,32 +717,19 @@ ass_12_17  %>% mutate(tot_change = (tot_17-tot_12)/tot_12 *100, mov_change = (mo
 
 ```{r}
 
+rates <- ass_rates %>%select(dyn_cum_2, mov_change, immov_change, tot_change) %>% pivot_longer(cols =2:4 )
 
 
-library(cowplot)
-
- cowplot::plot_grid(ggplot(ass_rates %>% filter(between(tot_change, quantile(tot_change, .025), quantile(tot_change,.975))), aes(tot_change, fill = factor(dyn_cum_2)))+
-  geom_density(alpha = .5)+
+ggplot(rates %>% filter(value<600), aes(factor(dyn_cum_2),value))+
+  geom_boxplot()+
+  facet_wrap(~name)+
   theme_minimal()+
-  labs(title = "Percentage growth of total assets ", subtitle = "AE 2012-17")+
-  theme(legend.position = "none"),
-
-
- ggplot(ass_rates %>% filter(between(mov_change, quantile(mov_change, .025), quantile(mov_change,.975))), aes(mov_change, fill = factor(dyn_cum_2)))+
-
-  geom_density(alpha = .5)+
-  theme_minimal()+
-  labs(title = "Percentage growth of movable assets ", subtitle = "AE 2012-17")+
+  scale_x_discrete(labels = c("non-family", "family"))+
+  labs(title = "Percentage growth of  assets ", subtitle = "AE 20012:17", x = "", y = "% growth")+
   theme(legend.position = "none")
- ,
- 
- 
-  ggplot(ass_rates %>% filter(between(immov_change, quantile(immov_change, .025), quantile(immov_change,.975))), aes(immov_change, fill = factor(dyn_cum_2)))+
-  geom_density(alpha = .5)+
-      scale_fill_discrete(labels = c("Non-family", "Family"))+
-  theme_minimal()+
-  labs(title = "Percentage immovable of total assets ", subtitle = "AE 2012-17", fill = ""))
-   
+
+
+
 ```
 
 

@@ -646,7 +646,7 @@ success_cat <- dyn_ae_ge_fam_uniq$success_cat
 
 library(lfe)
 
-fit.mem <- felm(second_mem_dur ~caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land + linkage_down + second_mem_dur)
+fit.mem <- felm(second_mem_dur ~caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land + linkage_down )
 
 
 

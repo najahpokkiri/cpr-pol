@@ -323,7 +323,7 @@ library(fixest)
 
 
 
-fit.1 <- feglm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land +linkage_down+ post_90 +n_elections_w |district+year, family = binomial(link = "probit" ), data = df)
+fit.1 <- feglm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land + post_90 +n_elections_w |district+year, family = binomial(link = "probit" ), data = df)
 
 
 fit.2 <- feglm(linkage_up ~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land + post_90+n_elections_w|district+year, family = binomial(link = "probit"), data = df)
@@ -439,7 +439,7 @@ df  <- tibble(dynast , caste_uc, caste_yadav,caste_non_yadav_obc , caste_dalit ,
 
 
 
-fit.1 <- feglm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land +linkage_down+ post_90 + n_elections_w |district + year  , family = binomial(link = "probit"), data = df)
+fit.1 <- feglm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land + post_90 + n_elections_w |district + year  , family = binomial(link = "probit"), data = df)
 
 
 fit.2 <- feglm(linkage~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land + post_90 + n_elections_w| district+year , family = binomial(link = "probit"), data = df)
@@ -608,7 +608,7 @@ df <- tibble(dynast , caste_uc, caste_yadav,caste_non_yadav_obc , caste_dalit , 
 
 
 ```{r  results = "asis"}
-fit.1 <- feglm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land +linkage_down+ n_elections_w+ log(total_assets)  + serious_crime + turncoat |district+year, family = binomial(link = "probit"), data= df)
+fit.1 <- feglm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land + n_elections_w+ log(total_assets)  + serious_crime + turncoat |district+year, family = binomial(link = "probit"), data= df)
 
 
 #summary(fit.2)
@@ -716,7 +716,7 @@ df <- tibble(dynast , caste_uc, caste_yadav,caste_non_yadav_obc , caste_dalit , 
 
 
 ```{r results = "asis"}
-fit.1 <- feglm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land +  linkage_down+n_elections_w+ log(total_assets) + serious_crime + turncoat|pc+year, family = binomial(link = "probit"), data= df)
+fit.1 <- feglm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land + n_elections_w+ log(total_assets) + serious_crime + turncoat|pc+year, family = binomial(link = "probit"), data= df)
 
 
 
@@ -837,7 +837,7 @@ df <- tibble(dynast , caste_uc, caste_yadav,caste_non_yadav_obc , caste_dalit , 
 ```{r results="asis"}
 
 
-fit.1 <- feglm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land + linkage_down+n_elections_w+ log(total_assets)  + serious_crime + non_serious_crime+turncoat|constituency+year, family = binomial(link = "probit"), data = df)
+fit.1 <- feglm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land + n_elections_w+ log(total_assets)  + serious_crime + non_serious_crime+turncoat|constituency+year, family = binomial(link = "probit"), data = df)
 
 
 
