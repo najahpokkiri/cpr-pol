@@ -733,6 +733,41 @@ ggplot(dyn_ae_ge_fam_uniq)+
 ```
 
 
+### Individuals won
+
+
+```{r}
+
+dyn_non_fam_w <- dyn_ae_ge %>% filter(dyn_tot_2==0 &n_elections_won >=1)%>% group_by(family_id) %>% summarise(max_year = max(year), min_year = min(year)) %>% mutate(life_span = max_year-min_year) 
+
+
+medx <- median(dyn_non_fam_w$life_span)
+meanx <- mean(dyn_non_fam_w$life_span)
+
+# dyn_non_fam_w %>% filter(life_span>42)
+
+
+ggplot(dyn_non_fam_w)+
+  geom_density(aes(x=life_span+5, y = ..density..),size = 1, color = 'black')+
+  geom_vline(xintercept = medx, color = "red")+
+  xlim(0,50)+
+  ylim(0,.1)+
+  geom_vline(xintercept = meanx, color = "blue")+
+  geom_text(aes(x=(medx+.75), label="Median", y=0.01), colour="red", size =4, angle = 90 )+
+  geom_text(aes(x=(meanx -.75), label="Mean", y = 0.01), colour="blue", size = 4, angle = 90)+
+  theme_minimal_hgrid()+
+  labs(title = "Life span of non-families", x= "Year", y = "Density")+
+  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
+        plot.background = element_blank(),
+        #plot.title = element_text(hjust = 0.5, size = 20, face = "bold", family = "serif",
+                                 # margin = margin(t = 0, r = 0, b = 20, l = 0))
+        )
+
+
+# dyn_ae_ge %>% filter(family_id =="f0004207")
+
+```
+
 
 ### Individual life span
 
