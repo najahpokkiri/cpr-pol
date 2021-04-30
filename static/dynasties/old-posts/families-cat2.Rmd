@@ -661,7 +661,11 @@ stargazer(fit.mem, type="html", title = "What determines the years needed for th
 ```
 
 
-### Multinom. ref. - Rising
+### Multinom {.tabset}
+
+#### With second mem. {.tabset}
+
+##### Multinom. ref. - Rising
 
 
 ```{r message = FALSE, warning = FALSE, echo = FALSE}
@@ -683,7 +687,7 @@ stargazer(fit.multinom, type="html", keep = c("success_cat","minister_duration",
 ```
 
 
-### Multinom. ref. - Stable
+##### Multinom. ref. - Stable
 
 
 ```{r message = FALSE, warning = FALSE, echo = FALSE}
@@ -694,6 +698,48 @@ success_cat<-factor( success_cat,levels = c( "Stable","Rising","Declining"))
 library("nnet")
 
 fit.multinom <- multinom(success_cat~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land + linkage_down+ second_mem_dur)
+```
+
+```{r, results= "asis"}
+stargazer(fit.multinom, type="html", keep = c("success_cat","minister_duration","industry", "school_college", "land", "linkage_down","second_mem_dur"),add.lines = list (c("Caste control", "Yes","Yes","Yes")))
+```
+
+
+#### Without second mem. {.tabset}
+
+##### Multinom. ref. - Rising
+
+
+```{r message = FALSE, warning = FALSE, echo = FALSE}
+
+
+success_cat<-factor( success_cat,levels = c( "Rising","Stable","Declining"))
+
+library("nnet")
+
+fit.multinom <- multinom(success_cat~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land + linkage_down)
+
+
+
+```
+
+
+```{r, results= "asis"}
+stargazer(fit.multinom, type="html", keep = c("success_cat","minister_duration","industry", "school_college", "land", "linkage_down","second_mem_dur"),add.lines = list (c("Caste control", "Yes","Yes","Yes")))
+```
+
+
+##### Multinom. ref. - Stable
+
+
+```{r message = FALSE, warning = FALSE, echo = FALSE}
+
+
+success_cat<-factor( success_cat,levels = c( "Stable","Rising","Declining"))
+
+
+
+fit.multinom <- multinom(success_cat~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land + linkage_down)
 ```
 
 ```{r, results= "asis"}
