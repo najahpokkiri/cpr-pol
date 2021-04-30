@@ -79,6 +79,9 @@ Most of the files are just the replication of posts from the old site. All the p
 * [Candidate quality.](../../dynasties/old-posts/cand_quality.html)
 
 
+* [College](../../dynasties/old-posts/edu_inst.html)
+
+
 
 
 
