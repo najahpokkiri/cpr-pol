@@ -43,7 +43,7 @@ library(gridExtra)
 ```
 
 
-# PMGSY roads
+# PMGSY roads {.tabset}
 
 ```{r file config}
 
@@ -209,7 +209,224 @@ kable(caption = "PMGSY average number of contractors and amount sanctioned  wrt 
 ```
 
 
-# PWD roads
+# AC level data
+
+
+```{r}
+
+pmgsy_ac <- fread("D:/cpr/data/up_misc/merged_ac_all.csv")
+
+#names(pmgsy_ac)
+
+pmgsy_ac <-pmgsy_ac %>% group_by(year,constituency_no) %>% summarise(length = sum(`Road Length (Kms)`, na.rm = TRUE), n_roads = n(), cost = sum(`Sanction Cost`, na.rm = TRUE))
+
+
+dyn <- fread("D:/cpr/UP/up-dynasties/dyn_other_data/dyn_all.csv")
+
+dyn <- dyn %>% filter(year %in% c(2007, 2012)&position ==1&election_type=="AE")
+
+dyn_pmgsy <- left_join( dyn,pmgsy_ac, by = c("year", "constituency_no"))
+
+
+
+nl <- read.csv("D:/cpr/data/controls/nl_94_13.csv")
+
+nl <- nl %>% filter(year %in% c(2007, 2012))
+
+
+dyn_pmgsy <- right_join( nl,dyn_pmgsy, by = c( "year", "constituency_no"))
+
+
+
+```
+### Summary of the data {.tabset}
+
+
+Data is available for two years 2007 and 2012. So we expect to have 403*2 = 806 observations.
+
+
+
+#### Missing values
+
+
+
+
+```{r}
+
+dyn_pmgsy %>% summarise_at(c("length", "n_roads","cost"), ~sum(is.na(.)))
+
+```
+
+
+```{r}
+"/" <- function(x,y) ifelse(y==0,0,base:::"/"(x,y))
+
+dyn_pmgsy <- dyn_pmgsy %>% mutate(length = ifelse(is.na(length),0,length), n_roads = ifelse(is.na(n_roads),0,n_roads),cost_km = cost/length, cost_project = cost/n_roads )
+```
+
+
+#### Variable summary {.tabset}
+
+
+##### Length
+
+```{r}
+
+
+ 
+  ggplot(dyn_pmgsy %>% filter(length>0) , aes(length))+
+  geom_density(fill = "steelblue")+
+    theme_minimal()
+
+
+
+```
+
+
+##### Number of roads
+
+```{r}
+
+ 
+  ggplot(dyn_pmgsy, aes(n_roads))+
+  geom_density(fill = "steelblue")+
+    theme_minimal()
+```
+
+##### cost per kilometre
+
+```{r}
+  ggplot(dyn_pmgsy %>% filter(cost_km>0), aes(cost_km))+
+  geom_density(fill = "steelblue")+
+    theme_minimal()
+```
+
+
+##### cost per project
+
+
+```{r}
+
+  ggplot(dyn_pmgsy %>% filter(cost_project>0), aes(cost_project))+
+  geom_density(fill = "steelblue")+
+    theme_minimal()
+
+#dyn_pmgsy %>% select(cost_km)
+
+```
+
+
+### Regressions {.tabset}
+
+```{r}
+
+library(lfe)
+
+#summary(fit.length)
+
+fit.length <- felm(length ~dyn_cum_2 + constituency_type +log(electors)+incumbent+no_terms+turnout_percentage+ margin_percentage+enop+nl_tot|year+district_name|0|district_name, data = subset(dyn_pmgsy %>%  filter(length>0)))
+
+#summary(fit.length)
+
+
+
+fit.cost_km<- felm(cost_km~dyn_cum_2 + constituency_type +log(electors)+incumbent+no_terms+turnout_percentage+ margin_percentage+enop+nl_tot|year+district_name|0|district_name, data = subset(dyn_pmgsy %>%  filter(cost_km>0)))
+
+#summary(fit.cost_km)
+
+
+
+fit.cost_project<- felm(cost_project~dyn_cum_2 + incumbent+no_terms+constituency_type +log(electors)+turnout_percentage+ margin_percentage+enop+nl_tot|year+district_name|0|district_name, data = subset(dyn_pmgsy %>%  filter(cost_project>0)))
+
+#summary(fit.cost_project)
+
+```
+
+#### Linear
+
+
+```{r results="asis"}
+
+library(stargazer)
+
+ stargazer(fit.length, fit.cost_km, fit.cost_project, title="Linear regression - PMGSY  ",type = "html",
+align=TRUE,  no.space=TRUE,omit.stat=c("LL","ser","f"),dep.var.labels = c("road length", "Cost per km", "cost per project"),
+add.lines=list(c('Year fixed effects', 'Yes','Yes','Yes' ), c('District fixed effects', 'Yes','Yes','Yes'), c('Clustered error', 'District','District','District')))
+
+```
+
+---
+
+#### Poisson
+
+```{r results="asis"}
+
+library(fixest)
+
+fit.nroad  <- fepois(n_roads ~dyn_cum_2 + constituency_type +log(electors)+incumbent+no_terms+turnout_percentage+ margin_percentage+enop+nl_tot|year+district_name, cluster =~district_name, data = dyn_pmgsy) 
+
+
+etable(fit.nroad,label = "Number of roads - Poisson", title= "Poisson - Number of roads")%>% kable() %>% kable_styling(full_width = F)
+```
+
+---
+
+# PMGSY contractors data 
+
+## Summary {.tabset}
+
+```{r}
+raw_data <- readxl::read_xlsx("D:/cpr/data/up_misc/PMGSY Contractors.xlsx", sheet = 1:1)
+```
+
+
+### Dimension
+
+
+```{r}
+
+dim(raw_data)
+
+```
+
+### variable names
+
+```{r}
+names(raw_data)
+```
+
+
+
+### Preview
+
+```{r}
+DT::datatable(head(raw_data))
+```
+
+### Missing caste
+
+`TRUE` represents missing ones
+
+```{r}
+table(is.na(raw_data$Caste)) %>% kable(col.names = c("is.na","Count")) %>% kable_styling(full_width = F)
+```
+
+### caste distribution
+
+- Castes with more than 11 observations
+
+
+```{r}
+
+raw_data %>% group_by(Caste) %>% summarise(count= n()) %>% filter(count>10 &Caste!= "NA") %>% arrange(-count) %>% kable() %>%  kable_styling(full_width = F)
+
+```
+
+
+
+
+
+# PWD roads {.tabset}
 
 
 ```{r}
