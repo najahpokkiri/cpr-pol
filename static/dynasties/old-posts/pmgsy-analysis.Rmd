@@ -411,14 +411,36 @@ DT::datatable(head(raw_data))
 table(is.na(raw_data$Caste)) %>% kable(col.names = c("is.na","Count")) %>% kable_styling(full_width = F)
 ```
 
+### Unique castes
+
+```{r}
+unique(raw_data$Caste)
+```
+
+
 ### caste distribution
 
-- Castes with more than 11 observations
+
+
+
+
+
 
 
 ```{r}
 
-raw_data %>% group_by(Caste) %>% summarise(count= n()) %>% filter(count>10 &Caste!= "NA") %>% arrange(-count) %>% kable() %>%  kable_styling(full_width = F)
+
+raw_data <- raw_data %>% mutate(caste_group = case_when (grepl(c("Brahmin|Thakur|Bania|UC|Kayasth|Bhumihaar|Rajput|Raput|Jaiswal|Jain"), Caste,ignore.case = TRUE )~"UC",
+                                             grepl(c("Muslim"), Caste,ignore.case = TRUE)~"Muslims",
+                                             grepl(c("SC"), Caste,ignore.case = TRUE)~"Dalit",
+                                             grepl(c("Yadav|Kurmi|Maurya|OBC|Jat|Punjabi|Sahu| Khatris|OBC|Lodhi|Kushwaha"), Caste,ignore.case = TRUE )~"OBC",
+                                             
+                                             
+                                             TRUE~ "Un-identified"))
+
+raw_data %>% group_by(caste_group) %>% summarise(count= n(), pc = count/length(raw_data$Caste)*100)  %>% arrange(-count) %>% slice(1:1, 3:5,2:2) %>%kable(digits =0, col.names = c("Caste","Count", "Percentage")) %>%  kable_styling(full_width = F)
+
+#raw_data %>% filter(caste_group=="Un-identified") %>% distinct(Caste)
 
 ```
 
