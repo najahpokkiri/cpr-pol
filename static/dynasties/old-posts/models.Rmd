@@ -956,7 +956,7 @@ df <- tibble(dynast , caste_uc, caste_yadav,caste_non_yadav_obc , caste_dalit , 
 ```{r results="asis"}
 
 
-fit.1 <- feglm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land + n_elections_w+ log(total_assets)  + serious_crime + non_serious_crime+turncoat|constituency+year, family = binomial(link = "probit"), data = df)
+fit.1 <- feglm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land + n_elections_w+ log(total_assets)  + serious_crime + non_serious_crime+turncoat+election_type|constituency+year, family = binomial(link = "probit"), data = df)
 
 
 
@@ -972,16 +972,16 @@ fit.4 <- felm(vote_share ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dal
 #summary(fit.1)
 
 
-etable(fit.1,fit.2,fit.3,cluster = "constituency",extraline=list("Caste control"=c("Yes",  "Yes", "Yes"))) %>%  slice(-(2:7)) %>% kable(caption = "Regression Results - AE 2012-17") %>% kable_styling(full_width = F)
+etable(fit.1,fit.2,fit.3,cluster = "constituency",extraline=list("Caste control"=c("Yes",  "Yes", "Yes"))) %>%  slice(-(2:7)) %>% kable(caption = "Regression Results - AE GE 2009:19") %>% kable_styling(full_width = F)
 
-stargazer( fit.4,title="Regression Results - AE 2012:17 ",type = "html",
+stargazer( fit.4,title="Regression Results - AE GE 2009:19 ",type = "html",
 align=TRUE, dep.var.labels=c( "Vote Share Percentage"), no.space=TRUE, omit= c("caste_uc","caste_yadav","caste_non_yadav_obc", "caste_muslim", "caste_dalit"))
 
 # 
 # stargazer(fit.1, fit.2, fit.3,fit.4,title="Regression Results - AE & GE 2009:19 ",type = "html",
 # align=TRUE, dep.var.labels=c("Dynast","Winner", "Linkage","Vote Share Percentage"), no.space=TRUE,add.lines=list(c('Constituency fixed effects', 'Yes' )))
 
-#summary(fit.3)
+summary(fit.2)
 ```
 <!-- # Cabinet ministers -->
 

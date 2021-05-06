@@ -53,6 +53,11 @@ We use TRUE/FALSE to represent a families linkage.
 
 dyn <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/dyn_ae_ge.csv")
 
+dyn$level_log_cum <- ifelse(dyn$level_log_cum==TRUE, "Politically diversified - Yes", "Politically diversified - No")
+
+
+dyn$level_log_cum <- factor(dyn$level_log_cum, levels = c("Politically diversified - Yes", "Politically diversified - No"))
+
 
 ```
 
@@ -147,10 +152,14 @@ This table shows us the number of families with linkage.
 ```{r}
 #dyn_adr <- dyn_adr %>% mutate(level_log_cum= ifelse(level_cum %in% c("AE", "GE"), FALSE, TRUE))
 
+# unique(dyn_adr_fam$level_log_cum)
 
 
 
 dyn_adr_fam <- dyn_adr %>% filter(dyn_cum_2== 1)
+
+
+
 
 dyn_adr_fam %>%  group_by(level_log_cum) %>%  summarise(n()) %>%  kable(caption = "Summary table of individuals from families with and without linkages \n AE: 2012-2017, GE: 2009-2019", col.names = c("Linkage", "Count"))  %>% kable_styling(bootstrap_options = "striped")
 ```
@@ -222,7 +231,17 @@ dyn_indus_ae_ge <- dyn_indus_ae_ge %>% mutate(indus_2_c = ifelse(indus_2>0,1,0),
 dyn_indus_ae_ge_uniq <- dyn_indus_ae_ge %>%  filter(dyn_tot_2 ==1) %>% arrange(-year) %>% 
   distinct( family_id, .keep_all = T) 
 
-dyn_indus_ae_ge_uniq <- dyn_indus_ae_ge_uniq %>% mutate(level_log= ifelse(level %in% c("AE", "GE"), FALSE, TRUE))
+
+# 
+# dyn$level_log_cum <- ifelse(dyn$level_log_cum==TRUE, "Politically diversified - Yes", "Politically diversified - No")
+
+
+
+
+
+dyn_indus_ae_ge_uniq <- dyn_indus_ae_ge_uniq %>% mutate(level_log= ifelse(level %in% c("AE", "GE"), "Politically diversified - No", "Politically diversified - Yes"))
+
+dyn_indus_ae_ge_uniq$level_log <- factor(dyn_indus_ae_ge_uniq$level_log, levels = c("Politically diversified - Yes", "Politically diversified - No"))
 
 
 dyn_indus_ae_ge_uniq$dyn_tot_2_text <- ifelse(dyn_indus_ae_ge_uniq$dyn_tot_2==1, "Family", "Non-family")

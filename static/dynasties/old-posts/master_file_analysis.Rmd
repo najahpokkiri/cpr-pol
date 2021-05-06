@@ -1557,13 +1557,51 @@ ggplot(caste_cat, aes(x = fam_exp_cat, y = prop , fill = caste_groups, label = r
 ## Caste {.tabset .tabset-fade .tabset-pills}
 
 
+### Individual composition
+
+
+```{r}
+
+
+dyn_ae_ge$caste_groups <- factor(dyn_ae_ge$caste_groups, levels = c("Upper Caste","Yadav","Non-Yadav OBC","Dalit" , "Muslim"  ,"Others" ))
+
+
+dyn_ae_ge %>% filter(position ==1)%>% group_by(caste_groups) %>% summarise(count = n(), prop = count/length(dyn_ae_ge$caste_groups[dyn_ae_ge$position==1])*100) %>% mutate(caste = "caste") %>% 
+  ggplot(aes(caste, prop, fill = caste_groups, label = round(prop,0)))+
+    geom_col()+
+      geom_text(size = 2.5, position = position_stack(vjust = 0.5))+
+
+    colorspace::scale_fill_discrete_qualitative(palette= "dark3" )+
+
+    theme_minimal()+
+  theme(aspect.ratio=4/2)+
+labs(title = "Caste composition of winners ",x = "", y = "", fill = "Caste Groups")+
+    theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
+  theme(plot.background = element_blank(),
+        axis.line.x = element_line(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.y = element_blank()
+  ) 
+
+
+
+  
+
+```
+
+
+
+
 ### Family v/s non-family
+
+- non-unqiue
 
 
 
 ```{r ae ge families caste}
 
-dyn_ae_ge_caste <- dyn_ae_ge_uniq %>% filter(fam_exp_tot > 1)
+dyn_ae_ge_caste <- dyn_ae_ge %>% filter(fam_exp_tot > 1)
 caste_comp_dyn_ae_ge <- dyn_ae_ge_caste %>%
     group_by(dyn_tot_2,caste_groups)%>%
     summarise(freq = n()) %>% filter(!is.na(dyn_tot_2) & !is.na(caste_groups))

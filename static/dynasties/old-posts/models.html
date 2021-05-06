@@ -3314,7 +3314,7 @@ Residual Std. Error
 <h2>AE-GE (2009:19)</h2>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <caption>
-Regression Results - AE 2012-17
+Regression Results - AE GE 2009:19
 </caption>
 <thead>
 <tr>
@@ -3638,7 +3638,7 @@ BIC
 </table>
 <table style="text-align:center">
 <caption>
-<strong>Regression Results - AE 2012:17</strong>
+<strong>Regression Results - AE GE 2009:19</strong>
 </caption>
 <tr>
 <td colspan="2" style="border-bottom: 1px solid black">
@@ -3881,7 +3881,22 @@ Residual Std. Error
 </td>
 </tr>
 </table>
-<!-- # Cabinet ministers -->
+<p>GLM estimation, family = binomial(link = “probit”), Dep. Var.: winner Observations: 1,357 Fixed-effects: constituency: 404, year: 5 Standard-errors: Clustered (constituency) Estimate Std. Error z value Pr(&gt;|z|)<br />
+caste_uc 0.349074 0.243334 1.434500 0.151416<br />
+caste_yadav -0.227130 0.338895 -0.670207 0.502726<br />
+caste_non_yadav_obc 0.146333 0.254982 0.573898 0.566037<br />
+caste_dalit 0.202228 0.264419 0.764803 0.444389<br />
+caste_muslim -0.745692 0.286763 -2.600400 0.009312 ** minister_duration 0.017550 0.027842 0.630343 0.528470<br />
+industry 0.098003 0.079032 1.240000 0.214958<br />
+school_college -0.063981 0.120708 -0.530053 0.596075<br />
+land 0.000319 0.000281 1.133600 0.256981<br />
+n_elections_w -0.007070 0.041859 -0.168906 0.865871<br />
+log(total_assets) -0.000530 0.044821 -0.011820 0.990569<br />
+serious_crime 0.018126 0.025420 0.713058 0.475810<br />
+turncoat 0.253951 0.155687 1.631200 0.102857<br />
+dynast -0.033252 0.162936 -0.204079 0.838292<br />
+linkage_down 0.026455 0.182370 0.145060 0.884664<br />
+… 1 variable was removed because of collinearity (election_typeGE) — Signif. codes: 0 ‘<em><strong>’ 0.001 ’</strong>’ 0.01 ’</em>’ 0.05 ‘.’ 0.1 ’ ’ 1 Log-Likelihood: -851.2 Adj. Pseudo R2: -0.358405 BIC: 4,753.5 Squared Cor.: 0.113945 <!-- # Cabinet ministers --></p>
 <!-- ```{r summary} -->
 <!-- cabinet <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/up_cabinet_01.07.20.csv") -->
 <!-- #glimpse(cabinet) -->
