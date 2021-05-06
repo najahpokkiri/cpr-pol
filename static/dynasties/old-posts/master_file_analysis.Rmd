@@ -1219,6 +1219,31 @@ dyn_indus_ae_ge_uniq$dyn_tot_2_text <- ifelse(dyn_indus_ae_ge_uniq$dyn_tot_2==1,
 dyn_indus_ae_ge_uniq %>%  group_by(dyn_tot_2_text) %>% summarise(mean(indus_count)) %>% kable(caption = "Industry ownership", col.names = c("Politician's identity", "Average number of  ownersip"), digits = 2) %>% kable_styling(bootstrap_options = "striped")
 ```
 
+
+---
+
+
+
+
+```{r}
+
+ggplot(dyn_indus_ae_ge_uniq,aes(indus_count ,fill = dyn_tot_2_text))+
+
+  geom_density( adjust =3, alpha = .5)+
+  ylim(0,.7)+
+  labs(title = "Industry distribution among family catagories", x= "Count")+
+  theme_minimal_hgrid()+
+  theme(legend.position = "bottom",
+        legend.title = element_blank())
+  
+  # 
+  # ggplot(dyn_indus_ae_ge_uniq)+
+  # geom_density(aes(x=indus_count, y = ..density..),size = .7, color = 'black')+
+  #   geom_smooth()
+
+
+```
+
 #### Distribution
 
  Industry distribution among families
@@ -1289,7 +1314,30 @@ dyn_indus_ae_ge_uniq <- dyn_indus_ae_ge_uniq  %>% mutate(indus_rt = case_when(in
                                   TRUE~ "non-rent-thick"))
 
 
+rt <- dyn_indus_ae_ge_uniq   %>% filter(indus_rt != "0") %>% group_by(dyn_tot_2_text, indus_rt) %>% summarise(count = n()) %>% group_by(dyn_tot_2_text) %>% mutate(sum = sum(count), prop = count/sum) %>% select(dyn_tot_2_text, indus_rt, prop)
+
 dyn_indus_ae_ge_uniq   %>% filter(indus_rt != "0") %>% group_by(dyn_tot_2_text, indus_rt) %>% summarise(count = n()) %>% group_by(dyn_tot_2_text) %>% mutate(sum = sum(count), prop = count/sum) %>% select(dyn_tot_2_text, indus_rt, prop) %>% kable(captioni = "industry ownership wrt rent extraction type", col.names = c("Politician's identity","rent-type", "Proportion"), digits = 2) %>% kable_styling(bootstrap_options = "striped")
+```
+
+
+
+```{r}
+ggplot(rt,aes(x = dyn_tot_2_text, y = prop, fill = indus_rt, label = round(prop,2)))+
+  geom_bar(position = "stack", stat= "identity")+
+      geom_text(size = 2.5, position = position_stack(vjust = 0.5))+
+    colorspace::scale_fill_discrete_qualitative(palette= "dark3" )+
+  coord_fixed(ratio =4)+
+    theme_minimal()+
+labs(title = "Industry composition among dynasts and non-dynasts ",x = "", y = "Proportion of industry")+
+    theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
+  theme(plot.background = element_blank(),
+        axis.line.x = element_line(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.y = element_blank(),
+        legend.title= element_blank()
+  ) 
+
 ```
 
 
@@ -1611,15 +1659,15 @@ labs(title = "Caste composition of MLAs and MPs ",x = "", y = "", fill = "Caste 
 
 ```
 
-```{r}
+<!-- ```{r} -->
 
-dyn_ae_ge %>% filter(position==1) %>% 
-  ggplot(aes(factor(dyn_cum_2), turnout_percentage))+
-  geom_point()+
-  #geom_jitter()+
-  geom_smooth(se= FALSE, method = "lm")
+<!-- dyn_ae_ge %>% filter(position==1) %>%  -->
+<!--   ggplot(aes(factor(dyn_cum_2), turnout_percentage))+ -->
+<!--   geom_point()+ -->
+<!--   #geom_jitter()+ -->
+<!--   geom_smooth(se= FALSE, method = "lm") -->
 
-```
+<!-- ``` -->
 
 
 
