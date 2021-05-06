@@ -1755,7 +1755,7 @@ div.tocify {
 <div id="document-history" class="section level3">
 <h3>Document History</h3>
 <p>Original Publish Date: 16 July, 2020</p>
-<p>Updated on: 30 April, 2021</p>
+<p>Updated on: 06 May, 2021</p>
 <hr />
 </div>
 <div id="dynast-winner" class="section level1 tabset">
@@ -2284,6 +2284,53 @@ BIC
 </div>
 <div id="ae-2012--17" class="section level2">
 <h2>AE 2012 -17</h2>
+<!-- ### test -->
+<!-- ```{r} -->
+<!-- dyn_ae_12_17<- dyn_ae_ge %>% filter(year %in% c(2012,2017) & position ==1) -->
+<!-- ``` -->
+<!-- ```{r} -->
+<!-- dynast <-dyn_ae_12_17$dyn_cum_2 -->
+<!-- vote_share <- dyn_ae_12_17$vote_share_percentage -->
+<!-- industry <- dyn_ae_12_17$indus_count %>% replace_na(0) -->
+<!-- industry_rent_thick <- dyn_ae_12_17$indus_rt %>% replace_na(0) -->
+<!-- industry_non_rent_thick <- dyn_ae_12_17$indus_nrt %>% replace_na(0) -->
+<!-- caste_uc <- ifelse(dyn_ae_12_17$caste_groups == "Upper Caste", 1,0) -->
+<!-- caste_yadav <- ifelse(dyn_ae_12_17$caste_groups == "Yadav", 1,0) -->
+<!-- caste_muslim <- ifelse(dyn_ae_12_17$caste_groups == "Muslim", 1,0) -->
+<!-- caste_dalit <- ifelse(dyn_ae_12_17$caste_groups == "Dalit", 1,0) -->
+<!-- caste_non_yadav_obc <- ifelse(dyn_ae_12_17$caste_groups == "Non-Yadav OBC", 1,0) -->
+<!-- turncoat <- dyn_ae_12_17$turncoat -->
+<!-- N_minister <- dyn_ae_12_17$n_sc_minster%>% replace_na(0) -->
+<!-- minister_duration <- dyn_ae_12_17$min_dur_yr %>% replace_na(0) -->
+<!-- #minister_duration <-  cut(minister_duration, breaks = c(0,00.1,3,5,Inf),labels = c("ANever", "Low","Medium", "High"),include.lowest = TRUE) -->
+<!-- minister <-ifelse(dyn_ae_12_17$min_dur_yr>0,1,0)%>% replace_na(0)  -->
+<!-- n_elections_w <- dyn_ae_12_17$n_el_c_ae -->
+<!-- school <- dyn_ae_12_17$school%>% replace_na(0) -->
+<!-- college <- dyn_ae_12_17$college%>% replace_na(0) -->
+<!-- school_college <- paste(school, college, sep = "") -->
+<!-- school_college <- case_when(school_college == "00"~ 0, -->
+<!--                             TRUE ~ 1) -->
+<!-- land <- as.numeric(dyn_ae_12_17$land) %>% replace_na(0) -->
+<!-- total_assets <- dyn_ae_12_17$total_assets -->
+<!-- assets_above_median <- ifelse(dyn_ae_12_17$total_assets>median(dyn_ae_12_17$total_assets),1,0) -->
+<!-- serious_crime <- ifelse(dyn_ae_12_17$serious_crime>0, TRUE, FALSE) -->
+<!-- winner <- ifelse(dyn_ae_12_17$position==1, 1,0) -->
+<!-- association <- ifelse(dyn_ae_12_17$association_inv>0,1,0)%>% replace_na(0) -->
+<!-- organisation <- ifelse(dyn_ae_12_17$org_inv>0,1,0) %>% replace_na(0) -->
+<!-- politics <- ifelse(dyn_ae_12_17$poitical_inv>0,1,0) %>% replace_na(0)  -->
+<!-- linkage <- ifelse(dyn_ae_12_17$level_cum %in% c("AE", "GE"),0,1) -->
+<!-- linkage_down <- ifelse(dyn_ae_12_17$level_cum %in% c("AE-LB", "GE-AE-LB","GE-LB"),1,0) -->
+<!-- district <- dyn_ae_12_17$district_name -->
+<!-- year <- dyn_ae_12_17$year -->
+<!-- dynast_winner <- ifelse(dyn_ae_12_17$dyn_cum_2==1,1,0) -->
+<!-- dyn_ae_12_17$incumebnt <-  -->
+<!-- df <- tibble(dynast , caste_uc, caste_yadav,caste_non_yadav_obc , caste_dalit , caste_muslim ,minister_duration ,industry , school_college , land ,linkage_down, n_elections_w,  total_assets  , serious_crime , turncoat, winner, vote_share,district, year, dyn_ae_12_17$enop, dyn_ae_12_17$turnout_percentage, dyn_ae_12_17$margin_percentage, dyn_ae_12_17$constituency_type, dynast_winner,dyn_ae_12_17$incumbent -->
+<!--              ) -->
+<!-- ``` -->
+<!-- ```{r} -->
+<!-- fit.2 <- feglm(dynast_winner~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration+industry + school_college + land + n_elections_w + log(total_assets) + serious_crime + turncoat + linkage_down+`dyn_ae_12_17$enop`+ `dyn_ae_12_17$turnout_percentage`+ `dyn_ae_12_17$margin_percentage`+`dyn_ae_12_17$incumbent`+ `dyn_ae_12_17$constituency_type`|district+year , family = binomial(link = "probit"), data = df) -->
+<!-- etable(fit.2,extraline=list("Caste control"=c("Yes")),drop= c("caste_uc","caste_yadav","caste_non_yadav_obc", "caste_muslim", "caste_dalit")) %>% kable() -->
+<!-- ``` -->
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <caption>
 Regression Results - AE 2012-17
@@ -3769,6 +3816,20 @@ linkage_down
 </td>
 <td>
 (0.360)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+election_typeGE
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.000)
 </td>
 </tr>
 <tr>

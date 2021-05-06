@@ -230,7 +230,13 @@ fam_tab <- fam_tab %>% mutate(`0` = ifelse(is.na(`0`), `1`,`0`), diff = `1`-`0`)
 
 
 
+
 ## AE All 
+
+
+
+
+
 
 
 
@@ -313,7 +319,12 @@ district <- dyn_ae_uniq$district_name
 
 year <- dyn_ae_uniq$year
 
+
+
+
 df <- tibble(dynast, caste_uc,caste_yadav,caste_non_yadav_obc , caste_dalit , caste_muslim ,minister_duration ,industry , school_college , land ,linkage_down,linkage_up, post_90 ,n_elections_w ,district, year)
+
+
 ```
 
 
@@ -333,6 +344,9 @@ fit.2 <- feglm(linkage_up ~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_d
  fit.3 <- feglm(linkage_down ~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land + dynast+ post_90 +n_elections_w |district+year , family = binomial(link = "probit"), data = df)
  
  
+  # fit.4 <- feglm( ~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land + dynast+ post_90 +n_elections_w |district+year , family = binomial(link = "probit"), data = subset(df %>% filter(position ==1)))
+  # 
+  # 
  
  etable(fit.1, fit.2, fit.3,cluster = "district",extraline=list("Caste control"=c("Yes", "Yes", "Yes"))) %>%  slice(-(2:7)) %>% kable(caption = "Regression Results - AE All") %>% kable_styling(full_width = F)
  
@@ -521,6 +535,109 @@ dyn_ae_ge $total_assets <- as.numeric(dyn_ae_ge $total_assets)
 
 
 ## AE 2012 -17
+
+
+
+<!-- ### test -->
+
+
+<!-- ```{r} -->
+<!-- dyn_ae_12_17<- dyn_ae_ge %>% filter(year %in% c(2012,2017) & position ==1) -->
+<!-- ``` -->
+
+
+
+<!-- ```{r} -->
+
+<!-- dynast <-dyn_ae_12_17$dyn_cum_2 -->
+
+
+<!-- vote_share <- dyn_ae_12_17$vote_share_percentage -->
+
+
+<!-- industry <- dyn_ae_12_17$indus_count %>% replace_na(0) -->
+
+<!-- industry_rent_thick <- dyn_ae_12_17$indus_rt %>% replace_na(0) -->
+
+<!-- industry_non_rent_thick <- dyn_ae_12_17$indus_nrt %>% replace_na(0) -->
+
+<!-- caste_uc <- ifelse(dyn_ae_12_17$caste_groups == "Upper Caste", 1,0) -->
+
+
+<!-- caste_yadav <- ifelse(dyn_ae_12_17$caste_groups == "Yadav", 1,0) -->
+
+<!-- caste_muslim <- ifelse(dyn_ae_12_17$caste_groups == "Muslim", 1,0) -->
+
+<!-- caste_dalit <- ifelse(dyn_ae_12_17$caste_groups == "Dalit", 1,0) -->
+
+<!-- caste_non_yadav_obc <- ifelse(dyn_ae_12_17$caste_groups == "Non-Yadav OBC", 1,0) -->
+
+
+<!-- turncoat <- dyn_ae_12_17$turncoat -->
+
+
+<!-- N_minister <- dyn_ae_12_17$n_sc_minster%>% replace_na(0) -->
+
+<!-- minister_duration <- dyn_ae_12_17$min_dur_yr %>% replace_na(0) -->
+
+<!-- #minister_duration <-  cut(minister_duration, breaks = c(0,00.1,3,5,Inf),labels = c("ANever", "Low","Medium", "High"),include.lowest = TRUE) -->
+
+<!-- minister <-ifelse(dyn_ae_12_17$min_dur_yr>0,1,0)%>% replace_na(0)  -->
+
+
+<!-- n_elections_w <- dyn_ae_12_17$n_el_c_ae -->
+
+
+<!-- school <- dyn_ae_12_17$school%>% replace_na(0) -->
+
+<!-- college <- dyn_ae_12_17$college%>% replace_na(0) -->
+
+<!-- school_college <- paste(school, college, sep = "") -->
+
+<!-- school_college <- case_when(school_college == "00"~ 0, -->
+<!--                             TRUE ~ 1) -->
+
+<!-- land <- as.numeric(dyn_ae_12_17$land) %>% replace_na(0) -->
+
+<!-- total_assets <- dyn_ae_12_17$total_assets -->
+
+<!-- assets_above_median <- ifelse(dyn_ae_12_17$total_assets>median(dyn_ae_12_17$total_assets),1,0) -->
+
+<!-- serious_crime <- ifelse(dyn_ae_12_17$serious_crime>0, TRUE, FALSE) -->
+
+<!-- winner <- ifelse(dyn_ae_12_17$position==1, 1,0) -->
+
+<!-- association <- ifelse(dyn_ae_12_17$association_inv>0,1,0)%>% replace_na(0) -->
+
+<!-- organisation <- ifelse(dyn_ae_12_17$org_inv>0,1,0) %>% replace_na(0) -->
+
+<!-- politics <- ifelse(dyn_ae_12_17$poitical_inv>0,1,0) %>% replace_na(0)  -->
+
+
+<!-- linkage <- ifelse(dyn_ae_12_17$level_cum %in% c("AE", "GE"),0,1) -->
+
+<!-- linkage_down <- ifelse(dyn_ae_12_17$level_cum %in% c("AE-LB", "GE-AE-LB","GE-LB"),1,0) -->
+
+<!-- district <- dyn_ae_12_17$district_name -->
+
+<!-- year <- dyn_ae_12_17$year -->
+
+<!-- dynast_winner <- ifelse(dyn_ae_12_17$dyn_cum_2==1,1,0) -->
+
+<!-- dyn_ae_12_17$incumebnt <-  -->
+
+<!-- df <- tibble(dynast , caste_uc, caste_yadav,caste_non_yadav_obc , caste_dalit , caste_muslim ,minister_duration ,industry , school_college , land ,linkage_down, n_elections_w,  total_assets  , serious_crime , turncoat, winner, vote_share,district, year, dyn_ae_12_17$enop, dyn_ae_12_17$turnout_percentage, dyn_ae_12_17$margin_percentage, dyn_ae_12_17$constituency_type, dynast_winner,dyn_ae_12_17$incumbent -->
+<!--              ) -->
+<!-- ``` -->
+
+
+<!-- ```{r} -->
+<!-- fit.2 <- feglm(dynast_winner~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration+industry + school_college + land + n_elections_w + log(total_assets) + serious_crime + turncoat + linkage_down+`dyn_ae_12_17$enop`+ `dyn_ae_12_17$turnout_percentage`+ `dyn_ae_12_17$margin_percentage`+`dyn_ae_12_17$incumbent`+ `dyn_ae_12_17$constituency_type`|district+year , family = binomial(link = "probit"), data = df) -->
+
+
+<!-- etable(fit.2,extraline=list("Caste control"=c("Yes")),drop= c("caste_uc","caste_yadav","caste_non_yadav_obc", "caste_muslim", "caste_dalit")) %>% kable() -->
+
+<!-- ``` -->
 
 ```{r  results = "asis"}
 dyn_ae_ge  <- dyn_ae_ge  %>% group_by(family_id) %>% mutate(n_el_w_pat_ae_12_17 = length(year[relative_id==1 & position ==1 &  dyn_cum_2 ==0 & year <2012 & election_type == "AE"]))
@@ -826,10 +943,12 @@ linkage_down <- ifelse(dyn_ae_ge_09_19_uniq$level_cum %in% c("AE-LB", "GE-AE-LB"
 
 constituency <- dyn_ae_ge_09_19_uniq$constituency_name
 
+election_type <- dyn_ae_ge_09_19_uniq$election_type
+
 
 year <- dyn_ae_ge_09_19_uniq$year
 
-df <- tibble(dynast , caste_uc, caste_yadav,caste_non_yadav_obc , caste_dalit , caste_muslim ,minister_duration ,industry , school_college , land ,linkage_down, n_elections_w,  total_assets  , serious_crime, non_serious_crime , turncoat, winner, vote_share, constituency, linkage, year
+df <- tibble(dynast , caste_uc, caste_yadav,caste_non_yadav_obc , caste_dalit , caste_muslim ,minister_duration ,industry , school_college , land ,linkage_down, n_elections_w,  total_assets  , serious_crime, non_serious_crime , turncoat, winner, vote_share, constituency, linkage, year, election_type
              )
 ```
 
@@ -842,13 +961,13 @@ fit.1 <- feglm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit 
 
 
 
-fit.2 <- feglm(winner ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land + n_elections_w + log(total_assets) + serious_crime + turncoat + dynast + linkage_down|constituency+year, family = binomial(link = "probit"), data = df)
+fit.2 <- feglm(winner ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land + n_elections_w + log(total_assets) + serious_crime + turncoat + dynast + linkage_down+election_type|constituency+year, family = binomial(link = "probit"), data = df)
 
 
 
-fit.3 <- feglm(linkage ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land + n_elections_w + log(total_assets) + serious_crime + turncoat |constituency+year , family = binomial(link = "probit"), data= df)
+fit.3 <- feglm(linkage ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land + n_elections_w + log(total_assets) + serious_crime + turncoat+election_type |constituency+year , family = binomial(link = "probit"), data= df)
 
-fit.4 <- felm(vote_share ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land + n_elections_w + log(total_assets)  + serious_crime + turncoat + dynast + linkage_down|constituency+year|0|year)
+fit.4 <- felm(vote_share ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land + n_elections_w + log(total_assets)  + serious_crime + turncoat + dynast + linkage_down+election_type|constituency+year|0|year)
 
 #summary(fit.1)
 

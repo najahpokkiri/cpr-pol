@@ -76,7 +76,6 @@ dyn_ae <- dyn_ae %>% mutate(delim = case_when(grepl("x00",con_id_uniq, ignore.ca
                                               TRUE~"old"))
 
 
-dyn_ae %>% filter(year>2009)%>% distinct(con_id_uniq, .keep_all = TRUE) %>%  group_by(delim, constituency_type) %>% summarise(count = n()) %>% group_by(delim)%>%mutate(total =sum(count)) 
 
 
 res <- dyn_ae %>% filter(year %in% c(2007,2012)& delim=="old") %>% distinct(year,con_id_uniq, .keep_all= TRUE) %>% select(year,con_id_uniq, constituency_type)
@@ -257,6 +256,9 @@ dyn_ae_ge_fam_uniq <- dyn_ae_ge_fam  %>% group_by(family_id)%>% arrange(election
 ```
 
 
+
+
+
 ## Elite types{.tabset}
 
 ### Definitions
@@ -296,6 +298,26 @@ This chart depicts how the life span of a family varies according to their caste
 
 
 ---
+
+### turncoats and same party
+
+```{r}
+
+dyn_ae_ge_fam %>% group_by(election_type,success_cat) %>% summarise(turncoat = mean(turncoat), same_party = mean(same_party, na.rm = TRUE)) %>% kable(digits =2)
+
+#table(dyn_ae_ge_fam$turncoat)
+
+```
+
+
+### delim change
+
+
+```{r}
+
+dyn_ae %>% filter(year>2009)%>% distinct(con_id_uniq, .keep_all = TRUE) %>%  group_by(delim, constituency_type) %>% summarise(count = n()) %>% group_by(delim)%>%mutate(total =sum(count)) 
+```
+
 
 
 ### years to be a  family
@@ -757,7 +779,7 @@ fit.mem <- felm(second_mem_dur ~caste_uc+ caste_yadav+caste_non_yadav_obc + cast
 
 
 
-stargazer(fit.mem, type="html", title = "What determines the years needed for the entry of the second member of a family",keep = c("second_mem_dur","minister_duration","industry", "school_college", "land", "linkage_down"),covariate.labels = c( "Minister duration", "Economic diversification","Educational ownership", "Land ownership", "Political diversification"), add.lines = list (c("Caste control", "Yes")))
+stargazer(fit.mem, type="html", title = "What determines the years needed for the entry of the second member of a family",keep = c( "linkage_down","second_mem_dur","minister_duration","industry", "school_college", "land"),covariate.labels = c( "Political diversification","Minister duration", "Economic diversification","Educational ownership", "Land ownership" ), add.lines = list (c("Caste control", "Yes")))
 
 # stargazer(fit.felm,title="Regression Results - UP  Night lights - Dynast 2 ",type = "text",
 # align=TRUE,  no.space=TRUE,add.lines=list(c('Year fixed effects', 'Yes' ), c('District fixed effects', 'Yes'), c("SE clustering" ,"District level")))
@@ -790,7 +812,12 @@ fit.multinom <- multinom(success_cat~  caste_uc+ caste_yadav+caste_non_yadav_obc
 
 
 ```{r, results= "asis"}
-stargazer(fit.multinom, type="html", keep = c("success_cat","minister_duration","industry", "school_college", "land", "linkage_down","second_mem_dur"),add.lines = list (c("Caste control", "Yes","Yes","Yes")),covariate.labels = c( "Minister duration", "Economic diversification","Educational ownership", "Land ownership", "Political diversification","Years took for the second member entry"))
+
+
+
+stargazer(fit.multinom, type="html", keep = c("linkage_down","minister_duration","industry", "school_college", "land", "second_mem_dur"),add.lines = list (c("Caste control", "Yes","Yes","Yes")),covariate.labels = c(  "Political diversification","Minister duration", "Economic diversification","Educational ownership", "Land ownership","Years took for the second member entry"))
+
+
 ```
 
 
@@ -808,7 +835,8 @@ fit.multinom <- multinom(success_cat~  caste_uc+ caste_yadav+caste_non_yadav_obc
 ```
 
 ```{r, results= "asis"}
-stargazer(fit.multinom, type="html", keep = c("success_cat","minister_duration","industry", "school_college", "land", "linkage_down","second_mem_dur"),add.lines = list (c("Caste control", "Yes","Yes","Yes")),covariate.labels = c( "Minister duration", "Economic diversification","Educational ownership", "Land ownership", "Political diversification","Years took for the second member entry"))
+stargazer(fit.multinom, type="html", keep = c("linkage_down","minister_duration","industry", "school_college", "land", "second_mem_dur"),add.lines = list (c("Caste control", "Yes","Yes","Yes")),covariate.labels = c( "Political diversification","Minister duration", "Economic diversification","Educational ownership", "Land ownership", "Years took for the second member entry"))
+
 ```
 
 
@@ -832,7 +860,7 @@ fit.multinom <- multinom(success_cat~  caste_uc+ caste_yadav+caste_non_yadav_obc
 
 
 ```{r, results= "asis"}
-stargazer(fit.multinom, type="html", keep = c("success_cat","minister_duration","industry", "school_college", "land", "linkage_down","second_mem_dur"),add.lines = list (c("Caste control", "Yes","Yes","Yes")),covariate.labels = c( "Minister duration", "Economic diversification","Educational ownership", "Land ownership", "Political diversification","Years took for the second member entry"))
+stargazer(fit.multinom, type="html", keep = c("linkage_down","minister_duration","industry", "school_college", "land", "second_mem_dur"),add.lines = list (c("Caste control", "Yes","Yes","Yes")),covariate.labels = c("Political diversification", "Minister duration", "Economic diversification","Educational ownership", "Land ownership", "Years took for the second member entry"))
 ```
 
 
@@ -850,7 +878,7 @@ fit.multinom <- multinom(success_cat~  caste_uc+ caste_yadav+caste_non_yadav_obc
 ```
 
 ```{r, results= "asis"}
-stargazer(fit.multinom, type="html", keep = c("success_cat","minister_duration","industry", "school_college", "land", "linkage_down","second_mem_dur"),add.lines = list (c("Caste control", "Yes","Yes","Yes")),covariate.labels = c( "Minister duration", "Economic diversification","Educational ownership", "Land ownership", "Political diversification","Years took for the second member entry"))
+stargazer(fit.multinom, type="html", keep = c("linkage_down","success_cat","minister_duration","industry", "school_college", "land", "second_mem_dur"),add.lines = list (c("Caste control", "Yes","Yes","Yes")),covariate.labels = c( "Political diversification","Minister duration", "Economic diversification","Educational ownership", "Land ownership", "Years took for the second member entry"))
 ```
 
 ---
@@ -870,13 +898,14 @@ fit.3 <- glm(Stable ~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit +
 
 
  stargazer(fit.1,fit.2,fit.3,title="Regression Results - Success of dynasties ",type = "html",
-            align=TRUE,  no.space=TRUE,keep = c("minister_duration","industry", "school_college", "land", "linkage_down","second_mem_dur"),add.lines = list (c("Caste control", "Yes","Yes","Yes")))
+            align=TRUE,  no.space=TRUE,keep = c("linkage_down","minister_duration","industry", "school_college", "land", "second_mem_dur"),covariate.labels = c("Political diversification", "Minister duration", "Economic diversification","Educational ownership", "Land ownership", "Years took for the second member entry"),add.lines = list (c("Caste control", "Yes","Yes","Yes")))
 
 ```
 
-### probit - second memner
 
-```{r}
+### probit - second member
+
+```{r results="asis"}
 
 ### with delim change
 
@@ -888,19 +917,20 @@ fit.1 <- felm(Declining ~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dal
 fit.3 <- felm(Stable ~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land + linkage_down+factor(delim_change))
 
  stargazer(fit.1,fit.3,title="Regression Results - Success of dynasties ",type = "html",
-            align=TRUE,  no.space=TRUE,keep = c("minister_duration","industry", "school_college", "land", "linkage_down","delim_change"),add.lines = list (c("Caste control", "Yes","Yes","Yes")),covariate.labels = c( "Minister duration", "Economic diversification","Educational ownership", "Land ownership", "Political diversification","Delimitation control"))
+            align=TRUE,  no.space=TRUE,keep = c("linkage_down","minister_duration","industry", "school_college", "land", "delim_change"),add.lines = list (c("Caste control", "Yes","Yes","Yes")),covariate.labels = c("Political diversification", "Minister duration", "Economic diversification","Educational ownership", "Land ownership", "Delimitation control"))
 
 ```
 
 ### Dual option {.tabset}
 
-#### stable v/s declining
+
+#### stable v/s declining {.tabset}
 
 
  
 
 
-
+##### with second member
  
  
 ```{r , results= "asis"}
@@ -970,6 +1000,7 @@ linkage_up <- ifelse(sd$level%in% c("GE-AE", "GE-AE-LB"),1,0)
 linkage_down <- ifelse(sd$level %in% c("AE-LB", "GE-AE-LB", "GE-LB"),1,0)
 
 
+delim_change <- sd$delim_change
 
 
 
@@ -993,9 +1024,36 @@ fit.2 <- glm(Stable~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + 
 
 
  stargazer(fit.1,fit.2,title="Regression Results - Declining v/s Stable ",type = "html",
-            align=TRUE,  no.space=TRUE,keep = c("minister_duration","industry", "school_college", "land", "linkage_down", "second_mem_dur"),add.lines = list (c("Caste control", "Yes","Yes")),covariate.labels = c( "Minister duration", "Economic diversification","Educational ownership", "Land ownership", "Political diversification","Years took for the second member entry"))
+            align=TRUE,  no.space=TRUE,keep = c("linkage_down","minister_duration","industry", "school_college", "land",  "second_mem_dur"),add.lines = list (c("Caste control", "Yes","Yes")),covariate.labels = c("Political diversification", "Minister duration", "Economic diversification","Educational ownership", "Land ownership", "Years took for the second member entry"))
 
 ```
+
+#### with delim control
+
+```{r}
+
+
+
+fit.1 <- glm(Declining~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land + linkage_down+factor(delim_change), family= binomial(link = "probit") )
+
+##summary(fit.1)
+
+Stable<- ifelse(sd$success_cat=="Stable",1,0)
+
+fit.2 <- glm(Stable  ~caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land + linkage_down+factor(delim_change), family= binomial(link = "probit") )
+
+##summary(fit.1)
+
+ stargazer(fit.1,fit.2,title="Regression Results - Declining v/s   ",type = "html",
+            align=TRUE,  no.space=TRUE,keep = c("linkage_down","minister_duration","industry", "school_college", "land",  "delim_change"),add.lines = list (c("Caste control", "Yes","Yes")),covariate.labels = c( "Political diversification", "Minister duration", "Economic diversification","Educational ownership", "Land ownership","Delimitation control"))
+
+```
+
+
+
+
+
+
 
 
 #### Stable v/s rising
@@ -1087,7 +1145,7 @@ fit.2 <- glm(Rising ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + 
 
 
  stargazer(fit.1,fit.2,title="Regression Results - Stable v/s Rising ",type = "html",
-            align=TRUE,  no.space=TRUE,keep = c("minister_duration","industry", "school_college", "land", "linkage_down", "second_mem_dur"),add.lines = list (c("Caste control", "Yes","Yes")),covariate.labels = c( "Minister duration", "Economic diversification","Educational ownership", "Land ownership", "Political diversification","Years took for the second member entry"))
+            align=TRUE,  no.space=TRUE,keep = c("linkage_down","minister_duration","industry", "school_college", "land",  "second_mem_dur"),add.lines = list (c("Caste control", "Yes","Yes")),covariate.labels = c( "Political diversification", "Minister duration", "Economic diversification","Educational ownership", "Land ownership","Years took for the second member entry"))
 
 ```
 
@@ -1176,102 +1234,102 @@ fit.2 <- glm(Rising~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + 
 ##summary(fit.1)
 
  stargazer(fit.1,fit.2,title="Regression Results - Declining v/s Rising ",type = "html",
-            align=TRUE,  no.space=TRUE,keep = c("minister_duration","industry", "school_college", "land", "linkage_down", "second_mem_dur"),add.lines = list (c("Caste control", "Yes","Yes")),covariate.labels = c( "Minister duration", "Economic diversification","Educational ownership", "Land ownership", "Political diversification","Years took for the second member entry"))
+            align=TRUE,  no.space=TRUE,keep = c("linkage_down","minister_duration","industry", "school_college", "land",  "second_mem_dur"),add.lines = list (c("Caste control", "Yes","Yes")),covariate.labels = c( "Political diversification", "Minister duration", "Economic diversification","Educational ownership", "Land ownership","Years took for the second member entry"))
 
 ```
 
-#### declining  v/s stable
+<!-- #### declining  v/s stable -->
 
 
 
 
 
-```{r results="asis"}
-## rising v/s declning
+<!-- ```{r results="asis"} -->
+<!-- ## rising v/s declning -->
 
 
-sd <- dyn_ae_ge_fam_uniq %>% filter(success_cat!= "Rising")
+<!-- sd <- dyn_ae_ge_fam_uniq %>% filter(success_cat!= "Rising") -->
 
 
-second_mem_dur <- sd$diff
+<!-- second_mem_dur <- sd$diff -->
 
-industry <- sd$indus_count %>% replace_na(0)
+<!-- industry <- sd$indus_count %>% replace_na(0) -->
 
-# industry_rent_thick <- sd$indus_rt %>% replace_na(0)
-# 
-# industry_non_rent_thick <- sd$indus_nrt %>% replace_na(0)
+<!-- # industry_rent_thick <- sd$indus_rt %>% replace_na(0) -->
+<!-- #  -->
+<!-- # industry_non_rent_thick <- sd$indus_nrt %>% replace_na(0) -->
 
-caste_uc <- ifelse(sd$caste_groups == "Upper Caste", 1,0)
-
-
-caste_yadav <- ifelse(sd$caste_groups == "Yadav", 1,0)
-
-caste_muslim <- ifelse(sd$caste_groups == "Muslim", 1,0)
-
-caste_dalit <- ifelse(sd$caste_groups == "Dalit", 1,0)
-
-caste_non_yadav_obc <- ifelse(sd$caste_groups == "Non-Yadav OBC", 1,0)
+<!-- caste_uc <- ifelse(sd$caste_groups == "Upper Caste", 1,0) -->
 
 
-turncoat <- sd$turncoat
+<!-- caste_yadav <- ifelse(sd$caste_groups == "Yadav", 1,0) -->
+
+<!-- caste_muslim <- ifelse(sd$caste_groups == "Muslim", 1,0) -->
+
+<!-- caste_dalit <- ifelse(sd$caste_groups == "Dalit", 1,0) -->
+
+<!-- caste_non_yadav_obc <- ifelse(sd$caste_groups == "Non-Yadav OBC", 1,0) -->
 
 
-N_minister <- sd$n_sc_minster%>% replace_na(0)
-
-minister_duration <- sd$min_dur_yr %>% replace_na(0)
+<!-- turncoat <- sd$turncoat -->
 
 
-minister <-ifelse(sd$min_dur_yr>0,1,0)%>% replace_na(0) 
+<!-- N_minister <- sd$n_sc_minster%>% replace_na(0) -->
+
+<!-- minister_duration <- sd$min_dur_yr %>% replace_na(0) -->
 
 
-post_2002 <- ifelse(sd$year >=2002,1,0)
+<!-- minister <-ifelse(sd$min_dur_yr>0,1,0)%>% replace_na(0)  -->
 
 
-
-#n_elections_w<- as.numeric(sd$n_el_w)
-
-school <- sd$school%>% replace_na(0)
-
-college <- sd$college%>% replace_na(0)
-
-school_college <- paste(school, college, sep = "")
-
-school_college <- case_when(school_college == "00"~ 0,
-                            TRUE ~ 1)
-
-land <- as.numeric(sd$land) %>% replace_na(0)
+<!-- post_2002 <- ifelse(sd$year >=2002,1,0) -->
 
 
 
-linkage <- ifelse(sd$level %in% c("AE", "GE"),0,1)
+<!-- #n_elections_w<- as.numeric(sd$n_el_w) -->
 
-linkage_up <- ifelse(sd$level%in% c("GE-AE", "GE-AE-LB"),1,0)
+<!-- school <- sd$school%>% replace_na(0) -->
 
-linkage_down <- ifelse(sd$level %in% c("AE-LB", "GE-AE-LB", "GE-LB"),1,0)
+<!-- college <- sd$college%>% replace_na(0) -->
 
-delim_change <- sd$delim_change
+<!-- school_college <- paste(school, college, sep = "") -->
+
+<!-- school_college <- case_when(school_college == "00"~ 0, -->
+<!--                             TRUE ~ 1) -->
+
+<!-- land <- as.numeric(sd$land) %>% replace_na(0) -->
 
 
 
-#success_cat <- relevel(success_cat, ref = "stable")
+<!-- linkage <- ifelse(sd$level %in% c("AE", "GE"),0,1) -->
+
+<!-- linkage_up <- ifelse(sd$level%in% c("GE-AE", "GE-AE-LB"),1,0) -->
+
+<!-- linkage_down <- ifelse(sd$level %in% c("AE-LB", "GE-AE-LB", "GE-LB"),1,0) -->
+
+<!-- delim_change <- sd$delim_change -->
 
 
-Declining <- ifelse(sd$success_cat=="Declining",1,0)
 
-fit.1 <- glm(Declining~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land + linkage_down+factor(delim_change), family= binomial(link = "probit") )
+<!-- #success_cat <- relevel(success_cat, ref = "stable") -->
 
-##summary(fit.1)
 
-Stable<- ifelse(sd$success_cat=="Stable",1,0)
+<!-- Declining <- ifelse(sd$success_cat=="Declining",1,0) -->
 
-fit.2 <- glm(Stable  ~caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land + linkage_down+factor(delim_change), family= binomial(link = "probit") )
+<!-- fit.1 <- glm(Declining~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land + linkage_down+factor(delim_change), family= binomial(link = "probit") ) -->
 
-##summary(fit.1)
+<!-- ##summary(fit.1) -->
 
- stargazer(fit.1,fit.2,title="Regression Results - Declining v/s   ",type = "html",
-            align=TRUE,  no.space=TRUE,keep = c("minister_duration","industry", "school_college", "land", "linkage_down", "delim_change"),add.lines = list (c("Caste control", "Yes","Yes")),covariate.labels = c( "Minister duration", "Economic diversification","Educational ownership", "Land ownership", "Political diversification","Delimitation control"))
+<!-- Stable<- ifelse(sd$success_cat=="Stable",1,0) -->
 
-```
+<!-- fit.2 <- glm(Stable  ~caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land + linkage_down+factor(delim_change), family= binomial(link = "probit") ) -->
+
+<!-- ##summary(fit.1) -->
+
+<!--  stargazer(fit.1,fit.2,title="Regression Results - Declining v/s   ",type = "html", -->
+<!--             align=TRUE,  no.space=TRUE,keep = c("minister_duration","industry", "school_college", "land", "linkage_down", "delim_change"),add.lines = list (c("Caste control", "Yes","Yes")),covariate.labels = c( "Minister duration", "Economic diversification","Educational ownership", "Land ownership", "Political diversification","Delimitation control")) -->
+
+<!-- ``` -->
 
 
 

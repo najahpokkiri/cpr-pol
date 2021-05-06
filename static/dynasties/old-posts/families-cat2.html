@@ -1755,19 +1755,11 @@ div.tocify {
 <div id="document-history" class="section level3" number="0.0.1">
 <h3 number="0.0.1"><span class="header-section-number">0.0.1</span> Document History</h3>
 <p>Original Publish Date: 21 July, 2020</p>
-<p>Updated on: 05 May, 2021</p>
+<p>Updated on: 06 May, 2021</p>
 <hr />
 <p>In this post we further analyse the families. We categorised them into two - declining and rising. We track down all the families started in 1970s till 2007. Then we assess their performance in the elections held after 2007. This includes 3 General elections and 2 Assembly elections. If they have one at least one election in these 5 elections we call them rising dynasties and rest of them as declining dynasties.</p>
 <hr />
 <p>The follwoing table shows the difference the longevity of these two groups</p>
-<pre><code>## # A tibble: 4 x 4
-## # Groups:   delim [2]
-##   delim    constituency_type count total
-##   &lt;chr&gt;    &lt;chr&gt;             &lt;int&gt; &lt;int&gt;
-## 1 diss/new GEN                  16    18
-## 2 diss/new SC                    2    18
-## 3 old      GEN                 302   385
-## 4 old      SC                   83   385</code></pre>
 <!-- ## 2nd category -->
 </div>
 <div id="elite-types" class="section level2 tabset" number="0.1">
@@ -1865,8 +1857,126 @@ Stable
 <p>This chart depicts how the life span of a family varies according to their caste.</p>
 <hr />
 </div>
-<div id="years-to-be-a-family" class="section level3" number="0.1.4">
-<h3 number="0.1.4"><span class="header-section-number">0.1.4</span> years to be a family</h3>
+<div id="turncoats-and-same-party" class="section level3" number="0.1.4">
+<h3 number="0.1.4"><span class="header-section-number">0.1.4</span> turncoats and same party</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+election_type
+</th>
+<th style="text-align:left;">
+success_cat
+</th>
+<th style="text-align:right;">
+turncoat
+</th>
+<th style="text-align:right;">
+same_party
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+AE
+</td>
+<td style="text-align:left;">
+Declining
+</td>
+<td style="text-align:right;">
+0.22
+</td>
+<td style="text-align:right;">
+0.50
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+AE
+</td>
+<td style="text-align:left;">
+Rising
+</td>
+<td style="text-align:right;">
+0.20
+</td>
+<td style="text-align:right;">
+0.54
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+AE
+</td>
+<td style="text-align:left;">
+Stable
+</td>
+<td style="text-align:right;">
+0.23
+</td>
+<td style="text-align:right;">
+0.54
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GE
+</td>
+<td style="text-align:left;">
+Declining
+</td>
+<td style="text-align:right;">
+0.18
+</td>
+<td style="text-align:right;">
+0.62
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GE
+</td>
+<td style="text-align:left;">
+Rising
+</td>
+<td style="text-align:right;">
+0.23
+</td>
+<td style="text-align:right;">
+0.52
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GE
+</td>
+<td style="text-align:left;">
+Stable
+</td>
+<td style="text-align:right;">
+0.18
+</td>
+<td style="text-align:right;">
+0.72
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="delim-change" class="section level3" number="0.1.5">
+<h3 number="0.1.5"><span class="header-section-number">0.1.5</span> delim change</h3>
+<pre><code>## # A tibble: 4 x 4
+## # Groups:   delim [2]
+##   delim    constituency_type count total
+##   &lt;chr&gt;    &lt;chr&gt;             &lt;int&gt; &lt;int&gt;
+## 1 diss/new GEN                  16    18
+## 2 diss/new SC                    2    18
+## 3 old      GEN                 302   385
+## 4 old      SC                   83   385</code></pre>
+</div>
+<div id="years-to-be-a-family" class="section level3" number="0.1.6">
+<h3 number="0.1.6"><span class="header-section-number">0.1.6</span> years to be a family</h3>
 <p><img src="data:image/png;base64,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" width="768" /></p>
 <!-- ### relative -->
 <!-- ```{r} -->
@@ -2217,7 +2327,7 @@ second_mem_dur
 </tr>
 <tr>
 <td style="text-align:left">
-Minister duration
+Political diversification
 </td>
 <td>
 -0.359<sup>***</sup>
@@ -2238,7 +2348,7 @@ Minister duration
 </tr>
 <tr>
 <td style="text-align:left">
-Economic diversification
+Minister duration
 </td>
 <td>
 -0.581
@@ -2259,7 +2369,7 @@ Economic diversification
 </tr>
 <tr>
 <td style="text-align:left">
-Educational ownership
+Economic diversification
 </td>
 <td>
 -0.050
@@ -2280,7 +2390,7 @@ Educational ownership
 </tr>
 <tr>
 <td style="text-align:left">
-Land ownership
+Educational ownership
 </td>
 <td>
 -0.001
@@ -2301,7 +2411,7 @@ Land ownership
 </tr>
 <tr>
 <td style="text-align:left">
-Political diversification
+Land ownership
 </td>
 <td>
 -1.810
@@ -2435,7 +2545,7 @@ Declining
 </tr>
 <tr>
 <td style="text-align:left">
-Minister duration
+Political diversification
 </td>
 <td>
 -0.007
@@ -2464,7 +2574,7 @@ Minister duration
 </tr>
 <tr>
 <td style="text-align:left">
-Economic diversification
+Minister duration
 </td>
 <td>
 0.091
@@ -2493,7 +2603,7 @@ Economic diversification
 </tr>
 <tr>
 <td style="text-align:left">
-Educational ownership
+Economic diversification
 </td>
 <td>
 0.668<sup>**</sup>
@@ -2522,36 +2632,36 @@ Educational ownership
 </tr>
 <tr>
 <td style="text-align:left">
+Educational ownership
+</td>
+<td>
+-0.0001
+</td>
+<td>
+-0.0001
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.0004)
+</td>
+<td>
+(0.0004)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
 Land ownership
-</td>
-<td>
--0.0001
-</td>
-<td>
--0.0001
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-</td>
-<td>
-(0.0004)
-</td>
-<td>
-(0.0004)
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-</td>
-<td>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-Political diversification
 </td>
 <td>
 -0.473
@@ -2700,7 +2810,7 @@ Declining
 </tr>
 <tr>
 <td style="text-align:left">
-Minister duration
+Political diversification
 </td>
 <td>
 0.007
@@ -2729,7 +2839,7 @@ Minister duration
 </tr>
 <tr>
 <td style="text-align:left">
-Economic diversification
+Minister duration
 </td>
 <td>
 -0.091
@@ -2758,7 +2868,7 @@ Economic diversification
 </tr>
 <tr>
 <td style="text-align:left">
-Educational ownership
+Economic diversification
 </td>
 <td>
 -0.668<sup>**</sup>
@@ -2787,7 +2897,7 @@ Educational ownership
 </tr>
 <tr>
 <td style="text-align:left">
-Land ownership
+Educational ownership
 </td>
 <td>
 0.0001
@@ -2816,7 +2926,7 @@ Land ownership
 </tr>
 <tr>
 <td style="text-align:left">
-Political diversification
+Land ownership
 </td>
 <td>
 0.473
@@ -2970,7 +3080,7 @@ Declining
 </tr>
 <tr>
 <td style="text-align:left">
-Minister duration
+Political diversification
 </td>
 <td>
 0.032
@@ -2999,7 +3109,7 @@ Minister duration
 </tr>
 <tr>
 <td style="text-align:left">
-Economic diversification
+Minister duration
 </td>
 <td>
 0.168
@@ -3028,7 +3138,7 @@ Economic diversification
 </tr>
 <tr>
 <td style="text-align:left">
-Educational ownership
+Economic diversification
 </td>
 <td>
 0.638<sup>**</sup>
@@ -3057,7 +3167,7 @@ Educational ownership
 </tr>
 <tr>
 <td style="text-align:left">
-Land ownership
+Educational ownership
 </td>
 <td>
 0.00001
@@ -3086,7 +3196,7 @@ Land ownership
 </tr>
 <tr>
 <td style="text-align:left">
-Political diversification
+Land ownership
 </td>
 <td>
 -0.258
@@ -3205,7 +3315,7 @@ Declining
 </tr>
 <tr>
 <td style="text-align:left">
-Minister duration
+Political diversification
 </td>
 <td>
 -0.032
@@ -3234,7 +3344,7 @@ Minister duration
 </tr>
 <tr>
 <td style="text-align:left">
-Economic diversification
+Minister duration
 </td>
 <td>
 -0.168
@@ -3263,7 +3373,7 @@ Economic diversification
 </tr>
 <tr>
 <td style="text-align:left">
-Educational ownership
+Economic diversification
 </td>
 <td>
 -0.638<sup>**</sup>
@@ -3292,36 +3402,36 @@ Educational ownership
 </tr>
 <tr>
 <td style="text-align:left">
+Educational ownership
+</td>
+<td>
+-0.00001
+</td>
+<td>
+-0.00001
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.0004)
+</td>
+<td>
+(0.0004)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
 Land ownership
-</td>
-<td>
--0.00001
-</td>
-<td>
--0.00001
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-</td>
-<td>
-(0.0004)
-</td>
-<td>
-(0.0004)
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-</td>
-<td>
-</td>
-<td>
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-Political diversification
 </td>
 <td>
 0.259
@@ -3446,7 +3556,7 @@ Stable
 </tr>
 <tr>
 <td style="text-align:left">
-minister_duration
+Political diversification
 </td>
 <td>
 -0.096<sup>***</sup>
@@ -3473,7 +3583,7 @@ minister_duration
 </tr>
 <tr>
 <td style="text-align:left">
-industry
+Minister duration
 </td>
 <td>
 -0.282<sup>***</sup>
@@ -3500,7 +3610,7 @@ industry
 </tr>
 <tr>
 <td style="text-align:left">
-school_college
+Economic diversification
 </td>
 <td>
 -0.059
@@ -3527,7 +3637,7 @@ school_college
 </tr>
 <tr>
 <td style="text-align:left">
-land
+Educational ownership
 </td>
 <td>
 -0.0001
@@ -3554,7 +3664,7 @@ land
 </tr>
 <tr>
 <td style="text-align:left">
-linkage_down
+Land ownership
 </td>
 <td>
 -0.738<sup>**</sup>
@@ -3581,7 +3691,7 @@ linkage_down
 </tr>
 <tr>
 <td style="text-align:left">
-second_mem_dur
+Years took for the second member entry
 </td>
 <td>
 -0.026<sup>**</sup>
@@ -3680,38 +3790,258 @@ Akaike Inf. Crit.
 </tr>
 </table>
 </div>
-<div id="probit---second-memner" class="section level3" number="0.3.4">
-<h3 number="0.3.4"><span class="header-section-number">0.3.4</span> probit - second memner</h3>
-<pre><code>## 
-## &lt;table style=&quot;text-align:center&quot;&gt;&lt;caption&gt;&lt;strong&gt;Regression Results - Success of dynasties&lt;/strong&gt;&lt;/caption&gt;
-## &lt;tr&gt;&lt;td colspan=&quot;3&quot; style=&quot;border-bottom: 1px solid black&quot;&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;text-align:left&quot;&gt;&lt;/td&gt;&lt;td colspan=&quot;2&quot;&gt;&lt;em&gt;Dependent variable:&lt;/em&gt;&lt;/td&gt;&lt;/tr&gt;
-## &lt;tr&gt;&lt;td&gt;&lt;/td&gt;&lt;td colspan=&quot;2&quot; style=&quot;border-bottom: 1px solid black&quot;&gt;&lt;/td&gt;&lt;/tr&gt;
-## &lt;tr&gt;&lt;td style=&quot;text-align:left&quot;&gt;&lt;/td&gt;&lt;td&gt;Declining&lt;/td&gt;&lt;td&gt;Stable&lt;/td&gt;&lt;/tr&gt;
-## &lt;tr&gt;&lt;td style=&quot;text-align:left&quot;&gt;&lt;/td&gt;&lt;td&gt;(1)&lt;/td&gt;&lt;td&gt;(2)&lt;/td&gt;&lt;/tr&gt;
-## &lt;tr&gt;&lt;td colspan=&quot;3&quot; style=&quot;border-bottom: 1px solid black&quot;&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;text-align:left&quot;&gt;Minister duration&lt;/td&gt;&lt;td&gt;-0.021&lt;sup&gt;***&lt;/sup&gt;&lt;/td&gt;&lt;td&gt;0.017&lt;sup&gt;*&lt;/sup&gt;&lt;/td&gt;&lt;/tr&gt;
-## &lt;tr&gt;&lt;td style=&quot;text-align:left&quot;&gt;&lt;/td&gt;&lt;td&gt;(0.008)&lt;/td&gt;&lt;td&gt;(0.009)&lt;/td&gt;&lt;/tr&gt;
-## &lt;tr&gt;&lt;td style=&quot;text-align:left&quot;&gt;Economic diversification&lt;/td&gt;&lt;td&gt;-0.093&lt;sup&gt;***&lt;/sup&gt;&lt;/td&gt;&lt;td&gt;0.066&lt;sup&gt;**&lt;/sup&gt;&lt;/td&gt;&lt;/tr&gt;
-## &lt;tr&gt;&lt;td style=&quot;text-align:left&quot;&gt;&lt;/td&gt;&lt;td&gt;(0.025)&lt;/td&gt;&lt;td&gt;(0.028)&lt;/td&gt;&lt;/tr&gt;
-## &lt;tr&gt;&lt;td style=&quot;text-align:left&quot;&gt;Educational ownership&lt;/td&gt;&lt;td&gt;-0.044&lt;/td&gt;&lt;td&gt;0.124&lt;sup&gt;**&lt;/sup&gt;&lt;/td&gt;&lt;/tr&gt;
-## &lt;tr&gt;&lt;td style=&quot;text-align:left&quot;&gt;&lt;/td&gt;&lt;td&gt;(0.054)&lt;/td&gt;&lt;td&gt;(0.060)&lt;/td&gt;&lt;/tr&gt;
-## &lt;tr&gt;&lt;td style=&quot;text-align:left&quot;&gt;Land ownership&lt;/td&gt;&lt;td&gt;0.00001&lt;/td&gt;&lt;td&gt;-0.00002&lt;/td&gt;&lt;/tr&gt;
-## &lt;tr&gt;&lt;td style=&quot;text-align:left&quot;&gt;&lt;/td&gt;&lt;td&gt;(0.0001)&lt;/td&gt;&lt;td&gt;(0.0001)&lt;/td&gt;&lt;/tr&gt;
-## &lt;tr&gt;&lt;td style=&quot;text-align:left&quot;&gt;Political diversification&lt;/td&gt;&lt;td&gt;-0.151&lt;sup&gt;**&lt;/sup&gt;&lt;/td&gt;&lt;td&gt;0.014&lt;/td&gt;&lt;/tr&gt;
-## &lt;tr&gt;&lt;td style=&quot;text-align:left&quot;&gt;&lt;/td&gt;&lt;td&gt;(0.070)&lt;/td&gt;&lt;td&gt;(0.079)&lt;/td&gt;&lt;/tr&gt;
-## &lt;tr&gt;&lt;td style=&quot;text-align:left&quot;&gt;Delimitation control&lt;/td&gt;&lt;td&gt;0.047&lt;/td&gt;&lt;td&gt;0.075&lt;/td&gt;&lt;/tr&gt;
-## &lt;tr&gt;&lt;td style=&quot;text-align:left&quot;&gt;&lt;/td&gt;&lt;td&gt;(0.067)&lt;/td&gt;&lt;td&gt;(0.074)&lt;/td&gt;&lt;/tr&gt;
-## &lt;tr&gt;&lt;td colspan=&quot;3&quot; style=&quot;border-bottom: 1px solid black&quot;&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;text-align:left&quot;&gt;Caste control&lt;/td&gt;&lt;td&gt;Yes&lt;/td&gt;&lt;td&gt;Yes&lt;/td&gt;&lt;/tr&gt;
-## &lt;tr&gt;&lt;td style=&quot;text-align:left&quot;&gt;Observations&lt;/td&gt;&lt;td&gt;308&lt;/td&gt;&lt;td&gt;308&lt;/td&gt;&lt;/tr&gt;
-## &lt;tr&gt;&lt;td style=&quot;text-align:left&quot;&gt;R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;&lt;td&gt;0.147&lt;/td&gt;&lt;td&gt;0.076&lt;/td&gt;&lt;/tr&gt;
-## &lt;tr&gt;&lt;td style=&quot;text-align:left&quot;&gt;Adjusted R&lt;sup&gt;2&lt;/sup&gt;&lt;/td&gt;&lt;td&gt;0.115&lt;/td&gt;&lt;td&gt;0.042&lt;/td&gt;&lt;/tr&gt;
-## &lt;tr&gt;&lt;td style=&quot;text-align:left&quot;&gt;Residual Std. Error (df = 296)&lt;/td&gt;&lt;td&gt;0.420&lt;/td&gt;&lt;td&gt;0.468&lt;/td&gt;&lt;/tr&gt;
-## &lt;tr&gt;&lt;td colspan=&quot;3&quot; style=&quot;border-bottom: 1px solid black&quot;&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;text-align:left&quot;&gt;&lt;em&gt;Note:&lt;/em&gt;&lt;/td&gt;&lt;td colspan=&quot;2&quot; style=&quot;text-align:right&quot;&gt;&lt;sup&gt;*&lt;/sup&gt;p&lt;0.1; &lt;sup&gt;**&lt;/sup&gt;p&lt;0.05; &lt;sup&gt;***&lt;/sup&gt;p&lt;0.01&lt;/td&gt;&lt;/tr&gt;
-## &lt;/table&gt;</code></pre>
+<div id="probit---second-member" class="section level3" number="0.3.4">
+<h3 number="0.3.4"><span class="header-section-number">0.3.4</span> probit - second member</h3>
+<table style="text-align:center">
+<caption>
+<strong>Regression Results - Success of dynasties</strong>
+</caption>
+<tr>
+<td colspan="3" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td colspan="2">
+<em>Dependent variable:</em>
+</td>
+</tr>
+<tr>
+<td>
+</td>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+Declining
+</td>
+<td>
+Stable
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(1)
+</td>
+<td>
+(2)
+</td>
+</tr>
+<tr>
+<td colspan="3" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Political diversification
+</td>
+<td>
+-0.021<sup>***</sup>
+</td>
+<td>
+0.017<sup>*</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.008)
+</td>
+<td>
+(0.009)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Minister duration
+</td>
+<td>
+-0.093<sup>***</sup>
+</td>
+<td>
+0.066<sup>**</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.025)
+</td>
+<td>
+(0.028)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Economic diversification
+</td>
+<td>
+-0.044
+</td>
+<td>
+0.124<sup>**</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.054)
+</td>
+<td>
+(0.060)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Educational ownership
+</td>
+<td>
+0.00001
+</td>
+<td>
+-0.00002
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.0001)
+</td>
+<td>
+(0.0001)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Land ownership
+</td>
+<td>
+-0.151<sup>**</sup>
+</td>
+<td>
+0.014
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.070)
+</td>
+<td>
+(0.079)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Delimitation control
+</td>
+<td>
+0.047
+</td>
+<td>
+0.075
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.067)
+</td>
+<td>
+(0.074)
+</td>
+</tr>
+<tr>
+<td colspan="3" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Caste control
+</td>
+<td>
+Yes
+</td>
+<td>
+Yes
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Observations
+</td>
+<td>
+308
+</td>
+<td>
+308
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+R<sup>2</sup>
+</td>
+<td>
+0.147
+</td>
+<td>
+0.076
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Adjusted R<sup>2</sup>
+</td>
+<td>
+0.115
+</td>
+<td>
+0.042
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Residual Std. Error (df = 296)
+</td>
+<td>
+0.420
+</td>
+<td>
+0.468
+</td>
+</tr>
+<tr>
+<td colspan="3" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td colspan="2" style="text-align:right">
+<sup><em></sup>p&lt;0.1; <sup><strong></sup>p&lt;0.05; <sup></strong></em></sup>p&lt;0.01
+</td>
+</tr>
+</table>
 </div>
 <div id="dual-option" class="section level3 tabset" number="0.3.5">
 <h3 class="tabset" number="0.3.5"><span class="header-section-number">0.3.5</span> Dual option</h3>
-<div id="stable-vs-declining" class="section level4" number="0.3.5.1">
-<h4 number="0.3.5.1"><span class="header-section-number">0.3.5.1</span> stable v/s declining</h4>
+<div id="stable-vs-declining" class="section level4 tabset" number="0.3.5.1">
+<h4 class="tabset" number="0.3.5.1"><span class="header-section-number">0.3.5.1</span> stable v/s declining</h4>
+<div id="with-second-member" class="section level5" number="0.3.5.1.1">
+<h5 number="0.3.5.1.1"><span class="header-section-number">0.3.5.1.1</span> with second member</h5>
 <table style="text-align:center">
 <caption>
 <strong>Regression Results - Declining v/s Stable</strong>
@@ -3759,7 +4089,7 @@ Stable
 </tr>
 <tr>
 <td style="text-align:left">
-Minister duration
+Political diversification
 </td>
 <td>
 -0.097<sup>**</sup>
@@ -3780,7 +4110,7 @@ Minister duration
 </tr>
 <tr>
 <td style="text-align:left">
-Economic diversification
+Minister duration
 </td>
 <td>
 -0.285<sup>***</sup>
@@ -3801,7 +4131,7 @@ Economic diversification
 </tr>
 <tr>
 <td style="text-align:left">
-Educational ownership
+Economic diversification
 </td>
 <td>
 -0.370<sup>*</sup>
@@ -3822,7 +4152,7 @@ Educational ownership
 </tr>
 <tr>
 <td style="text-align:left">
-Land ownership
+Educational ownership
 </td>
 <td>
 -0.0001
@@ -3843,7 +4173,7 @@ Land ownership
 </tr>
 <tr>
 <td style="text-align:left">
-Political diversification
+Land ownership
 </td>
 <td>
 -0.762<sup>**</sup>
@@ -3945,8 +4275,36 @@ Akaike Inf. Crit.
 </tr>
 </table>
 </div>
-<div id="stable-vs-rising" class="section level4" number="0.3.5.2">
-<h4 number="0.3.5.2"><span class="header-section-number">0.3.5.2</span> Stable v/s rising</h4>
+</div>
+<div id="with-delim-control" class="section level4" number="0.3.5.2">
+<h4 number="0.3.5.2"><span class="header-section-number">0.3.5.2</span> with delim control</h4>
+<pre><code>## 
+## &lt;table style=&quot;text-align:center&quot;&gt;&lt;caption&gt;&lt;strong&gt;Regression Results - Declining v/s&lt;/strong&gt;&lt;/caption&gt;
+## &lt;tr&gt;&lt;td colspan=&quot;3&quot; style=&quot;border-bottom: 1px solid black&quot;&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;text-align:left&quot;&gt;&lt;/td&gt;&lt;td colspan=&quot;2&quot;&gt;&lt;em&gt;Dependent variable:&lt;/em&gt;&lt;/td&gt;&lt;/tr&gt;
+## &lt;tr&gt;&lt;td&gt;&lt;/td&gt;&lt;td colspan=&quot;2&quot; style=&quot;border-bottom: 1px solid black&quot;&gt;&lt;/td&gt;&lt;/tr&gt;
+## &lt;tr&gt;&lt;td style=&quot;text-align:left&quot;&gt;&lt;/td&gt;&lt;td&gt;Declining&lt;/td&gt;&lt;td&gt;Stable&lt;/td&gt;&lt;/tr&gt;
+## &lt;tr&gt;&lt;td style=&quot;text-align:left&quot;&gt;&lt;/td&gt;&lt;td&gt;(1)&lt;/td&gt;&lt;td&gt;(2)&lt;/td&gt;&lt;/tr&gt;
+## &lt;tr&gt;&lt;td colspan=&quot;3&quot; style=&quot;border-bottom: 1px solid black&quot;&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;text-align:left&quot;&gt;Political diversification&lt;/td&gt;&lt;td&gt;-0.088&lt;sup&gt;**&lt;/sup&gt;&lt;/td&gt;&lt;td&gt;0.088&lt;sup&gt;**&lt;/sup&gt;&lt;/td&gt;&lt;/tr&gt;
+## &lt;tr&gt;&lt;td style=&quot;text-align:left&quot;&gt;&lt;/td&gt;&lt;td&gt;(0.038)&lt;/td&gt;&lt;td&gt;(0.038)&lt;/td&gt;&lt;/tr&gt;
+## &lt;tr&gt;&lt;td style=&quot;text-align:left&quot;&gt;Minister duration&lt;/td&gt;&lt;td&gt;-0.359&lt;sup&gt;***&lt;/sup&gt;&lt;/td&gt;&lt;td&gt;0.359&lt;sup&gt;***&lt;/sup&gt;&lt;/td&gt;&lt;/tr&gt;
+## &lt;tr&gt;&lt;td style=&quot;text-align:left&quot;&gt;&lt;/td&gt;&lt;td&gt;(0.107)&lt;/td&gt;&lt;td&gt;(0.107)&lt;/td&gt;&lt;/tr&gt;
+## &lt;tr&gt;&lt;td style=&quot;text-align:left&quot;&gt;Economic diversification&lt;/td&gt;&lt;td&gt;-0.420&lt;sup&gt;*&lt;/sup&gt;&lt;/td&gt;&lt;td&gt;0.420&lt;sup&gt;*&lt;/sup&gt;&lt;/td&gt;&lt;/tr&gt;
+## &lt;tr&gt;&lt;td style=&quot;text-align:left&quot;&gt;&lt;/td&gt;&lt;td&gt;(0.219)&lt;/td&gt;&lt;td&gt;(0.219)&lt;/td&gt;&lt;/tr&gt;
+## &lt;tr&gt;&lt;td style=&quot;text-align:left&quot;&gt;Educational ownership&lt;/td&gt;&lt;td&gt;-0.00001&lt;/td&gt;&lt;td&gt;0.00001&lt;/td&gt;&lt;/tr&gt;
+## &lt;tr&gt;&lt;td style=&quot;text-align:left&quot;&gt;&lt;/td&gt;&lt;td&gt;(0.0003)&lt;/td&gt;&lt;td&gt;(0.0003)&lt;/td&gt;&lt;/tr&gt;
+## &lt;tr&gt;&lt;td style=&quot;text-align:left&quot;&gt;Land ownership&lt;/td&gt;&lt;td&gt;-0.704&lt;sup&gt;**&lt;/sup&gt;&lt;/td&gt;&lt;td&gt;0.704&lt;sup&gt;**&lt;/sup&gt;&lt;/td&gt;&lt;/tr&gt;
+## &lt;tr&gt;&lt;td style=&quot;text-align:left&quot;&gt;&lt;/td&gt;&lt;td&gt;(0.352)&lt;/td&gt;&lt;td&gt;(0.352)&lt;/td&gt;&lt;/tr&gt;
+## &lt;tr&gt;&lt;td style=&quot;text-align:left&quot;&gt;Delimitation control&lt;/td&gt;&lt;td&gt;-0.038&lt;/td&gt;&lt;td&gt;0.038&lt;/td&gt;&lt;/tr&gt;
+## &lt;tr&gt;&lt;td style=&quot;text-align:left&quot;&gt;&lt;/td&gt;&lt;td&gt;(0.267)&lt;/td&gt;&lt;td&gt;(0.267)&lt;/td&gt;&lt;/tr&gt;
+## &lt;tr&gt;&lt;td colspan=&quot;3&quot; style=&quot;border-bottom: 1px solid black&quot;&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;text-align:left&quot;&gt;Caste control&lt;/td&gt;&lt;td&gt;Yes&lt;/td&gt;&lt;td&gt;Yes&lt;/td&gt;&lt;/tr&gt;
+## &lt;tr&gt;&lt;td style=&quot;text-align:left&quot;&gt;Observations&lt;/td&gt;&lt;td&gt;192&lt;/td&gt;&lt;td&gt;192&lt;/td&gt;&lt;/tr&gt;
+## &lt;tr&gt;&lt;td style=&quot;text-align:left&quot;&gt;Log Likelihood&lt;/td&gt;&lt;td&gt;-107.164&lt;/td&gt;&lt;td&gt;-107.164&lt;/td&gt;&lt;/tr&gt;
+## &lt;tr&gt;&lt;td style=&quot;text-align:left&quot;&gt;Akaike Inf. Crit.&lt;/td&gt;&lt;td&gt;238.328&lt;/td&gt;&lt;td&gt;238.328&lt;/td&gt;&lt;/tr&gt;
+## &lt;tr&gt;&lt;td colspan=&quot;3&quot; style=&quot;border-bottom: 1px solid black&quot;&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;text-align:left&quot;&gt;&lt;em&gt;Note:&lt;/em&gt;&lt;/td&gt;&lt;td colspan=&quot;2&quot; style=&quot;text-align:right&quot;&gt;&lt;sup&gt;*&lt;/sup&gt;p&lt;0.1; &lt;sup&gt;**&lt;/sup&gt;p&lt;0.05; &lt;sup&gt;***&lt;/sup&gt;p&lt;0.01&lt;/td&gt;&lt;/tr&gt;
+## &lt;/table&gt;</code></pre>
+</div>
+<div id="stable-vs-rising" class="section level4" number="0.3.5.3">
+<h4 number="0.3.5.3"><span class="header-section-number">0.3.5.3</span> Stable v/s rising</h4>
 <table style="text-align:center">
 <caption>
 <strong>Regression Results - Stable v/s Rising</strong>
@@ -3994,7 +4352,7 @@ Rising
 </tr>
 <tr>
 <td style="text-align:left">
-Minister duration
+Political diversification
 </td>
 <td>
 0.0003
@@ -4015,7 +4373,7 @@ Minister duration
 </tr>
 <tr>
 <td style="text-align:left">
-Economic diversification
+Minister duration
 </td>
 <td>
 0.083
@@ -4036,7 +4394,7 @@ Economic diversification
 </tr>
 <tr>
 <td style="text-align:left">
-Educational ownership
+Economic diversification
 </td>
 <td>
 0.394<sup>**</sup>
@@ -4057,7 +4415,7 @@ Educational ownership
 </tr>
 <tr>
 <td style="text-align:left">
-Land ownership
+Educational ownership
 </td>
 <td>
 -0.00004
@@ -4078,7 +4436,7 @@ Land ownership
 </tr>
 <tr>
 <td style="text-align:left">
-Political diversification
+Land ownership
 </td>
 <td>
 -0.317
@@ -4180,8 +4538,8 @@ Akaike Inf. Crit.
 </tr>
 </table>
 </div>
-<div id="rising-vs-declining" class="section level4" number="0.3.5.3">
-<h4 number="0.3.5.3"><span class="header-section-number">0.3.5.3</span> Rising v/s declining</h4>
+<div id="rising-vs-declining" class="section level4" number="0.3.5.4">
+<h4 number="0.3.5.4"><span class="header-section-number">0.3.5.4</span> Rising v/s declining</h4>
 <table style="text-align:center">
 <caption>
 <strong>Regression Results - Declining v/s Rising</strong>
@@ -4229,7 +4587,7 @@ Rising
 </tr>
 <tr>
 <td style="text-align:left">
-Minister duration
+Political diversification
 </td>
 <td>
 -0.107<sup>***</sup>
@@ -4250,7 +4608,7 @@ Minister duration
 </tr>
 <tr>
 <td style="text-align:left">
-Economic diversification
+Minister duration
 </td>
 <td>
 -0.256<sup>***</sup>
@@ -4271,7 +4629,7 @@ Economic diversification
 </tr>
 <tr>
 <td style="text-align:left">
-Educational ownership
+Economic diversification
 </td>
 <td>
 0.256
@@ -4292,7 +4650,7 @@ Educational ownership
 </tr>
 <tr>
 <td style="text-align:left">
-Land ownership
+Educational ownership
 </td>
 <td>
 -0.0001
@@ -4313,7 +4671,7 @@ Land ownership
 </tr>
 <tr>
 <td style="text-align:left">
-Political diversification
+Land ownership
 </td>
 <td>
 -0.963<sup>***</sup>
@@ -4414,241 +4772,46 @@ Akaike Inf. Crit.
 </td>
 </tr>
 </table>
-</div>
-<div id="declining-vs-stable" class="section level4" number="0.3.5.4">
-<h4 number="0.3.5.4"><span class="header-section-number">0.3.5.4</span> declining v/s stable</h4>
-<table style="text-align:center">
-<caption>
-<strong>Regression Results - Declining v/s</strong>
-</caption>
-<tr>
-<td colspan="3" style="border-bottom: 1px solid black">
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-</td>
-<td colspan="2">
-<em>Dependent variable:</em>
-</td>
-</tr>
-<tr>
-<td>
-</td>
-<td colspan="2" style="border-bottom: 1px solid black">
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-</td>
-<td>
-Declining
-</td>
-<td>
-Stable
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-</td>
-<td>
-(1)
-</td>
-<td>
-(2)
-</td>
-</tr>
-<tr>
-<td colspan="3" style="border-bottom: 1px solid black">
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-Minister duration
-</td>
-<td>
--0.088<sup>**</sup>
-</td>
-<td>
-0.088<sup>**</sup>
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-</td>
-<td>
-(0.038)
-</td>
-<td>
-(0.038)
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-Economic diversification
-</td>
-<td>
--0.359<sup>***</sup>
-</td>
-<td>
-0.359<sup>***</sup>
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-</td>
-<td>
-(0.107)
-</td>
-<td>
-(0.107)
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-Educational ownership
-</td>
-<td>
--0.420<sup>*</sup>
-</td>
-<td>
-0.420<sup>*</sup>
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-</td>
-<td>
-(0.219)
-</td>
-<td>
-(0.219)
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-Land ownership
-</td>
-<td>
--0.00001
-</td>
-<td>
-0.00001
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-</td>
-<td>
-(0.0003)
-</td>
-<td>
-(0.0003)
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-Political diversification
-</td>
-<td>
--0.704<sup>**</sup>
-</td>
-<td>
-0.704<sup>**</sup>
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-</td>
-<td>
-(0.352)
-</td>
-<td>
-(0.352)
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-Delimitation control
-</td>
-<td>
--0.038
-</td>
-<td>
-0.038
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-</td>
-<td>
-(0.267)
-</td>
-<td>
-(0.267)
-</td>
-</tr>
-<tr>
-<td colspan="3" style="border-bottom: 1px solid black">
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-Caste control
-</td>
-<td>
-Yes
-</td>
-<td>
-Yes
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-Observations
-</td>
-<td>
-192
-</td>
-<td>
-192
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-Log Likelihood
-</td>
-<td>
--107.164
-</td>
-<td>
--107.164
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-Akaike Inf. Crit.
-</td>
-<td>
-238.328
-</td>
-<td>
-238.328
-</td>
-</tr>
-<tr>
-<td colspan="3" style="border-bottom: 1px solid black">
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-<em>Note:</em>
-</td>
-<td colspan="2" style="text-align:right">
-<sup><em></sup>p&lt;0.1; <sup><strong></sup>p&lt;0.05; <sup></strong></em></sup>p&lt;0.01
-</td>
-</tr>
-</table>
+<!-- #### declining  v/s stable -->
+<!-- ```{r results="asis"} -->
+<!-- ## rising v/s declning -->
+<!-- sd <- dyn_ae_ge_fam_uniq %>% filter(success_cat!= "Rising") -->
+<!-- second_mem_dur <- sd$diff -->
+<!-- industry <- sd$indus_count %>% replace_na(0) -->
+<!-- # industry_rent_thick <- sd$indus_rt %>% replace_na(0) -->
+<!-- #  -->
+<!-- # industry_non_rent_thick <- sd$indus_nrt %>% replace_na(0) -->
+<!-- caste_uc <- ifelse(sd$caste_groups == "Upper Caste", 1,0) -->
+<!-- caste_yadav <- ifelse(sd$caste_groups == "Yadav", 1,0) -->
+<!-- caste_muslim <- ifelse(sd$caste_groups == "Muslim", 1,0) -->
+<!-- caste_dalit <- ifelse(sd$caste_groups == "Dalit", 1,0) -->
+<!-- caste_non_yadav_obc <- ifelse(sd$caste_groups == "Non-Yadav OBC", 1,0) -->
+<!-- turncoat <- sd$turncoat -->
+<!-- N_minister <- sd$n_sc_minster%>% replace_na(0) -->
+<!-- minister_duration <- sd$min_dur_yr %>% replace_na(0) -->
+<!-- minister <-ifelse(sd$min_dur_yr>0,1,0)%>% replace_na(0)  -->
+<!-- post_2002 <- ifelse(sd$year >=2002,1,0) -->
+<!-- #n_elections_w<- as.numeric(sd$n_el_w) -->
+<!-- school <- sd$school%>% replace_na(0) -->
+<!-- college <- sd$college%>% replace_na(0) -->
+<!-- school_college <- paste(school, college, sep = "") -->
+<!-- school_college <- case_when(school_college == "00"~ 0, -->
+<!--                             TRUE ~ 1) -->
+<!-- land <- as.numeric(sd$land) %>% replace_na(0) -->
+<!-- linkage <- ifelse(sd$level %in% c("AE", "GE"),0,1) -->
+<!-- linkage_up <- ifelse(sd$level%in% c("GE-AE", "GE-AE-LB"),1,0) -->
+<!-- linkage_down <- ifelse(sd$level %in% c("AE-LB", "GE-AE-LB", "GE-LB"),1,0) -->
+<!-- delim_change <- sd$delim_change -->
+<!-- #success_cat <- relevel(success_cat, ref = "stable") -->
+<!-- Declining <- ifelse(sd$success_cat=="Declining",1,0) -->
+<!-- fit.1 <- glm(Declining~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land + linkage_down+factor(delim_change), family= binomial(link = "probit") ) -->
+<!-- ##summary(fit.1) -->
+<!-- Stable<- ifelse(sd$success_cat=="Stable",1,0) -->
+<!-- fit.2 <- glm(Stable  ~caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + school_college + land + linkage_down+factor(delim_change), family= binomial(link = "probit") ) -->
+<!-- ##summary(fit.1) -->
+<!--  stargazer(fit.1,fit.2,title="Regression Results - Declining v/s   ",type = "html", -->
+<!--             align=TRUE,  no.space=TRUE,keep = c("minister_duration","industry", "school_college", "land", "linkage_down", "delim_change"),add.lines = list (c("Caste control", "Yes","Yes")),covariate.labels = c( "Minister duration", "Economic diversification","Educational ownership", "Land ownership", "Political diversification","Delimitation control")) -->
+<!-- ``` -->
 </div>
 </div>
 </div>
