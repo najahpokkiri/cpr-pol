@@ -80,6 +80,9 @@ dyn_all_uniq <- dyn_all %>% filter(family_id != "") %>% group_by(family_id) %>% 
 
  dyn_ae_ge <- dyn_all %>% filter(election_type %in% c("AE", "GE"))
 
+
+dyn_ae_ge <- dyn_ae_ge %>% mutate(land_decile = ntile(land,10))
+
 ## Industries
 
 dyn_indus <- read.csv("D:/cpr/UP/up-dynasties/ae_ge_indus.csv")
@@ -323,9 +326,9 @@ industry <- dyn_ae_uniq$indus_count %>% replace_na(0)
 industry <- industry+school_college
 
 
-land <- as.numeric(dyn_ae_uniq$land) %>% replace_na(0)
+#land <- as.numeric(dyn_ae_uniq$land) %>% replace_na(0)
 
-land<- ntile(land, 10)  
+land<- dyn_ae_uniq$land_decile
 
 association <- dyn_ae_uniq$association_fam %>% replace_na(0)
 
@@ -499,9 +502,11 @@ industry <- industry+school_college
 
 
 
-land <- as.numeric(dyn_ae_ge_uniq$land) %>% replace_na(0)
+# land <- as.numeric(dyn_ae_ge_uniq$land) %>% replace_na(0)
+# 
+# land<- ntile(land, 10)  
 
-land<- ntile(land, 10)  
+land<- dyn_ae_ge_uniq$land_decile
 
 linkage <- ifelse(dyn_ae_ge_uniq$level %in% c("AE", "GE"),0,1)
 
@@ -701,11 +706,13 @@ school_college <- case_when(school_college == "00"~ 0,
 
 industry <- industry+school_college
 
-land <- as.numeric(dyn_ae_12_17_uniq$land) %>% replace_na(0)
+# land <- as.numeric(dyn_ae_12_17_uniq$land) %>% replace_na(0)
+# 
+# 
+# 
+# land<- ntile(land, 10)  
 
-
-
-land<- ntile(land, 10)  
+land<- dyn_ae_12_17_uniq$land_decile
 
 total_assets <- dyn_ae_12_17_uniq$total_assets
 
@@ -872,10 +879,12 @@ school_college <- case_when(school_college == "00"~ 0,
 
 
 industry <- industry+school_college
+# 
+# land <- as.numeric(dyn_ge_09_19_uniq $land) %>% replace_na(0)
+# 
+# land<- ntile(land, 10)  
 
-land <- as.numeric(dyn_ge_09_19_uniq $land) %>% replace_na(0)
-
-land<- ntile(land, 10)  
+land<- dyn_ge_09_19_uniq$land_decile
 
 total_assets <- as.numeric(dyn_ge_09_19_uniq $total_assets)
 
@@ -1041,10 +1050,12 @@ school_college <- case_when(school_college == "00"~ 0,
 
 industry <- school_college+industry
 
-land <- as.numeric(dyn_ae_ge_09_19_uniq $land) %>% replace_na(0)
+# land <- as.numeric(dyn_ae_ge_09_19_uniq $land) %>% replace_na(0)
+# 
+# 
+# land<- ntile(land, 10)  
 
-
-land<- ntile(land, 10)  
+land<- dyn_ae_ge_09_19_uniq$land_decile
 
 total_assets <- dyn_ae_ge_09_19_uniq $total_assets
 
