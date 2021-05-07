@@ -765,7 +765,7 @@ cbind(stat, vals) %>% kable(digits = 2, col.names = c("Measure", "Family", "Poli
 
 
 ```{r  results = "asis"}
-fit.1 <- feglm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry +  land + n_elections_w+ log(total_assets)  + serious_crime + turncoat |district+year, family = binomial(link = "probit"), data= df)
+fit.1 <- feglm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim+linkage+ +minister_duration +industry +  land + n_elections_w+ log(total_assets)  + serious_crime + turncoat |district+year, family = binomial(link = "probit"), data= df)
 
 
 #summary(fit.2)
@@ -930,7 +930,7 @@ cbind(stat, vals) %>% kable(digits = 2, col.names = c("Measure", "Family", "Poli
 
 
 ```{r results = "asis"}
-fit.1 <- feglm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + land + n_elections_w+ log(total_assets) + serious_crime + turncoat|pc+year, family = binomial(link = "probit"), data= df)
+fit.1 <- feglm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim+linkage_down +minister_duration +industry + land + n_elections_w+ log(total_assets) + serious_crime + turncoat|pc+year, family = binomial(link = "probit"), data= df)
 
 
 
@@ -1108,7 +1108,7 @@ cbind(stat, vals) %>% kable(digits = 2, col.names = c("Measure", "Family", "Poli
 
 
 ```{r results="asis"}
-fit.1 <- feglm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry  + land + n_elections_w+ log(total_assets)  + serious_crime + non_serious_crime+turncoat+election_type|constituency+year, family = binomial(link = "probit"), data = df)
+fit.1 <- feglm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +linkage_down +minister_duration +industry  + land + n_elections_w+ log(total_assets)  + serious_crime + non_serious_crime+turncoat+election_type|constituency+year, family = binomial(link = "probit"), data = df)
 
 
 
