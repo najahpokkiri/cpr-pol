@@ -4,7 +4,7 @@ author: ""
 date: "2020-02-07"
 params:
   orig_date: "Original Publish Date: 21 July, 2020"
-  update_date: !r paste("Updated on:", format(Sys.time(), '%d %B, %Y'))
+  update_date: !r paste("Updated on:", format(Sys.time(), '%I:%m  %p -- %d %B, %Y'))
 output:
   html_document:
     theme: readable
@@ -899,7 +899,7 @@ fit.multinom <- multinom(success_cat~  caste_uc+ caste_yadav+caste_non_yadav_obc
 ```
 
 ```{r, results= "asis"}
-stargazer(fit.multinom, type="html", keep = c("linkage_down","success_cat","minister_duration","industry", "land", "second_mem_dur"),order = c("linkage_down","success_cat","minister_duration","industry", "school_college", "land", "second_mem_dur"),add.lines = list (c("Caste control", "Yes","Yes","Yes")),covariate.labels = c( "Political diversification","Minister duration", "Economic diversification","Educational ownership", "Land ownership", "Years took for the second member entry"))
+stargazer(fit.multinom, type="html", keep = c("linkage_down","success_cat","minister_duration","industry", "land", "second_mem_dur"),order = c("linkage_down","success_cat","minister_duration","industry",  "land", "second_mem_dur"),add.lines = list (c("Caste control", "Yes","Yes","Yes")),covariate.labels = c( "Political diversification","Minister duration", "Economic diversification", "Land ownership", "Years took for the second member entry"))
 ```
 
 ---

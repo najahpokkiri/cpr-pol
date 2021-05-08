@@ -4,7 +4,7 @@ author: ""
 date: '2020-06-10'
 params:
   orig_date: "Original Publish Date: 10 June, 2020"
-  update_date: !r paste("Updated on:", format(Sys.time(), '%d %B, %Y'))
+  update_date: !r paste("Updated on:", format(Sys.time(), '%I:%m  %p -- %d %B, %Y'))
 authors:
   - najah
 summary: The main analysis document of the dynasties dataset.
@@ -125,6 +125,11 @@ dyn_uniq_ind <- dyn %>% arrange(-year) %>%
   
 dyn_ae_ge <- dyn %>% filter(election_type %in% c("AE", "GE") & family_id != "")
 
+dyn_ae_ge <- dyn_ae_ge %>% group_by(family_id) %>% mutate(max_year = max(year), min_year = min(year),life_span = max_year-min_year)
+
+
+dyn_ae_ge <- dyn_ae_ge  %>% group_by(election_id) %>% mutate(term_duration= max(term_duration)) %>% ungroup()
+
 
 dyn_ae_ge$land <- as.numeric(dyn_ae_ge$land)
 
@@ -135,9 +140,9 @@ dyn_ae_ge$land <- as.numeric(dyn_ae_ge$land)
  dyn_ae_ge <-  dyn_ae_ge %>% mutate(id = paste0(family_id, relative_id, rel_id_rep))
 
 
-dyn_ae_ge <- dyn_ae_ge %>% group_by(fam_rel_uniq_id) %>% mutate(n_elections_won = n_distinct(election_id[position ==1]))
+dyn_ae_ge <- dyn_ae_ge %>% group_by(fam_rel_uniq_id) %>% mutate(n_elections_won = n_distinct(election_id[position ==1])) %>% ungroup(fam_rel_uniq_id)
 
-dyn_ae_ge <- dyn_ae_ge %>% group_by(fam_rel_uniq_id) %>% mutate(n_elections_contested = n_distinct(election_id))
+dyn_ae_ge <- dyn_ae_ge %>% group_by(fam_rel_uniq_id) %>% mutate(n_elections_contested = n_distinct(election_id))%>% ungroup(fam_rel_uniq_id)
 
 
 dyn_ae_ge_uniq_ind <- dyn_ae_ge %>% arrange(-year) %>% 
@@ -480,7 +485,7 @@ dyn_ae_ge_uniq_ind %>% group_by(n_elections_won) %>% summarise(n_individuals = n
 library(treemapify)
 
 
-dyn_ae_ge <- dyn_ae_ge %>% group_by(uniq_id) %>% mutate(n_el_w_ind = length(election_id[position==1]))
+dyn_ae_ge <- dyn_ae_ge %>% group_by(uniq_id) %>% mutate(n_el_w_ind = length(election_id[position==1])) %>% ungroup(uniq_id)
 
 
 
@@ -680,36 +685,16 @@ dyn_ae_ge %>% group_by(election_type, dyn_cum_2,year) %>% summarise(count = sum(
 
 ## Life span {.tabset}
 
-### family
+### family{.tabset}
 
-This section looks at the life span of families. Life span is calculated by computing the difference in entry year of the family with the last appearance of a member from the same family. Life span is simply the longitudinal life of a family. This  is calculated by simply computing the difference in the entry year of a family with the year in which the last member has contested. The following graph is a density chart of the the life span of the unique families in the dataset.
+#### 1
 
 
-Life span in this context is the year difference between the election that the patriarch contested before the second member and the last election that contested by someone from the family.
-
+Here life span is calculated by computing the difference in entry year of the family with the last appearance of a member from the same family. Life span is simply the longitudinal life of a family. This  is calculated by simply computing the difference in the entry year of a family with the year in which the last member has contested. The following graph is a density chart of the the life span of the unique families in the dataset.
 
 ```{r}
 
 
-
-fam_tab <- rbind(dyn_ae_ge_fam %>% group_by(family_id) %>% filter( dyn_cum_2==0 ) %>% slice(which.max(year))%>% select(year, family_id,dyn_cum_2),
-
-dyn_ae_ge_fam %>% group_by(family_id) %>% filter(dyn_cum_2==1  ) %>% slice(which.min(year)) %>% select(year, family_id,dyn_cum_2 )) %>%pivot_wider(values_from = year, names_from= dyn_cum_2) 
-
-
-
-fam_tab <- fam_tab %>% mutate(`0` = ifelse(is.na(`0`), `1`,`0`), diff = `1`-`0`)
-
-dyn_ae_ge_fam <- dyn_ae_ge %>% filter(dyn_tot_2 ==1)
-
-
-dyn_ae_ge_fam <- dyn_ae_ge_fam %>% group_by(family_id) %>% mutate(min_yr = min(year), max_yr = max(year))
-
-dyn_ae_ge_fam_uniq <- dyn_ae_ge_fam %>% arrange(-year) %>% distinct(family_id,  .keep_all = TRUE)
-
-dyn_ae_ge_fam_uniq <- inner_join(dyn_ae_ge_fam_uniq, fam_tab, by = "family_id")
-
-dyn_ae_ge_fam_uniq$life_span <- dyn_ae_ge_fam_uniq$max_yr- dyn_ae_ge_fam_uniq$`0`
 
 
 medx <- median(dyn_ae_ge_fam_uniq$life_span)
@@ -733,13 +718,73 @@ ggplot(dyn_ae_ge_fam_uniq)+
 ```
 
 
+#### 2
+
+Life span in this context is the year difference between the election that the patriarch contested before the second member and the last election that contested by someone from the family.
+
+
+
+```{r}
+
+
+
+fam_tab <- rbind(dyn_ae_ge_fam %>% group_by(family_id) %>% filter( dyn_cum_2==0 ) %>% slice(which.max(year))%>% select(year, family_id,dyn_cum_2),
+
+dyn_ae_ge_fam %>% group_by(family_id) %>% filter(dyn_cum_2==1  ) %>% slice(which.min(year)) %>% select(year, family_id,dyn_cum_2 )) %>%pivot_wider(values_from = year, names_from= dyn_cum_2) 
+
+
+
+fam_tab <- fam_tab %>% mutate(`0` = ifelse(is.na(`0`), `1`,`0`), diff = `1`-`0`)
+
+dyn_ae_ge_fam <- dyn_ae_ge %>% filter(dyn_tot_2 ==1)
+
+
+dyn_ae_ge_fam <- dyn_ae_ge_fam %>% group_by(family_id) %>% mutate(min_yr = min(year), max_yr = max(year))
+
+dyn_ae_ge_fam_uniq <- dyn_ae_ge_fam %>% arrange(-year) %>% distinct(family_id,  .keep_all = TRUE)
+
+dyn_ae_ge_fam_uniq <- inner_join(dyn_ae_ge_fam_uniq, fam_tab, by = "family_id")
+
+dyn_ae_ge_fam_uniq$life_span_1 <- dyn_ae_ge_fam_uniq$max_yr- dyn_ae_ge_fam_uniq$`0`+ dyn_ae_ge_fam_uniq$term_duration
+
+
+medx <- median(dyn_ae_ge_fam_uniq$life_span_1)
+meanx <- mean(dyn_ae_ge_fam_uniq$life_span_1)
+
+ggplot(dyn_ae_ge_fam_uniq)+
+  geom_density(aes(x=life_span_1, y = ..density..),size = 1, color = 'black')+
+  geom_vline(xintercept = medx, color = "red")+
+  geom_vline(xintercept = meanx, color = "blue")+
+  geom_text(aes(x=(medx+3), label="Median", y=0.01), colour="red", size =4, angle = 90 )+
+  geom_text(aes(x=(meanx -3), label="Mean", y = 0.01), colour="blue", size = 4, angle = 90)+
+  theme_minimal_hgrid()+
+  labs(title = "Life span of Families", x= "Year", y = "Density")+
+  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
+        plot.background = element_blank(),
+        plot.title = element_text(hjust = 0.5, size = 20, face = "bold", family = "serif",
+                                  margin = margin(t = 0, r = 0, b = 20, l = 0)))
+
+
+
+```
+
+
+
+
 ### Individuals won
 
 
 ```{r}
 
-dyn_non_fam_w <- dyn_ae_ge %>% filter(dyn_tot_2==0 &n_elections_won >=1)%>% group_by(family_id) %>% summarise(max_year = max(year), min_year = min(year)) %>% mutate(life_span = max_year-min_year) 
+dyn_non_fam_w <- dyn_ae_ge %>% filter(dyn_tot_2==0 &n_elections_won >=1)%>% group_by(family_id) %>% summarise(max_year = max(year), min_year = min(year)) 
 
+
+
+term_duration <- dyn_ae_ge %>% filter(dyn_tot_2==0 &n_elections_won >=1)%>% arrange(-year)%>% distinct(family_id, .keep_all = TRUE) %>% select(term_duration)
+
+dyn_non_fam_w <- cbind(dyn_non_fam_w,term_duration )
+
+dyn_non_fam_w <- dyn_non_fam_w%>% mutate(life_span = max_year-min_year+term_duration) 
 
 medx <- median(dyn_non_fam_w$life_span)
 meanx <- mean(dyn_non_fam_w$life_span)
@@ -748,7 +793,7 @@ meanx <- mean(dyn_non_fam_w$life_span)
 
 
 ggplot(dyn_non_fam_w)+
-  geom_density(aes(x=life_span+5, y = ..density..),size = 1, color = 'black')+
+  geom_density(aes(x=life_span, y = ..density..),size = 1, color = 'black')+
   geom_vline(xintercept = medx, color = "red")+
   xlim(0,50)+
   ylim(0,.1)+

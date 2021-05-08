@@ -83,6 +83,11 @@ dyn_all_uniq <- dyn_all %>% filter(family_id != "") %>% group_by(family_id) %>% 
 
 dyn_ae_ge <- dyn_ae_ge %>% mutate(land_decile = ntile(land,10))
 
+
+dyn_ae_ge <- dyn_ae_ge  %>% group_by(election_id) %>% mutate(term_duration= max(term_duration)) %>% ungroup()
+
+dyn_ae_ge <- dyn_ae_ge %>% group_by(family_id) %>% mutate(n_el_w = length(election_id[position==1])) %>% ungroup()
+
 ## Industries
 
 dyn_indus <- read.csv("D:/cpr/UP/up-dynasties/ae_ge_indus.csv")
@@ -233,6 +238,8 @@ fam_tab <- fam_tab %>% mutate(`0` = ifelse(is.na(`0`), `1`,`0`), diff = `1`-`0`)
 
 
 
+
+
 # Dynast winner {.tabset}
 
 
@@ -310,6 +317,8 @@ n_elections_w<- as.numeric(dyn_ae_uniq$n_el_w_pat_ae)
 
 #elections_w_2<-  ifelse(elections_w_2>1,1,0)
 
+won_elections <- dyn_ae_uniq$n_el_w
+
 
 school <- dyn_ae_uniq$school%>% replace_na(0)
 
@@ -351,7 +360,7 @@ year <- dyn_ae_uniq$year
 
 
 
-df <- tibble(dynast, caste_uc,caste_yadav,caste_non_yadav_obc , caste_dalit , caste_muslim ,minister_duration ,industry ,  land ,linkage,linkage_down,linkage_up, post_90 ,n_elections_w ,district, year)
+df <- tibble(dynast, caste_uc,caste_yadav,caste_non_yadav_obc , caste_dalit , caste_muslim ,minister_duration ,industry ,  land ,linkage,linkage_down,linkage_up, post_90 ,n_elections_w ,district, year, won_elections)
 
 
 mean <- df %>% summarise_at( c("dynast","linkage" , "minister_duration","industry" , "land" , "n_elections_w" ),~mean(.), na.rm = TRUE)
@@ -382,6 +391,9 @@ cbind(stat, vals) %>% kable(digits = 2, col.names = c("Measure", "Family", "Poli
 ```
 
 
+
+
+
 ```{r  results= "asis"}
 library(fixest)
 
@@ -397,12 +409,17 @@ fit.1 <- feglm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit 
 fit.2 <- feglm(linkage ~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry +  land + post_90+n_elections_w|district+year, family = binomial(link = "probit"), data = df)
 
 
+
+fit.3 <- feglm(won_elections~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim+linkage +minister_duration +industry +  land + post_90, data = df)
+
  
  myDict = c("industry" = "Economic diversification", "school_college" = "Educational ownership", "land" = "Land ownership", "n_elections_w" = "Number of elections won", "linkage" = "Political diversification", "minister_duration" = "Minister duration", "dynast" = "Family")
  
-  order= c("dynast","Political diversification","linkage" , "minister_duration","industry" , "land" , "n_elections_w" )
+  order= c("dynast","Political diversification","linkage" , "minister_duration","industry" , "land" , "n_elections_w", "won_elections" )
   
-  drop <- c("caste_uc", "caste_yadav","caste_non_yadav_obc", "caste_dalit", "caste_muslim")
+  drop <- c("caste_uc", "caste_yadav","caste_non_yadav_obc", "caste_dalit", "caste_muslim","(Intercept)")
+
+  
 ```
 
 
@@ -420,7 +437,10 @@ etable(fit.1,cluster = "district",extraline=list("Caste control"=c("Yes")),drop 
 etable(fit.2,cluster = "district",extraline=list("Caste control"=c("Yes")),drop = drop, order = order ,dict = myDict)  %>% kable(caption = "Regression Results - AE All") %>% kable_styling(full_width = F)
 ```
 
+```{r  results= "asis"}
 
+etable(fit.3,extraline=list("Caste control"=c("Yes")),drop = drop, order = order ,dict = myDict)  %>% kable(caption = "Elections won - AE All") %>% kable_styling(full_width = F)
+```
 
 ## AE GE all
 
@@ -513,12 +533,13 @@ linkage <- ifelse(dyn_ae_ge_uniq$level %in% c("AE", "GE"),0,1)
 linkage_down <- ifelse(dyn_ae_ge_uniq$level %in% c("AE-LB", "GE-AE-LB","GE-LB"),1,0)
 #library(arm)
 
+won_elections <- dyn_ae_ge_uniq$n_el_w
 
 district <- dyn_ae_ge_uniq$district_name
 
 year <- dyn_ae_ge_uniq$year
 
-df  <- tibble(dynast , caste_uc, caste_yadav,caste_non_yadav_obc , caste_dalit , caste_muslim ,minister_duration ,industry , school_college , land ,linkage_down, post_90 , n_elections_w,district,linkage, year)
+df  <- tibble(dynast , caste_uc, caste_yadav,caste_non_yadav_obc , caste_dalit , caste_muslim ,minister_duration ,industry , school_college , land ,linkage_down, post_90 , n_elections_w,district,linkage, year, won_elections)
 
 
 mean <- df %>% summarise_at( c("dynast","linkage_down" , "minister_duration","industry" , "land" , "n_elections_w" ),~mean(.), na.rm = TRUE)
@@ -554,12 +575,15 @@ fit.1 <- feglm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit 
 fit.2 <- feglm(linkage_down~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry + land + post_90 + n_elections_w| district+year , family = binomial(link = "probit"), data = df)
 
 
+
+fit.3 <- feglm(won_elections ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim+linkage_down +minister_duration +industry + land + post_90  , data = df)
+
  
  myDict = c("industry" = "Economic diversification", "school_college" = "Educational ownership", "land" = "Land ownership", "n_elections_w" = "Number of elections won", "linkage" = "Political diversification", "minister_duration" = "Minister duration", "dynast" = "Family", "linkage_down" = "Political diversification")
  
-  order= c("Family","Political diversification" ,"linkage_down", "minister_duration","industry" ,"school_college", "land" , "n_elections_w" )
+  order= c("Family","Political diversification" ,"linkage_down", "minister_duration","industry" ,"school_college", "land" , "n_elections_w", "won_elections"  )
   
-  drop <- c("caste_uc", "caste_yadav","caste_non_yadav_obc", "caste_dalit", "caste_muslim")
+  drop <- c("caste_uc", "caste_yadav","caste_non_yadav_obc", "caste_dalit", "caste_muslim","(Intercept)")
 ```
 
 ---
@@ -575,6 +599,13 @@ etable(fit.1,cluster = "district",extraline=list("Caste control"=c("Yes")),drop 
 etable(fit.2,cluster = "district",extraline=list("Caste control"=c("Yes")),drop = drop, order = order ,dict = myDict)  %>% kable(caption = "Regression Results - AE All") %>% kable_styling(full_width = F)
 ```
 
+
+---
+
+```{r  results= "asis"}
+
+etable(fit.3,extraline=list("Caste control"=c("Yes")),drop = drop, order = order ,dict = myDict)  %>% kable(caption = "Elections won - AE and GE All") %>% kable_styling(full_width = F)
+```
 
 
 ```{r adr}
