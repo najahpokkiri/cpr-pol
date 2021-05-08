@@ -64,6 +64,10 @@ dyn_ae_ge <- dyn %>% filter(election_type %in% c("AE", "GE") & family_id != "")
 
 dyn_ae_ge <- dyn_ae_ge %>% mutate(land_decile = ntile(land,10),n_mem = n_distinct(rel_id_uniq))
 
+dyn_ae_ge <- dyn_ae_ge %>% group_by(family_id) %>% mutate(n_mem = n_distinct(rel_id_uniq),max_year = max(year), min_year = min(year),life_span = max_year-min_year+term_duration)
+
+ 
+
 
 dyn_ae <- dyn %>% filter(election_type =="AE")
 
@@ -906,36 +910,36 @@ stargazer(fit.multinom, type="html", keep = c("linkage_down","success_cat","mini
 
 ```{r}
 
-## life span calc
-
-#yn_ae_ge <- dyn_ae_ge %>% mutate(uniq_id = paste0(family_id,relative_id, rel_id_rep))
-dyn_ae_ge <- dyn_ae_ge %>% group_by(family_id) %>% mutate(n_el_w = length(election_id[position==1]))
-
-dyn_ae_ge_fam <- dyn_ae_ge %>% filter(dyn_tot_2 ==1)
-
-
-#dyn_ae_ge_fam <- dyn_ae_ge_fam %>% group_by(family_id) %>% mutate(min_yr = min(year), max_yr = max(year))
-
-
-
-fam_tab <- rbind(dyn_ae_ge_fam %>% group_by(family_id) %>% filter( dyn_cum_2==0 ) %>% slice(which.max(year))%>% select(year, family_id,dyn_cum_2),
-
-dyn_ae_ge_fam %>% group_by(family_id) %>% filter(dyn_cum_2==1  ) %>% slice(which.min(year)) %>% select(year, family_id,dyn_cum_2 )) %>%pivot_wider(values_from = year, names_from= dyn_cum_2) 
-
-
-
-fam_tab <- fam_tab %>% mutate(`0` = ifelse(is.na(`0`), `1`,`0`), diff = `1`-`0`)
-
-#dyn_ae_ge_fam <- dyn_ae_ge %>% filter(dyn_tot_2 ==1)
-
-
-dyn_ae_ge_fam <- dyn_ae_ge_fam %>% group_by(family_id) %>% mutate(min_yr = min(year), max_yr = max(year))
-
-dyn_ae_ge_fam_uniq <- dyn_ae_ge_fam %>% arrange(-year) %>% distinct(family_id,  .keep_all = TRUE)
-
-dyn_ae_ge_fam_uniq <- inner_join(dyn_ae_ge_fam_uniq, fam_tab, by = "family_id")
-
-dyn_ae_ge_fam_uniq$life_span <- dyn_ae_ge_fam_uniq$max_yr- dyn_ae_ge_fam_uniq$`0`
+# ## life span calc
+# 
+# #yn_ae_ge <- dyn_ae_ge %>% mutate(uniq_id = paste0(family_id,relative_id, rel_id_rep))
+# dyn_ae_ge <- dyn_ae_ge %>% group_by(family_id) %>% mutate(n_el_w = length(election_id[position==1]))
+# 
+# dyn_ae_ge_fam <- dyn_ae_ge %>% filter(dyn_tot_2 ==1)
+# 
+# 
+# #dyn_ae_ge_fam <- dyn_ae_ge_fam %>% group_by(family_id) %>% mutate(min_yr = min(year), max_yr = max(year))
+# 
+# 
+# 
+# fam_tab <- rbind(dyn_ae_ge_fam %>% group_by(family_id) %>% filter( dyn_cum_2==0 ) %>% slice(which.max(year))%>% select(year, family_id,dyn_cum_2),
+# 
+# dyn_ae_ge_fam %>% group_by(family_id) %>% filter(dyn_cum_2==1  ) %>% slice(which.min(year)) %>% select(year, family_id,dyn_cum_2 )) %>%pivot_wider(values_from = year, names_from= dyn_cum_2) 
+# 
+# 
+# 
+# fam_tab <- fam_tab %>% mutate(`0` = ifelse(is.na(`0`), `1`,`0`), diff = `1`-`0`)
+# 
+# #dyn_ae_ge_fam <- dyn_ae_ge %>% filter(dyn_tot_2 ==1)
+# 
+# 
+# dyn_ae_ge_fam <- dyn_ae_ge_fam %>% group_by(family_id) %>% mutate(min_yr = min(year), max_yr = max(year))
+# 
+# dyn_ae_ge_fam_uniq <- dyn_ae_ge_fam %>% arrange(-year) %>% distinct(family_id,  .keep_all = TRUE)
+# 
+# dyn_ae_ge_fam_uniq <- inner_join(dyn_ae_ge_fam_uniq, fam_tab, by = "family_id")
+# 
+# dyn_ae_ge_fam_uniq$life_span <- dyn_ae_ge_fam_uniq$max_yr- dyn_ae_ge_fam_uniq$`0`
 
 ```
 
