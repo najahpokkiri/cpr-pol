@@ -875,7 +875,7 @@ fit.multinom <- multinom(success_cat~  caste_uc+ caste_yadav+caste_non_yadav_obc
 ```
 
 ```{r, results= "asis"}
-stargazer(fit.multinom, type="html", keep = c("linkage_down","minister_duration","industry",  "land", "second_mem_dur"), order = c("linkage_down","minister_duration","industry", "school_college", "land", "second_mem_dur"),add.lines = list (c("Caste control", "Yes","Yes","Yes")),covariate.labels = c( "Political diversification","Minister duration", "Economic diversification","Educational ownership", "Land ownership", "Years took for the second member entry"))
+stargazer(fit.multinom, type="html", keep = c("linkage_down","minister_duration","industry",  "land", "second_mem_dur"), order = c("linkage_down","minister_duration","industry",  "land", "second_mem_dur"),add.lines = list (c("Caste control", "Yes","Yes","Yes")),covariate.labels = c( "Political diversification","Minister duration", "Economic diversification", "Land ownership", "Years took for the second member entry"))
 
 ```
 
