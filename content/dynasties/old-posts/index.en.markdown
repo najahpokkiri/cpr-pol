@@ -41,14 +41,13 @@ Most of the files are just the replication of posts from the old site. All the p
 * [Politcal Charecterstics](../../dynasties/old-posts/pol-char-analysis.html)
 
 
-* [GE 2019](../../dynasties/old-posts/ge-2019.html)
+* [General elections](../../dynasties/old-posts/ge-2019.html)
 
 
 
 * [Election finance](../../dynasties/old-posts/election-finance.html)
 
 
-* [Marginal candidates](../../dynasties/old-posts/ge_experiments.html)
 
 * [ADR Survey](../../dynasties/old-posts/adr-survey.html)
 

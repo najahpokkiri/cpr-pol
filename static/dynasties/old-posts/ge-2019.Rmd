@@ -1,5 +1,5 @@
 ---
-title: "General Elections: 2019"
+title: "General Elections"
 author: ""
 date: "2020-06-27"
 params:
@@ -181,5 +181,520 @@ stargazer(fit, fit.turnout, fit.logit, align = TRUE, no.space = TRUE, type = "ht
 
 
 ```
+
+
+# GE 5 percent 
+
+### India {.tabset}
+
+
+
+
+
+```{r}
+
+library(fixest)
+
+library(lfe)
+
+
+dyn_ge <- fread("D:/cpr/UP/up-dynasties/dyn_other_data/tcpd_ge_09_14_19_dyn.csv")
+
+
+dyn_ge <-dyn_ge %>% select(1:1, 3:5,13:18)
+
+
+ dyn_ge$State_Name <- tolower(dyn_ge$State_Name)
+
+
+
+
+adr <- fread("D:/cpr/UP/up-dynasties/dyn_other_data/adr/adr_tcpd_09_14_19.csv")
+
+adr$State_Name <- tolower(adr$State_Name)
+
+
+dyn_ge_adr <- inner_join(dyn_ge, adr, by = c("State_Name", "Year", "Constituency_No", "Position"))
+
+names(dyn_ge_adr) <- tolower(names(dyn_ge_adr))
+
+
+dyn_ge_adr  <- dyn_ge_adr %>% mutate(edu = case_when(education %in% c("5th Pass","10th Pass","8th Pass") ~"10",
+                                  education == "12th Pass" ~"12",
+                                  education %in% c("Graduate","Graduate Professional") ~"14",
+                                  education == "Post Graduate" ~ "16",
+                                  education == "Doctorate" ~"18",
+                                  education %in% c("Literate","Others") ~"5",
+                                  TRUE ~ "0"
+                                  
+                                  
+                                  ))
+
+```
+
+
+
+
+```{r}
+dynast  <-dyn_ge_adr$dyn
+
+incumbent <- dyn_ge_adr$incumbent
+
+recontest <- dyn_ge_adr$recontest
+
+#bjp <- dyn_ge_adr$bjp
+
+female<- ifelse(dyn_ge_adr$sex=="F",1,0)
+
+
+# gender <- relevel(gender, ref = "M")
+
+turncoat <- dyn_ge_adr$turncoat
+
+serious_crime <- ifelse(dyn_ge_adr$serious_crime>0,1,0)
+
+
+
+
+education <- as.numeric(dyn_ge_adr$edu)
+
+# caste <-  case_when(str_detect(dyn_ge_adr$caste_rec, "(UC)|(IC)") ~"UC+IC",
+#                    TRUE ~"Others")
+
+
+caste_UC_IC <- as.numeric(case_when(str_detect(dyn_ge_adr$caste_rec, "(UC)|(IC)") ~"1",
+                   TRUE ~"0"))
+
+
+
+enop <- dyn_ge_adr$enop
+
+vote_share_pc <- dyn_ge_adr$vote_share_percentage
+
+#contest <- dyn_ge_adr$contested
+
+terms <- dyn_ge_adr$no_terms
+
+inc <- ifelse(dyn_ge_adr$party=="INC",1,0)
+
+bjp <-  ifelse(dyn_ge_adr$party=="BJP",1,0)
+
+
+assets <- as.numeric(dyn_ge_adr$total_assets)
+
+winner <- ifelse(dyn_ge_adr$position==1,1,0)
+
+age <- as.numeric(dyn_ge_adr$age)
+
+
+reservation_SCST <- ifelse(dyn_ge_adr$constituency_type == "GEN",0 ,1)
+
+turnout <- dyn_ge_adr$turnout_percentage
+
+state <- dyn_ge_adr$state_name
+
+year <- dyn_ge_adr$year
+
+constituency <- dyn_ge_adr$constituency_no
+
+party <- dyn_ge_adr$party
+
+df <- tibble(winner ,   incumbent,  turncoat ,caste_UC_IC, female , terms , dynast , assets  , serious_crime, education,age, state,year,enop, reservation_SCST,recontest, constituency, party, vote_share_pc, inc, bjp)
+# 
+# df_cor <- tibble(winner ,   incumbent,  turncoat , terms , dynast , assets  , serious_crime, education,age,year, enop,recontest)
+# 
+# 
+# 
+# corr <- cor(df_cor, use = "complete.obs")
+# 
+# corrplot::corrplot(corr, method = "circle")
+```
+
+
+#### Summaries {.tabset}
+
+##### All
+
+
+
+```{r}
+mean <- df %>% summarise_at( c("winner"  , "incumbent", "turncoat" ,"female" , "terms", "dynast", "assets", "serious_crime", "education","age" , "reservation_SCST", "caste_UC_IC"),~mean(., na.rm = TRUE))
+
+min <- df %>% summarise_at( c("winner"  , "incumbent", "turncoat" ,"female" , "terms", "dynast", "assets", "serious_crime", "education","age" , "reservation_SCST", "caste_UC_IC"),~min(., na.rm = TRUE))
+
+max <- df %>% summarise_at( c("winner"  , "incumbent", "turncoat" ,"female" , "terms", "dynast", "assets", "serious_crime", "education","age" , "reservation_SCST", "caste_UC_IC"),~max(., na.rm = TRUE))
+
+unique_n<- df %>% summarise_at( c("winner"  , "incumbent", "turncoat" ,"female" , "terms", "dynast", "assets", "serious_crime", "education","age" , "reservation_SCST", "caste_UC_IC"),list(n = "uniqueN"))
+
+n<- df %>% summarise_at( c("winner"  , "incumbent", "turncoat" ,"female" , "terms", "dynast", "assets", "serious_crime", "education","age" , "reservation_SCST", "caste_UC_IC"),list(n = "length"))
+
+
+sd<- df %>% summarise_at( c("winner"  , "incumbent", "turncoat" ,"female" , "terms", "dynast", "assets", "serious_crime", "education","age" , "reservation_SCST", "caste_UC_IC"),list(sd= "sd"))
+
+stat <-as.data.frame(c("Length", "Unique-N","Mean", "SD","Min", "Max")) %>% rename("stat"=1:1)
+
+
+
+
+
+
+
+vals <- data.table::rbindlist(list(n,unique_n,mean, sd,min, max), use.names = FALSE) 
+names(vals) <- str_remove( names(vals),"_n")
+
+
+cbind(stat, vals) %>% pivot_longer(cols = 2:13) %>% pivot_wider(names_from = stat, values_from = value) %>%  kable(digits = 2,  caption = "Summary of GE 5% data") %>% kable_styling(full_width = F)
+
+```
+
+
+##### Dynasts
+
+
+```{r}
+mean <- df %>% group_by(dynast)%>% summarise_at( c("winner"  , "incumbent", "turncoat" ,"female" , "terms", "assets", "serious_crime", "education","age" , "reservation_SCST", "caste_UC_IC"),~mean(., na.rm = TRUE))
+
+min <- df %>% group_by(dynast)%>% summarise_at( c("winner"  , "incumbent", "turncoat" ,"female" , "terms",  "assets", "serious_crime", "education","age" , "reservation_SCST", "caste_UC_IC"),~min(., na.rm = TRUE))
+
+max <- df%>% group_by(dynast) %>% summarise_at( c("winner"  , "incumbent", "turncoat" ,"female" , "terms", "assets", "serious_crime", "education","age" , "reservation_SCST", "caste_UC_IC"),~max(., na.rm = TRUE))
+
+unique_n<- df %>% group_by(dynast)%>% summarise_at( c("winner"  , "incumbent", "turncoat" ,"female" , "terms", "assets", "serious_crime", "education","age" , "reservation_SCST", "caste_UC_IC"),list(n = "uniqueN"))
+
+n<- df %>% group_by(dynast)%>% summarise_at( c("winner"  , "incumbent", "turncoat" ,"female" , "terms",  "assets", "serious_crime", "education","age" , "reservation_SCST", "caste_UC_IC"),list(n = "length"))
+
+
+sd<- df %>% group_by(dynast)%>% summarise_at( c("winner"  , "incumbent", "turncoat" ,"female" , "terms",  "assets", "serious_crime", "education","age" , "reservation_SCST", "caste_UC_IC"),list(sd= "sd"))
+
+stat <-as.data.frame(c("Length","Length", "Unique-N","Unique-N","Mean", "Mean","SD","SD","Min","Min","Max","Max")) %>% rename("stat"=1:1)
+
+
+
+
+vals <- data.table::rbindlist(list(n,unique_n,mean, sd,min, max), use.names = FALSE) 
+
+
+names(vals) <- str_remove( names(vals),"_n")
+
+vals$dynast <- ifelse(vals$dynast==1,"Family","Non-fam")
+
+
+
+
+cbind(stat, vals) %>% pivot_longer(cols = 3:13) %>% pivot_wider(names_from = c(stat,dynast), values_from = value) %>%  kable(digits = 2,  caption = "Summary of GE 5% data") %>% kable_styling(full_width = F)
+
+
+
+```
+
+
+##### 5PC v/s rest
+
+
+```{r}
+
+ge0919 <- fread("D:/cpr/UP/up-dynasties/dyn_other_data/adr/adr_tcpd_09_14_19.csv")
+
+names(ge0919) <- tolower(names(ge0919))
+
+ge0919 <-ge0919 %>% mutate(vote_share = cut(vote_share_percentage, breaks = c(-Inf,5,Inf), labels = c("<5","5+")),
+                           female = ifelse(sex=="F", 1,0),
+                           edu = case_when(education %in% c("5th Pass","10th Pass","8th Pass") ~"10",
+                                  education == "12th Pass" ~"12",
+                                  education %in% c("Graduate","Graduate Professional") ~"14",
+                                  education == "Post Graduate" ~ "16",
+                                  education == "Doctorate" ~"18",
+                                  education %in% c("Literate","Others") ~"5",
+                                  TRUE ~ "0"
+                                  
+                                  
+                                  ))
+
+
+
+
+ge0919 <- ge0919 %>% mutate(across(c(total_assets, total_liabilities, edu, age), as.numeric))
+
+
+
+
+ge0919 %>% filter(!is.na(vote_share))%>% group_by(vote_share) %>% summarise_at( c("vote_share_percentage", "incumbent", "turncoat" ,"female" , "no_terms", "total_assets", "total_liabilities","serious_crime","non_serious_crime", "edu","age" ),~mean(., na.rm = TRUE)) %>% 
+  pivot_longer(cols = 2:12) %>% pivot_wider(names_from = vote_share, values_from = value) %>% select(1:1,3:3, 2:2)%>% kable(digits = 2, col.names = c("Varibale","5+","<5")) %>% kable_styling(full_width = F)
+
+
+
+```
+
+
+
+#### Winner
+
+```{r results="asis"}
+
+fit_year <- feglm(winner ~   incumbent+  turncoat +caste_UC_IC+ female + terms + dynast + log(assets)  + serious_crime+ education+age+ inc + bjp | year, family = binomial(link = "probit" ), data = df )
+
+
+fit_state <- feglm(winner ~   incumbent+  turncoat +caste_UC_IC+ female + terms + dynast + log(assets)  + serious_crime+ education+age+ inc + bjp | state+year,  family = binomial(link = "probit" ),data = df )
+
+fit_ac <- feglm(winner ~   incumbent+  turncoat +caste_UC_IC+ female + terms + dynast + log(assets)  + serious_crime+ education+age + inc + bjp| state+year+constituency, family = binomial(link = "probit" ), data = df )
+
+
+
+
+order = c("dynast" ,"winner" , "vote_share_pc", "incumbent",  "turncoat" , "terms",  "assets", "serious_crime", "education", "age","caste_UC_IC", "female", "inc","bjp")
+
+
+
+etable(fit_year,fit_state, fit_ac,  cluster = c("state","constituency"), order = order) %>% kable() %>% kable_styling(full_width = F)
+
+
+```
+
+
+#### Vote share
+
+```{r results="asis"}
+
+
+fit_year <- felm(vote_share_pc ~   incumbent+  turncoat +caste_UC_IC+ female+  terms + dynast + log(assets)  + serious_crime+ education+age+ inc + bjp | year, data = subset(df %>% filter(assets>0))  )
+
+
+
+
+fit_state <- felm(vote_share_pc ~   incumbent+  turncoat +caste_UC_IC+ female+  terms + dynast + log(assets)  + serious_crime+ education+age+ inc + bjp | year+state|0|state, data = subset(df %>% filter(assets>0))  )
+
+
+
+fit_ac<- felm(vote_share_pc ~   incumbent+  turncoat +caste_UC_IC+ female+ terms + dynast + log(assets)  + serious_crime+ education+age+ inc + bjp | year+state+constituency|0|constituency+state, data = subset(df %>% filter(assets>0)) )
+
+
+
+# etable(fit_year,fit_state,fit_ac, fit_party, cluster = c("state","constituency"), order = order) %>% kable(caption = "UP vote share")
+
+
+list <- list(c("Fixed effects","Year" , "Year + State", "Year + State + Constiuency"), c("SE Clustered", "None","State","Constituency+ State" ))
+
+
+
+stargazer( fit_year,fit_state,fit_ac,title="Vote share - India ",type = "html",
+align=TRUE, no.space=TRUE, order = order,add.lines=list)
+
+```
+
+### UP {.tabset}
+
+
+```{r}
+
+
+dyn_up_ge_adr <- dyn_ge_adr %>% filter(state_name =="uttar pradesh")
+
+
+dynast  <-dyn_up_ge_adr$dyn
+
+incumbent <- dyn_up_ge_adr$incumbent
+
+recontest <- dyn_up_ge_adr$recontest
+
+#bjp <- dyn_up_ge_adr$bjp
+
+gender <- factor(ifelse(dyn_up_ge_adr$sex=="F","F","M"))
+
+
+gender <- relevel(gender, ref = "M")
+
+turncoat <- dyn_up_ge_adr$turncoat
+
+serious_crime <- ifelse(dyn_up_ge_adr$serious_crime>0,1,0)
+
+
+inc <- ifelse(dyn_up_ge_adr$party=="INC",1,0)
+
+bjp <-  ifelse(dyn_up_ge_adr$party=="BJP",1,0)
+
+education <- as.numeric(dyn_up_ge_adr$edu)
+
+# caste <-  case_when(str_detect(dyn_up_ge_adr$caste_rec, "(UC)|(IC)") ~"UC+IC",
+#                    TRUE ~"Others")
+
+caste_UC_IC <- as.numeric(case_when(str_detect(dyn_up_ge_adr$caste_rec, "(UC)|(IC)") ~"1",
+                   TRUE ~"0"))
+female<- ifelse(dyn_up_ge_adr$sex=="F",1,0)
+
+enop <- dyn_up_ge_adr$enop
+
+vote_share_pc <- dyn_up_ge_adr$vote_share_percentage
+
+#contest <- dyn_up_ge_adr$contested
+
+terms <- dyn_up_ge_adr$no_terms
+
+
+assets <- as.numeric(dyn_up_ge_adr$total_assets)
+
+winner <- ifelse(dyn_up_ge_adr$position==1,1,0)
+
+age <- as.numeric(dyn_up_ge_adr$age)
+
+
+#reservation <- ifelse(dyn_up_ge_adr$constituency_type == "GEN","GEN" ,"SC/ST")
+
+reservation_SCST <- ifelse(dyn_up_ge_adr$constituency_type == "GEN",0 ,1)
+
+turnout <- dyn_up_ge_adr$turnout_percentage
+
+state <- dyn_up_ge_adr$state_name
+
+year <- dyn_up_ge_adr$year
+
+constituency <- dyn_up_ge_adr$constituency_no
+
+party <- dyn_up_ge_adr$party
+
+df <- tibble(winner ,   incumbent,  turncoat ,caste_UC_IC , female , terms , dynast , assets  , serious_crime, education,age, state,year,enop, reservation_SCST,recontest, constituency, party, vote_share_pc, inc, bjp)
+
+# df_cor <- tibble(winner ,   incumbent,  turncoat , terms , dynast , assets  , serious_crime, education,age,year, enop,recontest)
+# 
+# 
+# 
+# corr <- cor(df_cor, use = "complete.obs")
+# 
+# corrplot::corrplot(corr, method = "circle")
+
+
+```
+
+
+#### Summaries {.tabset}
+
+##### All
+
+
+
+```{r}
+mean <- df %>% summarise_at( c("winner"  , "incumbent", "turncoat" ,"female" , "terms", "dynast", "assets", "serious_crime", "education","age" , "reservation_SCST", "caste_UC_IC"),~mean(., na.rm = TRUE))
+
+min <- df %>% summarise_at( c("winner"  , "incumbent", "turncoat" ,"female" , "terms", "dynast", "assets", "serious_crime", "education","age" , "reservation_SCST", "caste_UC_IC"),~min(., na.rm = TRUE))
+
+max <- df %>% summarise_at( c("winner"  , "incumbent", "turncoat" ,"female" , "terms", "dynast", "assets", "serious_crime", "education","age" , "reservation_SCST", "caste_UC_IC"),~max(., na.rm = TRUE))
+
+unique_n<- df %>% summarise_at( c("winner"  , "incumbent", "turncoat" ,"female" , "terms", "dynast", "assets", "serious_crime", "education","age" , "reservation_SCST", "caste_UC_IC"),list(n = "uniqueN"))
+
+n<- df %>% summarise_at( c("winner"  , "incumbent", "turncoat" ,"female" , "terms", "dynast", "assets", "serious_crime", "education","age" , "reservation_SCST", "caste_UC_IC"),list(n = "length"))
+
+
+sd<- df %>% summarise_at( c("winner"  , "incumbent", "turncoat" ,"female" , "terms", "dynast", "assets", "serious_crime", "education","age" , "reservation_SCST", "caste_UC_IC"),list(sd= "sd"))
+
+stat <-as.data.frame(c("Length", "Unique-N","Mean", "SD","Min", "Max")) %>% rename("stat"=1:1)
+
+
+
+
+vals <- data.table::rbindlist(list(n,unique_n,mean, sd,min, max), use.names = FALSE) 
+
+
+
+names(vals) <- str_remove( names(vals),"_n")
+
+
+cbind(stat, vals) %>% pivot_longer(cols = 2:13) %>% pivot_wider(names_from = stat, values_from = value) %>%  kable(digits = 2,  caption = "Summary of GE 5% data") %>% kable_styling(full_width = F)
+
+```
+
+
+##### Dynasts
+
+
+```{r}
+mean <- df %>% group_by(dynast)%>% summarise_at( c("winner"  , "incumbent", "turncoat" ,"female" , "terms", "assets", "serious_crime", "education","age" , "reservation_SCST", "caste_UC_IC"),~mean(., na.rm = TRUE))
+
+min <- df %>% group_by(dynast)%>% summarise_at( c("winner"  , "incumbent", "turncoat" ,"female" , "terms",  "assets", "serious_crime", "education","age" , "reservation_SCST", "caste_UC_IC"),~min(., na.rm = TRUE))
+
+max <- df%>% group_by(dynast) %>% summarise_at( c("winner"  , "incumbent", "turncoat" ,"female" , "terms", "assets", "serious_crime", "education","age" , "reservation_SCST", "caste_UC_IC"),~max(., na.rm = TRUE))
+
+unique_n<- df %>% group_by(dynast)%>% summarise_at( c("winner"  , "incumbent", "turncoat" ,"female" , "terms", "assets", "serious_crime", "education","age" , "reservation_SCST", "caste_UC_IC"),list(n = "uniqueN"))
+
+n<- df %>% group_by(dynast)%>% summarise_at( c("winner"  , "incumbent", "turncoat" ,"female" , "terms",  "assets", "serious_crime", "education","age" , "reservation_SCST", "caste_UC_IC"),list(n = "length"))
+
+
+sd<- df %>% group_by(dynast)%>% summarise_at( c("winner"  , "incumbent", "turncoat" ,"female" , "terms",  "assets", "serious_crime", "education","age" , "reservation_SCST", "caste_UC_IC"),list(sd= "sd"))
+
+stat <-as.data.frame(c("Length","Length", "Unique-N","Unique-N","Mean", "Mean","SD","SD","Min","Min","Max","Max")) %>% rename("stat"=1:1)
+
+
+
+
+vals <- data.table::rbindlist(list(n,unique_n,mean, sd,min, max), use.names = FALSE) 
+
+
+
+
+names(vals) <- str_remove( names(vals),"_n")
+
+vals$dynast <- ifelse(vals$dynast==1,"Family","Non-fam")
+
+
+
+cbind(stat, vals) %>% pivot_longer(cols = 3:13) %>% pivot_wider(names_from = c(stat,dynast), values_from = value) %>%  kable(digits = 2,  caption = "Summary of GE 5% data") %>% kable_styling(full_width = F)
+
+
+```
+
+
+
+##### 5PC v/s rest
+
+
+```{r}
+
+
+ge0919_up <- ge0919 %>%filter(state_name %in% c("Uttar_Pradesh", "uttar pradesh") )
+
+ge0919_up %>% filter(!is.na(vote_share))%>% group_by(vote_share) %>% summarise_at( c("vote_share_percentage", "incumbent", "turncoat" ,"female" , "no_terms", "total_assets", "total_liabilities","serious_crime","non_serious_crime", "edu","age" ),~mean(., na.rm = TRUE)) %>% 
+  pivot_longer(cols = 2:12) %>% pivot_wider(names_from = vote_share, values_from = value) %>% select(1:1,3:3, 2:2)%>% kable(digits = 2, col.names = c("Varibale","5+","<5")) %>% kable_styling(full_width = F)
+
+
+
+```
+#### Winner
+
+
+```{r results="asis"}
+
+
+
+fit_year <- feglm(winner ~   incumbent+  turncoat +caste_UC_IC+ female + terms + dynast + log(assets)  + serious_crime+ education+age+inc+bjp | year, family = binomial(link = "probit" ), data = df )
+
+
+
+
+fit_ac <- feglm(winner ~   incumbent+  turncoat +caste_UC_IC+ female + terms + dynast + log(assets)  + serious_crime+ education+age +inc +bjp|year+constituency, family = binomial(link = "probit" ), data = df )
+
+
+
+
+etable(fit_year, fit_ac, cluster = c("constituency"), order = order) %>% kable()%>% kable_styling(full_width = F)
+```
+
+#### Vote share
+
+```{r results="asis"}
+fit_year <- felm(vote_share_pc ~   incumbent+  turncoat +caste_UC_IC+ female + terms + dynast + log(assets)  + serious_crime+ education+age+inc+bjp | year, data = df )
+
+
+fit_ac <- felm(vote_share_pc ~   incumbent+  turncoat +caste_UC_IC+ female + terms + dynast + log(assets)  + serious_crime+ education+age+inc+bjp | year+constituency|0|constituency, data = df )
+
+# 
+# etable(fit_year,fit_ac, fit_party, cluster = c("constituency"), order = order) %>% kable(caption = "UP vote share")
+
+list <- list(c("Fixed effects","Year" ,  "Year + Constiuency"), c("SE Clustered", "None","Constituency" ))
+
+
+
+stargazer( fit_year,fit_ac,title="Vote share - UP ",type = "html",
+align=TRUE, no.space=TRUE, order = order,add.lines=list)
+
+
+```
+
 
 
