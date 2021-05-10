@@ -1,0 +1,154 @@
+
+
+```{r}
+ rafael <- fread("D:/cpr/UP/up-dynasties/dyn_other_data/rafael-dataset.csv", stringsAsFactors = FALSE)
+
+unique(rafael$year)
+
+ dim(rafael)
+# 
+ names(rafael)
+# 
+#unique(rafael$year)
+# 
+# unique(rafael$position)
+# 
+ rafael_up <- rafael %>% select(year, constituency_no, position, totalvotes, partynew, partypercent)
+# 
+# # summary(rafael_up
+ 
+ 
+
+ dyn<- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/dyn_ae_ge.csv") 
+ 
+ 
+dyn <- dyn %>% group_by(election_type, year, constituency_no) %>% mutate(dyn_vs_nondyn = ifelse(any(dyn_cum_2==1) & any(dyn_cum_2==0),1,0), dyn_w_vs_nondyn = ifelse(dyn_vs_nondyn==1 & position==1 &dyn_cum_2==1,1,0))
+  
+  
+ 
+# 
+ # dyn %>% group_by(election_type, year, constituency_no) %>% mutate(dyn_vs_nondyn = ifelse(any(dyn_cum_2==1) & any(dyn_cum_2==0),1,0)) %>% 
+ #   select(year, constituency_no, dyn_cum_2, dyn_vs_nondyn) %>% filter(year==2017)
+ 
+ dyn_ae <- dyn %>% filter(election_type=="AE" & position %in% c(1,2))
+ 
+dyn_ae<- dyn_ae %>% mutate(margin_cat = cut(margin_percentage, breaks = c(0,1,3,5,7,10,15,20, Inf)))
+                  
+                  
+ 
+dyn_rafael <- merge(dyn_ae, rafael_up, by = c("year", "constituency_no","position"), allow.cartesian = TRUE)
+
+
+head(rafael_up)
+
+dim(rafael_up)
+library(DescTools)
+
+
+gini <- dyn_rafael %>%group_by(year, constituency_no, dyn_w_vs_nondyn) %>% summarise(gini = Gini(partypercent, na.rm = TRUE)) 
+
+
+cv <- dyn_rafael %>%group_by(year, constituency_no) %>% summarise(cv =CoefVar(partypercent, na.rm = TRUE)) 
+
+dyn_cv <- inner_join(dyn_ae, cv, by =c( "year", "constituency_no"))
+
+dyn_rafael %>%  filter(margin_percentage<10)%>%group_by(year, constituency_no, dyn_cum) %>% summarise(gini = Gini(partypercent, na.rm = TRUE)) %>% group_by(dyn_w_vs_nondyn) %>% summarise(mean(gini, na.rm = TRUE)) %>% kable(digits = 2) 
+
+
+
+dyn_rafael %>% group_by(year, constituency_no, dyn_w_vs_nondyn)
+
+dyn_rafael %>%filter(year!= 2007 & margin_percentage<3) %>% group_by(year, constituency_no, dyn_w_vs_nondyn) %>% summarise(cv =CoefVar(partypercent, na.rm = TRUE)) %>% 
+   group_by(dyn_w_vs_nondyn) %>% summarise(mean(cv, na.rm = TRUE)) %>% kable(digits = 2) 
+  
+
+str(rafael_up)
+
+
+ggplot(gini, aes(gini, fill = factor(dyn_w_vs_nondyn)))+
+  geom_density()
+
+
+ggplot(cv, aes(cv, fill = factor(dyn_w_vs_nondyn)))+
+  geom_density()
+```
+
+
+```{r}
+ rafael <- fread("D:/cpr/UP/up-dynasties/dyn_other_data/rafael-dataset.csv", stringsAsFactors = FALSE)
+
+
+ rafael_up <- rafael %>% select(year, constituency_no, position, totalvotes, partynew, partypercent)
+
+ 
+ 
+
+ dyn<- fread("D:/cpr/UP/up-dynasties/dyn_other_data/dyn_ae_ge.csv") 
+ 
+ 
+dyn <- dyn %>% group_by(election_type, year, constituency_no) %>% mutate(dyn_vs_nondyn = ifelse(any(dyn_cum_2==1) & any(dyn_cum_2==0),1,0), dyn_w_vs_nondyn = ifelse(dyn_vs_nondyn==1 & position==1 &dyn_cum_2==1,1,0))
+  
+  
+
+ 
+ dyn_ae <- dyn %>% filter(election_type=="AE" & position %in% c(1,2))
+ 
+dyn_ae<- dyn_ae %>% mutate(margin_cat = cut(margin_percentage, breaks = c(0,1,3,5,7,10,15,20, Inf), labels = c("1","3","5","7","10","15","20","21")))
+                  
+                  
+ 
+dyn_rafael <- merge(dyn_ae, rafael_up, by = c("year", "constituency_no","position"), allow.cartesian = TRUE)
+
+
+library(DescTools)
+
+
+
+cv <- dyn_rafael %>%group_by(year, constituency_no,position) %>% summarise(cv =CoefVar(partypercent, na.rm = TRUE)) 
+
+
+dyn_cv <- inner_join(dyn_ae, cv, by =c( "year", "constituency_no","position"))
+
+
+
+  
+```
+
+
+
+
+```{r}
+
+rdd <- dyn_cv %>% filter(dyn_vs_nondyn==1&margin_percentage<=5 &position==1) %>% mutate(mv = ifelse(dyn_cum_2==0,-margin_percentage, margin_percentage)) %>% select(year,constituency_no,dyn_cum_2,margin_percentage,mv,cv)
+
+rdd <- rdd %>% rename(dynast = dyn_cum_2)
+
+
+
+ggplot(rdd %>% filter(cv<2.5), aes(mv,cv , color = factor(dynast)))+
+  geom_point()+
+    geom_smooth(method="lm", se= FALSE)+
+  geom_vline(xintercept = 0)+
+    scale_color_discrete(labels = c("non-dynast winner", "dynast winner"))+
+  #guides(color = FALSE)+
+  ylim(0,1)+
+   labs(x = "Margin of victory", y = "co-efficient of variation")+
+  theme(legend.position = "bottom", legend.title = element_blank())
+  
+
+```
+
+
+
+
+```{r}
+
+
+fit <- lm(cv~factor(dynast), data = subset(rdd %>% filter(cv<2.5)))
+
+summary(fit)
+
+summary(felm(cv~dyn_cum_2+margin_percentage+vote_share_percentage+enop+incumbent+log(electors)+turnout_percentage)|district_name+year|0|district_name, data = dyn_cv))
+
+```
+
