@@ -412,14 +412,15 @@ ge0919 <-ge0919 %>% mutate(vote_share = cut(vote_share_percentage, breaks = c(-I
 
 
 
-ge0919 <- ge0919 %>% mutate(across(c(total_assets, total_liabilities, edu, age), as.numeric))
+ge0919 <- ge0919 %>% mutate(across(c(total_assets, total_liabilities, edu, age), as.numeric)) %>% mutate(assets_million = (total_assets)/1000000, liabilities_million = (total_liabilities)/1000000)
 
 
 
+count <- ge0919 %>% filter(!is.na(vote_share))%>% group_by(vote_share) %>% summarise(count = n())
 
-ge0919 %>% filter(!is.na(vote_share))%>% group_by(vote_share) %>% summarise_at( c("vote_share_percentage", "incumbent", "turncoat" ,"female" , "no_terms", "total_assets", "total_liabilities","serious_crime","non_serious_crime", "edu","age" ),~mean(., na.rm = TRUE)) %>% 
-  pivot_longer(cols = 2:12) %>% pivot_wider(names_from = vote_share, values_from = value) %>% select(1:1,3:3, 2:2)%>% kable(digits = 2, col.names = c("Varibale","5+","<5")) %>% kable_styling(full_width = F)
 
+ge0919 %>% filter(!is.na(vote_share))%>% group_by(vote_share) %>% summarise_at( c("vote_share_percentage", "incumbent", "turncoat" ,"female" , "no_terms", "assets_million", "liabilities_million","serious_crime","non_serious_crime", "edu","age" ),~mean(., na.rm = TRUE)) %>% inner_join(count, by ="vote_share")%>% select(1:1, 13:13, everything())%>% 
+  pivot_longer(cols = 2:13) %>% pivot_wider(names_from = vote_share, values_from = value) %>% select(1:1,3:3, 2:2)%>% kable(digits = 2, col.names = c("Varibale","5+","<5")) %>% kable_styling(full_width = F)
 
 
 ```
@@ -649,9 +650,12 @@ cbind(stat, vals) %>% pivot_longer(cols = 3:13) %>% pivot_wider(names_from = c(s
 
 ge0919_up <- ge0919 %>%filter(state_name %in% c("Uttar_Pradesh", "uttar pradesh") )
 
-ge0919_up %>% filter(!is.na(vote_share))%>% group_by(vote_share) %>% summarise_at( c("vote_share_percentage", "incumbent", "turncoat" ,"female" , "no_terms", "total_assets", "total_liabilities","serious_crime","non_serious_crime", "edu","age" ),~mean(., na.rm = TRUE)) %>% 
-  pivot_longer(cols = 2:12) %>% pivot_wider(names_from = vote_share, values_from = value) %>% select(1:1,3:3, 2:2)%>% kable(digits = 2, col.names = c("Varibale","5+","<5")) %>% kable_styling(full_width = F)
 
+count <- ge0919 %>% filter(!is.na(vote_share))%>% group_by(vote_share) %>% summarise(count = n())
+
+
+ge0919_up %>% filter(!is.na(vote_share))%>% group_by(vote_share) %>% summarise_at( c("vote_share_percentage", "incumbent", "turncoat" ,"female" , "no_terms", "assets_million", "liabilities_million","serious_crime","non_serious_crime", "edu","age" ),~mean(., na.rm = TRUE)) %>% inner_join(count, by ="vote_share")%>% select(1:1, 13:13, everything())%>% 
+  pivot_longer(cols = 2:13) %>% pivot_wider(names_from = vote_share, values_from = value) %>% select(1:1,3:3, 2:2)%>% kable(digits = 2, col.names = c("Varibale","5+","<5")) %>% kable_styling(full_width = F)
 
 
 ```
