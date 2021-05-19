@@ -64,7 +64,7 @@ Most of the files are just the replication of posts from the old site. All the p
 
 * [Models](../../dynasties/old-posts/models.html)
 
-
+* [Models new](../../dynasties/old-posts/models.new.html)
 
 * [Taluqdars](../../dynasties/old-posts/taluqdars_analysis.html)
 
