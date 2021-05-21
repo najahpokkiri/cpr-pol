@@ -469,7 +469,7 @@ dyn_ge_adr <- dyn_ge_adr %>% group_by(state_name, year, constituency_no) %>% mut
 dyn_ge_adr <- dyn_ge_adr %>% 
   group_by(state_name, year, constituency_no) %>% 
   mutate(dyn_vs_nondyn = ifelse(any(dyn==1) & any(dyn==0),1,0),
-         dyn_won = ifelse(dyn==1 & position==1,1,0), 
+         dyn_won = ifelse(any(dyn==1 & position==1),1,0), 
          dyn_contest = ifelse(any(dyn==1),1,0),
          criminal_contest = ifelse(any(serious_criminal==1),1,0),
          asset_median = ifelse(ac_avg_assets>st_median_asset,1,0)
@@ -493,6 +493,16 @@ dyn_ge_adr %>%ungroup() %>%
 ```
 
 
+```{r}
+
+# dyn_ge_adr$dynat_winner <- ifelse(dyn_ge_adr$dynast ==1 &dyn_ge_adr$position ==1,1,0)
+# 
+# dyn_ge_adr <- dyn_ge_adr %>% group_by(state_name, year, constituency_no) %>% mutate(n_cand_ac = n(), criminal_cand_ac = sum(serious_criminal), dyn_contested_ac = sum(dyn), dynast_winner = ifelse(dyn ==1 &position ==1,1,0))
+# 
+# dyn_ge_adr %>%ungroup() %>% filter(year==2014) %>% 
+#   distinct(state_name, year, constituency_no, .keep_all = TRUE) %>% select(state_name, year, constituency_no,n_cand_ac,dyn_contested_ac, dynast_winner, criminal_cand_ac) %>% write.csv("D:/cpr/UP/up-dynasties/dyn_other_data/ge14_pc_stats.csv")
+
+```
 
 
 #### Winner
@@ -846,7 +856,7 @@ dyn_up_ge_adr <- dyn_up_ge_adr %>% group_by( year, constituency_no) %>% mutate(a
 dyn_up_ge_adr <- dyn_up_ge_adr %>% 
   group_by( year, constituency_no) %>% 
   mutate(dyn_vs_nondyn = ifelse(any(dyn==1) & any(dyn==0),1,0),
-         dyn_won = ifelse(dyn==1 & position==1,1,0), 
+         dyn_won = ifelse(any(dyn==1 & position==1),1,0), 
          dyn_contest = ifelse(any(dyn==1),1,0),
          criminal_contest = ifelse(any(serious_criminal==1),1,0),
          asset_median = ifelse(ac_avg_assets>st_median_asset,1,0)
