@@ -108,7 +108,9 @@ state <- tcpd_5$State_Name
 
 
 
-# GE 2019 summary
+# GE 2019 {.tabset}
+
+## summary
 
 ```{r}
 
@@ -169,7 +171,7 @@ fit.logit <- glm(winner ~bjp +  incumbent+  turncoat +caste+ sex + terms + dynas
 
 <!-- # Turnout linear model -->
 
-# Regressions
+## Regressions
 
 
 ```{r turnout, results = "asis"}
@@ -299,7 +301,30 @@ constituency <- dyn_ge_adr$constituency_no
 
 party <- dyn_ge_adr$party
 
-df <- tibble(winner ,   incumbent,  turncoat ,caste_UC_IC, female , terms , dynast , assets  , serious_crime, education,age, state,year,enop, reservation_SCST,recontest, constituency, party, vote_share_pc, inc, bjp)
+
+margin_percentage <- dyn_ge_adr$margin_percentage
+
+dynast_winner <- ifelse( dyn_ge_adr$position==1 &  dyn_ge_adr$dyn==1,1,0)
+
+uc_ic_winner <- ifelse( dyn_ge_adr$position==1 &  caste_UC_IC ==1,1,0)
+
+incumbent_winner <- ifelse( dyn_ge_adr$position==1 &  incumbent ==1,1,0)
+
+asset_quartile <- ntile(assets,4)
+
+asset_winner <- ifelse(dyn_ge_adr$position==1 & asset_quartile==4,1,0)
+
+
+ser_crime_winner <- ifelse(dyn_ge_adr$position==1 & serious_crime==1,1,0)
+
+
+position <- dyn_ge_adr$position
+
+enop <- dyn_ge_adr$enop
+
+#turnout <- dyn_ge_adr$turnout_percentage
+
+df <- tibble(winner ,   incumbent,  turncoat ,caste_UC_IC, female , terms , dynast , assets  , serious_crime, education,age, state,year,enop, reservation_SCST,recontest, constituency, party, vote_share_pc, inc, bjp, margin_percentage, dynast_winner, position, turnout, asset_winner, incumbent_winner, uc_ic_winner, ser_crime_winner)
 # 
 # df_cor <- tibble(winner ,   incumbent,  turncoat , terms , dynast , assets  , serious_crime, education,age,year, enop,recontest)
 # 
@@ -309,6 +334,8 @@ df <- tibble(winner ,   incumbent,  turncoat ,caste_UC_IC, female , terms , dyna
 # 
 # corrplot::corrplot(corr, method = "circle")
 ```
+
+
 
 
 #### Summaries {.tabset}
@@ -425,6 +452,47 @@ ge0919 %>% filter(!is.na(vote_share))%>% group_by(vote_share) %>% summarise_at( 
 
 ```
 
+##### AC summary
+
+```{r}
+
+
+dyn_ge_adr$serious_criminal <- ifelse(dyn_ge_adr$serious_crime>0,1,0)
+
+
+#dyn_ge_adr$asset_median <- 
+
+dyn_ge_adr <- dyn_ge_adr %>% group_by(state_name, year) %>% mutate( st_median_asset = median(as.numeric(total_assets), na.rm = TRUE)) %>% ungroup()
+
+dyn_ge_adr <- dyn_ge_adr %>% group_by(state_name, year, constituency_no) %>% mutate(ac_avg_assets = mean(as.numeric(total_assets), na.rm = TRUE) )
+
+dyn_ge_adr <- dyn_ge_adr %>% 
+  group_by(state_name, year, constituency_no) %>% 
+  mutate(dyn_vs_nondyn = ifelse(any(dyn==1) & any(dyn==0),1,0),
+         dyn_won = ifelse(dyn==1 & position==1,1,0), 
+         dyn_contest = ifelse(any(dyn==1),1,0),
+         criminal_contest = ifelse(any(serious_criminal==1),1,0),
+         asset_median = ifelse(ac_avg_assets>st_median_asset,1,0)
+                                                                                    )
+
+
+```
+
+
+
+```{r}
+dyn_ge_adr %>%ungroup() %>% 
+  distinct(state_name, year, constituency_no, .keep_all = TRUE) %>% 
+  group_by(year) %>% 
+  summarise (dyn_contest = mean(dyn_contest),
+             dyn_won = mean(dyn_won),
+             criminal_contest = mean(criminal_contest),
+             median_assets = mean(asset_median)
+)%>% kable(digits = 2, col.names = c("Year","% of PCs in dynast contested","% of PCs in dynast won","% of PCs in a serious criminal contested","% of PCs in PC average assets is higher than the state median")) %>% 
+  kable_styling(full_width = F)
+```
+
+
 
 
 #### Winner
@@ -480,6 +548,107 @@ stargazer( fit_year,fit_state,fit_ac,title="Vote share - India ",type = "html",
 align=TRUE, no.space=TRUE, order = order,add.lines=list)
 
 ```
+
+
+#### misc. models
+
+```{r}
+df_win <- df %>% mutate(year = as.factor(year), constituency= as.factor(constituency))%>% filter(!is.na(state)&!is.na(year)&!is.na(constituency)&assets>0)
+
+df_win$non_dyn_win <- ifelse(df_win$dynast==1,0,1)
+# 
+# fit_ac <- feglm(dynast_winner ~  margin_percentage+reservation_SCST + turnout| state+year+constituency, family = binomial(link = "probit" ), data = df)
+# 
+# 
+# etable(fit_ac, cluster= c("state","constituency")) %>% kable(caption = "Dynast winner - winners data")
+# data = subset(df %>% filter(position ==1))
+# 
+# 
+# fit_lm <- felm(dynast_winner ~  margin_percentage+ incumbent+  turncoat +caste_UC_IC+ female + terms + log(assets)  + serious_crime+ education+age + inc + bjp| factor(state)+factor(year)+factor(constituency),data =df_win)
+```
+
+
+```{r}
+fit_dyn <- felm(dynast_winner ~  margin_percentage+reservation_SCST + turnout+enop| state+year+constituency|0|constituency, data = df)
+
+
+fit_uc <- felm(uc_ic_winner~  margin_percentage+ reservation_SCST + turnout+enop| state+year+constituency|0|constituency,  data = df)
+
+
+fit_incumbent<- felm(incumbent_winner~ margin_percentage+reservation_SCST + turnout+enop| state+year+constituency|0 |constituency,  data = df)
+
+
+fit_asset <- felm(asset_winner~ margin_percentage+ reservation_SCST + turnout+enop| state+year+constituency|0|constituency, data = df)
+
+
+fit_crime<- felm(ser_crime_winner~ margin_percentage+reservation_SCST + turnout+enop| state+year+constituency|0|constituency, data = df)
+
+# 
+# etable(fit_dyn, fit_uc,fit_incumbent, fit_asset,fit_crime,cluster= c("state","constituency")) %>% kable(caption = "*** winners - 5 PC")
+```
+
+
+```{r results="asis"}
+stargazer(fit_dyn, fit_uc,fit_incumbent, fit_asset,fit_crime, type = "html", add.lines = list(c("Fixed effects", "State+Year+Constituency","State+Year+Constituency", "State+Year+Constituency" ,"State+Year+Constituency","State+Year+Constituency")),c("Clustered SE","Constituency","Constituency","Constituency","Constituency","Constituency"))
+
+
+```
+
+
+<!-- ```{r} -->
+<!-- library(jtools) -->
+
+<!-- effect_plot(fit_lm, pred = margin_percentage, interval = FALSE, y.label = "Probability of dynast winning")+ -->
+<!--   ylim(0,1) -->
+
+<!-- fit_ac$fitted.values[,1] -->
+
+<!-- fit_ac$coeftable# -->
+
+<!-- fit_ac$coef[1] -->
+
+
+<!-- ggplot(subset(df %>% filter(position ==1)), aes(margin_percentage,dynast_winner ))+ -->
+<!--   geom_point()+ -->
+<!--    geom_smooth(method = "glm", method.args = list(family = binomial(link = "probit") ) -->
+<!--                 )  -->
+
+<!-- pred <-  predict(fit_ac) -->
+
+
+<!-- plot(p, data=subset(df %>% filter(position ==1)), col="red4") -->
+<!-- lines(vs ~ hp, newdat, col="green4", lwd=2) -->
+
+<!-- ``` -->
+
+
+<!-- #### close election rdd -->
+
+
+
+```{r}
+
+# dyn_ge_adr <- dyn_ge_adr %>% group_by(state_name, year, constituency_no) %>% mutate(dyn_vs_nondyn = ifelse(any(dyn==1) & any(dyn==0),1,0), dyn_w_vs_nondyn = ifelse(dyn==1 & position==1 &dyn==1,1,0))
+# 
+# 
+# rdd <- dyn_ge_adr  %>% filter(dyn_vs_nondyn==1&margin_percentage<=5 &position==1) %>% mutate(mv = ifelse(dyn==0,-margin_percentage, margin_percentage)) %>% select(state_name,year,constituency_no,dyn,margin_percentage,mv)
+# 
+# rdd <- rdd %>% rename(dynast = dyn_cum_2)
+# 
+# 
+# 
+# ggplot(rdd %>% filter(cv<2.5), aes(mv,cv , color = factor(dynast)))+
+#   geom_point()+
+#     geom_smooth(method="lm", se= FALSE)+
+#   geom_vline(xintercept = 0)+
+#     scale_color_discrete(labels = c("non-dynast winner", "dynast winner"))+
+#   #guides(color = FALSE)+
+#   ylim(0,1)+
+#    labs(x = "Margin of victory", y = "co-efficient of variation")+
+#   theme(legend.position = "bottom", legend.title = element_blank())
+
+```
+
 
 ### UP {.tabset}
 
@@ -659,6 +828,48 @@ ge0919_up %>% filter(!is.na(vote_share))%>% group_by(vote_share) %>% summarise_a
 
 
 ```
+
+##### AC summary
+
+```{r}
+
+
+dyn_up_ge_adr$serious_criminal <- ifelse(dyn_up_ge_adr$serious_crime>0,1,0)
+
+
+#dyn_up_ge_adr$asset_median <- 
+
+dyn_up_ge_adr <- dyn_up_ge_adr %>% group_by( year) %>% mutate( st_median_asset = median(as.numeric(total_assets), na.rm = TRUE)) %>% ungroup()
+
+dyn_up_ge_adr <- dyn_up_ge_adr %>% group_by( year, constituency_no) %>% mutate(ac_avg_assets = mean(as.numeric(total_assets), na.rm = TRUE) )
+
+dyn_up_ge_adr <- dyn_up_ge_adr %>% 
+  group_by( year, constituency_no) %>% 
+  mutate(dyn_vs_nondyn = ifelse(any(dyn==1) & any(dyn==0),1,0),
+         dyn_won = ifelse(dyn==1 & position==1,1,0), 
+         dyn_contest = ifelse(any(dyn==1),1,0),
+         criminal_contest = ifelse(any(serious_criminal==1),1,0),
+         asset_median = ifelse(ac_avg_assets>st_median_asset,1,0)
+                                                                                    )
+
+
+```
+
+
+
+```{r}
+dyn_up_ge_adr %>%ungroup() %>% 
+  distinct(year, constituency_no, .keep_all = TRUE) %>% 
+  group_by(year) %>% 
+  summarise (dyn_contest = mean(dyn_contest),
+             dyn_won = mean(dyn_won),
+             criminal_contest = mean(criminal_contest),
+             median_assets = mean(asset_median)
+)%>% kable(digits = 2, col.names = c("Year","% of PCs in dynast contested","% of PCs in dynast won","% of PCs in a serious criminal contested","% of PCs in PC average assets is higher than the state median")) %>% 
+  kable_styling(full_width = F)
+```
+
+
 #### Winner
 
 

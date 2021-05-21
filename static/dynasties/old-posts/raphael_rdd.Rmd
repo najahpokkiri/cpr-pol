@@ -148,7 +148,204 @@ fit <- lm(cv~factor(dynast), data = subset(rdd %>% filter(cv<2.5)))
 
 summary(fit)
 
-summary(felm(cv~dyn_cum_2+margin_percentage+vote_share_percentage+enop+incumbent+log(electors)+turnout_percentage)|district_name+year|0|district_name, data = dyn_cv))
+summary(felm(cv~dyn_cum_2+margin_percentage+vote_share_percentage+enop+incumbent+log(electors)+turnout_percentage)|district_name+year|0|district_name, data = dyn_cv)
 
 ```
+
+# GE
+
+```{r}
+adr <- fread("D:/cpr/UP/up-dynasties/dyn_other_data/adr/adr_tcpd_09_14_19.csv")
+
+
+mp <- adr %>% filter(Vote_Share_Percentage>=5)%>% select(c("State_Name", "Year", "Constituency_No", "Position", "Margin_Percentage"))
+
+mp$State_Name <- tolower(mp$State_Name)
+
+names(mp) <- tolower(names(mp))
+
+
+
+
+
+ac_pc <- fread("D:/cpr/UP/up-dynasties/dyn_other_data/ac_pc/dyn_merged_ac_pc_10_05.csv")
+
+names(ac_pc) <- tolower(names(ac_pc))
+
+
+
+cv <- ac_pc%>%group_by(state_name,year_x, constituency_no,position) %>% mutate(cv =CoefVar(`vs_ac`, na.rm = TRUE)) %>% distinct(state_name,year_x, constituency_no,position,.keep_all = TRUE) %>% select(state_name,year_x, constituency_no,position, cv, dyn,vote_share_percentage)
+
+cv <- cv %>% mutate(state_name=ifelse(state_name =="nct of delhi", "delhi", state_name))
+
+cv$state_name <- str_trim(cv$state_name)
+
+
+mp$state_name <- str_trim(mp$state_name )
+
+cv_1<- inner_join(cv, mp, by = c("state_name", "year_x" ="year", "constituency_no", "position"))
+
+cv %>% group_by(dyn) %>% summarise(average_cv = mean(cv, na.rm = TRUE)) %>% kable(digits =2)
+```
+
+
+### 5 PC
+
+
+
+```{r}
+ggplot(cv,aes( vote_share_percentage,cv, color = factor(dyn)))+
+ #geom_point()+
+  geom_smooth(method = "lm")+
+  coord_cartesian(ylim=c(0,.50))+
+   #ylim(0,.35)+
+  # xlim(0,90)+
+  scale_color_discrete(labels = c("Non-fam","Family"))+
+  labs(x = "vote share", y = "CoV", title = "Coeficient of varation as a function of vote share - 5 PC")+
+  theme_minimal_hgrid()+
+  theme(legend.position = "bottom",
+        legend.title = element_blank())
+
+```
+
+
+### winner & runner up
+
+```{r}
+
+ggplot(cv %>% filter(position %in% c(1,2)) , aes( vote_share_percentage,cv, color = factor(dyn)))+
+ #geom_point()+
+  geom_smooth(method = "lm")+
+  coord_cartesian(ylim=c(0,.40))+
+   #ylim(0,.35)+
+  # xlim(0,90)+
+  scale_color_discrete(labels = c("Non-fam","Family"))+
+  labs(x = "vote share", y = "CoV", title = "Coeficient of varation as a function of vote share - winner a& runner up")+
+  theme_minimal_hgrid()+
+  theme(legend.position = "bottom",
+        legend.title = element_blank())
+
+
+```
+
+
+### winner
+
+```{r}
+
+ggplot(cv %>% filter(position ==1) , aes( vote_share_percentage,cv, color = factor(dyn)))+
+ #geom_point()+
+  geom_smooth(method = "lm")+
+  coord_cartesian(ylim=c(0,.30))+
+   #ylim(0,.35)+
+  # xlim(0,90)+
+  scale_color_discrete(labels = c("Non-fam","Family"))+
+  labs(x = "vote share", y = "CoV", title = "Coeficient of varation as a function of vote share - winner")+
+  theme_minimal_hgrid()+
+  theme(legend.position = "bottom",
+        legend.title = element_blank())
+
+```
+
+
+```{r}
+
+
+ggplot(cv, aes(factor(dyn),cv ))+
+  geom_boxplot()+
+  ylim(0,1)+
+  #geom_point()+
+ # geom_smooth(method = "lm", se = FALSE)+
+    labs(x = "Dynast", y = "CoV")
+
+
+
+cv$dynast <- ifelse(cv$dyn ==1, "fam","non-fam")
+
+cv %>% group_by( dynast) %>%
+  summarise(
+    count = n(),
+    mean = mean(cv, na.rm = TRUE),
+    sd = sd(cv, na.rm = TRUE))
+    
+library("ggpubr")
+    
+    ggboxplot(cv , x = "dynast", y = "cv", 
+          color = "dynast", palette = c("#00AFBB", "#E7B800") )
+    
+with(cv %>% filter(cv<1), shapiro.test(cv[dynast == "fam"]))# p = 0.1
+# Shapiro-Wilk normality test for Women's weights
+with(cv, shapiro.test(cv[dynast == "non-fam"]))# p = 0.1
+  
+
+cv1 <- cv %>% filter(cv<1 ) %>% ungroup()%>% select(cv)
+ggdensity(cv1$cv,
+          main = "Density plot of tooth length",
+          xlab = "Tooth length")
+
+ggqqplot(cv1$cv)
+
+hist(cv1$cv)
+
+cv2 <- cv %>% filter(cv<1  & !is.na(cv)) %>% ungroup()%>% select(cv, dynast)
+
+t.test( cv2$cv,cv2$dynast)
+
+res.ftest <- var.test(cv ~ dynast, data = cv)
+res.ftest
+
+
+cv2_winner <- cv %>% filter(cv<1  & !is.na(cv)& position %in% c(1,2)) %>% ungroup()%>% select(cv, dynast)
+
+res <- t.test(cv ~ dynast ,data = cv, var.equal = FALSE)
+
+res <- t.test(cv ~ dynast ,data = cv2_winner, var.equal = FALSE)
+
+
+
+ wil <-  wilcox.test(cv ~ dynast ,data = cv2_winner, var.equal = FALSE)
+    
+```
+
+
+## ge rdd
+
+
+```{r}
+
+
+cv_1 <- cv_1 %>% group_by(state_name, year_x, constituency_no) %>% mutate(dyn_vs_nondyn = ifelse(any(dyn==1) & any(dyn==0),1,0), dyn_w_vs_nondyn = ifelse(dyn==1 & position==1 &dyn==1,1,0))
+
+
+rdd <- cv_1  %>% filter(dyn_vs_nondyn==1&margin_percentage<=5 &position==1) %>% mutate(mv = ifelse(dyn==0,-margin_percentage, margin_percentage)) %>% select(state_name,year_x,constituency_no,dyn,margin_percentage,mv,cv)
+
+rdd <- rdd %>% rename(dynast = dyn)
+
+
+
+ggplot(rdd , aes(mv,cv , color = factor(dynast)))+
+  geom_point()+
+    geom_smooth(method="lm", se= FALSE)+
+  geom_vline(xintercept = 0)+
+    scale_color_discrete(labels = c("non-dynast winner", "dynast winner"))+
+  #guides(color = FALSE)+
+  ylim(0,1)+
+   labs(x = "Margin of victory", y = "co-efficient of variation")+
+  theme(legend.position = "bottom", legend.title = element_blank())
+
+
+
+```
+
+
+```{r}
+
+
+
+
+
+
+```
+
+
 
