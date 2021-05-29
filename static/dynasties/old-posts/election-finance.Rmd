@@ -70,9 +70,12 @@ fin_12  <- fin_12 %>% mutate(exp_missing = exp_tot_given - exp_tot_calc)
 
 fin_17  <- fin_17 %>% mutate(exp_missing = exp_tot_given - exp_tot_calc)
 
-fin_12_17 <- rbind(fin_12, fin_17, use.names= TRUE)
+fin_12_17 <- rbind(fin_12, fin_17, use.names= TRUE) %>% filter(year !=1)
+
+fin_12_17  <- fin_12_17 %>% group_by(year, constituency_no, Party) %>% mutate(party_count = n()) 
 
 
+fin_12_17 <- fin_12_17 %>% filter(party_count<2)
 
 # names(fin_12)[1:15]
 # 
@@ -80,16 +83,27 @@ fin_12_17 <- rbind(fin_12, fin_17, use.names= TRUE)
 ```
 
 
+```{r }
+
+# 
+#  dyn %>% filter(election_type == "AE" &  year %in% c(2012,2017)) %>% filter(constituency_no%in%c(59,69,258, 269)) %>% select(constituency_no,position, candidate_name, party)
+# 
+# dyn_el_fin%>% select(constituency_no,position, candidate_name, Candidate,party, Party)
+```
+
+
 ```{r file config1}
-
-
 dyn_ae_12_17_w<- dyn %>% filter(election_type == "AE" & position==1 & year %in% c(2012,2017))
 
 dyn_ae_12_17_w$dyn_cum_text <- ifelse(dyn_ae_12_17_w$dyn_cum_2 ==0, "Non-family","Family")
 
 
 
-dyn_el_fin <- merge(fin_12_17,dyn_ae_12_17_w, by = c("year", "constituency_no"))
+dyn_el_fin <- inner_join(fin_12_17,dyn_ae_12_17_w, by = c("year", "constituency_no", "Party"="party"))
+
+
+dyn_el_fin_all <- left_join(dyn_ae_12_17_w,fin_12_17, by = c("year", "constituency_no","party"="Party"))
+
 
 
 ```
@@ -99,11 +113,9 @@ dyn_el_fin <- merge(fin_12_17,dyn_ae_12_17_w, by = c("year", "constituency_no"))
 ## Data summary {.tabset}
 
 
-### Preview
 
-```{r}
-DT::datatable(head(fin_12_17))
-```
+
+
 ### Main variables
 
 
@@ -120,18 +132,60 @@ names(fin_12_17)
 fin_12_17 %>% filter(year!=1)%>% group_by(year) %>% summarise(n_obs = n()) %>% kable() %>% kable_styling(full_width = F)
 
 ```
+### Reported
 
-### dynasts
 
 ```{r}
 
-dyn_ae_12_17_w %>% filter(year!=1)%>% group_by(year, dyn_cum_text) %>% summarise(n_obs = n())%>% kable() %>% kable_styling(full_width = F)
+dyn_el_fin_all %>% group_by(year,dyn_cum_text) %>% summarise(exp_count = n(), reported = sum(ifelse(!is.na(fund_tot_given),1,0)), reported_pc = reported/exp_count*100) %>% select(1:2, 5:5) %>% kable(digits =0, col.names = c("Year","Entity","% of winners reported")) %>% kable_styling(full_width = F)
+
+
+
+```
+
+### Among reported
+
+
+
+```{r}
+
+dyn_el_fin_all %>% filter(!is.na(fund_tot_calc))%>% group_by(year, dyn_cum_text) %>% summarise(count = n(), funds_given = sum(ifelse(fund_tot_given>0,1,0)), funds_given_pc =funds_given/count*100,
+                                                                                                exp_given = sum(ifelse(exp_tot_given>0,1,0)), exp_given_pc =exp_given/count*100) %>% select(1:2, 5:5, 7:7) %>% kable(digits =0, col.names = c("Year","Entity","% of reporters with funds>0","% of reporters with expenditure>0")) %>% kable_styling(full_width = F)
+
+
+
+## 1lk above
+
+dyn_el_fin_all  <- dyn_el_fin_all %>% mutate(fund_tot_1lk= ifelse( fund_tot_given>100000,fund_tot_calc,0), exp_tot_1lk =ifelse( exp_tot_given>100000,exp_tot_calc,0))
+
+
+dyn_el_fin_all %>% filter(!is.na(fund_tot_calc))%>% group_by(year, dyn_cum_text) %>% summarise(count = n(),funds_given = sum(ifelse(fund_tot_1lk>0,1,0)), funds_given_pc =funds_given/count*100,
+                                                                                                exp_given = sum(ifelse(exp_tot_1lk>0,1,0)), exp_given_pc =exp_given/count*100) %>% select(1:2, 5:5, 7:7) %>% kable(digits =0, col.names = c("Year","Entity","% of reporters with funds>0","% of reporters with expenditure>0")) %>% kable_styling(full_width = F)
+
+
 
 ```
 
 
 
-### Missing observations - obs that is zero
+### Missing{.tabset}
+
+
+
+
+```{r}
+fin_12_17 %>% summarise(total_entries  = n(),missing_funds = sum(ifelse(fund_tot_given<=0,1,0)), missing_expenditure = sum(ifelse(exp_tot_given<=0,1,0)))
+```
+
+
+```{r}
+
+dyn_el_fin %>% group_by(dyn_cum_text)%>%  summarise(total_entries = n(),missing_funds = sum(ifelse(fund_tot_given<=0,1,0)),pc_missing_funds = missing_funds/total_entries, missing_expenditure = sum(ifelse(exp_tot_given<=0,1,0)), pc_missing_exp = missing_expenditure/total_entries) %>% kable(digits = 2)
+
+```
+
+
+
 
 
 ```{r}
@@ -143,6 +197,54 @@ fin_12_17 %>% filter(year!=1)%>% group_by(year)%>% summarise(zero_fund_own= sum(
 
 
 ```
+
+## Finance {.tabset}
+
+
+```{r}
+
+dyn_el_fin_all <- dyn_el_fin_all %>% mutate(fund_tot_lk = fund_tot_given/100000)
+
+ggplot(dyn_el_fin_all %>% filter(!is.na(fund_tot_given)& fund_tot_calc<4.1e+07), aes( dyn_cum_text,log(fund_tot_lk)))+
+  geom_boxplot()+
+  facet_wrap(~year)+
+  theme_bw()+
+  labs(y = "Total funds (In lakhs)", title = "Election finance - funds", x= "")
+
+
+```
+
+
+```{r}
+
+dyn_el_fin_all <- dyn_el_fin_all %>% mutate(exp_tot_lk = exp_tot_given/100000)
+
+ggplot(dyn_el_fin_all %>% filter(!is.na(fund_tot_given)& fund_tot_calc<4.1e+07), aes( dyn_cum_text,exp_tot_lk))+
+  geom_boxplot()+
+  facet_wrap(~year)
+  theme_bw()+
+  labs(y = "Total expenditure (In lakhs)", title = "Election finance - expenditure", x= "")
+```
+
+
+### 2017
+
+
+```{r}
+
+names <- as_labeller(c(`fund_tot_lk` = "Total funds", `exp_tot_lk` = "Total expenditure"))
+
+dyn_el_fin_all %>% filter(!is.na(fund_tot_given)&fund_tot_lk < 400 & year ==2017) %>% select(dyn_cum_text, fund_tot_lk, exp_tot_lk) %>% data.table::melt(1:1) %>% 
+  ggplot(aes(dyn_cum_text, value))+
+  geom_boxplot()+
+  facet_wrap(~variable,labeller = names)+
+  theme_bw()+
+  labs(y = "Money (In lakhs)", title = "Election finance: AE 2017 UP", x= "")
+   
+
+```
+
+
 
 
 

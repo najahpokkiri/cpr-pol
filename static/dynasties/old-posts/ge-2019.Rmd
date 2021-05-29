@@ -318,13 +318,38 @@ asset_winner <- ifelse(dyn_ge_adr$position==1 & asset_quartile==4,1,0)
 ser_crime_winner <- ifelse(dyn_ge_adr$position==1 & serious_crime==1,1,0)
 
 
+
+
 position <- dyn_ge_adr$position
 
 enop <- dyn_ge_adr$enop
 
 #turnout <- dyn_ge_adr$turnout_percentage
 
-df <- tibble(winner ,   incumbent,  turncoat ,caste_UC_IC, female , terms , dynast , assets  , serious_crime, education,age, state,year,enop, reservation_SCST,recontest, constituency, party, vote_share_pc, inc, bjp, margin_percentage, dynast_winner, position, turnout, asset_winner, incumbent_winner, uc_ic_winner, ser_crime_winner)
+
+last_year <- dyn_ge_adr %>%filter(position ==1)%>%  
+  
+  mutate(year = year-5, lagged_turnout = turnout_percentage,lagged_margin = margin_percentage, value = NULL) %>% select(state_name,year, constituency_no, lagged_turnout, lagged_margin) %>% distinct(state_name,year, constituency_no, .keep_all = TRUE)
+
+dyn_ge_adr <- dyn_ge_adr %>% left_join(last_year, by = c("state_name","year", "constituency_no"))
+
+
+
+lagged_margin <- dyn_ge_adr$lagged_margin
+
+lagged_turnout <- dyn_ge_adr$lagged_turnout
+
+
+ dynast_1_2 <- dyn_ge_adr %>% group_by(state_name,year, constituency_no) %>% mutate(dynast_1_2 =ifelse(any( position %in% c(1,2)) & any( dyn==1),1,0)) %>%ungroup()%>% select(dynast_1_2)
+ 
+dyn_ge_adr$serious_criminal <- ifelse(as.numeric(dyn_ge_adr$serious_crime)>0,1,0)
+ 
+ 
+criminal_1_2 <- dyn_ge_adr %>% group_by(state_name,year, constituency_no) %>% mutate(criminal_1_2 =ifelse(any( position %in% c(1,2)) & any( serious_criminal==1),1,0)) %>%ungroup()%>% select(criminal_1_2)
+# 
+# df <- tibble(winner ,   incumbent,  turncoat , female , terms , dynast , assets  , serious_crime,  year,enop, reservation_SCST,recontest, constituency, party, vote_share_pc, inc, bjp, margin_percentage,  position, turnout, sub_region,immovable_assets,movable_assets,mov_assets_ratio , caste_uc, caste_sc, caste_muslim, caste_obc, dynast_1_2, lagged_margin, lagged_turnout)
+
+df <- tibble(winner ,   incumbent,  turncoat ,caste_UC_IC, female , terms , dynast , assets  , serious_crime, education,age, state,year,enop, reservation_SCST,recontest, constituency, party, vote_share_pc, inc, bjp, margin_percentage, dynast_winner, position, turnout, asset_winner, incumbent_winner, uc_ic_winner, ser_crime_winner,dynast_1_2, lagged_margin, lagged_turnout, criminal_1_2)
 # 
 # df_cor <- tibble(winner ,   incumbent,  turncoat , terms , dynast , assets  , serious_crime, education,age,year, enop,recontest)
 # 
@@ -333,6 +358,8 @@ df <- tibble(winner ,   incumbent,  turncoat ,caste_UC_IC, female , terms , dyna
 # corr <- cor(df_cor, use = "complete.obs")
 # 
 # corrplot::corrplot(corr, method = "circle")
+
+
 ```
 
 
@@ -495,12 +522,49 @@ dyn_ge_adr %>%ungroup() %>%
 
 ```{r}
 
-# dyn_ge_adr$dynat_winner <- ifelse(dyn_ge_adr$dynast ==1 &dyn_ge_adr$position ==1,1,0)
-# 
-# dyn_ge_adr <- dyn_ge_adr %>% group_by(state_name, year, constituency_no) %>% mutate(n_cand_ac = n(), criminal_cand_ac = sum(serious_criminal), dyn_contested_ac = sum(dyn), dynast_winner = ifelse(dyn ==1 &position ==1,1,0))
-# 
-# dyn_ge_adr %>%ungroup() %>% filter(year==2014) %>% 
-#   distinct(state_name, year, constituency_no, .keep_all = TRUE) %>% select(state_name, year, constituency_no,n_cand_ac,dyn_contested_ac, dynast_winner, criminal_cand_ac) %>% write.csv("D:/cpr/UP/up-dynasties/dyn_other_data/ge14_pc_stats.csv")
+#dyn_ge_adr$dynat_winner <- ifelse(dyn_ge_adr$dynast ==1 &dyn_ge_adr$position ==1,1,0)
+
+dyn_ge_adr <- dyn_ge_adr %>% group_by(state_name, year, constituency_no) %>% mutate(n_cand_ac = n(), criminal_cand_ac = sum(serious_criminal), dyn_contested_ac = sum(dyn), dynast_winner = ifelse(dyn ==1 &position ==1,1,0))
+
+dyn_ge_adr %>%ungroup() %>% filter(year==2014) %>%
+  distinct(state_name, year, constituency_no, .keep_all = TRUE) %>% select(state_name, year, constituency_no,n_cand_ac,dyn_contested_ac, dynast_winner, criminal_cand_ac) %>%arrange(state_name, constituency_no) %>%  write.csv("D:/cpr/UP/up-dynasties/dyn_other_data/ge14_pc_stats.csv")
+
+```
+
+
+#### Other stats {.tabset}
+
+##### retention
+
+
+```{r}
+
+dyn_ae_ge <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/dyn_ae_ge.csv")
+
+dyn_ae_ge %>% group_by(dyn_cum_2,position) %>% summarise(recontest = mean(recontest)) %>% pivot_wider(names_from = dyn_cum_2, values_from = recontest) %>% kable(digits = 2, col.names = c("Position","non-fam renomination", "fam renomination"), caption = "AE-GE All") %>% kable_styling(full_width = F)
+
+```
+
+
+```{r}
+
+dyn_ge_adr $position_rev <- ifelse(dyn_ge_adr$position>2,"3+",position)
+
+dyn_ge_adr %>% group_by(dyn,position_rev) %>% summarise(recontest = mean(recontest, na.rm = TRUE)) %>% pivot_wider(names_from = dyn, values_from = recontest) %>% kable(digits = 2, col.names = c("Position","non-fam renomination", "fam renomination"), caption = "GE Pan India 09:19") %>% kable_styling(full_width = F)
+
+
+```
+
+##### serious crime
+
+```{r}
+
+dyn_ge_adr$serious_criminal <- ifelse(dyn_ge_adr$serious_crime>0,1,0)
+
+
+dyn_ge_adr %>% group_by(serious_criminal,position_rev) %>% summarise(recontest = mean(recontest, na.rm = TRUE)) %>% pivot_wider(names_from = serious_criminal, values_from = recontest) %>% kable(digits = 2, col.names = c("Position","non-criminal renomination", "criminal renomination"), caption = "GE Pan India 09:19") %>% kable_styling(full_width = F)
+
+
 
 ```
 
@@ -558,6 +622,185 @@ stargazer( fit_year,fit_state,fit_ac,title="Vote share - India ",type = "html",
 align=TRUE, no.space=TRUE, order = order,add.lines=list)
 
 ```
+
+
+
+#### states
+
+
+```{r, fig.width=8}
+
+names(dyn_ge) <- tolower(names(dyn_ge))
+
+
+dyn_ge %>% group_by(state_name, year ) %>% summarise(count = n(),
+                                             dyn_1_2 =  sum(ifelse(dyn==1 &position %in% c(1,2),1,0)),
+                                             prop_dyn_1_2 = dyn_1_2/count) %>%
+  filter(count>17) %>%select(state_name, year,prop_dyn_1_2) %>% filter(state_name %!in% c("jammu & kashmir","jharkhand") )%>% 
+  ggplot(aes(prop_dyn_1_2, reorder(state_name, - prop_dyn_1_2), label = round(prop_dyn_1_2,2)))+
+  geom_bar(stat ="identity", fill = "steelblue")+
+  labs(title = "Family politicians among winners and runner-ups", subtitle = "Loksabha elections - 2009:19", x = "", y ="")+
+
+  facet_wrap(~year)+
+    scale_x_continuous(labels = c(".0",".1",".2",".3",".4",".5"))+
+  geom_text(hjust=1, size = 3, color = "white")+
+  theme_minimal()+
+    theme(
+       # plot.background = element_blank(),
+        # plot.title = element_text( size = 18, family = "serif"),
+        # plot.subtitle = element_text( size = 15,
+        #                              margin = margin(t = 0, r = 0, b = 20, l = 0)),
+        text = element_text(color = "gray20",family = "serif"),
+        axis.text.x =element_blank(),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 12),
+        axis.text = element_text(face = "italic", size = 10),
+        axis.title = element_text(vjust = -1, size = 15),        
+        axis.ticks = element_blank(),
+         axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+        axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+        axis.line.x = element_line()
+  ) 
+
+ 
+
+```
+
+
+
+
+
+#### turnout {.tabset}
+
+##### turnout
+
+
+```{r results = "asis"}
+
+
+
+fit.1 <- felm(turnout~  dynast_1_2+ reservation_SCST + margin_percentage+enop+criminal_1_2|0|0|state, data = subset(df %>% filter(position==1)))
+
+
+
+fit.2 <- felm(turnout~  dynast_1_2+ reservation_SCST + margin_percentage+enop+criminal_1_2|year|0|state, data = subset(df %>% filter(position==1)))
+
+fit.3 <- felm(turnout~  dynast_1_2+ reservation_SCST + margin_percentage+enop+criminal_1_2|state|0|state, data = subset(df %>% filter(position==1)))
+
+fit.4<- felm(turnout~  dynast_1_2+ reservation_SCST + margin_percentage+enop+criminal_1_2| state+year|0|state, data = subset(df %>% filter(position==1)))
+
+
+
+
+fit.5<- felm(turnout~  dynast_1_2+ reservation_SCST + margin_percentage+enop+criminal_1_2|constituency+ state+year|0|state, data = subset(df %>% filter(position==1)))
+
+
+addlines <- list(c('Fixed effects', '' ,"Year", "State","Year and State","State, Year and Constituency"), c("Clustered SE" ,"State","State","State","State", "State"))
+
+
+ 
+stargazer(fit.1, fit.2, fit.3, fit.4, fit.5,type = "html", add.lines = addlines)
+
+#summary(fit.4)
+
+```
+
+##### lagged turnout
+
+
+```{r results = "asis"}
+
+fit.1 <- felm(turnout~  dynast_1_2+ reservation_SCST + margin_percentage+enop+criminal_1_2+lagged_turnout|0|0|state, data = subset(df %>% filter(position==1)))
+
+
+
+fit.2 <- felm(turnout~  dynast_1_2+ reservation_SCST + margin_percentage+enop+criminal_1_2+lagged_turnout|year|0|state, data = subset(df %>% filter(position==1)))
+
+fit.3 <- felm(turnout~  dynast_1_2+ reservation_SCST + margin_percentage+enop+criminal_1_2+lagged_turnout|state|0|state, data = subset(df %>% filter(position==1)))
+
+fit.4<- felm(turnout~  dynast_1_2+ reservation_SCST + margin_percentage+enop+criminal_1_2+lagged_turnout| state+year|0|state, data = subset(df %>% filter(position==1)))
+
+
+
+
+fit.5<- felm(turnout~  dynast_1_2+ reservation_SCST + margin_percentage+enop+criminal_1_2+lagged_turnout|constituency+ state+year|0|state, data = subset(df %>% filter(position==1)))
+
+
+addlines <- list(c('Fixed effects', '' ,"Year", "State","Year and State","State, Year and Constituency"), c("Clustered SE" ,"State","State","State","State", "State"))
+
+
+ 
+stargazer(fit.1, fit.2, fit.3, fit.4, fit.5,type = "html", add.lines = addlines, title = "lagged turnout")
+
+```
+
+
+#### Margin{.tabset}
+
+##### Margin
+
+
+
+```{r results = "asis" }
+
+
+
+fit.1 <- felm(margin_percentage~  dynast_1_2+ reservation_SCST + turnout+enop|0|0|state, data = subset(df %>% filter(position==1)))
+
+
+
+fit.2 <- felm(margin_percentage~  dynast_1_2+ reservation_SCST +turnout+enop|year|0|state, data = subset(df %>% filter(position==1)))
+
+fit.3 <- felm(margin_percentage~  dynast_1_2+ reservation_SCST +turnout+enop|state|0|state, data = subset(df %>% filter(position==1)))
+
+fit.4<- felm(margin_percentage~  dynast_1_2+ reservation_SCST + turnout+enop| state+year|0|state, data = subset(df %>% filter(position==1)))
+
+
+
+
+fit.5<- felm(margin_percentage~  dynast_1_2+ reservation_SCST + turnout+enop|constituency+ state+year|0|state, data = subset(df %>% filter(position==1)))
+
+
+addlines <- list(c('Fixed effects', '' ,"Year", "State","Year and State","State, Year and Constituency"), c("Clustered SE" ,"State","State","State","State", "State"))
+
+
+ 
+stargazer(fit.1, fit.2, fit.3, fit.4, fit.5,type = "html", add.lines = addlines)
+
+```
+
+##### lagged margin
+
+```{r results = "asis"}
+
+
+fit.1 <- felm(margin_percentage~  dynast_1_2+ reservation_SCST + turnout+enop+lagged_margin|0|0|state, data = subset(df %>% filter(position==1)))
+
+
+
+fit.2 <- felm(margin_percentage~  dynast_1_2+ reservation_SCST +turnout+enop+lagged_margin|year|0|state, data = subset(df %>% filter(position==1)))
+
+fit.3 <- felm(margin_percentage~  dynast_1_2+ reservation_SCST +turnout+enop+lagged_margin|state|0|state, data = subset(df %>% filter(position==1)))
+
+fit.4<- felm(margin_percentage~  dynast_1_2+ reservation_SCST + turnout+enop+lagged_margin| state+year|0|state, data = subset(df %>% filter(position==1)))
+
+
+
+
+fit.5<- felm(margin_percentage~  dynast_1_2+ reservation_SCST + turnout+enop+lagged_margin|constituency+ state+year|0|state, data = subset(df %>% filter(position==1)))
+
+
+addlines <- list(c('Fixed effects', '' ,"Year", "State","Year and State","State, Year and Constituency"), c("Clustered SE" ,"State","State","State","State", "State"))
+
+
+ 
+stargazer(fit.1, fit.2, fit.3, fit.4, fit.5,type = "html", add.lines = addlines, title = "margin percentage lagged")
+
+```
+
+
+
+
 
 
 #### misc. models
@@ -920,6 +1163,36 @@ align=TRUE, no.space=TRUE, order = order,add.lines=list)
 
 
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

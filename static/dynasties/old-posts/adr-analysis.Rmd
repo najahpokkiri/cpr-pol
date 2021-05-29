@@ -51,6 +51,244 @@ select <- dplyr::select
 "/" <- function(x,y) ifelse(y==0,0,base:::"/"(x,y))
 ```
 
+# 5 PC{.tabset}
+
+```{r}
+
+dyn_ae <- readxl::read_xlsx("D:/cpr/UP/up-dynasties/dyn_other_data/TCPD_UP_VS_16_17_RK.xlsx")
+
+
+dyn_ae <- dyn_ae %>% select(5:6, 10:10,14:14)
+
+
+
+adr_ae_12 <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/adr/up_12_adr.csv")
+
+
+
+adr_ae_17 <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/adr/up_17_adr.csv")
+
+adr_ae <- rbindlist (list(adr_ae_12, adr_ae_17), use.names = TRUE, fill= TRUE)
+
+
+
+
+
+adr_ae <- adr_ae %>% select(-(1:9))
+
+
+
+dyn_ae_adr <- inner_join(dyn_ae, adr_ae, by =c("Year", "Constituency_No", "Position"))
+
+names(dyn_ae_adr) <- tolower(names(dyn_ae_adr))
+
+dyn_ae_adr <- dyn_ae_adr %>% rename ( dyn= dynast)
+
+
+# 
+# 
+# dyn_ge <- readxl::read_xlsx("D:/cpr/UP/up-dynasties/dyn_other_data/UP_TCPD_GE_091419 _April_21.xlsx")
+# 
+# 
+# 
+# 
+# dyn_ge <-dyn_ge %>% select( 3:5,15:15)
+# 
+# 
+# 
+# adr_ge <- fread("D:/cpr/UP/up-dynasties/dyn_other_data/adr_candidatelevel.csv")
+# 
+# 
+# adr_ge <- adr_ge %>% select(-c(2:10))
+# 
+# dyn_ge_adr <- inner_join(dyn_ge, adr_ge, by = c("Year" , "Constituency_No" , "Position" = "position"))
+# 
+# names(dyn_ge_adr) <- tolower(names(dyn_ge_adr))
+# 
+# 
+# 
+# 
+# dyn_ge_adr$state_name <- NULL
+# 
+# 
+# #dyn_ge_adr  <- dyn_ge_adr %>% select(-c(58:63,7:10, 11:13, 15:21))
+# 
+# dyn_ae_ge_adr <- rbindlist(list(dyn_ae_adr, dyn_ge_adr), use.names = TRUE, fill = TRUE)
+
+dyn_ae_adr$total_assets <- as.numeric(dyn_ae_adr$total_assets )
+
+# 
+# dyn_ge_adr  <- dyn_ge_adr %>% mutate(edu = case_when(education %in% c("5th Pass","10th Pass","8th Pass") ~"10",
+#                                   education == "12th Pass" ~"12",
+#                                   education %in% c("Graduate","Graduate Professional") ~"14",
+#                                   education == "Post Graduate" ~ "16",
+#                                   education == "Doctorate" ~"18",
+#                                   education %in% c("Literate","Others") ~"5",
+#                                   TRUE ~ "0"
+#                                   
+#                                   
+#                                   ))
+
+
+caste_uc <- ifelse(dyn_ae_ge_adr$caste_rec%in% c("IC","UC","uc"),1,0)
+
+caste_muslim <- as.numeric(case_when(grepl( "muslim",dyn_ae_ge_adr$caste_rec, ignore.case = TRUE) ~"1",
+                   TRUE ~"0"))
+
+
+caste_sc <- ifelse(dyn_ae_ge_adr$caste_rec %in% c("SC","ST"),1,0)
+
+caste_obc<- ifelse(dyn_ae_ge_adr$caste_rec =="OBC",1,0)
+
+
+dyn_ae_adr <- dyn_ae_adr %>% mutate(caste_groups = case_when(caste_rec%in% c("IC","UC","uc")~"Upper Caste",
+                                               grepl( "muslim",caste_rec, ignore.case = TRUE) ~"Muslim",
+                                               caste_rec =="OBC"~"OBC",
+                                               caste_rec %in% c("SC","ST") ~"Dalit",
+                                               TRUE ~"Others"
+                                               
+                                               
+                                                         
+                                               ))
+
+
+
+
+```
+
+
+## assets
+
+```{r}
+
+dyn_ae_adr$caste_groups <- factor(dyn_ae_adr$caste_groups, levels = c("Upper Caste","OBC"  ,"Dalit" ,"Muslim","Others" ) )
+
+
+ggplot(dyn_ae_adr %>% filter(total_assets<1000000000), aes(caste_groups, total_assets))+
+  geom_boxplot()+
+  facet_wrap(~year)+
+    scale_y_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  )
+  # scale_y_log10() 
+  # scale_y_continuous(trans = 'log10')+
+  # annotation_logticks(sides="lb")
+  # scale_y_continuous(labels = unit_format(unit = "M", scale = 1e-6))
+
+
+
+
+ggplot(dyn_ae_adr %>% filter(total_assets<100000000), aes(caste_groups, total_assets))+
+  geom_boxplot()+
+  facet_wrap(~year)+
+  scale_y_continuous(labels = unit_format(unit = "M", scale = 1e-6))
+
+
+
+
+```
+
+
+## criminal
+
+
+```{r}
+
+dyn_ae_adr <- dyn_ae_adr %>% mutate(serious_criminal = ifelse(serious_crime>0,1,0), serious_crime_1 = ifelse(serious_crime>9,9,serious_crime))
+
+
+
+
+
+
+ggplot(dyn_ae_adr %>% filter(serious_crime>1), aes(caste_groups,serious_crime_1))+
+  geom_boxplot()+
+   labs(subtitle = "Serious case distribution wrt caste ")+
+  ylim(0,10)+
+  facet_wrap(~year)
+  theme_bw()
+  
+  
+## trying a stacked chart
+  
+  
+crime_df <- dyn_ae_adr  %>% group_by(caste_groups) %>% summarise(count = n(),
+                                                    crime_1 = sum(ifelse(serious_crime>0,1,0)) /count,
+                                                     crime_2 = sum(ifelse(serious_crime>1,1,0)) /count,
+                                                     crime_3 = sum(ifelse(serious_crime>2,1,0)) /count) %>% 
+  select(-c(2:2)) %>% 
+  melt(1:1)
+  
+
+##
+
+
+df_stack <- dyn_ae_adr %>% group_by(year,caste_groups) %>% summarise(total = n(), 
+                                                                crime_winners = sum(ifelse(serious_crime>2 & position ==1,1,0)),
+                                                                
+                                                                criminal_1 = sum(serious_criminal==1), 
+                                                    
+                                                    
+                                                    crime_3 = sum(ifelse(serious_crime>2,1,0))  ) %>% 
+  group_by(year) %>% mutate(sum_total = sum(total), sum_criminal_winners = sum(crime_winners), sum_criminal_1 = sum(criminal_1), sum_criminal_2 = sum(crime_3),
+                            total_pc = total/sum_total,
+                            winner_pc = crime_winners/sum_criminal_winners,
+                            criminal_1_pc = criminal_1/sum_criminal_1,
+                            criminal_2_pc = crime_3/sum_criminal_2) %>% 
+  select(1:2, 11:14) %>% 
+  melt(1:2)
+
+
+
+
+
+  ggplot(df_stack,aes(variable, value, fill = caste_groups,label = ifelse(value>.05,round(value,2),"")))+
+   geom_bar(stat="identity", position = "stack")+
+    geom_text(size = 2.5, position = position_stack(vjust = 0.5))+ 
+    facet_wrap(~year)+
+     scale_x_discrete(labels = c("All candidates","Winners","Candidates \n w/ 1 case","Candidate \n w/ 2+ case"))+
+  colorspace::scale_fill_discrete_qualitative(palette= "dark3" )+
+    theme_minimal()+
+      
+    labs(title = "Caste composition",x = "", y = "Proportion", fill = "") +
+    theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
+  theme(plot.background = element_blank(),
+        axis.line.x = element_line(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.y = element_blank(),
+        legend.position = "bottom"
+  ) 
+
+  
+ scale_x_discrete(labels = c("All candidates","Winners","Candidates \n w/ 1 case","Candidates \n  w/ 2 case","Candidate \n w/ 2+ case"))+ggplot(df_stack, aes(variable, value, fill = caste_groups))+
+  geom_bar(position = "fill",stat = "identity")+
+   scale_y_continuous(labels = scales::percent_format())+
+  geom_text(aes(label = paste0(value*100,"%")), 
+            position = position_stack(vjust = 0.5), size = 2)
+  colorspace::scale_fill_discrete_qualitative(palette ="dark3")+
+  scale_x_discrete(labels = c("All candidates","Winners","Candidates \n w/ 1 case","Candidates \n  w/ 2 case","Candidate \n w/ 2+ case"))+
+  labs(x = "", y = "Proportion of caste groups ", subtitle = "Caste composition")+
+     theme_minimal()+
+      
+    labs(title = "Caste composition among families wrt success  ",x = "", y = "Proportion", fill = "") +
+    theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
+  theme(plot.background = element_blank(),
+        axis.line.x = element_line(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.y = element_blank()
+  ) 
+  
+  
+
+
+```
+
+
+
+
 
 ```{r read main file}
 
@@ -128,6 +366,7 @@ adr <- adr %>% rename( position = position_tcpd)
 
 
 ```
+
 
 ```{r merging it with dyn -adr}
 
@@ -683,6 +922,9 @@ ggplot(dyn_adr_ae, aes(factor(dyn_cum_2),total_assets))+
         axis.title = element_text(vjust = -1, size = 15),        
         axis.ticks = element_blank()
   ) 
+
+
+
 ```
 
 

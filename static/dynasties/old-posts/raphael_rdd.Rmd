@@ -1,89 +1,121 @@
 
 
+
 ```{r}
- rafael <- fread("D:/cpr/UP/up-dynasties/dyn_other_data/rafael-dataset.csv", stringsAsFactors = FALSE)
 
-unique(rafael$year)
+library(tidyverse)
 
- dim(rafael)
-# 
- names(rafael)
-# 
-#unique(rafael$year)
-# 
-# unique(rafael$position)
-# 
- rafael_up <- rafael %>% select(year, constituency_no, position, totalvotes, partynew, partypercent)
-# 
-# # summary(rafael_up
- 
- 
+library(data.table)
 
- dyn<- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/dyn_ae_ge.csv") 
- 
- 
-dyn <- dyn %>% group_by(election_type, year, constituency_no) %>% mutate(dyn_vs_nondyn = ifelse(any(dyn_cum_2==1) & any(dyn_cum_2==0),1,0), dyn_w_vs_nondyn = ifelse(dyn_vs_nondyn==1 & position==1 &dyn_cum_2==1,1,0))
-  
-  
- 
-# 
- # dyn %>% group_by(election_type, year, constituency_no) %>% mutate(dyn_vs_nondyn = ifelse(any(dyn_cum_2==1) & any(dyn_cum_2==0),1,0)) %>% 
- #   select(year, constituency_no, dyn_cum_2, dyn_vs_nondyn) %>% filter(year==2017)
- 
- dyn_ae <- dyn %>% filter(election_type=="AE" & position %in% c(1,2))
- 
-dyn_ae<- dyn_ae %>% mutate(margin_cat = cut(margin_percentage, breaks = c(0,1,3,5,7,10,15,20, Inf)))
-                  
-                  
- 
-dyn_rafael <- merge(dyn_ae, rafael_up, by = c("year", "constituency_no","position"), allow.cartesian = TRUE)
-
-
-head(rafael_up)
-
-dim(rafael_up)
-library(DescTools)
-
-
-gini <- dyn_rafael %>%group_by(year, constituency_no, dyn_w_vs_nondyn) %>% summarise(gini = Gini(partypercent, na.rm = TRUE)) 
-
-
-cv <- dyn_rafael %>%group_by(year, constituency_no) %>% summarise(cv =CoefVar(partypercent, na.rm = TRUE)) 
-
-dyn_cv <- inner_join(dyn_ae, cv, by =c( "year", "constituency_no"))
-
-dyn_rafael %>%  filter(margin_percentage<10)%>%group_by(year, constituency_no, dyn_cum) %>% summarise(gini = Gini(partypercent, na.rm = TRUE)) %>% group_by(dyn_w_vs_nondyn) %>% summarise(mean(gini, na.rm = TRUE)) %>% kable(digits = 2) 
-
-
-
-dyn_rafael %>% group_by(year, constituency_no, dyn_w_vs_nondyn)
-
-dyn_rafael %>%filter(year!= 2007 & margin_percentage<3) %>% group_by(year, constituency_no, dyn_w_vs_nondyn) %>% summarise(cv =CoefVar(partypercent, na.rm = TRUE)) %>% 
-   group_by(dyn_w_vs_nondyn) %>% summarise(mean(cv, na.rm = TRUE)) %>% kable(digits = 2) 
-  
-
-str(rafael_up)
-
-
-ggplot(gini, aes(gini, fill = factor(dyn_w_vs_nondyn)))+
-  geom_density()
-
-
-ggplot(cv, aes(cv, fill = factor(dyn_w_vs_nondyn)))+
-  geom_density()
 ```
 
 
 ```{r}
- rafael <- fread("D:/cpr/UP/up-dynasties/dyn_other_data/rafael-dataset.csv", stringsAsFactors = FALSE)
+# 
+#  rafael <- fread("D:/cpr/UP/up-dynasties/dyn_other_data/rafael-dataset.csv", stringsAsFactors = FALSE)
+# 
+# # unique(rafael$year)
+# # 
+# #  dim(rafael)
+# # # 
+# #  names(rafael)
+# # 
+# #unique(rafael$year)
+# # 
+# # unique(rafael$position)
+# # 
+#  rafael_up <- rafael %>% select(year, constituency_no, position, totalvotes, partynew, partypercent)
+# # 
+# # # summary(rafael_up
+#  
+#  
+# 
+#  dyn<- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/dyn_ae_ge.csv") 
+#  
+#  
+# dyn <- dyn %>% group_by(election_type, year, constituency_no) %>% mutate(dyn_vs_nondyn = ifelse(any(dyn_cum_2==1) & any(dyn_cum_2==0),1,0), dyn_w_vs_nondyn = ifelse(dyn_vs_nondyn==1 & position==1 &dyn_cum_2==1,1,0))
+#   
+#   
+#  
+# # 
+#  # dyn %>% group_by(election_type, year, constituency_no) %>% mutate(dyn_vs_nondyn = ifelse(any(dyn_cum_2==1) & any(dyn_cum_2==0),1,0)) %>% 
+#  #   select(year, constituency_no, dyn_cum_2, dyn_vs_nondyn) %>% filter(year==2017)
+#  
+#  dyn_ae <- dyn %>% filter(election_type=="AE" & position %in% c(1,2))
+#  
+# dyn_ae<- dyn_ae %>% mutate(margin_cat = cut(margin_percentage, breaks = c(0,1,3,5,7,10,15,20, Inf)))
+#                   
+#                   
+#  
+# dyn_rafael <- merge(dyn_ae, rafael_up, by = c("year", "constituency_no","position"), allow.cartesian = TRUE)
+# 
+# 
+# head(rafael_up)
+# 
+# dim(rafael_up)
+# library(DescTools)
+# 
+# 
+# gini <- dyn_rafael %>%group_by(year, constituency_no, dyn_w_vs_nondyn) %>% summarise(gini = Gini(partypercent, na.rm = TRUE)) 
+# 
+# 
+# cv <- dyn_rafael %>%group_by(year, constituency_no) %>% summarise(cv =CoefVar(partypercent, na.rm = TRUE)) 
+# 
+# dyn_cv <- inner_join(dyn_ae, cv, by =c( "year", "constituency_no"))
+# # 
+# # dyn_rafael %>%  filter(margin_percentage<10)%>%group_by(year, constituency_no, dyn_cum) %>% summarise(gini = Gini(partypercent, na.rm = TRUE)) %>% group_by(dyn_w_vs_nondyn) %>% summarise(mean(gini, na.rm = TRUE)) %>% kable(digits = 2) 
+# 
+# 
+# 
+# 
+# dyn_rafael %>%filter(year!= 2007 & margin_percentage<5) %>% group_by(year, constituency_no, dyn_w_vs_nondyn) %>% summarise(cv =CoefVar(partypercent, na.rm = TRUE)) %>% 
+#    group_by(dyn_w_vs_nondyn) %>% summarise(mean(cv, na.rm = TRUE)) %>% kable(digits = 2, caation = "CoV up at 5 PC", col.names= c("Who won election - : fam v/s non-fam","CoV")) %>% kable_styling(full_width = F)
+#   
+# # 
+# # str(rafael_up)
+# # 
+# # 
+# # ggplot(gini, aes(gini, fill = factor(dyn_w_vs_nondyn)))+
+# #   geom_density()
+# 
+# 
+# ggplot(cv, aes(cv, fill = factor(dyn_w_vs_nondyn)))+
+#   geom_density()
+```
+# RDD
+
+## UP 
 
 
- rafael_up <- rafael %>% select(year, constituency_no, position, totalvotes, partynew, partypercent)
+This is carried out using AE election booth level data from 2007, 2012, 2017 UP elections
 
+
+```{r}
+rafael <- fread("D:/cpr/UP/up-dynasties/dyn_other_data/rafael-dataset.csv", stringsAsFactors = FALSE)
+
+
+ rafael_up <- rafael %>% select(year, constituency_no, position, votes = totalvotes, partynew, partypercent)
  
  
+ rafael_up %>% group_by(year, constituency_no) %>% mutate(total_votes = sum(votes))
+ 
+```
 
- dyn<- fread("D:/cpr/UP/up-dynasties/dyn_other_data/dyn_ae_ge.csv") 
+
+```{r}
+
+ps_17 <- fread("D:/cpr/data/raphael/upvidhansabha2017.csv")
+
+```
+
+
+```{r}
+
+
+
+
+
+dyn<- fread("D:/cpr/UP/up-dynasties/dyn_other_data/dyn_ae_ge.csv") 
  
  
 dyn <- dyn %>% group_by(election_type, year, constituency_no) %>% mutate(dyn_vs_nondyn = ifelse(any(dyn_cum_2==1) & any(dyn_cum_2==0),1,0), dyn_w_vs_nondyn = ifelse(dyn_vs_nondyn==1 & position==1 &dyn_cum_2==1,1,0))
@@ -114,17 +146,52 @@ dyn_cv <- inner_join(dyn_ae, cv, by =c( "year", "constituency_no","position"))
   
 ```
 
+## Normal regression
 
+
+```{r results = "asis}
+
+dyn_cv$dynast <- dyn_cv$dyn_cum_2
+
+fit.up <- felm(cv~dynast+margin_percentage+vote_share_percentage+enop+incumbent+log(electors)+turnout_percentage|constituency_name+year|0|constituency_name, data = dyn_cv)
+
+
+
+
+addlines <- list(c('Fixed effects',"Year and Constituency"), c("Clustered SE" ,"Constituency"))
+
+
+
+
+
+ #drop <- c("caste_uc", "caste_obc", "caste_sc", "caste_muslim","(Intercept)","Constant","mov_assets_ratio:assets")
+
+stargazer(fit.up, type = "text", add.lines = addlines)
+
+```
 
 
 ```{r}
-
-rdd <- dyn_cv %>% filter(dyn_vs_nondyn==1&margin_percentage<=5 &position==1) %>% mutate(mv = ifelse(dyn_cum_2==0,-margin_percentage, margin_percentage)) %>% select(year,constituency_no,dyn_cum_2,margin_percentage,mv,cv)
+rdd <- dyn_cv%>% ungroup() %>% filter(dyn_vs_nondyn==1&margin_percentage<=5 &position%in% c(1,2)) %>%  %>% mutate(mv = ifelse(dyn_cum_2==0,-margin_percentage, margin_percentage)) %>% select(year,constituency_no,position,dyn_cum_2,margin_percentage,mv,cv)
 
 rdd <- rdd %>% rename(dynast = dyn_cum_2)
+```
 
 
+### close elections [5 PC] break up
 
+```{r}
+
+
+rdd %>% group_by(dynast) %>% summarise(count = n()) %>% kable() %>% kable_styling(full_width = F)
+
+
+```
+
+### rdd graph
+
+
+```{r}
 ggplot(rdd %>% filter(cv<2.5), aes(mv,cv , color = factor(dynast)))+
   geom_point()+
     geom_smooth(method="lm", se= FALSE)+
@@ -144,20 +211,27 @@ ggplot(rdd %>% filter(cv<2.5), aes(mv,cv , color = factor(dynast)))+
 ```{r}
 
 
-fit <- lm(cv~factor(dynast), data = subset(rdd %>% filter(cv<2.5)))
+fit <- felm(cv~factor(dynast)+ position, data = subset(rdd %>% filter(cv<2.5)))
 
 summary(fit)
 
-summary(felm(cv~dyn_cum_2+margin_percentage+vote_share_percentage+enop+incumbent+log(electors)+turnout_percentage)|district_name+year|0|district_name, data = dyn_cv)
+
+
 
 ```
+
+
+
 
 # GE
 
 ```{r}
 adr <- fread("D:/cpr/UP/up-dynasties/dyn_other_data/adr/adr_tcpd_09_14_19.csv")
+```
 
+## ge rdd
 
+```{r}
 mp <- adr %>% filter(Vote_Share_Percentage>=5)%>% select(c("State_Name", "Year", "Constituency_No", "Position", "Margin_Percentage"))
 
 mp$State_Name <- tolower(mp$State_Name)
@@ -171,9 +245,60 @@ names(mp) <- tolower(names(mp))
 ac_pc <- fread("D:/cpr/UP/up-dynasties/dyn_other_data/ac_pc/dyn_merged_ac_pc_10_05.csv")
 
 names(ac_pc) <- tolower(names(ac_pc))
+```
 
 
 
+
+
+
+```{r}
+
+# ge <- adr %>% filter(Position %in% c(1,2))%>% select(c("State_Name", "Year", "Constituency_No", "Position", "Margin_Percentage"))
+# 
+# ge$State_Name <- tolower(ge$State_Name)
+# 
+# names(ge) <- tolower(names(ge))
+
+
+
+
+ac_pc <- ac_pc %>% group_by(state_name,year_x, constituency_no) %>% mutate(dynast_1_2 =ifelse(any( position %in% c(1,2)) & any( dyn==1),1,0)) %>% ungroup()
+
+ac_pc %>%
+ group_by(state_name,year_x, constituency_no, ac_name) %>%
+ mutate(ac_id = cur_group_id())
+
+
+
+
+ac_pc_ge <- ac_pc %>% filter(position ==1)
+
+vs_2 <- ac_pc %>% filter(position ==2) %>% select(state_name,year_x, constituency_no,ac_name,vs_ac_2 =vs_ac, )
+
+ac_pc_ge <- inner_join(ac_pc_ge,vs_2, by = c("state_name","year_x", "constituency_no","ac_name"))
+
+
+ac_pc_ge <- ac_pc_ge %>% mutate(margin_ac = vs_ac-vs_ac_2)
+
+
+
+ggplot(ac_pc_ge %>% filter(dynast_1_2==1 ), aes(margin_ac, fill = factor(dyn)))+
+  geom_density()+
+  theme_bw()+
+  labs(subtitle = "Distribution of margin (%) within AC for PCs where dynast and non-dynast contested - ge 2009:19", x = "Margin(%)")+
+  scale_fill_discrete(labels = c("non-fam","fam"))+
+  scale_y_continuous(
+  labels = scales::number_format(accuracy = 0.01))+
+  theme(legend.position = "bottom",
+        legend.title = element_blank())
+
+```
+
+## ge cv
+
+
+```{r}
 cv <- ac_pc%>%group_by(state_name,year_x, constituency_no,position) %>% mutate(cv =CoefVar(`vs_ac`, na.rm = TRUE)) %>% distinct(state_name,year_x, constituency_no,position,.keep_all = TRUE) %>% select(state_name,year_x, constituency_no,position, cv, dyn,vote_share_percentage)
 
 cv <- cv %>% mutate(state_name=ifelse(state_name =="nct of delhi", "delhi", state_name))
@@ -220,7 +345,7 @@ ggplot(cv %>% filter(position %in% c(1,2)) , aes( vote_share_percentage,cv, colo
    #ylim(0,.35)+
   # xlim(0,90)+
   scale_color_discrete(labels = c("Non-fam","Family"))+
-  labs(x = "vote share", y = "CoV", title = "Coeficient of varation as a function of vote share - winner a& runner up")+
+  labs(x = "vote share", y = "CoV", title = "Coeficient of varation as a function of vote share - winner & runner up")+
   theme_minimal_hgrid()+
   theme(legend.position = "bottom",
         legend.title = element_blank())
@@ -289,21 +414,21 @@ hist(cv1$cv)
 
 cv2 <- cv %>% filter(cv<1  & !is.na(cv)) %>% ungroup()%>% select(cv, dynast)
 
-t.test( cv2$cv,cv2$dynast)
-
-res.ftest <- var.test(cv ~ dynast, data = cv)
-res.ftest
-
-
-cv2_winner <- cv %>% filter(cv<1  & !is.na(cv)& position %in% c(1,2)) %>% ungroup()%>% select(cv, dynast)
-
-res <- t.test(cv ~ dynast ,data = cv, var.equal = FALSE)
-
-res <- t.test(cv ~ dynast ,data = cv2_winner, var.equal = FALSE)
-
-
-
- wil <-  wilcox.test(cv ~ dynast ,data = cv2_winner, var.equal = FALSE)
+# t.test( cv2$cv,cv2$dynast)
+# 
+# res.ftest <- var.test(cv ~ dynast, data = cv)
+# res.ftest
+# 
+# 
+# cv2_winner <- cv %>% filter(cv<1  & !is.na(cv)& position %in% c(1,2)) %>% ungroup()%>% select(cv, dynast)
+# 
+# res <- t.test(cv ~ dynast ,data = cv, var.equal = FALSE)
+# 
+# res <- t.test(cv ~ dynast ,data = cv2_winner, var.equal = FALSE)
+# 
+# 
+# 
+#  wil <-  wilcox.test(cv ~ dynast ,data = cv2_winner, var.equal = FALSE)
     
 ```
 
@@ -317,7 +442,7 @@ res <- t.test(cv ~ dynast ,data = cv2_winner, var.equal = FALSE)
 cv_1 <- cv_1 %>% group_by(state_name, year_x, constituency_no) %>% mutate(dyn_vs_nondyn = ifelse(any(dyn==1) & any(dyn==0),1,0), dyn_w_vs_nondyn = ifelse(dyn==1 & position==1 &dyn==1,1,0))
 
 
-rdd <- cv_1  %>% filter(dyn_vs_nondyn==1&margin_percentage<=5 &position==1) %>% mutate(mv = ifelse(dyn==0,-margin_percentage, margin_percentage)) %>% select(state_name,year_x,constituency_no,dyn,margin_percentage,mv,cv)
+rdd <- cv_1  %>% filter(dyn_vs_nondyn==1&margin_percentage<=5 &position%in% c(1,2 )) %>% mutate(mv = ifelse(dyn==0,-margin_percentage, margin_percentage)) %>% select(state_name,year_x,constituency_no,dyn,margin_percentage,mv,cv)
 
 rdd <- rdd %>% rename(dynast = dyn)
 
@@ -337,15 +462,6 @@ ggplot(rdd , aes(mv,cv , color = factor(dynast)))+
 
 ```
 
-
-```{r}
-
-
-
-
-
-
-```
 
 
 

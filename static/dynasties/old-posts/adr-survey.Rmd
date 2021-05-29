@@ -143,7 +143,11 @@ names(composite_score)[1] <- "Issue"
 
 ### Importance table
 
-importance <- dynast_adr %>% group_by(dynast) %>% summarise(job_training = mean(`I: Training for jobs`, na.rm = TRUE), 
+importance <- dynast_adr %>% group_by(dynast) %>% summarise(mp_trust = mean(`I: Trustworthiness of MP`, na.rm = TRUE),
+                                                             mp_accessibility = mean(`I: Accessibility of MP`, na.rm = TRUE),
+                                                            
+  job_training = mean(`I: Training for jobs`, na.rm = TRUE), 
+  
                                                     road =mean(`I: Better roads`, na.rm = TRUE) ,
                                                     water = mean(`I: Drinking water`, na.rm = TRUE),
                                                     public_transport = mean(`I: Better public transport`, na.rm = TRUE),
@@ -174,7 +178,10 @@ importance <- importance %>% select(-variable)
 ### performance table
 
 
-performance <- dynast_adr %>% group_by(dynast) %>% summarise(job_training = mean(`P: Training for jobs`, na.rm = TRUE), 
+performance <- dynast_adr %>% group_by(dynast) %>% summarise( mp_trust = mean(`P: Trustworthiness of MP`, na.rm = TRUE),
+                                                               mp_accessibility = mean(`P: Accessibility of MP`, na.rm = TRUE),
+                                                              
+  job_training = mean(`P: Training for jobs`, na.rm = TRUE), 
                                               road =mean(`P: Better roads`, na.rm = TRUE) ,
                                               water = mean(`P: Drinking water`, na.rm = TRUE),
                                               public_transport = mean(`P: Better public transport`, na.rm = TRUE),
@@ -184,7 +191,7 @@ performance <- dynast_adr %>% group_by(dynast) %>% summarise(job_training = mean
                                               law_and_order = mean(`P: Better Law and Order / Policing`, na.rm = TRUE),
                                               women_empowerment = mean(`P: Empowerment of Women`, na.rm = TRUE),
                                               subsidized_food = mean(`P: Subsidized food distribution`, na.rm = TRUE),
-                                              mp_accessibility = mean(`P: Accessibility of MP`, na.rm = TRUE),
+                                             
                                               anti_terrorism = mean(`P: Anti-terrorism`, na.rm = TRUE),
                                               employement_opportunities = mean(`P: Better employment opportunities`, na.rm = TRUE),
                                               environmental_issues = mean(`P: Environmental issues`, na.rm = TRUE),
@@ -192,7 +199,7 @@ performance <- dynast_adr %>% group_by(dynast) %>% summarise(job_training = mean
                                               reservation = mean(`P: Reservation for jobs and education`, na.rm = TRUE),
                                               women_security = mean(`P: Security for women`, na.rm = TRUE),
                                               strong_defence = mean(`P: Strong Defence/Military`, na.rm = TRUE),
-                                              mp_trust = mean(`P: Trustworthiness of MP`, na.rm = TRUE)
+                                             
 )%>%
   melt(id = "dynast", measure = 2:20) %>% pivot_wider(names_from = "dynast", values_from = "value") 
 names(performance)[2:3] <- c("Performance - non-dynast", "Performance- dynast")
@@ -236,22 +243,36 @@ names(composite_score)  <- c("Measure", "Non_dynast", "Dynast")
 
 ```{r  importance chart, fig.width = 16/2, fig.height = 9/2}
 names(importance1)   <- c("Measure", "Non_dynast", "Dynast")
+
+
+df2 = tidyr::gather(importance1, group, value, -Measure)
   
-  ggplot(importance1, aes(y = reorder(Measure, Non_dynast),
-                          x = Non_dynast,
-                          xend = Dynast)) +  
-  geom_dumbbell(colour = "#dddddd",
+
+
+
+imp <- ggplot(importance1, aes(y =  Measure)) + 
+     geom_point(data = df2, aes(x = value, color = group), size = 3) +
+     geom_dumbbell(aes(x = Non_dynast, xend = Dynast), size=3, colour = "#dddddd",
                 size = 3,
                 colour_x = "#FAAB18",
                 colour_xend = "#1380A1") +
-  #bbc_style()+
-  theme_minimal_hgrid()+
-  labs(title = "Pressing issues of the constituents - 2009:2014",
-       subtitle = "Dynasts constiuencies v/s Non-dynasts constituencies",
-       x = "Rating (Out of 3)",
+  scale_y_discrete(limits = rev(levels(performance1$Measure)))+
+
+  labs(title = "Pressing issues of the constituents",
+      
+       x = "Rating",
        y = "",
        caption = "Source: ADR-Daksh Survey Report")+
-  scale_x_continuous(limits = c(2,2.5), breaks = c(2, 2.25, 2.5))
+    xlim(0,5)+
+ scale_color_manual(name = "", values = c("#1380A1","#FAAB18") )+
+  theme_minimal()+
+  theme(panel.grid.major.x= element_blank(),
+        panel.grid.minor.x = element_blank(), 
+        axis.line.x = element_line())
+
+
+
+
 # 
 #   finalise_plot(plot_name = imp_score,
 #               source = "Source: ADR-Daksh Survey Report",
@@ -259,6 +280,9 @@ names(importance1)   <- c("Measure", "Non_dynast", "Dynast")
 #               width_pixels = 640,
 #               height_pixels = 450)
 #
+
+
+
 ```
 
 
@@ -266,22 +290,43 @@ names(importance1)   <- c("Measure", "Non_dynast", "Dynast")
 
 ```{r  performance chart, fig.width = 16/2, fig.height = 9/2}
 names(performance1)   <- c("Measure", "Non_dynast", "Dynast")
-#perf_score <- 
-  ggplot(performance1, aes(y = reorder(Measure, Non_dynast),
-                          x = Non_dynast,
-                          xend = Dynast)) +  
-  geom_dumbbell(colour = "#dddddd",
+
+
+df2 = tidyr::gather(performance1, group, value, -Measure)
+
+
+  
+pf <- ggplot(performance1, aes(y =  Measure)) + 
+     geom_point(data = df2, aes(x = value, color = group), size = 3) +
+     geom_dumbbell(aes(x = Non_dynast, xend = Dynast), size=3, colour = "#dddddd",
                 size = 3,
                 colour_x = "#FAAB18",
                 colour_xend = "#1380A1") +
-  #bbc_style()+
-    theme_minimal_hgrid()+
-  labs(title = "Performance of MPs - 2009:2014",
-       subtitle = "Dynasts  v/s Non-dynasts  ",
-       x = "Rating (Out of 3)",
+  scale_y_discrete(limits = rev(levels(performance1$Measure)))+
+
+  labs(title = "Performance of MPs ",
+       
+       x = "Rating",
        y = "",
        caption = "Source: ADR-Daksh Survey Report")+
-  scale_x_continuous(limits = c(1.5,1.8), breaks = c(1.5,1.65, 1.8))
+    xlim(0,5)+
+ scale_color_manual(name = "", values = c("#1380A1","#FAAB18") )+
+  theme_minimal()+
+  theme(panel.grid.major.x= element_blank(),
+        panel.grid.minor.x = element_blank(), 
+        axis.line.x = element_line())
+
+
+
+
+ggpubr::ggarrange(imp, pf, 2, common.legend = TRUE)
+
+library(patchwork)
+combined <- imp / pf & theme(legend.position = "bottom")
+combined + plot_layout(guides = "collect")
+
+combined <- imp + pf + plot_layout(guides = "collect") & theme(legend.position = "bottom")
+  
   # finalise_plot(plot_name = perf_score,
   #             source = "Source: ADR-Daksh Survey Report",
   #             save_filepath = "ADR_performance_score.png",

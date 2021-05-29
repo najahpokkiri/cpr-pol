@@ -1,0 +1,154 @@
+
+
+
+```{r}
+
+library(tidyverse)
+
+library(data.table)
+
+library(kableExtra)
+
+```
+
+
+```{r}
+
+library(haven)
+
+nes <- haven::read_sav("D:/cpr/data/nes/NES_2014.sav")
+
+View(head(nes))
+
+dim(nes)
+
+names(nes)
+
+state <- read.csv("D:/cpr/data/nes/nes_state_id.csv")
+
+
+nes <- inner_join(state, nes, by = "state_id")
+
+dyn <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/tcpd_ge_09_14_19_dyn.csv")
+
+
+
+names(dyn)[1] <- "state_name"
+
+dyn$state_name <- tolower(dyn$state_name)
+
+names(dyn) <- tolower(names(dyn))
+
+ dynast_1_2 <- dyn_ge_adr %>% group_by(state_name,year, constituency_no) %>% mutate(dynast_1_2 =ifelse(any( position %in% c(1,2)) & any( dyn==1),1,0)) %>%ungroup()%>% select(dynast_1_2)
+
+dyn <- dyn %>% group_by(year, state_name, constituency_no) %>% mutate(dyn_n = ifelse(any(dyn== 1),0,1), dyn_y = ifelse(any(dyn==1),1,0), dyn_1_2 =ifelse(position %in% c(1,2) & any( dyn==1),1,0))
+
+dyn_14 <- dyn %>% filter(year ==2014& position ==1)
+
+
+nes_dyn <- inner_join(nes, dyn_14, by = c("state_name","pc_id"="constituency_no"))
+
+
+
+
+```
+
+
+
+
+```{r}
+
+
+
+dynast <- nes_dyn$dyn
+
+dynast_contestant <- ifelse(nes_dyn$dyn_y==1,1,0)
+
+no_dynast <- ifelse(nes_dyn$dyn_n==1,1,0)
+
+dynast_1_2 <- ifelse(nes_dyn$dyn_1_2==1,1,0)
+
+rally_meeting <- ifelse(nes_dyn$q6a==2,1,0)
+
+proces_natak <- ifelse(nes_dyn$q6b==2,1,0)
+  
+dd_canvas <- ifelse(nes_dyn$q6c==2,1,0)
+
+money_coll_cont <- ifelse(nes_dyn$q6d==2,1,0)
+  
+
+poster_leaflet <- ifelse(nes_dyn$q6e==2,1,0)
+
+party <- ifelse(nes_dyn$q12==2,1,0)
+
+cm <- ifelse(nes_dyn$q13a==2,1,0)
+
+rule_party <- ifelse(nes_dyn$q13b==2,1,0)
+
+pol_info <- ifelse(cm+rule_party>0,1,0)
+
+malpractise_increase <- ifelse(nes_dyn$q14==1,1,0)
+
+
+home_visit <- ifelse(nes_dyn$q25a==2,1,0)
+
+call <-  ifelse(nes_dyn$q25b==2,1,0)
+
+handout <-  ifelse(nes_dyn$q25c==2,1,0)
+
+drive_ps <-  ifelse(nes_dyn$q25d==2,1,0)
+
+
+df_6 <- tibble(dynast,rally_meeting, proces_natak, dd_canvas,money_coll_cont, poster_leaflet, pol_info, malpractise_increase,home_visit,call,handout, drive_ps, dynast_contestant, dynast_1_2, no_dynast)
+
+
+```
+
+
+
+
+
+
+```{r}
+df_6 %>% select(-c("dynast","dynast_1_2", "dynast_contestant"))%>% group_by(no_dynast) %>% summarise_all(mean) %>% data.table::melt(1:1) %>% pivot_wider(names_from = 1:1, values_from= value) %>% kable(col.names = c("indicator","PCs without any dynast","PCs with atleast one dynast"), digits =2) %>% kable_styling(full_width = F)
+
+
+df_6 %>% select(-c("dynast", "dynast_contestant"))%>% group_by(dynast_1_2) %>% summarise_all(mean) %>% data.table::melt(1:1) %>% pivot_wider(names_from = 1:1, values_from= value) %>% kable(col.names = c("indicator","Rest of the PCs","PCs with either 1st or 2nd dynast"), digits =2) %>% kable_styling(full_width = F)
+
+
+```
+
+
+```{r}
+
+library(kableExtra)
+
+df_6 %>% group_by(dynast) %>% summarise_all(mean) %>%data.table::melt(1:1) %>% pivot_wider(names_from = 1:1, values_from= value) %>% kable(col.names = c("indicator","non-fam","fam"), digits =2) %>% kable_styling(full_width = F)
+
+ggplot(df_6)
+
+```
+
+```{r}
+
+
+library(lfe)
+
+
+summary(lm(dynast ~rally_meeting+ proces_natak+ dd_canvas+money_coll_cont+ poster_leaflet+ pol_info+ malpractise_increase+home_visit+call+handout+ drive_ps, data = df_6))
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+

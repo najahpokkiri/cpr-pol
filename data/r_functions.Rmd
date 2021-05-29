@@ -1,0 +1,25 @@
+---
+title: "r_functions"
+author: "Najah"
+date: "28/05/2021"
+output: html_document
+---
+
+
+## paste to excel
+```{r}
+
+write.excel <- function(x,row.names=FALSE,col.names=TRUE,...) {
+  write.table(x,"clipboard",sep="\t",row.names=row.names,col.names=col.names,...)
+}
+
+write.excel(table)
+
+```
+
+## not include
+
+```{r}
+`%!in%` = Negate(`%in%`)
+```
+
