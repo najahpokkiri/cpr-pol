@@ -506,6 +506,9 @@ sub_region <- dyn_ae_ge_uniq$sub_region
 
 mem1_female <-  ifelse(dyn_ae_ge_uniq$mem1_gender=="F",1,0)
 
+
+dyn_1_2 <- ifelse(dyn_ae_ge_uniq$mem1_gender=="F",1,0)
+
   df1 <- tibble(dynast, caste_uc,caste_yadav,caste_non_yadav_obc , caste_dalit , caste_muslim ,minister_duration ,industry , edu, land ,linkage,linkage_down,linkage_up, post_90 ,n_elections_w ,district, decade, minister,constituency, sub_region, mem1_female, n_el_w)
 
   
@@ -531,17 +534,6 @@ fit.3 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit +
 fit.4 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister +industry +  land +edu  +n_elections_w +mem1_female|decade +sub_region|0|constituency, data = df1)
 
 
-## w/o fixed effects
-
-# 
-# fit.1 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister +industry +  land +edu  +n_elections_w+mem1_female  , data = df1)
-# 
-# fit.2 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister +industry +  land +edu  +n_elections_w +mem1_female, data = df1)
-# 
-# 
-# fit.3 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister +industry +  land +edu  +n_elections_w +mem1_female, data = df1)
-# 
-# fit.4 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister +industry +  land +edu  +n_elections_w +mem1_female, data = df1)
 
 
 
@@ -578,6 +570,8 @@ align=TRUE,  no.space=TRUE,add.lines=addlines, omit = drop)
 
 
 ```
+
+
 
 
 
@@ -877,6 +871,8 @@ sub_region <- dyn_ae_ge_09_19$sub_region
  
  mem1_female <-  ifelse( dyn_ae_ge_09_19$mem1_gender=="F",1,0)
  
+
+ 
 df <- tibble(dynast , caste_uc, caste_yadav,caste_non_yadav_obc , caste_dalit , caste_muslim ,minister ,industry , edu , land ,linkage, n_elections_w,  total_assets  , serious_crime, turncoat, winner, vote_share, year, election_type, sub_region, incumbent,constituency, mem1_female, n_el_w
              )
 
@@ -899,19 +895,6 @@ fit.3 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit +
 fit.4 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister +industry  + land +edu+ n_elections_w+mem1_female+  log(total_assets)  +  serious_crime+turncoat+incumbent|year+sub_region|0|constituency,data = subset(df %>% filter(total_assets>0)))
 
 
-## w/o constant variables
-# 
-# fit.1 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim + log(total_assets)  +  serious_crime+turncoat+incumbent|0|0|constituency, data = df)
-# 
-# 
-# fit.2<- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  + log(total_assets)  +  serious_crime+turncoat+incumbent|year|0|constituency, data = df)
-# 
-# 
-# fit.3 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  + log(total_assets)  +  serious_crime+turncoat+incumbent|sub_region|0|constituency, data = df)
-# 
-# 
-# 
-# fit.4 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim + log(total_assets)  +  serious_crime+turncoat+incumbent|year+sub_region|0|constituency, data = df)
 
 ```
 
@@ -941,6 +924,26 @@ align=TRUE,  no.space=TRUE,add.lines=addlines, omit = drop)
 
 
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ### GE 2009 :19 elections won
 
@@ -1298,6 +1301,8 @@ dyn_ae_adr <- dyn_ae_adr %>% rename ( dyn= dynast)
 dyn_ge <- readxl::read_xlsx("D:/cpr/UP/up-dynasties/dyn_other_data/UP_TCPD_GE_091419 _April_21.xlsx")
 
 
+
+
 dyn_ge <-dyn_ge %>% select( 3:5,15:15)
 
 
@@ -1307,7 +1312,7 @@ adr_ge <- fread("D:/cpr/UP/up-dynasties/dyn_other_data/adr_candidatelevel.csv")
 
 adr_ge <- adr_ge %>% select(-c(2:10))
 
-dyn_ge_adr <- inner_join(dyn_ge, adr, by = c("Year" = "year", "Constituency_No" ="constituency_no", "Position" = "position"))
+dyn_ge_adr <- inner_join(dyn_ge, adr_ge, by = c("Year" , "Constituency_No" , "Position" = "position"))
 
 names(dyn_ge_adr) <- tolower(names(dyn_ge_adr))
 
@@ -1337,7 +1342,6 @@ dyn_ae_ge_adr$total_assets <- as.numeric(dyn_ae_ge_adr$total_assets )
 
 
 
- 
 
 ```
 
@@ -1414,7 +1418,7 @@ winner <- ifelse(dyn_ae_ge_adr$position==1,1,0)
 age <- as.numeric(dyn_ae_ge_adr$age)
 
 
-reservation_SCST <- ifelse(dyn_ae_ge_adr$constituency_type == "GEN",0 ,1)
+reservation_SCST <- ifelse(dyn_ae_ge_adr$constituency_type== "GEN",0 ,1)
 
 turnout <- dyn_ae_ge_adr$turnout_percentage
 
@@ -1439,7 +1443,26 @@ turnout <- dyn_ae_ge_adr$turnout_percentage
 
 sub_region <- dyn_ae_ge_adr$sub_region
 
-df <- tibble(winner ,   incumbent,  turncoat , female , terms , dynast , assets  , serious_crime,  year,enop, reservation_SCST,recontest, constituency, party, vote_share_pc, inc, bjp, margin_percentage,  position, turnout, sub_region,immovable_assets,movable_assets,mov_assets_ratio , caste_uc, caste_sc, caste_muslim, caste_obc)
+
+last_year <- dyn_ae_ge_adr %>%filter(position ==1)%>%  
+  
+  mutate(year = year-5, lagged_turnout = turnout_percentage,lagged_margin = margin_percentage, value = NULL) %>% select(year, constituency_no, lagged_turnout, lagged_margin) %>% distinct(year, constituency_no, .keep_all = TRUE)
+
+dyn_ae_ge_adr <- dyn_ae_ge_adr %>% left_join(last_year, by = c("year", "constituency_no"))
+
+
+
+lagged_margin <- dyn_ae_ge_adr$lagged_margin
+
+lagged_turnout <- dyn_ae_ge_adr$lagged_turnout
+
+
+ dynast_1_2 <- dyn_ae_ge_adr %>% group_by(year, constituency_no) %>% mutate(dynast_1_2 =ifelse(any( position %in% c(1,2)) & any( dyn==1),1,0)) %>%ungroup()%>% select(dynast_1_2)
+
+df <- tibble(winner ,   incumbent,  turncoat , female , terms , dynast , assets  , serious_crime,  year,enop, reservation_SCST,recontest, constituency, party, vote_share_pc, inc, bjp, margin_percentage,  position, turnout, sub_region,immovable_assets,movable_assets,mov_assets_ratio , caste_uc, caste_sc, caste_muslim, caste_obc, dynast_1_2, lagged_margin, lagged_turnout)
+
+
+
 # # 
 # df_cor <- tibble(dynast ,   incumbent,  turncoat , terms , assets  , serious_crime,  enop,recontest, movable_assets, immovable_assets)
 # # 
@@ -1486,6 +1509,8 @@ fit.4 <- felm(dynast ~  log(assets)  +  serious_crime+turncoat+  terms +female +
 
 
 
+
+
 ```
 
 
@@ -1509,7 +1534,7 @@ cov_labels <- c( "Minister", "Economic diversification", "Land ownership", "Educ
 
 
 
-stargazer(fit.1,fit.2, fit.3,fit.4,dep.var.labels = c("Political Family"),title="Regression Results - AE-GE 09:19", type = "html",
+stargazer(fit.1,fit.2, fit.3,fit.4,dep.var.labels = c("Political Family"),title="Regression Results - AE-GE 09:19", type = "text",
 align=TRUE,  no.space=TRUE,add.lines=addlines, omit = drop)
 
 # 
@@ -1521,26 +1546,16 @@ align=TRUE,  no.space=TRUE,add.lines=addlines, omit = drop)
 
 
 
+# India
 
 
+```{r}
 
+ge0919 <- fread("D:/cpr/UP/up-dynasties/dyn_other_data/adr/adr_tcpd_09_14_19.csv")
 
+names(ge0919) <- tolower(names(ge0919))
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+```
 
 
 

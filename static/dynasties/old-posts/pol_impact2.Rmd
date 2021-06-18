@@ -1,0 +1,314 @@
+---
+title: "Political impacts of dynasts"
+author: ""
+date: "2021-04-18"
+params:
+  orig_date: "Original Publish Date: 18 April, 2020"
+  update_date: !r paste("Updated on:", format(Sys.time(), '%d %B, %Y'))
+output:
+  html_document:
+    theme: readable
+    toc: TRUE
+    toc_float: TRUE
+    toc_depth: 5
+    number_sections: false
+    fig_width: 6            
+editor_options: 
+  chunk_output_type: inline
+
+---
+
+---
+
+### Document History
+
+`r params$orig_date`
+
+`r params$update_date`
+
+---
+```{r set up, warning=FALSE, include=FALSE, message= FALSE}
+
+knitr::opts_chunk$set(cache = FALSE,echo = FALSE, message=FALSE, warning = FALSE)
+
+##fig.width = 16/2, fig.height = 9/2
+
+library(tidyverse)
+library(data.table)
+library(knitr)
+library(kableExtra)
+library(scales)
+library(gridExtra)
+`%!in%` = Negate(`%in%`)
+```
+
+
+
+## Night light
+
+
+
+
+```{r}
+
+nl <- read.csv("D:/projects & works/CPR_Verma/dyn_dev.csv")
+
+nl <- nl %>% filter(position==1) %>% select(year, ac07_id,term_growth, annual_growth)  
+
+dyn_all <- fread("D:/cpr/UP/up-dynasties/dyn_other_data/dyn_all.csv")
+
+dyn_ae <- dyn_all %>% filter(election_type=="AE" & position==1)
+
+nl_dyn <- left_join(nl, dyn_ae, by = c("year", "ac07_id" ="constituency_no"))
+
+names(nl_dyn)
+
+n_college <- read.csv("D:/cpr/data/controls/up_college_ctrl.csv")
+
+
+
+nl_dyn <- left_join(nl_dyn, n_college, by = c("year", "ac07_id" = "constituency_no"))
+
+```
+
+
+
+
+```{r}
+
+## variables from last year
+
+# fit <- lm(data= nl_dyn,term_growth ~ dyn_cum_2+ sex + constituency_type +turnout_percentage+ enop+ term_duration+factor(year) +caste_groups+incumbent+turnout_percentage+margin_percentage+no_terms+log(electors) +college_cumsum+ factor(ac07_id))
+# 
+# summary(fit)
+
+library(lfe)
+
+
+fit <- felm(term_growth ~ dyn_cum_2+ sex + constituency_type +turnout_percentage+ enop+ term_duration +incumbent+turnout_percentage+margin_percentage+no_terms+log(electors) |factor(year)+factor(district_name)|0|district_name, data = nl_dyn)
+
+summary(fit)
+
+
+```
+
+
+# Pol impact
+
+
+```{r}
+
+dyn_all <- fread("D:/cpr/UP/up-dynasties/dyn_other_data/dyn_all.csv")
+
+
+dyn_win <- dyn_all %>% filter(election_type %in% c("AE")&position ==1) %>% select(year, constituency_no, dyn_cum_2)
+
+
+year <- c(1974 ,1977, 1980 ,1985,1989, 1991, 1993, 1996, 2002, 2007, 2012)
+
+year_later <- c(1977, 1980,1985,1989,1991,1993,1996,2002,2007,2012,2017)
+
+years <- as.data.frame(cbind(year, year_later))
+
+dyn_later <- inner_join(years, dyn_win, by = "year") %>% rename(dyn_earlier = dyn_cum_2)
+
+dyn_ae <- dyn_all %>% filter(election_type =="AE" & position ==1)
+
+
+dyn_ae_later <- left_join(dyn_later, dyn_ae, by= c("year_later"= "year", "constituency_no"="constituency_no") )
+
+
+dyn_aeL
+
+
+```
+
+
+
+```{r}
+
+fit <- lm(data=dyn_ae_later,turnout_percentage~dyn_earlier + term_duration+factor(year))
+
+summary(fit)
+
+```
+
+## close elections UP
+
+```{r}
+
+
+
+dyn_ae %>%filter(position ==1) %>%  select(year, margin_percentage) %>% mutate(pc_1= ifelse(margin_percentage<=1,1,0),
+                                                                               pc_2= ifelse(margin_percentage<=2,1,0),
+                                                                               pc_3= ifelse(margin_percentage<=3,1,0),
+                                                                               pc_4= ifelse(margin_percentage<=4,1,0),
+                                                                               pc_5= ifelse(margin_percentage<=5,1,0),
+                                                                               pc_10= ifelse(margin_percentage<=10,1,0)) %>% group_by(year) %>% summarise(pc1 = sum(pc_1),pc2 = sum(pc_2),pc3 = sum(pc_3),pc4 = sum(pc_4),pc5 = sum(pc_5),pc10 = sum(pc_10)) %>% 
+  filter(year>1990)
+
+
+dyn_ae %>% filter(position==1 & margin_percentage <=1& year ==2012)
+
+```
+
+
+
+
+## nl control
+
+```{r}
+
+nl <- fread("D:/cpr/data/controls/nl_up_7.csv")
+
+# names(nl)
+#   
+#   
+# nl$constituency_no <- as.numeric(str_sub(nl$ï..ac07_id,-3))
+
+nl <- nl %>% mutate(constituency_no= as.numeric(str_sub(nl$ac07_id,-3))) %>% select(constituency_no,everything(), -ac07_id)
+
+##dyn_dev_nl <- merge(dyn_dev, nl, by = "constituency_no")
+
+names(nl)
+
+
+nl_h <- head(nl)
+nl_h
+
+
+
+nl_m <- melt.data.table(nl, id =c("constituency_no", "num_cells"), measure = patterns( total = "^total_light",max = "^max_light", cal = "^cal" ))
+
+
+
+nl_m$year <-  NA
+
+nl_m$year[nl_m$variable == 1] <- 1994
+nl_m$year[nl_m$variable == 2] <- 1995
+nl_m$year[nl_m$variable == 3] <- 1996
+nl_m$year[nl_m$variable == 4] <- 1997
+nl_m$year[nl_m$variable == 5] <- 1998
+nl_m$year[nl_m$variable == 6] <- 1999
+nl_m$year[nl_m$variable == 7] <- 2000
+nl_m$year[nl_m$variable == 8] <- 2001
+nl_m$year[nl_m$variable == 9] <- 2002
+nl_m$year[nl_m$variable == 10] <- 2003
+nl_m$year[nl_m$variable == 11] <- 2004
+
+nl_m$year[nl_m$variable == 12] <- 2005
+nl_m$year[nl_m$variable == 13] <- 2006
+nl_m$year[nl_m$variable == 14] <- 2007
+nl_m$year[nl_m$variable == 15] <- 2008
+nl_m$year[nl_m$variable == 16] <- 2009
+nl_m$year[nl_m$variable == 17] <- 2010
+nl_m$year[nl_m$variable == 18] <- 2011
+nl_m$year[nl_m$variable == 19] <- 2012
+nl_m$year[nl_m$variable == 20] <- 2013
+
+
+```
+
+
+
+
+```{r}
+
+## creating per unit variable
+
+
+
+nl_07 <- nl_m %>% mutate(nl_cell = cal/num_cells) %>% select(year, constituency_no, max_nl =max, nl_tot = total, nl_cell) %>% filter(year %in% c(1994,1996,2002,2007))
+
+```
+
+#### nl 2008
+
+```{r}
+
+nl <- fread("D:/cpr/data/controls/nl_up_8.csv")
+
+# names(nl)
+#   
+#   
+# nl$constituency_no <- as.numeric(str_sub(nl$ï..ac07_id,-3))
+
+nl <- nl %>% mutate(constituency_no= as.numeric(str_sub(nl$ac08_id,-3))) %>% select(constituency_no,everything(), -ac08_id)
+
+##dyn_dev_nl <- merge(dyn_dev, nl, by = "constituency_no")
+
+names(nl)
+
+
+nl_h <- head(nl)
+nl_h
+
+
+
+nl_m <- melt.data.table(nl, id =c("constituency_no", "num_cells"), measure = patterns( total = "^total_light",max = "^max_light", cal = "^cal" ))
+
+
+
+nl_m$year <-  NA
+
+nl_m$year[nl_m$variable == 1] <- 1994
+nl_m$year[nl_m$variable == 2] <- 1995
+nl_m$year[nl_m$variable == 3] <- 1996
+nl_m$year[nl_m$variable == 4] <- 1997
+nl_m$year[nl_m$variable == 5] <- 1998
+nl_m$year[nl_m$variable == 6] <- 1999
+nl_m$year[nl_m$variable == 7] <- 2000
+nl_m$year[nl_m$variable == 8] <- 2001
+nl_m$year[nl_m$variable == 9] <- 2002
+nl_m$year[nl_m$variable == 10] <- 2003
+nl_m$year[nl_m$variable == 11] <- 2004
+
+nl_m$year[nl_m$variable == 12] <- 2005
+nl_m$year[nl_m$variable == 13] <- 2006
+nl_m$year[nl_m$variable == 14] <- 2007
+nl_m$year[nl_m$variable == 15] <- 2008
+nl_m$year[nl_m$variable == 16] <- 2009
+nl_m$year[nl_m$variable == 17] <- 2010
+nl_m$year[nl_m$variable == 18] <- 2011
+nl_m$year[nl_m$variable == 19] <- 2012
+nl_m$year[nl_m$variable == 20] <- 2013
+
+
+```
+
+
+
+
+```{r}
+
+## creating per unit variable
+
+
+
+nl_08 <- nl_m %>% mutate(nl_cell = cal/num_cells) %>% select(year, constituency_no, max_nl =max, nl_tot = total, nl_cell) %>% filter(year %in% c(2012,2013))
+
+```
+
+
+
+```{r}
+
+nl_all <-  data.table::rbindlist(list(nl_07, nl_08))
+
+nl_all <- nl_all  %>% mutate(year = ifelse(year==1994,1993,ifelse(year==2013,2012,year)))
+
+write.csv(nl_all, "D:/cpr/data/controls/nl_94_13.csv")
+
+```
+
+
+
+
+
+
+
+
+
+
+
+

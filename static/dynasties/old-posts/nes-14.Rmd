@@ -29,24 +29,63 @@ state <- read.csv("D:/cpr/data/nes/nes_state_id.csv")
 
 nes <- inner_join(state, nes, by = "state_id")
 
-dyn <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/tcpd_ge_09_14_19_dyn.csv")
+adr <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/adr/adr_tcpd_09_14_19.csv")
 
 
 
-names(dyn)[1] <- "state_name"
 
-dyn$state_name <- tolower(dyn$state_name)
 
-names(dyn) <- tolower(names(dyn))
+names(adr) <- tolower(names(adr))
 
- dynast_1_2 <- dyn_ge_adr %>% group_by(state_name,year, constituency_no) %>% mutate(dynast_1_2 =ifelse(any( position %in% c(1,2)) & any( dyn==1),1,0)) %>%ungroup()%>% select(dynast_1_2)
+adr$state_name <- tolower(adr$state_name)
 
-dyn <- dyn %>% group_by(year, state_name, constituency_no) %>% mutate(dyn_n = ifelse(any(dyn== 1),0,1), dyn_y = ifelse(any(dyn==1),1,0), dyn_1_2 =ifelse(position %in% c(1,2) & any( dyn==1),1,0))
+
+dyn_info <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/tcpd_ge_09_14_19_dyn.csv")
+
+names(dyn_info)[1] <- "state_name"
+
+
+
+
+names(dyn_info) <- tolower(names(dyn_info))
+
+dyn_info$state_name <- tolower(dyn_info$state_name)
+
+dyn_info <- dyn_info %>%filter(year ==2014) %>% select(state_name,year,constituency_no,position, dyn)
+
+dyn <- left_join(dyn_info, adr, by = c("state_name","year","constituency_no","position"))
+
+# 
+#  dynast_1_2 <- dyn_ge_adr %>% group_by(state_name,year, constituency_no) %>% mutate(dynast_1_2 =ifelse(any( position %in% c(1,2)) & any( dyn==1),1,0)) %>%ungroup()%>% select(dynast_1_2)
+
+dyn <- dyn %>% group_by(year, state_name, constituency_no) %>% mutate(dyn_n = ifelse(any(dyn== 1),0,1), dyn_any = ifelse(any(dyn==1),1,0), dyn_1_2 =ifelse(position %in% c(1,2) & any( dyn==1),1,0)) %>% ungroup()
+
+dyn$total_assets <- as.numeric(dyn$total_assets)
+
+
+dyn  <- dyn %>% mutate(edu =as.numeric( case_when(education %in% c("5th Pass","10th Pass","8th Pass") ~"10",
+                                  education == "12th Pass" ~"12",
+                                  education %in% c("Graduate","Graduate Professional") ~"14",
+                                  education == "Post Graduate" ~ "16",
+                                  education == "Doctorate" ~"18",
+                                  education %in% c("Literate","Others") ~"5",
+                                  TRUE ~ "0"
+
+
+                                  )))
+
+dyn <- dyn %>%group_by(constituency_no) %>% mutate(n_cand_median_assets = sum(ifelse(total_assets>median(total_assets, na.rm =TRUE),1,0)),
+                                            n_criminal = sum(ifelse(serious_crime>0,1,0)),
+                                            avg_edu = mean(edu, na.rm = TRUE)
+                                            )
+
+
+
 
 dyn_14 <- dyn %>% filter(year ==2014& position ==1)
 
 
-nes_dyn <- inner_join(nes, dyn_14, by = c("state_name","pc_id"="constituency_no"))
+
 
 
 
@@ -58,56 +97,77 @@ nes_dyn <- inner_join(nes, dyn_14, by = c("state_name","pc_id"="constituency_no"
 
 ```{r}
 
+```
 
 
-dynast <- nes_dyn$dyn
+```{r}
+rally_meeting <- ifelse(nes$q6a==2,1,0)
 
-dynast_contestant <- ifelse(nes_dyn$dyn_y==1,1,0)
-
-no_dynast <- ifelse(nes_dyn$dyn_n==1,1,0)
-
-dynast_1_2 <- ifelse(nes_dyn$dyn_1_2==1,1,0)
-
-rally_meeting <- ifelse(nes_dyn$q6a==2,1,0)
-
-proces_natak <- ifelse(nes_dyn$q6b==2,1,0)
+proces_natak <- ifelse(nes$q6b==2,1,0)
   
-dd_canvas <- ifelse(nes_dyn$q6c==2,1,0)
+dd_canvas <- ifelse(nes$q6c==2,1,0)
 
-money_coll_cont <- ifelse(nes_dyn$q6d==2,1,0)
+money_coll_cont <- ifelse(nes$q6d==2,1,0)
   
 
-poster_leaflet <- ifelse(nes_dyn$q6e==2,1,0)
+poster_leaflet <- ifelse(nes$q6e==2,1,0)
 
-party <- ifelse(nes_dyn$q12==2,1,0)
+party <- ifelse(nes$q12==2,1,0)
 
-cm <- ifelse(nes_dyn$q13a==2,1,0)
+cm <- ifelse(nes$q13a==2,1,0)
 
-rule_party <- ifelse(nes_dyn$q13b==2,1,0)
+rule_party <- ifelse(nes$q13b==2,1,0)
 
 pol_info <- ifelse(cm+rule_party>0,1,0)
 
-malpractise_increase <- ifelse(nes_dyn$q14==1,1,0)
+malpractise_increase <- ifelse(nes$q14==1,1,0)
 
 
-home_visit <- ifelse(nes_dyn$q25a==2,1,0)
+home_visit <- ifelse(nes$q25a==2,1,0)
 
-call <-  ifelse(nes_dyn$q25b==2,1,0)
+call <-  ifelse(nes$q25b==2,1,0)
 
-handout <-  ifelse(nes_dyn$q25c==2,1,0)
+handout <-  ifelse(nes$q25c==2,1,0)
 
-drive_ps <-  ifelse(nes_dyn$q25d==2,1,0)
+drive_ps <-  ifelse(nes$q25d==2,1,0)
+
+constituency <- nes$pc_id
+
+state <- nes$state_name
+
+participation <- rally_meeting + proces_natak + dd_canvas + money_coll_cont+ poster_leaflet
+
+mobilisation <- home_visit+call+handout+ drive_ps
 
 
-df_6 <- tibble(dynast,rally_meeting, proces_natak, dd_canvas,money_coll_cont, poster_leaflet, pol_info, malpractise_increase,home_visit,call,handout, drive_ps, dynast_contestant, dynast_1_2, no_dynast)
 
+nes_df <- tibble( mobilisation, participation,  constituency, state)
+
+nes_ac <- nes_df %>% group_by(state, constituency) %>% summarise(avg_mobilisation = mean(mobilisation),
+                                                       avg_participation = mean(participation))
+
+
+
+nes_dyn <- anti_join(nes_ac, dyn_14, by = c("state"="state_name","constituency"="constituency_no"))
+
+# nes %>% summarise(n_distinct(state_id, pc_id))
+
+# dyn_info  %>% filter(Year ==2014 &`ï..State_Name` == "Andhra Pradesh" )
+# 
+# adr %>% filter(year == 2014 &state_name == "andhra pradesh" & constituency_no
+#                %in% c(19,26))
+# 
+# dyn %>% filter(state_name == "andhra pradesh" & constituency_no
+#                %in% c(19,26))
 
 ```
 
 
+```{r}
 
+df_6 <- tibble(dynast,rally_meeting, proces_natak, dd_canvas,money_coll_cont, poster_leaflet, pol_info, malpractise_increase,home_visit,call,handout, drive_ps, dynast_contestant, dynast_1_2, no_dynast )
 
-
+```
 
 ```{r}
 df_6 %>% select(-c("dynast","dynast_1_2", "dynast_contestant"))%>% group_by(no_dynast) %>% summarise_all(mean) %>% data.table::melt(1:1) %>% pivot_wider(names_from = 1:1, values_from= value) %>% kable(col.names = c("indicator","PCs without any dynast","PCs with atleast one dynast"), digits =2) %>% kable_styling(full_width = F)
@@ -115,6 +175,10 @@ df_6 %>% select(-c("dynast","dynast_1_2", "dynast_contestant"))%>% group_by(no_d
 
 df_6 %>% select(-c("dynast", "dynast_contestant"))%>% group_by(dynast_1_2) %>% summarise_all(mean) %>% data.table::melt(1:1) %>% pivot_wider(names_from = 1:1, values_from= value) %>% kable(col.names = c("indicator","Rest of the PCs","PCs with either 1st or 2nd dynast"), digits =2) %>% kable_styling(full_width = F)
 
+
+corr <- cor(df_6)
+
+corrplot::corrplot(corr, method = "circle")
 
 ```
 
@@ -125,8 +189,86 @@ library(kableExtra)
 
 df_6 %>% group_by(dynast) %>% summarise_all(mean) %>%data.table::melt(1:1) %>% pivot_wider(names_from = 1:1, values_from= value) %>% kable(col.names = c("indicator","non-fam","fam"), digits =2) %>% kable_styling(full_width = F)
 
-ggplot(df_6)
 
+
+```
+
+```{r}
+
+pc_no <- nes_dyn$pc_id
+
+dynast_winner <- nes_dyn$dyn
+
+dynast_contestant <- ifelse(nes_dyn$dyn_any==1,1,0)
+
+no_dynast <- ifelse(nes_dyn$dyn_n==1,1,0)
+
+dynast_1_2 <- ifelse(nes_dyn$dyn_1_2==1,1,0)
+
+
+
+cand_mean_edu <- nes_dyn$avg_edu
+
+cand_assets_median <- nes_dyn$n_cand_median_assets
+
+
+cand_criminals <- nes_dyn$n_criminal
+
+turnout <- nes_dyn$turnout_percentage
+
+enop <- nes_dyn$enop
+
+reserved <- ifelse(nes_dyn$constituency_type=="GEN",0,1)
+
+constituency <- as.numeric(nes_dyn$constituency)
+
+state <- nes_dyn$state
+
+avg_mobilisation <- nes_dyn$avg_mobilisation
+
+avg_participation <- nes_dyn$avg_participation
+```
+
+
+```{r}
+
+
+
+
+df <- tibble(dynast_winner,dynast_1_2, dynast_contestant, cand_mean_edu, cand_assets_median, cand_criminals, turnout, enop, reserved, constituency, state,avg_participation,avg_mobilisation)
+
+
+
+```
+
+## regressions
+
+```{r}
+
+
+library(lfe)
+
+
+addlines <- list(c('Fixed effects', "Constituency",  "Constituency"), c("Clustered SE" ,"Constituency + State","Constituency + State"))
+
+nes.mob <- felm(avg_mobilisation ~dynast_contestant+ enop + reserved + cand_assets_median + cand_criminals + cand_mean_edu| state|0|state +constituency, data = df )
+
+nes.part <- felm(avg_participation ~dynast_contestant+  enop + reserved + cand_assets_median + cand_criminals + cand_mean_edu| state|0|state +constituency, psdef=FALSE,data = df )
+
+stargazer(nes.mob,nes.part, type = "text",align=TRUE,  no.space=TRUE,add.lines=addlines)
+
+```
+
+
+
+
+
+```{r results= "asis"}
+
+
+
+stargazer(fit.1,fit.2, fit.3,fit.4,dep.var.labels = c("Political Family"),title="Regression Results - AE-GE 09:19", type = "text",
+align=TRUE,  no.space=TRUE,add.lines=addlines, omit = drop)
 ```
 
 ```{r}
@@ -139,8 +281,13 @@ summary(lm(dynast ~rally_meeting+ proces_natak+ dd_canvas+money_coll_cont+ poste
 
 ```
 
+## ac level
 
+```{r}
 
+df
+
+```
 
 
 

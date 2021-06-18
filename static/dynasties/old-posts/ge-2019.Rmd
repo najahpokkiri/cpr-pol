@@ -735,7 +735,7 @@ stargazer(fit.1, fit.2, fit.3, fit.4, fit.5,type = "html", add.lines = addlines,
 ```
 
 
-#### Margin{.tabset}
+#### Margin {.tabset}
 
 ##### Margin
 

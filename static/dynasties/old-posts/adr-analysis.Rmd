@@ -130,15 +130,15 @@ dyn_ae_adr$total_assets <- as.numeric(dyn_ae_adr$total_assets )
 #                                   ))
 
 
-caste_uc <- ifelse(dyn_ae_ge_adr$caste_rec%in% c("IC","UC","uc"),1,0)
+caste_uc <- ifelse(dyn_ae_adr$caste_rec%in% c("IC","UC","uc"),1,0)
 
-caste_muslim <- as.numeric(case_when(grepl( "muslim",dyn_ae_ge_adr$caste_rec, ignore.case = TRUE) ~"1",
+caste_muslim <- as.numeric(case_when(grepl( "muslim",dyn_ae_adr$caste_rec, ignore.case = TRUE) ~"1",
                    TRUE ~"0"))
 
 
-caste_sc <- ifelse(dyn_ae_ge_adr$caste_rec %in% c("SC","ST"),1,0)
+caste_sc <- ifelse(dyn_ae_adr$caste_rec %in% c("SC","ST"),1,0)
 
-caste_obc<- ifelse(dyn_ae_ge_adr$caste_rec =="OBC",1,0)
+caste_obc<- ifelse(dyn_ae_adr$caste_rec =="OBC",1,0)
 
 
 dyn_ae_adr <- dyn_ae_adr %>% mutate(caste_groups = case_when(caste_rec%in% c("IC","UC","uc")~"Upper Caste",
@@ -164,27 +164,28 @@ dyn_ae_adr <- dyn_ae_adr %>% mutate(caste_groups = case_when(caste_rec%in% c("IC
 dyn_ae_adr$caste_groups <- factor(dyn_ae_adr$caste_groups, levels = c("Upper Caste","OBC"  ,"Dalit" ,"Muslim","Others" ) )
 
 
-ggplot(dyn_ae_adr %>% filter(total_assets<1000000000), aes(caste_groups, total_assets))+
+assets_caste <- ggplot(dyn_ae_adr %>% filter(total_assets<1000000000), aes(caste_groups, total_assets))+
   geom_boxplot()+
   facet_wrap(~year)+
+  labs(x = "", y = "Total assets", x = "",fill = "",title = "Asset") +
     scale_y_log10(
     breaks = scales::trans_breaks("log10", function(x) 10^x),
-    labels = scales::trans_format("log10", scales::math_format(10^.x))
-  )
-  # scale_y_log10() 
+    labels = scales::trans_format("log10", scales::math_format(10^.x)))+
+  theme_bw()
+# scale_y_log10() 
   # scale_y_continuous(trans = 'log10')+
   # annotation_logticks(sides="lb")
   # scale_y_continuous(labels = unit_format(unit = "M", scale = 1e-6))
 
 
 
-
-ggplot(dyn_ae_adr %>% filter(total_assets<100000000), aes(caste_groups, total_assets))+
-  geom_boxplot()+
-  facet_wrap(~year)+
-  scale_y_continuous(labels = unit_format(unit = "M", scale = 1e-6))
-
-
+# 
+# ggplot(dyn_ae_adr %>% filter(total_assets<100000000), aes(caste_groups, total_assets))+
+#   geom_boxplot()+
+#   facet_wrap(~year)+
+#   scale_y_continuous(labels = unit_format(unit = "M", scale = 1e-6))
+# 
+# 
 
 
 ```
@@ -243,7 +244,7 @@ df_stack <- dyn_ae_adr %>% group_by(year,caste_groups) %>% summarise(total = n()
 
 
 
-  ggplot(df_stack,aes(variable, value, fill = caste_groups,label = ifelse(value>.05,round(value,2),"")))+
+  criminal_caste_stacked <- ggplot(df_stack,aes(variable, value, fill = caste_groups,label = ifelse(value>.05,round(value,2),"")))+
    geom_bar(stat="identity", position = "stack")+
     geom_text(size = 2.5, position = position_stack(vjust = 0.5))+ 
     facet_wrap(~year)+
@@ -251,7 +252,7 @@ df_stack <- dyn_ae_adr %>% group_by(year,caste_groups) %>% summarise(total = n()
   colorspace::scale_fill_discrete_qualitative(palette= "dark3" )+
     theme_minimal()+
       
-    labs(title = "Caste composition",x = "", y = "Proportion", fill = "") +
+    labs(x = "", y = "Proportion", fill = "", title = "Criminality") +
     theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
   theme(plot.background = element_blank(),
         axis.line.x = element_line(),
@@ -261,28 +262,16 @@ df_stack <- dyn_ae_adr %>% group_by(year,caste_groups) %>% summarise(total = n()
         legend.position = "bottom"
   ) 
 
+
   
- scale_x_discrete(labels = c("All candidates","Winners","Candidates \n w/ 1 case","Candidates \n  w/ 2 case","Candidate \n w/ 2+ case"))+ggplot(df_stack, aes(variable, value, fill = caste_groups))+
-  geom_bar(position = "fill",stat = "identity")+
-   scale_y_continuous(labels = scales::percent_format())+
-  geom_text(aes(label = paste0(value*100,"%")), 
-            position = position_stack(vjust = 0.5), size = 2)
-  colorspace::scale_fill_discrete_qualitative(palette ="dark3")+
-  scale_x_discrete(labels = c("All candidates","Winners","Candidates \n w/ 1 case","Candidates \n  w/ 2 case","Candidate \n w/ 2+ case"))+
-  labs(x = "", y = "Proportion of caste groups ", subtitle = "Caste composition")+
-     theme_minimal()+
-      
-    labs(title = "Caste composition among families wrt success  ",x = "", y = "Proportion", fill = "") +
-    theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
-  theme(plot.background = element_blank(),
-        axis.line.x = element_line(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        axis.text.y = element_blank()
-  ) 
-  
+ggpubr::ggarrange(criminal_caste_stacked, assets_caste)
   
 
+cowplot::plot_grid(criminal_caste_stacked, assets_caste,align = "hv")
+
+library(patchwork)
+
+assets_caste + criminal_caste_stacked 
 
 ```
 

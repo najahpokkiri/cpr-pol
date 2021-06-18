@@ -120,7 +120,79 @@ cen_11_up <- cen_11 %>% filter(State_Name == "UTTAR PRADESH")
 ```
 
 
+# Post 2009
 
+
+```{r}
+
+dyn_09 <- dyn %>% filter(election_type =="AE" & year>= 2009 )
+
+
+  
+  table(is.na(dyn_09$dist_cen_21))
+  
+  
+dyn_dist_09 <- dyn_09 %>% group_by(dist_cen_21, year) %>% summarise( dyn_win = sum(dyn_cum_2[position ==1]), dyn_cont = sum(dyn_cum_2), total_cont = n(), dyn_cont_prop = dyn_cont/total_cont , dyn_win_prop = dyn_win/total_cont)
+
+
+dyn_dist_11 <- dyn_09 %>% group_by(dist_cen_11) %>% summarise( dyn_win = sum(dyn_cum_2[position ==1]), dyn_cont = sum(dyn_cum_2), total_cont = n(), dyn_cont_prop = dyn_cont/total_cont , dyn_win_prop = dyn_win/total_cont) %>% filter(!is.na(dist_cen_11))
+
+
+up_cen <- read.csv("D:/cpr/data/census/up_cen_dist.csv")
+
+dyn_cenhh_11 <- inner_join(dyn_dist_11, up_cenhh, by = c("dist_cen_11"= "District"))
+
+
+
+up_cen_pp <- read.csv("D:/cpr/data/census/up_cen_11_pp.csv")
+
+names(up_cen_pp) <- tolower(names(up_cen_pp))
+
+dyn_cenpp_11 <- inner_join(dyn_dist_11, up_cen_pp, by = c("dist_cen_11"= "ï..district.code"))
+
+```
+
+
+```{r}
+
+
+library(lfe)
+
+## hh
+
+fit <- felm(dyn_cont_prop ~ TOT_HL_P + P_SC+P_LIT +TOT_WORK_P +MARGWORK_P+MAINWORK_F, data = dyn_cen_11)
+
+
+summary(fit)
+
+
+
+
+## pp
+
+
+
+
+
+fit <- felm(dyn_cont_prop ~ population + literate +sc+marginal_workers +cultivator_workers+main_workers+agricultural_workers+ muslims+lpg_or_png_households+housholds_with_electric_lighting +households_with_internet+urban_households+primary_education+households_with_telephone_mobile_phone_mobile_only+having_latrine_facility_within_the_premises_total_households, data = dyn_cenpp_11)
+
+
+summary(fit)
+
+# 
+# fe2 <- fepois(n_colleges ~ dyn+ incumbent+margin_percentage+ turnout_percentage+enop+ +constituency_type+log(electors)+no_terms+log(total_assets)+serious_crime+non_serious_crime+edu+ position |year_el + State, data = dyn_in_college_adr,cluster = ~ State)
+# 
+# #summary(fe2)
+# 
+# etable(fe2) %>% kable(caption = "India colleges - Poisson model") %>% kable_styling(full_width = F)
+
+
+
+```
+
+
+
+# Pre 2009
 
 
 

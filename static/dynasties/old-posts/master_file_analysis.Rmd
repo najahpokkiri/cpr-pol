@@ -99,7 +99,6 @@ dyn <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/dyn_all.csv")
 
 
 
-
 ```{r setup for description}
 
 
@@ -358,6 +357,9 @@ dyn_all_uniq_fam %>% group_by(level) %>% summarise(count = n()) %>% arrange(-cou
 ---
 
 
+
+
+
 ## Past elections
 
 
@@ -403,6 +405,71 @@ ggplot(ae_dyn, aes(x = factor(year), y=prop, group = 1))+
 ```
 
 ---
+
+## Entry year
+
+```{r}
+
+dyn_ae_ge %>%group_by(family_id) %>% filter(dyn_cum_2==1) %>% arrange(year) %>% filter(year == min(year)) %>% distinct(family_id, .keep_all = TRUE) %>% select(family_id, year) %>% group_by(year) %>% summarise(count = n()) %>% mutate(cumsum= cumsum(count), pc = cumsum/322*100) %>% 
+  ggplot(aes(year, pc))+
+  geom_area(fill = "steelblue")+
+  theme_bw()+
+  #scale_y_continuous(labels = percent, limits = c(0,1))
+  labs(title = "Cumulative formation of families ",x = "Year", y = "Families (%)")
+    #theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
+  #colorspace::scale_fill_discrete_qualitative(palette= "dark3" )+
+  # theme(legend.position = "bottom",
+  # plot.background = element_blank(),
+  #       axis.line = element_line(),
+  #       panel.grid.major = element_blank(),
+  #       panel.grid.minor = element_blank(),
+  #       #axis.text.y = element_blank()
+  # )
+  # 
+  #dyn_ae_ge %>%group_by(family_id) %>% filter(dyn_cum_2==1) %>% arrange(year) %>% filter(year == min(year)) %>% distinct(family_id, .keep_all = TRUE) %>% select(family_id, year) 
+  
+   dyn_ae_ge %>%group_by(family_id) %>% filter(dyn_cum_2==1) %>% arrange(year) %>% filter(year == min(year)) %>% distinct(family_id, .keep_all = TRUE) %>% select(family_id, year) %>% 
+   ggplot(aes(year))+
+   geom_density()
+
+
+
+```
+
+## caste
+
+```{r}
+
+dyn_ae_ge <- dyn_ae_ge %>% mutate(year_cat =case_when(year>= 1970 & year<= 1988 ~"77-88",
+                        year>=1989& year<= 1999 ~"89-99",
+                        year>= 2000 & year<= 2008 ~"00-08",
+                        year>= 2009 & year<= 2019 ~"09-19",
+                        TRUE~ "?"))
+
+
+dyn_ae_ge$year_cat <- factor(dyn_ae_ge$year_cat , levels = c("77-88", "89-99", "00-08", "09-19"))
+
+dyn_ae_ge$caste_groups <- factor(dyn_ae_ge$caste_groups, levels = c("Upper Caste","Yadav","Non-Yadav OBC","Dalit" , "Muslim"  ,"Others" ))
+
+dyn_ae_ge %>%group_by(family_id) %>% filter(dyn_cum_2==1) %>% arrange(year) %>% filter(year == min(year)) %>% distinct(family_id, .keep_all = TRUE) %>% select(family_id, year_cat, caste_groups) %>%  group_by(year_cat, caste_groups)%>% summarise(count = n()) %>%arrange(-year_cat) %>% group_by(caste_groups) %>% mutate(cumsum = cumsum(count)) %>% group_by(year_cat) %>% mutate(sum = sum(cumsum) , pc = cumsum/sum*100) %>%
+  ggplot(aes(year_cat, pc, fill = caste_groups,label = round(pc,0)))+
+  geom_bar(position = "stack", stat = "identity")+
+     geom_text(size = 2.5, position = position_stack(vjust = 0.5))+
+
+    colorspace::scale_fill_discrete_qualitative(palette= "dark3" )+
+
+    theme_minimal()+
+labs(title = "Cumulative caste composition of families  ",x = "", y = "", fill = "Caste Groups")+
+    theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
+  theme(plot.background = element_blank(),
+        axis.line.x = element_line(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.y = element_blank()
+  ) 
+
+
+```
 
 
 ## AE GE election contest {.tabset .tabset-fade .tabset-pills}
@@ -466,6 +533,20 @@ dyn_ae_ge %>% filter(position ==1& year != 1974) %>% group_by(year, election_typ
 
 
 ---
+
+## Election contested
+
+
+```{r}
+dyn_ae_ge <- dyn_ae_ge %>% group_by(uniq_id) %>% mutate(n_el_w_ind = length(election_id[position==1]), n_el_c_ind  =n() ) %>% ungroup(uniq_id)
+
+count_tab <- dyn_ae_ge %>% group_by(uniq_id) %>%filter(dyn_tot_2 != 1) %>%   summarise(n_el_w_ind = length(election_id[position==1]), n_el_c_ind  =n() ) %>% distinct(uniq_id, .keep_all = TRUE)
+
+table(count_tab$n_el_c_ind)
+
+table(count_tab$n_el_w_ind)
+```
+
 
 ## Elections won{.tabset .tabset-fade .tabset-pills}
 
@@ -696,24 +777,22 @@ Here life span is calculated by computing the difference in entry year of the fa
 
 
 
+# 
+# medx <- median(dyn_ae_ge_fam_uniq$life_span)
+# meanx <- mean(dyn_ae_ge_fam_uniq$life_span)
 
-medx <- median(dyn_ae_ge_fam_uniq$life_span)
-meanx <- mean(dyn_ae_ge_fam_uniq$life_span)
-
-ggplot(dyn_ae_ge_fam_uniq)+
+fam_ls_w <- ggplot(dyn_ae_ge_fam_uniq)+
   geom_density(aes(x=life_span+5, y = ..density..),size = 1, color = 'black')+
-  geom_vline(xintercept = medx, color = "red")+
-  geom_vline(xintercept = meanx, color = "blue")+
-  geom_text(aes(x=(medx+3), label="Median", y=0.01), colour="red", size =4, angle = 90 )+
-  geom_text(aes(x=(meanx -3), label="Mean", y = 0.01), colour="blue", size = 4, angle = 90)+
-  theme_minimal_hgrid()+
-  labs(title = "Life span of Families", x= "Year", y = "Density")+
-  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
-        plot.background = element_blank(),
-        plot.title = element_text(hjust = 0.5, size = 20, face = "bold", family = "serif",
-                                  margin = margin(t = 0, r = 0, b = 20, l = 0)))
+  geom_vline(aes(xintercept = median(dyn_ae_ge_fam_uniq$life_span), color = "median"))+
+  geom_vline(aes(xintercept = mean(dyn_ae_ge_fam_uniq$life_span), color = "mean",show.legend  =TRUE))+
+   scale_color_manual(name = "statistics", values = c(median = "red", mean = "blue"))+
+  scale_y_continuous(
+  labels = scales::number_format(accuracy = 0.01))+
+ theme_bw()+
+  labs(subtitle = "Life span of families", x= "", y = "Density")
 
 
+fam_ls_w
 
 ```
 
@@ -751,20 +830,17 @@ dyn_ae_ge_fam_uniq$life_span_1 <- dyn_ae_ge_fam_uniq$max_yr- dyn_ae_ge_fam_uniq$
 medx <- median(dyn_ae_ge_fam_uniq$life_span_1)
 meanx <- mean(dyn_ae_ge_fam_uniq$life_span_1)
 
-ggplot(dyn_ae_ge_fam_uniq)+
+fam_ls_wo <- ggplot(dyn_ae_ge_fam_uniq)+
   geom_density(aes(x=life_span_1, y = ..density..),size = 1, color = 'black')+
-  geom_vline(xintercept = medx, color = "red")+
-  geom_vline(xintercept = meanx, color = "blue")+
-  geom_text(aes(x=(medx+3), label="Median", y=0.01), colour="red", size =4, angle = 90 )+
-  geom_text(aes(x=(meanx -3), label="Mean", y = 0.01), colour="blue", size = 4, angle = 90)+
-  theme_minimal_hgrid()+
-  labs(title = "Life span of Families", x= "Year", y = "Density")+
-  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
-        plot.background = element_blank(),
-        plot.title = element_text(hjust = 0.5, size = 20, face = "bold", family = "serif",
-                                  margin = margin(t = 0, r = 0, b = 20, l = 0)))
+  geom_vline(aes(xintercept =median(dyn_ae_ge_fam_uniq$life_span_1) , color = "median"))+
+  geom_vline(aes(xintercept = mean(dyn_ae_ge_fam_uniq$life_span_1), color = "mean",show.legend  =TRUE))+
+   scale_color_manual(name = "statistics", values = c(median = "red", mean = "blue"))+
+  scale_y_continuous(
+  labels = scales::number_format(accuracy = 0.01))+
+ theme_bw()+
+  labs(subtitle = "family life span after second member", x= "Years", y = "")
 
-
+fam_ls_wo
 
 ```
 
@@ -775,7 +851,6 @@ ggplot(dyn_ae_ge_fam_uniq)+
 
 
 ```{r}
-
 dyn_non_fam_w <- dyn_ae_ge %>% filter(dyn_tot_2==0 &n_elections_won >=1)%>% group_by(family_id) %>% summarise(max_year = max(year), min_year = min(year)) 
 
 
@@ -786,30 +861,83 @@ dyn_non_fam_w <- cbind(dyn_non_fam_w,term_duration )
 
 dyn_non_fam_w <- dyn_non_fam_w%>% mutate(life_span = max_year-min_year+term_duration) 
 
-medx <- median(dyn_non_fam_w$life_span)
-meanx <- mean(dyn_non_fam_w$life_span)
+# medx <- median(dyn_non_fam_w$life_span)
+# meanx <- mean(dyn_non_fam_w$life_span)
 
 # dyn_non_fam_w %>% filter(life_span>42)
 
 
-ggplot(dyn_non_fam_w)+
+ind_ls <-  ggplot(dyn_non_fam_w)+
   geom_density(aes(x=life_span, y = ..density..),size = 1, color = 'black')+
-  geom_vline(xintercept = medx, color = "red")+
+   labs(subtitle = "Life span of non-families", x= "", y = "")+
   xlim(0,50)+
   ylim(0,.1)+
-  geom_vline(xintercept = meanx, color = "blue")+
-  geom_text(aes(x=(medx+.75), label="Median", y=0.01), colour="red", size =4, angle = 90 )+
-  geom_text(aes(x=(meanx -.75), label="Mean", y = 0.01), colour="blue", size = 4, angle = 90)+
-  theme_minimal_hgrid()+
-  labs(title = "Life span of non-families", x= "Year", y = "Density")+
-  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
-        plot.background = element_blank(),
-        #plot.title = element_text(hjust = 0.5, size = 20, face = "bold", family = "serif",
-                                 # margin = margin(t = 0, r = 0, b = 20, l = 0))
-        )
+  geom_vline(aes(xintercept = median(dyn_non_fam_w$life_span), color = "median"))+
+  geom_vline(aes(xintercept = mean(dyn_non_fam_w$life_span), color = "mean",show.legend  =TRUE))+
+   scale_color_manual(name = "statistics", values = c(median = "red", mean = "blue"))+
+  scale_y_continuous(
+  labels = scales::number_format(accuracy = 0.01))+
+ theme_bw()
+ 
 
+
+
+  ind_ls
 
 # dyn_ae_ge %>% filter(family_id =="f0004207")
+```
+
+```{r}
+
+
+fam_tab <- rbind(dyn_ae_ge_fam %>% group_by(family_id) %>% filter( dyn_cum_2==0 ) %>% slice(which.max(year))%>% select(year, family_id,dyn_cum_2),
+
+dyn_ae_ge_fam %>% group_by(family_id) %>% filter(dyn_cum_2==1  ) %>% slice(which.min(year)) %>% select(year, family_id,dyn_cum_2 )) %>%pivot_wider(values_from = year, names_from= dyn_cum_2) 
+
+
+# 
+# fam_tab %>% mutate(entry = `0`==`1`) %>% group_by(entry) %>% tally()
+
+
+# mean(fam_tab$diff)
+
+fam_tab <- fam_tab %>% mutate(`0` = ifelse(is.na(`0`), `1`,`0`), diff = `1`-`0`)
+# 
+# fam_tab %>% filter(diff==0)
+
+# fam_tab %>% mutate(lag_group = cut(breaks= c()))
+
+
+# medx <- median(fam_tab$diff)
+# meanx <- mean(fam_tab$diff)
+# 
+
+
+year_entry <- ggplot(fam_tab %>% filter(diff>=0), aes(diff))+
+  geom_density(size = 1, color = 'black')+
+  labs(subtitle = "Years to second member entry", x = "Years",y = "Density")+
+  #xlim(0,45)
+  #ylim(.0,.15)+
+  geom_vline(aes(xintercept =  median(fam_tab$diff), color = "median"))+
+  geom_vline(aes(xintercept =  mean(fam_tab$diff), color = "mean",show.legend  =TRUE))+
+   scale_color_manual(name = "statistics", values = c(median = "red", mean = "blue"))+
+  scale_y_continuous(
+  labels = scales::number_format(accuracy = 0.01))+
+ theme_bw()
+year_entry
+
+# dyn_ae_ge_fam %>% select(year, dyn_cum_2, relative_id) %>% group_by(family_id, year) %>% summarise(val = sum(dyn_cum_2)/n())
+```
+
+```{r}
+
+
+library(ggpubr)
+
+figure <- ggpubr::ggarrange(fam_ls_w, ind_ls, year_entry,fam_ls_wo ,common.legend = TRUE, legend = "bottom", align = "hv")
+
+
+
 
 ```
 

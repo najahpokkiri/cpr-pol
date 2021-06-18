@@ -1,30 +1,99 @@
 ---
-title: "Untitled"
-author: "Najah"
+title: "Political impact"
+author: "N"
 date: "30/04/2021"
-output: html_document
+params:
+  orig_date: "Original Publish Date: 30th April, 2021"
+  update_date: !r paste("Updated on:", format(Sys.time(), '%d %B, %Y'))
+
+output:
+  html_document:
+    theme: flatly
+    toc: TRUE
+    toc_float: TRUE
+    toc_depth: 5
+    number_sections: TRUE
+    fig_width: 6            
+editor_options: 
+  chunk_output_type: inline
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+
+
+#### Document History
+
+`r params$orig_date`
+
+`r params$update_date`
+
+---
+
+```{r set up, warning=FALSE, include=FALSE, message= FALSE}
+knitr::opts_chunk$set(cache = FALSE ,echo = FALSE, message=FALSE, warning = FALSE,fig.width = 16/2, fig.height = 9/2)
+library(tidyverse)
+library(data.table)
+library(knitr)
+library(kableExtra)
+library(scales)
+library(gridExtra)
+library(stargazer)
+library(ggbump)
+library(cowplot)
+library(colorspace)
+library(ggthemes)
+library(DT)
+library(widgetframe)
+`%!in%` = Negate(`%in%`)
+select <- dplyr::select
 ```
 
-## R Markdown
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+```{r}
+dyn <- fread("D:/cpr/UP/up-dynasties/dyn_other_data/dyn_ae_ge.csv")
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
-```{r cars}
-summary(cars)
+dyn_win <- dyn %>% filter(election_type %in% c("AE")&position ==1& year>= 1974 & year<=2007) %>% select(year, constituency_no, dyn_cum_2, margin_percentage, turnout_percentage)
+
+
+year_before <- c(1974 ,1977, 1980 ,1985,1989, 1991, 1993, 1996, 2002, 2007, 2012)
+
+year_next <- c(1977, 1980,1985,1989,1991,1993,1996,2002,2007,2012,2017)
+
+years <- as.data.frame(cbind(year_before, year_next))
+
+dyn_next <- inner_join(years, dyn_win, by =c( "year_before"="year")) %>% rename(dyn_before = dyn_cum_2, margin_percentage_before = margin_percentage, turnout_percentage_before = turnout_percentage)
+
+dyn_ae <- dyn %>% filter(election_type =="AE" & position ==1& year>= 1974 & year<=2007)
+
+
+dyn_ae_next<- left_join(dyn_next, dyn_ae, by= c("year_next"= "year", "constituency_no"="constituency_no") )
+
+
+dyn_ae_next <- dyn_ae_next %>% mutate(turnout_percentage_change = turnout_percentage - turnout_percentage_before, turnout_percentage_change_relative = (turnout_percentage - turnout_percentage_before)/turnout_percentage_before)
+
+
+
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
+```{r}
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+library(lfe)
+
+fit <- felm(turnout_percentage_change_rate~dyn_before + term_duration + margin_percentage + enop + constituency_type+margin_percentage_before+log(electors) |year_next+constituency_no|0|constituency_no,data=dyn_ae_next)
+
+
+summary(fit)
+
+
+fit <- felm(margin_percentage~dyn_before + term_duration + enop +turnout_percentage_change+ constituency_type+log(electors) |year_next+constituency_no|0|constituency_no,data=dyn_ae_next)
+
+
+summary(fit)
+
+
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+

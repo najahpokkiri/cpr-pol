@@ -1,0 +1,377 @@
+---
+title: "Untitled"
+author: "Najah"
+date: "07/06/2021"
+output: html_document
+---
+
+
+```{r set up, warning=FALSE, include=FALSE, message= FALSE}
+
+knitr::opts_chunk$set(cache = FALSE,echo = FALSE, message=FALSE, warning = FALSE,fig.width = 16/2, fig.height = 9/2)
+
+
+library(tidyverse)
+library(data.table)
+library(knitr)
+library(kableExtra)
+library(scales)
+library(gridExtra)
+library(stargazer)
+library(ggbump)
+`%!in%` = Negate(`%in%`)
+
+select <- dplyr::select
+```
+
+```{r}
+
+
+dyn_ae_ge <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/dyn_ae_ge.csv")
+
+
+dyn_ae <-dyn_ae_ge %>% filter(election_type=="AE") %>%  mutate(year_delim = ifelse(year<2002,1996,2002))
+
+
+
+
+ac_delim <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/ac_no_delim.csv")
+
+names(ac_delim)[1] <- "year_delim"
+
+
+dyn_ae <- left_join(dyn_ae, ac_delim, by = c("year_delim", "constituency_no"))
+
+dyn_ae <- dyn_ae %>%  group_by(year, ac_no_76) %>% mutate(dynast_1_2 =ifelse(any( position %in% c(1,2)) & any( dyn_cum_2==1),1,0)) %>%ungroup()
+
+
+
+
+
+#dyn_ae <- dyn_ae %>% filter( year<2009 & position==1)
+
+dyn_ae %>% group_by(ac_no_76) %>% summarise(n())
+
+
+dyn_dur <- dyn_ae %>% filter(year<2009& position==1) %>% group_by(ac_no_76, ac_no_01) %>% summarise(dyn_dur_w=sum(term_duration[dyn_cum_2==1]), dyn_dur_c = sum(term_duration[dynast_1_2==1]), dyn_rule_w = ifelse(dyn_dur_w>0,1,0), dyn_rule_c = ifelse(dyn_dur_c>0,1,0))
+
+## dynast atleast won in 148 constituencies
+
+# cats
+
+
+#white for nil, less than 5, 6-15, 15+
+  
+  
+dyn_dur <- dyn_dur%>% mutate(dyn_dur_w_cat = case_when(dyn_dur_w ==0~"0",
+                                             dyn_dur_w >0 &dyn_dur_w <=5 ~"<=5",
+                                             dyn_dur_w >= 6 & dyn_dur_w<=15 ~"6-15",
+                                             dyn_dur_w>15~"15+" ,
+                                             TRUE~"X"))
+
+dyn_ae %>% filter(constituency_name=="SAHARANPUR" & position == 1) %>% select(year, candidate_name, first_member = patriarch_name, family_cumulative = dyn_cum_2,family_final= dyn_tot_2)
+
+
+dyn_dur$dyn_dur_w_cat <- factor(dyn_dur$dyn_dur_w_cat, levels = c("0","<=5","6-15","15+"))
+
+```
+
+
+## Maps
+
+
+```{r}
+library(sf)
+
+shp_eci <- st_read("D:/cpr/data/shape-file/AC_Data/States/S24/S24_AC.shp")
+
+# ac_shp <- st_read("D:/cpr/data/shape-file/ac_predelim/AC_All_Final.shp")
+# 
+# 
+# ac_shp_up <- ac_shp %>% filter(State == "Uttar Pradesh")
+
+ac_shp_fam <- inner_join(shp_eci, dyn_dur, by = c("AC_NO" = "ac_no_01"))
+
+ggplot(ac_shp_fam)+
+  geom_sf(aes(fill =factor(dyn_rule_w)))+
+  scale_fill_manual(values = c("white","steelblue"))+
+  
+  cowplot::theme_map()+
+  labs(title = "Constituencies ruled by dynasts",subtitle = "1971- 2008")+
+  theme(legend.position = "none")
+
+
+# ggplot(ac_shp_fam)+
+#   geom_sf(aes(fill =factor(dyn_rule_c)))+
+#   scale_fill_manual(values = c("white","steelblue"))+
+# 
+#   cowplot::theme_map()+
+#   labs(title = "Constituencies contested by dynasts",subtitle = "1971- 2008")+
+#   theme(legend.position = "none")
+```
+
+
+```{r}
+
+
+ggplot(ac_shp_fam)+
+  geom_sf(aes(fill =dyn_dur_w_cat))+
+  scale_fill_manual(values = c("white","green","blue","red"))+
+  cowplot::theme_map()+
+  labs(title = "Years ruled by dynasts in UP constituencies ",subtitle = "1971- 2008", fill ="")
+
+red blue green white
+
+
+
+```
+
+
+
+
+### district
+
+```{r}
+
+
+dist_shp <-  st_read("D:/cpr/data/shape-file/maps-master/Districts/Census_2011/2011_Dist.shp") %>% filter(ST_NM == "Uttar Pradesh")
+
+
+dist_fam <- dyn_ae_ge %>% filter(election_type=="AE" & dyn_cum_2==1 & year<2009) %>% arrange(-year) %>% distinct(family_id, .keep_all = TRUE) %>% group_by(dist_cen_11) %>% summarise(n_fam=n())
+
+
+
+dist_shp_fam <- left_join(dist_shp, dist_fam, by =c("censuscode"="dist_cen_11"))
+
+
+
+dist_shp_fam %>% filter(!is.na(n_fam)) %>% ggplot()+geom_sf()+stat_sf_coordinates(aes(size=n_fam))+
+  cowplot::theme_map()+
+   labs(title = "Families in UP districts ",subtitle = "2001 census", fill ="Number of families")
+  geom_sf(aes(size=n_fam))
+  
+  
+
+ggplot(dist_shp_fam)+
+  geom_sf(aes(fill =n_fam ))+
+  cowplot::theme_map()+
+  colorspace::scale_fill_continuous_sequential(palette ="Viridis",na.value="white")+
+   labs(title = "Families in UP districts ",subtitle = "2011 census", fill ="Number of families")
+  
+  scale_fill_gradientn()
+
+
+  colorspace::hcl_palettes(plot = TRUE)
+
+```
+
+
+## census
+
+
+```{r}
+
+cen <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/up_cen_07.csv")
+
+up_data <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/francesca/UPdata.csv")
+
+fr_lit <- up_data %>% select(AC_no_2001,fr_71= Plit71,fr_01 =Plit)
+
+cen$constituency_no <- as.numeric(str_sub(cen$ï..ac07_id,-3))
+
+
+cen_lit <- cen %>%
+  select(constituency_no,pc91_pca_p_lit,pc01_pca_p_lit,pc11_pca_p_lit,pc91_pca_tot_p,pc01_pca_tot_p,pc11_pca_tot_p) %>% 
+  mutate(pc_91_lit_pc = pc91_pca_p_lit/pc91_pca_tot_p,
+         pc_01_lit_pc = pc01_pca_p_lit/pc01_pca_tot_p,
+         pc_11_lit_pc = pc11_pca_p_lit/pc11_pca_tot_p) %>% 
+  select(constituency_no,pc_91_lit_pc,pc_01_lit_pc,pc_11_lit_pc)
+
+lit_1 <- left_join(fr_lit, cen_lit, by = c("AC_no_2001"="constituency_no"))
+
+cen_91 <- fread("D:/cpr/data/census/census_1991_ac.csv") %>% select(ac_code_predelim, lit_91_jatin= lit_pc)
+
+lit_2 <- left_join(cen_91,lit_1, by = c("ac_code_predelim"="AC_no_2001"))
+
+
+write.csv(lit_2, "D:/cpr/data/census/lit_all.csv")
+
+
+cen_ac <- cen %>%group_by(constituency_no)%>%
+  summarise(ppn = pc11_pca_tot_p_r /10000 ,
+            ppn_td= pc11_pca_tot_p_u/10000,
+              lit_pc = (pc11_pca_p_lit / pc11_pca_tot_p)*100,                                        
+              pri_sch = pc11_vd_p_sch/ppn,
+              middle_sch = pc11_vd_m_sch/ppn,
+              sec_sch = pc11_vd_s_sch/ppn, 
+              ssec_sch =pc11_vd_s_s_sch /ppn ,
+              college = pc11_vd_college /ppn,
+              road = pc11_vd_tar_road,
+              power_sum = pc11_vd_power_all_sum/ppn,
+              power_win = pc11_vd_power_all_win/ppn,
+              pri_sch_td = pc11_td_p_sch/ppn,
+              middle_sch_td = pc11_td_m_sch/ppn,
+              sec_sch_td = pc11_td_s_sch/ppn, 
+              ssec_sch_td =pc11_td_s_s_sch /ppn ,
+              college_td = pc11_td_college /ppn
+              )
+
+
+
+
+dyn_cen <- inner_join(dyn_dur, cen_ac, by = c("ac_no_01"= "constituency_no"))
+
+table(dyn_cen$dyn_rule_w) ## 127 dyn ACs
+
+
+names(cen)
+
+
+dyn_cen %>% group_by(dyn_rule_w) %>% summarise(across(5:19, mean, na.rm = TRUE)) 
+
+dyn_cen$grp <- as.character(dyn_cen$dyn_rule_w )
+
+
+
+
+grp <- dyn_cen$grp
+
+dyn_cen%>%ungroup()%>% 
+  select(c(10:23))%>% 
+  map_df(~ broom::tidy(t.test(. ~ grp)), .id = 'var')%>% 
+  mutate(pval_sig = ifelse(`p.value`<.1, "yes","no")) %>% 
+  select(var,,mean_nondyn = estimate1,mean_dyn = estimate2, pval_sig) %>% 
+ kable(caption = "t.test of 2011 census variables among dynast and non-dynast ACs") %>% kable_styling(full_width = F)
+
+t.test(dyn_cen$lit_pc, as.numeric(dyn_cen$dyn_rule_w))
+
+
+
+
+
+```
+
+
+
+
+
+```{r}
+
+
+dyn_cen_fam <- dyn_cen %>% filter(dyn_dur_w>0)
+
+
+
+ggplot(dyn_cen_fam, aes(dyn_dur_w))+
+  #geom_density()
+  geom_histogram(binwidth = 5, color = "steelblue")
+
+
+## median - 6
+
+## mean -8.1
+
+dyn_cen_fam$dyn_rule_w_lg <- ifelse(dyn_cen_fam$dyn_dur_w>median(dyn_cen_fam$dyn_dur_w),1,0)
+
+dyn_cen_fam %>% group_by(dyn_rule_w_lg) %>% summarise(across(5:18, mean, na.rm = TRUE)) 
+
+
+dyn_cen_fam$grp <- as.character(dyn_cen_fam$dyn_rule_w_lg )
+
+
+
+
+grp <- dyn_cen_fam$grp
+
+ dyn_cen_fam%>% ungroup() %>% 
+  select(c(10:23)) %>% 
+  map_df(~ broom::tidy(t.test(. ~ grp)), .id = 'var') %>% 
+   mutate(pval_sig = ifelse(`p.value`<.1, "yes","no")) %>% 
+  select(var,mean_short = estimate1,mean_persistent = estimate2, pval_sig) %>% 
+ kable(caption = "t.test of 2011 census variables among ACs where dynasts are persistent and not") %>% kable_styling(full_width = F)
+
+ kable() %>% kable_styling(full_width = F)
+
+t.test(dyn_cen_fam$pri_sch, as.numeric(dyn_cen_fam$dyn_rule_w))
+
+t.test(dyn_cen$pri_sch~as.character(dyn_cen$dyn_rule_w))$p.value
+
+```
+
+
+# Night lights
+
+
+```{r}
+
+nl <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/nl_up_07.csv")
+
+names(nl)[1] <- "ac_no_01"
+
+nl_11 <- nl %>% select(ac_no_01, num_cells, cal_total_light_cal2011) %>% mutate(nl_per_cell_11 = cal_total_light_cal2011/num_cells,
+                                                                                ac_no_01 = as.numeric(str_sub(ac_no_01, -3))) 
+
+
+
+dyn_dur
+
+
+dyn_dur_nl <- inner_join(dyn_dur, nl_11,by = "ac_no_01")
+
+dyn_dur_nl %>% group_by(dyn_rule_w) %>% summarise(mean = mean(nl_per_cell_11))
+
+
+tt <- t.test(nl_per_cell_11 ~ factor(dyn_rule_w), dyn_dur_nl)
+
+
+tidy(tt) %>% mutate(pval_sig = ifelse(`p.value`<.1, "yes","no"),var = "night light per cell") %>% 
+   
+  select(var,mean_non_dynast = estimate1,mean_dynast = estimate2, pval_sig) %>% 
+ kable(caption = "t.test of 2011 night among dynast and non-dynast ACs") %>% kable_styling(full_width = F)
+
+```
+
+
+
+
+
+```{r}
+
+dyn_nl_fam <- dyn_dur_nl %>% filter(dyn_dur_w>0)
+
+
+
+
+
+## median - 6
+
+## mean -8.1
+
+dyn_nl_fam$dyn_rule_w_lg <- ifelse(dyn_nl_fam$dyn_dur_w>median(dyn_nl_fam$dyn_dur_w),1,0)
+
+dyn_nl_fam %>% group_by(dyn_rule_w_lg) %>% summarise(mean = mean(nl_per_cell_11))
+
+
+tt <- t.test(nl_per_cell_11 ~ factor(dyn_rule_w_lg), dyn_nl_fam)
+
+
+tidy(tt) %>% mutate(pval_sig = ifelse(`p.value`<.1, "yes","no"),var = "night light per cell") %>% 
+  select(var,short_dynasticism = estimate1,Perisistent_dynasticism = estimate2, pval_sig) %>% 
+ kable(caption = "t.test of 2011 night among ACs where dynasts are persistent and not") %>% kable_styling(full_width = F)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

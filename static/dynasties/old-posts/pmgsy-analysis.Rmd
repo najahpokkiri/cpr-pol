@@ -42,14 +42,26 @@ library(gridExtra)
 `%!in%` = Negate(`%in%`)
 ```
 
+# PMGSY
 
-# PMGSY roads {.tabset}
+## summary stats {.tabset}
+
+
 
 ```{r file config}
 
 
 dyn <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/dyn_ae_ge.csv")
+
+
+dyn$dyn_cum_2_text <- ifelse(dyn$dyn_cum_2 ==0, "Non-family","Family")
 pmgsy<- fread("D:/cpr/UP/up-dynasties/dyn_other_data/pmgsy.csv", stringsAsFactors = FALSE)
+
+pmgsy <- pmgsy %>% mutate(year_ac = as.numeric(case_when(`Sanctioned Year` %in% c("2007 - 2008", "2009 - 2010","2010 - 2011","2011 - 2012")~"2007",
+                                     `Sanctioned Year` =="2012 - 2013" ~"2012",
+                                     `Sanctioned Year` =="2018 - 2019" ~"2017",
+                                     TRUE~ "Others"
+                                     )))
 
 #glimpse(pmgsy)
 
@@ -60,10 +72,14 @@ pmgsy <- pmgsy %>% select(year, everything())%>%  select(- c(2:78)) %>% rename(c
 
 dyn_ge_w <- dyn %>% filter(election_type == "GE" & position==1)
 
+dyn_ae_w <- dyn %>% filter(election_type == "AE" & position==1)
 
-dyn_pmgsy <- merge(dyn_ge_w,pmgsy, by = c("year", "constituency_no"))
+dyn_ae_pmgsy <- inner_join(pmgsy, dyn_ae_w, by = c("year_ac" = "year", "ac no" = "constituency_no"))
 
-dyn_pmgsy$dyn_cum_2_text <- ifelse(dyn_pmgsy$dyn_cum_2 ==0, "Non-family","Family")
+
+dyn_pmgsy <- merge(pmgsy,dyn_ge_w, by = c("year", "constituency_no"))
+
+#dyn_pmgsy$dyn_cum_2_text <- ifelse(dyn_pmgsy$dyn_cum_2 ==0, "Non-family","Family")
 
 #summary(pwd)
 
@@ -80,7 +96,7 @@ dyn_pmgsy  <- dyn_pmgsy %>% group_by(fam_rel_id_uniq) %>% mutate(n_proj_ind = n(
 
 ```
 
-## Summary stats
+### Summary stats
 
 
 
@@ -173,6 +189,8 @@ dyn_pmgsy  %>% group_by(caste_groups) %>% summarise(mean_proj = mean(n_proj_ind)
 
 ### Constituency type
 
+#### PC
+
 ```{r}
 
 
@@ -185,6 +203,20 @@ dyn_pmgsy %>% group_by(dyn_cum_2_text) %>% summarise(mean(n_cont_ind),sum(sancti
 kable(caption = "PMGSY average number of contractors and amount sanctioned  wrt constituency type", col.names = c ("Type of constituency", "Average number of unique contractors", "AAvergae amount sanctioned to a unique contractor (Lakhs)"),digits = 0)%>% kable_styling(bootstrap_options = "striped")
 
 ```
+
+#### AC
+
+
+```{r}
+
+
+dyn_ae_pmgsy %>% filter(year_ac!= 2012)%>%  group_by(dyn_cum_2_text) %>% summarise(n_projects = n(),uniq_contractors = n_distinct(`contractor name`), mean_uniq_contractors = n_projects/uniq_contractors, tot_cost = sum(sanctionedcostnew), mean_cost_project = tot_cost/n_projects, mean_cost_uniq_cotractor = mean_cost_project*mean_uniq_contractors) %>% select(-c("tot_cost"))%>% 
+  kable(digits = 1,caption = "pmgsy at ac level", col.names =c("Entity","total projects", "Unique contractors","Avg. uniq contractors","Avg. cost per project","Avg. amount recieved by unique contractor")) %>% 
+  kable_styling()
+
+```
+
+
 
 ### Experience categories
 
@@ -259,7 +291,7 @@ dyn_pmgsy %>% summarise_at(c("length", "n_roads","cost"), ~sum(is.na(.)))
 
 
 ```{r}
-"/" <- function(x,y) ifelse(y==0,0,base:::"/"(x,y))
+#"/" <- function(x,y) ifelse(y==0,0,base:::"/"(x,y))
 
 dyn_pmgsy <- dyn_pmgsy %>% mutate(length = ifelse(is.na(length),0,length), n_roads = ifelse(is.na(n_roads),0,n_roads),cost_km = cost/length, cost_project = cost/n_roads )
 ```
@@ -349,7 +381,7 @@ fit.cost_project<- felm(cost_project~dyn_cum_2 + incumbent+no_terms+constituency
 
 library(stargazer)
 
- stargazer(fit.length, fit.cost_km, fit.cost_project, title="Linear regression - PMGSY  ",type = "html",
+ stargazer(fit.length, fit.cost_km, fit.cost_project, title="Linear regression - PMGSY  ",type = "text",
 align=TRUE,  no.space=TRUE,omit.stat=c("LL","ser","f"),dep.var.labels = c("road length", "Cost per km", "cost per project"),
 add.lines=list(c('Year fixed effects', 'Yes','Yes','Yes' ), c('District fixed effects', 'Yes','Yes','Yes'), c('Clustered error', 'District','District','District')))
 
@@ -367,7 +399,57 @@ fit.nroad  <- fepois(n_roads ~dyn_cum_2 + constituency_type +log(electors)+incum
 
 
 etable(fit.nroad,label = "Number of roads - Poisson", title= "Poisson - Number of roads")%>% kable() %>% kable_styling(full_width = F)
+
+fit.nroad  <- felm(n_roads ~dyn_cum_2 + constituency_type +log(electors)+incumbent+no_terms+turnout_percentage+ margin_percentage+enop+nl_tot|year+district_name|0| district_name, data = dyn_pmgsy) 
+
+stargazer(fit.nroad, type = "text")
 ```
+
+---
+## Panel data
+
+```{r}
+
+pmgsy_ac <- fread("D:/cpr/data/up_misc/merged_ac_all.csv")
+
+pmgsy_df <- pmgsy_ac %>% select(c(1:1,3:3,124:135)) %>% rename(cost = `Sanction Cost`, length = `Road Length (Kms)` , expenditure = `Expenditure Till Date`) %>% mutate(left_over = cost- expenditure , cost_km = cost/length)
+
+
+
+dyn <- fread("D:/cpr/UP/up-dynasties/dyn_other_data/dyn_ae_ge.csv")
+
+dyn <- dyn %>% filter(year %in% c(2007, 2012)&position ==1&election_type=="AE")
+
+dyn_pmgsy <- inner_join( dyn,pmgsy_df, by = c("year", "constituency_no"))
+
+
+
+
+```
+
+
+```{r}
+
+fit.length <- felm(cost_km ~dyn_cum_2 + constituency_type +log(electors)+incumbent+no_terms+turnout_percentage+ margin_percentage+enop, data = subset(dyn_pmgsy %>%  filter(length>0 & year ==2007)))
+
+summary(fit.length)
+
+
+
+fit.cost_km<- felm(cost_km~dyn_cum_2 + constituency_type +log(electors)+incumbent+no_terms+turnout_percentage+ margin_percentage+enop+nl_tot|year+district_name|0|district_name, data = subset(dyn_pmgsy %>%  filter(cost_km>0)))
+
+#summary(fit.cost_km)
+
+
+
+fit.cost_project<- felm(cost_project~dyn_cum_2 + incumbent+no_terms+constituency_type +log(electors)+turnout_percentage+ margin_percentage+enop+nl_tot|year+district_name|0|district_name, data = subset(dyn_pmgsy %>%  filter(cost_project>0)))
+
+#summary(fit.cost_project)
+
+```
+
+
+
 
 ---
 
@@ -548,5 +630,94 @@ dyn_pwd %>% group_by(dyn_cum_2_text,fam_exp_cum_cat) %>% summarise(proj =n()/n_d
 
 ```
 
+# other page
+
+
+
+```{r}
+
+
+pmgsy <- readxl::read_xlsx("D:/cpr/data/up_misc/PMGSY Contractors.xlsx")
+
+pmgsy$Caste <- tolower(pmgsy$Caste)
+
+data.frame(prop.table(table(pmgsy$Caste))) %>% arrange(-Freq)%>% rename(caste = Var1, pc = Freq) %>%  kable(digits = 2)
+# 
+# [5:36 PM, 5/18/2021] Rahul Verma: Non-Yadav OBCs =  kurmi obc lodhi sahu kushwaha mauryaa
+# [5:36 PM, 5/18/2021] Rahul Verma: Dalit = SC
+# [5:36 PM, 5/18/2021] Rahul Verma: Muslim
+# [5:37 PM, 5/18/2021] Rahul Verma: Others
+
+pmgsy <- pmgsy %>% mutate(caste_groups = case_when(Caste %in% c("thakur", "brahmin", "bania", "uc", "rajput", "kyastha", "jat", "jain","jaiswal" ,"raput", "bhumihar" ,"khatris")~ "Upper Caste",
+                                             Caste =="yadav"~"Yadav",
+                                             Caste %in% c("kurmi", "obc", "lodhi", "sahu", "kushwaha", "mauryaa")~"Non-Yadav OBC",
+                                             Caste %in% c("dalit","sc") ~ "Dalit",
+                                             Caste == "muslim"~"Muslim",
+                                                                                         TRUE~"Others"))
+
+#pmgsy$caste_groups <- ifelse(pmgsy$caste_groups=="NA", NA,pmgsy$caste_groups)
+
+
+
+
+```
+
+
+
+```{r}
+
+
+pmgsy$caste_groups <- factor(pmgsy$caste_groups, levels = c("Upper Caste","Yadav","Non-Yadav OBC","Dalit" ,  ,"Others" ))
+
+
+pmgsy %>% filter(!is.na(caste_groups)) %>% group_by(caste_groups) %>% summarise(count = n(), pc = count/length(pmgsy$caste_groups)*100) %>% mutate(caste = "caste") %>% 
+  ggplot(aes(x= caste, fill = caste_groups, y=pc,label = round(pc,0)))+
+      geom_col()+
+      geom_text(size = 2.5, position = position_stack(vjust = 0.5))+
+
+    colorspace::scale_fill_discrete_qualitative(palette= "dark3" )+
+
+    theme_minimal()+
+  theme(aspect.ratio=4/2)+
+labs(title = "Caste composition of PMGSY contractors ",x = "", y = "", fill = "Caste Groups")+
+    theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
+  theme(plot.background = element_blank(),
+        axis.line.x = element_line(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.y = element_blank()
+  ) 
+
+
+
+```
+
+
+
+
+
+```{r}
+dyn_ae_ge$caste_groups <- factor(dyn_ae_ge$caste_groups, levels = c("Upper Caste","Yadav","Non-Yadav OBC","Dalit" , "Muslim"  ,"Others" ))
+
+
+dyn_ae_ge %>% filter(dyn_cum_2 ==1) %>% distinct(family_id, .keep_all = TRUE)%>% group_by(caste_groups) %>% summarise(count = n(), prop = count/322 *100)%>% mutate(caste = "caste") %>% 
+  ggplot(aes(caste, prop, fill = caste_groups, label = round(prop,0)))+
+    geom_col()+
+      geom_text(size = 2.5, position = position_stack(vjust = 0.5))+
+
+    colorspace::scale_fill_discrete_qualitative(palette= "dark3" )+
+
+    theme_minimal()+
+  theme(aspect.ratio=4/2)+
+labs(title = "Caste composition of families ",x = "", y = "", fill = "Caste Groups")+
+    theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
+  theme(plot.background = element_blank(),
+        axis.line.x = element_line(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.y = element_blank()
+  ) 
+
+```
 
 

@@ -58,6 +58,8 @@ taluqdars <- taluqdars %>% filter(caste_1!= "")
 taluqdars$revenue_1930 <- as.numeric(taluqdars$revenue_1930 )
 
 taluqdars$revenue_book <- as.numeric(taluqdars$revenue_book )
+
+head(taluqdars)
 ```
 
 
@@ -117,6 +119,9 @@ taluqdars %>% group_by(active_politics) %>% summarise(mean(revenue_1930, na.rm =
 ```
 
 
+
+
+
 ## Revenue 1930
 
 
@@ -169,6 +174,55 @@ ggplot(subset(taluqdars,!is.na(revenue_1930)),aes(x = reorder(as.factor(active_p
         axis.title = element_text(vjust = -1, size = 16),        
         axis.ticks = element_blank()
   ) 
+```
+
+### revenue - active status - density
+
+```{r}
+
+
+taluqdars %>% filter(!is.na(revenue_1930)) %>% group_by(active_politics) %>% tally()
+ggplot(taluqdars %>% filter(!is.na(revenue_1930)), aes(revenue_1930, fill= factor(active_politics)))+
+  geom_density()+
+  scale_y_continuous(labels = comma)+
+  scale_x_continuous(labels = comma)+
+  scale_fill_discrete(labels = c("Active","Dormant","Never joined politics"))+
+  labs(fill = "Active status")+
+  theme_bw()
+
+
+ggplot(taluqdars %>% filter(!is.na(revenue_1930)), aes(factor(active_politics),log(revenue_1930 )))+
+  geom_boxplot()+
+  scale_y_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  )+
+    scale_x_discrete(labels = c("Active","Dormant","Never joined politics"))+
+  labs(x = "")+
+  theme_bw()
+
+
+all <- ggplot(taluqdars %>% filter(!is.na(revenue_1930)&revenue_1930<400000), aes(factor(active_politics),revenue_1930 ))+
+  geom_boxplot()+
+  scale_y_continuous(labels = unit_format(unit = "Lakhs", scale = 1e-5))+
+    scale_x_discrete(labels = c("Active","Dormant","Never joined politics"))+
+  labs(x = "")+
+  theme_light()+
+  theme(
+    axis.text.y = element_blank(),
+    axis.title.y = element_blank(),
+    panel.grid.major.x = element_blank()
+  )
+
+single <- ggplot(taluqdars %>% mutate(type ="All")%>% filter(!is.na(revenue_1930)&revenue_1930<400000), aes(y=revenue_1930, x= type))+
+  geom_boxplot()+
+  scale_y_continuous(labels = unit_format(unit = "Lakhs", scale = 1e-5))+
+  labs(x = "", y = "Revenue - 1930")+
+  theme_light()
+
+
+
+single+all+plot_annotation(title = "Taluqdar revenue wrt status")+plot_layout(widths = c(1, 2))
 ```
 
 

@@ -61,6 +61,7 @@ mplads <- fread("D:/cpr/UP/up-dynasties/dyn_other_data/mplads-dataset.csv")
 
 names(mplads) <- tolower(names(mplads))
 
+
 mplads <- mplads %>% select(constituency_no,year, everything()) %>% select(- c(30:102))
 
 mplads$cost_cat <- cut(mplads$costnew, breaks = c(0,200000,500000,Inf), labels = c("Low", "Medium", "High"))
@@ -92,6 +93,7 @@ dyn_mplads$dyn_cum_2_text <- ifelse(dyn_mplads$dyn_cum_2 ==0, "Non-family","Fami
 #fwrite(dyn_mplads, "D:/cpr/UP/up-dynasties/dyn_other_data/mplads-dyn.csv")
 
 ```
+
 
 
 
@@ -159,12 +161,41 @@ Entity <- c("Non-family", "Family")
 
 ---
 
-### Days
+### Days to sanction
 
-When we looked at number of days that is required to finish a project was almost same for both the family types, on average they take 75 days to finish a project. When I looked at it by year, in 2004 dynasts took 12 days extra to finish the work compared to non-dynasts. Interestingly, in 2009 it reversed and dynasts took 12 day lesser than non-dynasts to finish the work
+<!-- When we looked at number of days that is required to finish a project was almost same for both the family types, on average they take 75 days to finish a project. When I looked at it by year, in 2004 dynasts took 12 days extra to finish the work compared to non-dynasts. Interestingly, in 2009 it reversed and dynasts took 12 day lesser than non-dynasts to finish the work -->
 
 
 
+
+```{r}
+
+dyn_mplads%>% filter(days>0)%>% group_by(dyn_cum_2_text) %>% summarise(days = mean(days))
+
+
+
+ggplot(dyn_mplads %>% filter(days>0), aes(dyn_cum_2_text, log(days)))+
+  geom_boxplot()
+
+```
+
+
+
+
+```{r}
+
+dyn_mplads_09 <- dyn_mplads %>% filter(year==2009)
+
+
+fam <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/fam_cvat_list.csv")
+
+
+mplads_fam <- inner_join(dyn_mplads_09, fam, by = "family_id")
+
+
+mplads_fam%>% filter(days>0)%>% group_by(success_cat) %>% summarise(obs = n(),n_fam = n_distinct(family_id), mean_days = mean(days)) %>% kable(digits = 0, caption = "2009 MPLADS")
+
+```
 
 ```{r days to complete}
 # 
