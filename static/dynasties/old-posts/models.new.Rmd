@@ -102,6 +102,41 @@ dyn_ae_ge <- dyn_ae_ge %>% mutate(level2 = ifelse(is.na(level2), election_type, 
 ```
 
 
+```{r}
+
+### edu-ind fixing
+
+
+  
+dyn_ae_ge$edu <- as.numeric(paste(dyn_ae_ge$school, dyn_ae_ge$college, sep = ""))
+
+
+dyn_ae_ge$edu_cat <- ifelse(dyn_ae_ge$edu ==10,1,ifelse(dyn_ae_ge$edu ==1,2,ifelse(dyn_ae_ge ==11,3,0)))
+# 
+dyn_ae_ge$edu_cat <- case_when(dyn_ae_ge$edu ==10 ~"Only School",
+                                        dyn_ae_ge$edu ==1~"Only College",
+                                        dyn_ae_ge$edu ==11~"Both School & College",
+                                        TRUE ~"None"
+
+                                        )
+
+edu <- as.numeric(case_when(dyn_ae_ge$edu_cat =="Only School" ~"1",
+                                        dyn_ae_ge$edu_cat =="Only College" ~"2",
+                                        dyn_ae_ge$edu_cat =="Both School & College" ~"3",
+                                        TRUE ~"0"))
+
+
+                            
+                             dyn_ae_ge <- dyn_ae_ge %>%  
+  mutate(edu_log = ifelse(edu_cat=="None",0,1)) %>%
+   rowwise() %>% 
+  mutate(ind_all = sum(ind_c1, ind_c2,ind_c3, ind_c4, ind_c5),
+         ind_edu = sum(ind_all+edu_log)) %>% ungroup() 
+                                  
+
+```
+
+
 
 ```{r}
 # 
@@ -325,6 +360,14 @@ dyn_ae_ge <-  merge(dyn_ae_ge,inv, by = c("election_type","year","constituency_n
 
 ##
 
+ 
+
+
+
+# ggplot(edu_dummy, aes(ind_edu))+
+#   geom_histogram(binwidth  = 1, color = "steelblue")+
+#         theme(aspect.ratio=16/9)
+
 
 dyn_ae_ge_fam <- dyn_ae_ge  %>% filter(dyn_tot_2 == 1)
 
@@ -439,25 +482,32 @@ n_elections_w <-ifelse(n_elections_w >=5,5 ,n_elections_w)
 
 
 
-  
-dyn_ae_ge_uniq$edu <- as.numeric(paste(dyn_ae_ge_uniq$school, dyn_ae_ge_uniq$college, sep = ""))
-
-
-dyn_ae_ge_uniq$edu_cat <- ifelse(dyn_ae_ge_uniq$edu ==10,1,ifelse(dyn_ae_ge_uniq$edu ==1,2,ifelse(dyn_ae_ge_uniq ==11,3,0)))
+#   
+# dyn_ae_ge_uniq$edu <- as.numeric(paste(dyn_ae_ge_uniq$school, dyn_ae_ge_uniq$college, sep = ""))
 # 
-dyn_ae_ge_uniq$edu_cat <- case_when(dyn_ae_ge_uniq$edu ==10 ~"Only School",
-                                        dyn_ae_ge_uniq$edu ==1~"Only College",
-                                        dyn_ae_ge_uniq$edu ==11~"Both School & College",
-                                        TRUE ~"None"
-
-                                        )
-
-edu <- as.numeric(case_when(dyn_ae_ge_uniq$edu_cat =="Only School" ~"1",
-                                        dyn_ae_ge_uniq$edu_cat =="Only College" ~"2",
-                                        dyn_ae_ge_uniq$edu_cat =="Both School & College" ~"3",
-                                        TRUE ~"0"
-
-                                        ))
+# 
+# dyn_ae_ge_uniq$edu_cat <- ifelse(dyn_ae_ge_uniq$edu ==10,1,ifelse(dyn_ae_ge_uniq$edu ==1,2,ifelse(dyn_ae_ge_uniq ==11,3,0)))
+# # 
+# dyn_ae_ge_uniq$edu_cat <- case_when(dyn_ae_ge_uniq$edu ==10 ~"Only School",
+#                                         dyn_ae_ge_uniq$edu ==1~"Only College",
+#                                         dyn_ae_ge_uniq$edu ==11~"Both School & College",
+#                                         TRUE ~"None"
+# 
+#                                         )
+# 
+# edu <- as.numeric(case_when(dyn_ae_ge_uniq$edu_cat =="Only School" ~"1",
+#                                         dyn_ae_ge_uniq$edu_cat =="Only College" ~"2",
+#                                         dyn_ae_ge_uniq$edu_cat =="Both School & College" ~"3",
+#                                         TRUE ~"0"
+# 
+# 
+#                             
+#                              dyn_ae_ge %>% distinct(family_id, .keep_all = TRUE) %>% 
+#   mutate(edu_log = ifelse(edu_cat=="None",0,1)) %>%
+#    rowwise() %>% 
+#   mutate(ind_all = sum(ind_c1, ind_c2,ind_c3, ind_c4, ind_c5),
+#          ind_edu = sum(indus_count+edu_log)) %>% ungroup() 
+#                                        ))
 
 
 
@@ -509,7 +559,9 @@ mem1_female <-  ifelse(dyn_ae_ge_uniq$mem1_gender=="F",1,0)
 
 dyn_1_2 <- ifelse(dyn_ae_ge_uniq$mem1_gender=="F",1,0)
 
-  df1 <- tibble(dynast, caste_uc,caste_yadav,caste_non_yadav_obc , caste_dalit , caste_muslim ,minister_duration ,industry , edu, land ,linkage,linkage_down,linkage_up, post_90 ,n_elections_w ,district, decade, minister,constituency, sub_region, mem1_female, n_el_w)
+ind_edu <- dyn_ae_ge_uniq$ind_edu
+
+  df1 <- tibble(dynast, caste_uc,caste_yadav,caste_non_yadav_obc , caste_dalit , caste_muslim ,minister_duration ,industry , land ,linkage,linkage_down,linkage_up, post_90 ,n_elections_w ,district, decade, minister,constituency, sub_region, mem1_female, n_el_w, ind_edu)
 
   
 
@@ -524,14 +576,14 @@ library(fixest)
 
 
 
-fit.1 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister +industry +  land +edu  +n_elections_w+mem1_female |0|0|constituency , data = df1)
+fit.1 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister +ind_edu +  land  +n_elections_w+mem1_female |0|0|constituency , data = df1)
 
-fit.2 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister +industry +  land +edu  +n_elections_w +mem1_female|decade|0|constituency, data = df1)
+fit.2 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister +ind_edu +  land  +n_elections_w +mem1_female|decade|0|constituency, data = df1)
 
 
-fit.3 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister +industry +  land +edu  +n_elections_w +mem1_female|sub_region|0|constituency, data = df1)
+fit.3 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister +ind_edu +  land   +n_elections_w +mem1_female|sub_region|0|constituency, data = df1)
 
-fit.4 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister +industry +  land +edu  +n_elections_w +mem1_female|decade +sub_region|0|constituency, data = df1)
+fit.4 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister +ind_edu +  land  +n_elections_w +mem1_female|decade +sub_region|0|constituency, data = df1)
 
 
 
@@ -543,7 +595,7 @@ fit.4 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit +
 
 ```{r}
 
-order = c("minister","industry",  "land", "edu","n_elections_w","mem1_female")
+order = c("minister","ind_edu",  "land", "n_elections_w","mem1_female")
 
 # addlines <- list(c('Fixed effects', '' ,"Decade", "Sub-region","Deacde and Sub-region"), c("Clustered SE" ,"Constituency","Constituency","Constituency","Constituency"), c("Caste control", "Yes","Yes","Yes","Yes"))
 
@@ -551,7 +603,7 @@ addlines <- list( c("Caste control", "Yes","Yes","Yes","Yes"))
 
  drop <- c("caste_uc", "caste_yadav","caste_non_yadav_obc", "caste_dalit", "caste_muslim","(Intercept)","Constant")
 
-cov_labels <- c( "Minister", "Economic diversification", "Land ownership", "Educational inst. ownership ", "Elections won by first member","First member - female")
+cov_labels <- c( "Minister", "Economic diversification", "Land ownership",  "Elections won by first member","First member - female")
 
  
 
@@ -585,14 +637,14 @@ library(fixest)
 
 
 
-fit.1 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister +industry +  land +edu  +n_elections_w+mem1_female |0|0|constituency , data =subset( df1 %>% filter(n_el_w>=1)))
+fit.1 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister +ind_edu +  land   +n_elections_w+mem1_female |0|0|constituency , data =subset( df1 %>% filter(n_el_w>=1)))
 
-fit.2 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister +industry +  land +edu  +n_elections_w +mem1_female|decade|0|constituency, data =subset( df1 %>% filter(n_el_w>=1)))
+fit.2 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister +ind_edu +  land  +n_elections_w +mem1_female|decade|0|constituency, data =subset( df1 %>% filter(n_el_w>=1)))
 
 
-fit.3 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister +industry +  land +edu  +n_elections_w +mem1_female|sub_region|0|constituency, data =subset( df1 %>% filter(n_el_w>=1)))
+fit.3 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister +ind_edu +  land   +n_elections_w +mem1_female|sub_region|0|constituency, data =subset( df1 %>% filter(n_el_w>=1)))
 
-fit.4 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister +industry +  land +edu  +n_elections_w +mem1_female|decade +sub_region|0|constituency,  data =subset( df1 %>% filter(n_el_w>=1)))
+fit.4 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister +ind_edu +  land + +n_elections_w +mem1_female|decade +sub_region|0|constituency,  data =subset( df1 %>% filter(n_el_w>=1)))
 
 
 ## w/o fixed effects
@@ -615,7 +667,7 @@ fit.4 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit +
 
 ```{r}
 
-order = c("minister","industry",  "land", "edu","n_elections_w","mem1_female")
+order = c("minister","ind_edu", "edu","n_elections_w","mem1_female")
 
 # addlines <- list(c('Fixed effects', '' ,"Decade", "Sub-region","Deacde and Sub-region"), c("Clustered SE" ,"Constituency","Constituency","Constituency","Constituency"), c("Caste control", "Yes","Yes","Yes","Yes"))
 
@@ -623,7 +675,7 @@ addlines <- list( c("Caste control", "Yes","Yes","Yes","Yes"))
 
  drop <- c("caste_uc", "caste_yadav","caste_non_yadav_obc", "caste_dalit", "caste_muslim","(Intercept)","Constant")
 
-cov_labels <- c( "Minister", "Economic diversification", "Land ownership", "Educational inst. ownership ", "Elections won by first member","First member - female")
+cov_labels <- c( "Minister", "Economic diversification", "Land ownership",  "Elections won by first member","First member - female")
 
  
 
@@ -793,24 +845,24 @@ n_elections_w <-ifelse(n_elections_w >=5,5 ,n_elections_w)
 
 
   
- dyn_ae_ge_09_19 $edu <- as.numeric(paste( dyn_ae_ge_09_19 $school,  dyn_ae_ge_09_19 $college, sep = ""))
-
-
- dyn_ae_ge_09_19 $edu_cat <- ifelse( dyn_ae_ge_09_19 $edu ==10,1,ifelse( dyn_ae_ge_09_19 $edu ==1,2,ifelse( dyn_ae_ge_09_19  ==11,3,0)))
+#  dyn_ae_ge_09_19 $edu <- as.numeric(paste( dyn_ae_ge_09_19 $school,  dyn_ae_ge_09_19 $college, sep = ""))
 # 
- dyn_ae_ge_09_19 $edu_cat <- case_when( dyn_ae_ge_09_19 $edu ==10 ~"Only School",
-                                         dyn_ae_ge_09_19 $edu ==1~"Only College",
-                                         dyn_ae_ge_09_19 $edu ==11~"Both School & College",
-                                        TRUE ~"None"
-
-                                        )
-
-edu <- as.numeric(case_when( dyn_ae_ge_09_19 $edu_cat =="Only School" ~"1",
-                                         dyn_ae_ge_09_19 $edu_cat =="Only College" ~"2",
-                                         dyn_ae_ge_09_19 $edu_cat =="Both School & College" ~"3",
-                                        TRUE ~"0"
-
-                                        ))
+# 
+#  dyn_ae_ge_09_19 $edu_cat <- ifelse( dyn_ae_ge_09_19 $edu ==10,1,ifelse( dyn_ae_ge_09_19 $edu ==1,2,ifelse( dyn_ae_ge_09_19  ==11,3,0)))
+# # 
+#  dyn_ae_ge_09_19 $edu_cat <- case_when( dyn_ae_ge_09_19 $edu ==10 ~"Only School",
+#                                          dyn_ae_ge_09_19 $edu ==1~"Only College",
+#                                          dyn_ae_ge_09_19 $edu ==11~"Both School & College",
+#                                         TRUE ~"None"
+# 
+#                                         )
+# 
+# edu <- as.numeric(case_when( dyn_ae_ge_09_19 $edu_cat =="Only School" ~"1",
+#                                          dyn_ae_ge_09_19 $edu_cat =="Only College" ~"2",
+#                                          dyn_ae_ge_09_19 $edu_cat =="Both School & College" ~"3",
+#                                         TRUE ~"0"
+# 
+#                                         ))
 
 
 
@@ -871,9 +923,12 @@ sub_region <- dyn_ae_ge_09_19$sub_region
  
  mem1_female <-  ifelse( dyn_ae_ge_09_19$mem1_gender=="F",1,0)
  
+ 
+ ind_edu <- dyn_ae_ge_09_19$ind_edu
+ 
 
  
-df <- tibble(dynast , caste_uc, caste_yadav,caste_non_yadav_obc , caste_dalit , caste_muslim ,minister ,industry , edu , land ,linkage, n_elections_w,  total_assets  , serious_crime, turncoat, winner, vote_share, year, election_type, sub_region, incumbent,constituency, mem1_female, n_el_w
+df <- tibble(dynast , caste_uc, caste_yadav,caste_non_yadav_obc , caste_dalit , caste_muslim ,minister ,ind_edu , land ,linkage, n_elections_w,  total_assets  , serious_crime, turncoat, winner, vote_share, year, election_type, sub_region, incumbent,constituency, mem1_female, n_el_w
              )
 
 ```
@@ -882,17 +937,17 @@ df <- tibble(dynast , caste_uc, caste_yadav,caste_non_yadav_obc , caste_dalit , 
 
 ```{r}
 
-fit.1 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +minister +industry  + land +edu+ n_elections_w+mem1_female+ log(total_assets)  +  serious_crime+turncoat+incumbent|0|0|constituency, data = subset(df %>% filter(total_assets>0)))
+fit.1 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +minister +ind_edu  + land+ n_elections_w+mem1_female+ log(total_assets)  +  serious_crime+turncoat+incumbent|0|0|constituency, data = subset(df %>% filter(total_assets>0)))
 
 
-fit.2<- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +minister +industry  + land +edu+ n_elections_w+mem1_female+ log(total_assets)  +  serious_crime+turncoat+incumbent|year|0|constituency, data = subset(df %>% filter(total_assets>0)))
+fit.2<- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +minister +ind_edu  + land +n_elections_w+mem1_female+ log(total_assets)  +  serious_crime+turncoat+incumbent|year|0|constituency, data = subset(df %>% filter(total_assets>0)))
 
 
-fit.3 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +minister +industry  + land +edu+ n_elections_w+ mem1_female+ log(total_assets)  +  serious_crime+turncoat+incumbent|sub_region|0|constituency, data = subset(df %>% filter(total_assets>0)))
+fit.3 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +minister +ind_edu  + land + n_elections_w+ mem1_female+ log(total_assets)  +  serious_crime+turncoat+incumbent|sub_region|0|constituency, data = subset(df %>% filter(total_assets>0)))
 
 
 
-fit.4 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister +industry  + land +edu+ n_elections_w+mem1_female+  log(total_assets)  +  serious_crime+turncoat+incumbent|year+sub_region|0|constituency,data = subset(df %>% filter(total_assets>0)))
+fit.4 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister +ind_edu  + land + n_elections_w+mem1_female+  log(total_assets)  +  serious_crime+turncoat+incumbent|year+sub_region|0|constituency,data = subset(df %>% filter(total_assets>0)))
 
 
 
@@ -901,11 +956,11 @@ fit.4 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit +
 
 ```{r}
 
-order = c("minister","industry",  "land", "edu","total_assets","serious_crime",     "n_elections_w","mem1_female", "turncoat","incumbent","winner")
+order = c("minister","ind_edu",  "land", "edu","total_assets","serious_crime",     "n_elections_w","mem1_female", "turncoat","incumbent","winner")
 
 addlines <- list(c('Fixed effects', '' ,"Year", "Sub-region","Year and Sub-region"), c("Clustered SE" ,"Constituency","Constituency","Constituency","Constituency"), c("Caste control", "Yes","Yes","Yes","Yes"))
 
-cov_labels <- c( "Minister", "Economic diversification", "Land ownership", "Educational inst. ownership ", "Total assets (log)","Serious crime","Elections won by first member","First member - female", "Turncoat","Incumbent")
+cov_labels <- c( "Minister", "Economic diversification", "Land ownership", "Total assets (log)","Serious crime","Elections won by first member","First member - female", "Turncoat","Incumbent")
 
 
 
@@ -952,16 +1007,16 @@ align=TRUE,  no.space=TRUE,add.lines=addlines, omit = drop)
 
 ```{r}
 
-fit.1 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +minister +industry  + land +edu+ n_elections_w+mem1_female+ log(total_assets)  +  serious_crime+turncoat+incumbent|0|0|constituency, data = subset(df %>% filter(total_assets>0 & n_el_w>=1)))
+fit.1 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +minister +ind_edu  + land + n_elections_w+mem1_female+ log(total_assets)  +  serious_crime+turncoat+incumbent|0|0|constituency, data = subset(df %>% filter(total_assets>0 & n_el_w>=1)))
 
-fit.2<- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +minister +industry  + land +edu+ n_elections_w+mem1_female+ log(total_assets)  +  serious_crime+turncoat+incumbent|year|0|constituency, data = subset(df %>% filter(total_assets>0 & n_el_w>=1)))
-
-
-fit.3 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +minister +industry  + land +edu+ n_elections_w+ mem1_female+ log(total_assets)  +  serious_crime+turncoat+incumbent|sub_region|0|constituency, data = subset(df %>% filter(total_assets>0 & n_el_w>=1)))
+fit.2<- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +minister +ind_edu  + land + n_elections_w+mem1_female+ log(total_assets)  +  serious_crime+turncoat+incumbent|year|0|constituency, data = subset(df %>% filter(total_assets>0 & n_el_w>=1)))
 
 
+fit.3 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +minister +ind_edu + land + n_elections_w+ mem1_female+ log(total_assets)  +  serious_crime+turncoat+incumbent|sub_region|0|constituency, data = subset(df %>% filter(total_assets>0 & n_el_w>=1)))
 
-fit.4 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister +industry  + land +edu+ n_elections_w+mem1_female+  log(total_assets)  +  serious_crime+turncoat+incumbent|year+sub_region|0|constituency,data = subset(df %>% filter(total_assets>0 & n_el_w>=1)))
+
+
+fit.4 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister +ind_edu  + land + n_elections_w+mem1_female+  log(total_assets)  +  serious_crime+turncoat+incumbent|year+sub_region|0|constituency,data = subset(df %>% filter(total_assets>0 & n_el_w>=1)))
 
 
 
@@ -971,11 +1026,11 @@ fit.4 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit +
 
 ```{r}
 
-order = c("minister","industry",  "land", "edu","total_assets","serious_crime",     "n_elections_w","mem1_female", "turncoat","incumbent","winner")
+order = c("minister","ind_edu",  "land", "total_assets","serious_crime",     "n_elections_w","mem1_female", "turncoat","incumbent","winner")
 
 addlines <- list(c('Fixed effects', '' ,"Year", "Sub-region","Year and Sub-region"), c("Clustered SE" ,"Constituency","Constituency","Constituency","Constituency"), c("Caste control", "Yes","Yes","Yes","Yes"))
 
-cov_labels <- c( "Minister", "Economic diversification", "Land ownership", "Educational inst. ownership ", "Total assets (log)","Serious crime","Elections won by first member","First member - female", "Turncoat","Incumbent")
+cov_labels <- c( "Minister", "Economic diversification", "Land ownership",  "Total assets (log)","Serious crime","Elections won by first member","First member - female", "Turncoat","Incumbent")
 
 
 
@@ -1129,25 +1184,25 @@ n_elections_w <-ifelse(n_elections_w >=5,5 ,n_elections_w)
 
 
 
-  
- dyn_ae_ge_09_19_uniq $edu <- as.numeric(paste( dyn_ae_ge_09_19_uniq $school,  dyn_ae_ge_09_19_uniq $college, sep = ""))
-
-
- dyn_ae_ge_09_19_uniq $edu_cat <- ifelse( dyn_ae_ge_09_19_uniq $edu ==10,1,ifelse( dyn_ae_ge_09_19_uniq $edu ==1,2,ifelse( dyn_ae_ge_09_19_uniq  ==11,3,0)))
+#   
+#  dyn_ae_ge_09_19_uniq $edu <- as.numeric(paste( dyn_ae_ge_09_19_uniq $school,  dyn_ae_ge_09_19_uniq $college, sep = ""))
 # 
- dyn_ae_ge_09_19_uniq $edu_cat <- case_when( dyn_ae_ge_09_19_uniq $edu ==10 ~"Only School",
-                                         dyn_ae_ge_09_19_uniq $edu ==1~"Only College",
-                                         dyn_ae_ge_09_19_uniq $edu ==11~"Both School & College",
-                                        TRUE ~"None"
-
-                                        )
-
-edu <- as.numeric(case_when( dyn_ae_ge_09_19_uniq $edu_cat =="Only School" ~"1",
-                                         dyn_ae_ge_09_19_uniq $edu_cat =="Only College" ~"2",
-                                         dyn_ae_ge_09_19_uniq $edu_cat =="Both School & College" ~"3",
-                                        TRUE ~"0"
-
-                                        ))
+# 
+#  dyn_ae_ge_09_19_uniq $edu_cat <- ifelse( dyn_ae_ge_09_19_uniq $edu ==10,1,ifelse( dyn_ae_ge_09_19_uniq $edu ==1,2,ifelse( dyn_ae_ge_09_19_uniq  ==11,3,0)))
+# # 
+#  dyn_ae_ge_09_19_uniq $edu_cat <- case_when( dyn_ae_ge_09_19_uniq $edu ==10 ~"Only School",
+#                                          dyn_ae_ge_09_19_uniq $edu ==1~"Only College",
+#                                          dyn_ae_ge_09_19_uniq $edu ==11~"Both School & College",
+#                                         TRUE ~"None"
+# 
+#                                         )
+# 
+# edu <- as.numeric(case_when( dyn_ae_ge_09_19_uniq $edu_cat =="Only School" ~"1",
+#                                          dyn_ae_ge_09_19_uniq $edu_cat =="Only College" ~"2",
+#                                          dyn_ae_ge_09_19_uniq $edu_cat =="Both School & College" ~"3",
+#                                         TRUE ~"0"
+# 
+#                                         ))
 
 
 
@@ -1212,14 +1267,17 @@ sub_region <- dyn_ae_ge_09_19_uniq$sub_region
  
  mem1_female <-  ifelse( dyn_ae_ge_09_19_uniq$mem1_gender=="F",1,0)
  
-df <- tibble(dynast , caste_uc, caste_yadav,caste_non_yadav_obc , caste_dalit , caste_muslim ,minister ,industry , edu , land ,linkage, n_elections_w,   serious_crime, turncoat, winner, vote_share, year, election_type, sub_region, incumbent,constituency, asset_avg, dyn_08,serious_crime_avg
+ 
+ ind_edu <- dyn_ae_ge_09_19_uniq$ind_edu
+ 
+df <- tibble(dynast , caste_uc, caste_yadav,caste_non_yadav_obc , caste_dalit , caste_muslim ,minister ,industry ,ind_edu ,linkage, n_elections_w,   serious_crime, turncoat, winner, vote_share, year, election_type, sub_region, incumbent,constituency, asset_avg, dyn_08,serious_crime_avg, land
              )
 
 ```
 
 ```{r}
 
-fit.1 <- felm(dynast ~  log(asset_avg) +  serious_crime+ land +edu+industry + dyn_08 + caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim |sub_region|0|constituency, data =subset(df %>% filter(asset_avg>0)))
+fit.1 <- felm(dynast ~  log(asset_avg) +  serious_crime+ land +ind_edu + dyn_08 + caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim |sub_region|0|constituency, data =subset(df %>% filter(asset_avg>0)))
 
 
 
@@ -1534,7 +1592,7 @@ cov_labels <- c( "Minister", "Economic diversification", "Land ownership", "Educ
 
 
 
-stargazer(fit.1,fit.2, fit.3,fit.4,dep.var.labels = c("Political Family"),title="Regression Results - AE-GE 09:19", type = "text",
+stargazer(fit.1,fit.2, fit.3,fit.4,dep.var.labels = c("Political Family"),title="Regression Results - AE-GE 09:19", type = "html",
 align=TRUE,  no.space=TRUE,add.lines=addlines, omit = drop)
 
 # 
@@ -1546,16 +1604,16 @@ align=TRUE,  no.space=TRUE,add.lines=addlines, omit = drop)
 
 
 
-# India
+<!-- # India -->
 
 
-```{r}
+<!-- ```{r} -->
 
-ge0919 <- fread("D:/cpr/UP/up-dynasties/dyn_other_data/adr/adr_tcpd_09_14_19.csv")
+<!-- ge0919 <- fread("D:/cpr/UP/up-dynasties/dyn_other_data/adr/adr_tcpd_09_14_19.csv") -->
 
-names(ge0919) <- tolower(names(ge0919))
+<!-- names(ge0919) <- tolower(names(ge0919)) -->
 
-```
+<!-- ``` -->
 
 
 
