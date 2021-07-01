@@ -4,7 +4,7 @@ author: ""
 date: "2020-06-27"
 params:
   orig_date: "Original Publish Date: 27 July, 2020"
-  update_date: !r paste("Updated on:", format(Sys.time(), '%d %B, %Y'))
+  update_date: !r paste("Updated on:", format(Sys.time(), '%I:%m  %p -- %d %B, %Y'))
 output:
   html_document:
     theme: readable
@@ -53,10 +53,16 @@ select <- dplyr::select
 
 
 
-tcpd_5 <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/tcpd_ge_19_VS_corrected.csv")
+tcpd_5 <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/tcpd_ge_19_VS_corrected.csv") 
+# 
+# ge_5 <- readxl::read_xlsx("D:/cpr/UP/up-dynasties/dyn_other_data/tcpd_ge_09_14_19_JuneTR.xlsx") %>% select(c(1:5, dynast = dyn))
+# 
+# #names(ge_5) <- tolower(names(ge_5))
+# 
+# tcpd_5 <- left_join(tcpd_5, ge_5, by = c("State_Name","Year", "Constituency_No","Position"))
 
+dynast  <-tcpd_5$dyn
 
-dynast  <-tcpd_5$dynast
 
 incumbent <- tcpd_5$Incumbent
 
@@ -199,13 +205,15 @@ library(fixest)
 
 library(lfe)
 
-
-dyn_ge <- fread("D:/cpr/UP/up-dynasties/dyn_other_data/tcpd_ge_09_14_19_dyn.csv")
-
-
-dyn_ge <-dyn_ge %>% select(1:1, 3:5,13:18)
+ #dyn_ge <- fread("D:/cpr/UP/up-dynasties/dyn_other_data/tcpd_ge_09_14_19_dyn.csv")
 
 
+
+
+# dyn_ge <-dyn_ge %>% select(1:1, 3:5,13:18)
+
+ dyn_ge <- readxl::read_xlsx("D:/cpr/UP/up-dynasties/dyn_other_data/tcpd_ge_09_14_19_JuneTR.xlsx") %>% select(c(1:1, 3:5, 13:16,18:19)) %>% mutate(dyn = ifelse(as.numeric(dyn)==1,1,0), dyn = ifelse(is.na(dyn),0,dyn))
+ 
  dyn_ge$State_Name <- tolower(dyn_ge$State_Name)
 
 
@@ -238,7 +246,8 @@ dyn_ge_adr  <- dyn_ge_adr %>% mutate(edu = case_when(education %in% c("5th Pass"
 
 
 ```{r}
-dynast  <-dyn_ge_adr$dyn
+
+dynast  <- dyn_ge_adr$dyn
 
 incumbent <- dyn_ge_adr$incumbent
 
@@ -573,12 +582,14 @@ dyn_ge_adr %>% group_by(serious_criminal,position_rev) %>% summarise(recontest =
 
 ```{r results="asis"}
 
+df$constituency_id <- paste0(df$state,df$constituency)
+
 fit_year <- feglm(winner ~   incumbent+  turncoat +caste_UC_IC+ female + terms + dynast + log(assets)  + serious_crime+ education+age+ inc + bjp | year, family = binomial(link = "probit" ), data = df )
 
 
 fit_state <- feglm(winner ~   incumbent+  turncoat +caste_UC_IC+ female + terms + dynast + log(assets)  + serious_crime+ education+age+ inc + bjp | state+year,  family = binomial(link = "probit" ),data = df )
 
-fit_ac <- feglm(winner ~   incumbent+  turncoat +caste_UC_IC+ female + terms + dynast + log(assets)  + serious_crime+ education+age + inc + bjp| state+year+constituency, family = binomial(link = "probit" ), data = df )
+fit_ac <- feglm(winner ~   incumbent+  turncoat +caste_UC_IC+ female + terms + dynast + log(assets)  + serious_crime+ education+age + inc + bjp| state+year+constituency_id, family = binomial(link = "probit" ), data = df )
 
 
 
@@ -607,7 +618,7 @@ fit_state <- felm(vote_share_pc ~   incumbent+  turncoat +caste_UC_IC+ female+  
 
 
 
-fit_ac<- felm(vote_share_pc ~   incumbent+  turncoat +caste_UC_IC+ female+ terms + dynast + log(assets)  + serious_crime+ education+age+ inc + bjp | year+state+constituency|0|constituency+state, data = subset(df %>% filter(assets>0)) )
+fit_ac<- felm(vote_share_pc ~   incumbent+  turncoat +caste_UC_IC+ female+ terms + dynast + log(assets)  + serious_crime+ education+age+ inc + bjp | year+state+constituency_id|0|constituency+state, data = subset(df %>% filter(assets>0)) )
 
 
 
@@ -636,7 +647,7 @@ names(dyn_ge) <- tolower(names(dyn_ge))
 dyn_ge %>% group_by(state_name, year ) %>% summarise(count = n(),
                                              dyn_1_2 =  sum(ifelse(dyn==1 &position %in% c(1,2),1,0)),
                                              prop_dyn_1_2 = dyn_1_2/count) %>%
-  filter(count>17) %>%select(state_name, year,prop_dyn_1_2) %>% filter(state_name %!in% c("jammu & kashmir","jharkhand") )%>% 
+  filter(count>16) %>%select(state_name, year,prop_dyn_1_2) %>% filter(state_name %!in% c("jammu & kashmir","jharkhand") )%>% ungroup() %>% 
   ggplot(aes(prop_dyn_1_2, reorder(state_name, - prop_dyn_1_2), label = round(prop_dyn_1_2,2)))+
   geom_bar(stat ="identity", fill = "steelblue")+
   labs(title = "Family politicians among winners and runner-ups", subtitle = "Loksabha elections - 2009:19", x = "", y ="")+
@@ -692,7 +703,7 @@ fit.4<- felm(turnout~  dynast_1_2+ reservation_SCST + margin_percentage+enop+cri
 
 
 
-fit.5<- felm(turnout~  dynast_1_2+ reservation_SCST + margin_percentage+enop+criminal_1_2|constituency+ state+year|0|state, data = subset(df %>% filter(position==1)))
+fit.5<- felm(turnout~  dynast_1_2+ reservation_SCST + margin_percentage+enop+criminal_1_2|constituency_id+ state+year|0|state, data = subset(df %>% filter(position==1)))
 
 
 addlines <- list(c('Fixed effects', '' ,"Year", "State","Year and State","State, Year and Constituency"), c("Clustered SE" ,"State","State","State","State", "State"))
@@ -723,7 +734,7 @@ fit.4<- felm(turnout~  dynast_1_2+ reservation_SCST + margin_percentage+enop+cri
 
 
 
-fit.5<- felm(turnout~  dynast_1_2+ reservation_SCST + margin_percentage+enop+criminal_1_2+lagged_turnout|constituency+ state+year|0|state, data = subset(df %>% filter(position==1)))
+fit.5<- felm(turnout~  dynast_1_2+ reservation_SCST + margin_percentage+enop+criminal_1_2+lagged_turnout|constituency_id+ state+year|0|state, data = subset(df %>% filter(position==1)))
 
 
 addlines <- list(c('Fixed effects', '' ,"Year", "State","Year and State","State, Year and Constituency"), c("Clustered SE" ,"State","State","State","State", "State"))
@@ -758,10 +769,10 @@ fit.4<- felm(margin_percentage~  dynast_1_2+ reservation_SCST + turnout+enop| st
 
 
 
-fit.5<- felm(margin_percentage~  dynast_1_2+ reservation_SCST + turnout+enop|constituency+ state+year|0|state, data = subset(df %>% filter(position==1)))
+fit.5<- felm(margin_percentage~  dynast_1_2+ reservation_SCST + turnout+enop|constituency_id+ state+year|0|state, data = subset(df %>% filter(position==1)))
 
 
-addlines <- list(c('Fixed effects', '' ,"Year", "State","Year and State","State, Year and Constituency"), c("Clustered SE" ,"State","State","State","State", "State"))
+addlines <- list(c('Fixed effects', '' ,"Year", "State","Year and State","State, Year and constituency_id"), c("Clustered SE" ,"State","State","State","State", "State"))
 
 
  
@@ -787,10 +798,10 @@ fit.4<- felm(margin_percentage~  dynast_1_2+ reservation_SCST + turnout+enop+lag
 
 
 
-fit.5<- felm(margin_percentage~  dynast_1_2+ reservation_SCST + turnout+enop+lagged_margin|constituency+ state+year|0|state, data = subset(df %>% filter(position==1)))
+fit.5<- felm(margin_percentage~  dynast_1_2+ reservation_SCST + turnout+enop+lagged_margin|constituency_id+ state+year|0|state, data = subset(df %>% filter(position==1)))
 
 
-addlines <- list(c('Fixed effects', '' ,"Year", "State","Year and State","State, Year and Constituency"), c("Clustered SE" ,"State","State","State","State", "State"))
+addlines <- list(c('Fixed effects', '' ,"Year", "State","Year and State","State, Year and constituency_id"), c("Clustered SE" ,"State","State","State","State", "State"))
 
 
  
@@ -822,19 +833,19 @@ df_win$non_dyn_win <- ifelse(df_win$dynast==1,0,1)
 
 
 ```{r}
-fit_dyn <- felm(dynast_winner ~  margin_percentage+reservation_SCST + turnout+enop| state+year+constituency|0|constituency, data = df)
+fit_dyn <- felm(dynast_winner ~  margin_percentage+reservation_SCST + turnout+enop| state+year+constituency_id|0|constituency_id, data = df)
 
 
-fit_uc <- felm(uc_ic_winner~  margin_percentage+ reservation_SCST + turnout+enop| state+year+constituency|0|constituency,  data = df)
+fit_uc <- felm(uc_ic_winner~  margin_percentage+ reservation_SCST + turnout+enop| state+year+constituency_id|0|constituency_id,  data = df)
 
 
-fit_incumbent<- felm(incumbent_winner~ margin_percentage+reservation_SCST + turnout+enop| state+year+constituency|0 |constituency,  data = df)
+fit_incumbent<- felm(incumbent_winner~ margin_percentage+reservation_SCST + turnout+enop| state+year+constituency_id|0 |constituency_id,  data = df)
 
 
-fit_asset <- felm(asset_winner~ margin_percentage+ reservation_SCST + turnout+enop| state+year+constituency|0|constituency, data = df)
+fit_asset <- felm(asset_winner~ margin_percentage+ reservation_SCST + turnout+enop| state+year+constituency_id|0|constituency_id, data = df)
 
 
-fit_crime<- felm(ser_crime_winner~ margin_percentage+reservation_SCST + turnout+enop| state+year+constituency|0|constituency, data = df)
+fit_crime<- felm(ser_crime_winner~ margin_percentage+reservation_SCST + turnout+enop| state+year+constituency_id|0|constituency_id, data = df)
 
 # 
 # etable(fit_dyn, fit_uc,fit_incumbent, fit_asset,fit_crime,cluster= c("state","constituency")) %>% kable(caption = "*** winners - 5 PC")
@@ -1128,6 +1139,7 @@ dyn_up_ge_adr %>%ungroup() %>%
 
 ```{r results="asis"}
 
+df$constituency_id <- paste0(df$state,df$constituency)
 
 
 fit_year <- feglm(winner ~   incumbent+  turncoat +caste_UC_IC+ female + terms + dynast + log(assets)  + serious_crime+ education+age+inc+bjp | year, family = binomial(link = "probit" ), data = df )
@@ -1135,7 +1147,7 @@ fit_year <- feglm(winner ~   incumbent+  turncoat +caste_UC_IC+ female + terms +
 
 
 
-fit_ac <- feglm(winner ~   incumbent+  turncoat +caste_UC_IC+ female + terms + dynast + log(assets)  + serious_crime+ education+age +inc +bjp|year+constituency, family = binomial(link = "probit" ), data = df )
+fit_ac <- feglm(winner ~   incumbent+  turncoat +caste_UC_IC+ female + terms + dynast + log(assets)  + serious_crime+ education+age +inc +bjp|year+constituency_id, family = binomial(link = "probit" ), data = df )
 
 
 
@@ -1149,7 +1161,7 @@ etable(fit_year, fit_ac, cluster = c("constituency"), order = order) %>% kable()
 fit_year <- felm(vote_share_pc ~   incumbent+  turncoat +caste_UC_IC+ female + terms + dynast + log(assets)  + serious_crime+ education+age+inc+bjp | year, data = df )
 
 
-fit_ac <- felm(vote_share_pc ~   incumbent+  turncoat +caste_UC_IC+ female + terms + dynast + log(assets)  + serious_crime+ education+age+inc+bjp | year+constituency|0|constituency, data = df )
+fit_ac <- felm(vote_share_pc ~   incumbent+  turncoat +caste_UC_IC+ female + terms + dynast + log(assets)  + serious_crime+ education+age+inc+bjp | year+constituency_id|0|constituency_id, data = df )
 
 # 
 # etable(fit_year,fit_ac, fit_party, cluster = c("constituency"), order = order) %>% kable(caption = "UP vote share")

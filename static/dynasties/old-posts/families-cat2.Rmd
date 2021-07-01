@@ -974,6 +974,7 @@ This is a multinomial logit model that regresses three success categories. Risin
 
 
 
+
 ```{r}
 
 library(lfe)
@@ -1051,9 +1052,21 @@ edu <- as.numeric(case_when( dyn_ae_ge_fam_uniq$edu_cat =="Only School" ~"1",
                                         TRUE ~"0"
 
                                        ))
+
+                            
+                             dyn_ae_ge_fam_uniq <- dyn_ae_ge_fam_uniq %>%  
+  mutate(edu_log = ifelse(edu_cat=="None",0,1)) %>%
+   rowwise() %>% 
+  mutate(ind_all = sum(ind_c1, ind_c2,ind_c3, ind_c4, ind_c5),
+         ind_edu = sum(ind_all+edu_log)) %>% ungroup() 
+                                  
+
+
+
+
 industry <- dyn_ae_ge_fam_uniq$indus_count %>% replace_na(0) 
 
-#industry <- industry+school_college
+ind_edu <- dyn_ae_ge_fam_uniq$ind_edu
 
 
 
@@ -1118,7 +1131,7 @@ caste_groups <- dyn_ae_ge_fam_uniq$caste_groups
 
 
 
-df <- tibble(family_id,constituency,success_cat, caste_uc, caste_yadav,caste_non_yadav_obc , caste_dalit , caste_muslim ,minister_duration ,industry , land , linkage,linkage_down, minister, edu, second_mem_dur, delim_change, election_type, caste_groups)
+df <- tibble(family_id,constituency,success_cat, caste_uc, caste_yadav,caste_non_yadav_obc , caste_dalit , caste_muslim ,minister_duration ,industry , land , linkage,linkage_down, minister, edu, second_mem_dur, delim_change, election_type, caste_groups, ind_edu)
 
 
 fam_df <- df
@@ -1193,13 +1206,13 @@ success_cat<-factor( success_cat,levels = c( "Declining","Stable","Rising"))
 
 
 
-fit.multinom <- multinom(success_cat~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry +  land + linkage+edu)
+fit.multinom <- multinom(success_cat~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +ind_edu +  land + linkage)
 ```
 
 ```{r, results= "asis"}
 
 
-stargazer(fit.multinom, type="html", keep = c("linkage","success_cat","minister","industry", "land", "edu"),order = c("linkage","success_cat","minister","industry",  "land", "edu"),add.lines = list (c("Caste control", "Yes","Yes","Yes")),covariate.labels = c( "Political diversification","Minister", "Economic diversification", "Land ownership", "Educational inst.ownership"))
+stargazer(fit.multinom, type="html", keep = c("linkage","success_cat","minister","ind_edu", "land"),order = c("linkage","success_cat","minister","ind_edu",  "land"),add.lines = list (c("Caste control", "Yes","Yes","Yes")),covariate.labels = c( "Political diversification","Minister", "Economic diversification", "Land ownership"))
 ```
 
 
@@ -1213,13 +1226,13 @@ success_cat<-factor( success_cat,levels = c( "Stable","Rising","Declining"))
 
 
 
-fit.multinom <- multinom(success_cat~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry +  land + linkage+edu)
+fit.multinom <- multinom(success_cat~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +ind_edu +  land + linkage)
 ```
 
 ```{r, results= "asis"}
 
 
-stargazer(fit.multinom, type="html", keep = c("linkage","success_cat","minister","industry", "land", "edu"),order = c("linkage","success_cat","minister","industry",  "land", "edu"),add.lines = list (c("Caste control", "Yes","Yes","Yes")),covariate.labels = c( "Political diversification","Minister", "Economic diversification", "Land ownership", "Educational inst.ownership"))
+stargazer(fit.multinom, type="html", keep = c("linkage","success_cat","minister","ind_edu", "land", "edu"),order = c("linkage","success_cat","minister","ind_edu",  "land"),add.lines = list (c("Caste control", "Yes","Yes","Yes")),covariate.labels = c( "Political diversification","Minister", "Economic diversification", "Land ownership"))
 ```
 
 
@@ -1235,13 +1248,13 @@ success_cat<-factor( success_cat,levels = c( "Rising","Declining","Stable"))
 
 
 
-fit.multinom <- multinom(success_cat~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry +  land + linkage+edu)
+fit.multinom <- multinom(success_cat~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +ind_edu +  land + linkage)
 ```
 
 ```{r, results= "asis"}
 
 
-stargazer(fit.multinom, type="html", keep = c("linkage","success_cat","minister","industry", "land", "edu"),order = c("linkage","success_cat","minister","industry",  "land", "edu"),add.lines = list (c("Caste control", "Yes","Yes","Yes")),covariate.labels = c( "Political diversification","Minister", "Economic diversification", "Land ownership", "Educational inst.ownership"))
+stargazer(fit.multinom, type="html", keep = c("linkage","success_cat","minister","indu_edu", "land"),order = c("linkage","success_cat","minister","ind_edu",  "land"),add.lines = list (c("Caste control", "Yes","Yes","Yes")),covariate.labels = c( "Political diversification","Minister", "Economic diversification", "Land ownership"))
 ```
 
 ---
@@ -1397,9 +1410,21 @@ edu <- as.numeric(case_when(fam_st_rs_adr$edu_cat =="Only School" ~"1",
                                         TRUE ~"0"
 
                                        ))
+
+
+                             fam_st_rs_adr <- fam_st_rs_adr %>%  
+  mutate(edu_log = ifelse(edu_cat=="None",0,1)) %>%
+   rowwise() %>% 
+  mutate(ind_all = sum(ind_c1, ind_c2,ind_c3, ind_c4, ind_c5),
+         ind_edu = sum(ind_all+edu_log)) %>% ungroup() 
+                                  
+
+
 industry <-fam_st_rs_adr$indus_count %>% replace_na(0) 
 
 #industry <- industry+school_college
+
+ind_edu <- fam_st_rs_adr$ind_edu
 
 
 
@@ -1452,7 +1477,7 @@ rising <- ifelse(fam_st_rs_adr$success_cat=="Rising",1,0)
 
 
 ```{r}
-df <- tibble( caste_uc, caste_yadav,caste_non_yadav_obc , caste_dalit , caste_muslim ,minister_duration ,industry , land , linkage,linkage_down, minister, edu, second_mem_dur, delim_change, serious_crime_avg, asset_avg, rising, stable)
+df <- tibble( caste_uc, caste_yadav,caste_non_yadav_obc , caste_dalit , caste_muslim ,minister_duration ,industry , land , linkage,linkage_down, minister, edu, second_mem_dur, delim_change, serious_crime_avg, asset_avg, rising, stable, ind_edu)
 
 df_cor <- tibble(asset_avg  , serious_crime_avg,  land, industry, edu, linkage)
 # 
@@ -1470,15 +1495,15 @@ df_cor <- tibble(asset_avg  , serious_crime_avg,  land, industry, edu, linkage)
 
 
 
-fit.ols<- felm(rising~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry +  land + linkage+edu+serious_crime_avg +log(asset_avg) , data = df)
+fit.ols<- felm(rising~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +ind_edu +  land + linkage+serious_crime_avg +log(asset_avg) , data = df)
 
-fit.ols1<- felm(stable~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry +  land + linkage+edu+serious_crime_avg +log(asset_avg) , data = df)
+fit.ols1<- felm(stable~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +ind_edu +  land + linkage+serious_crime_avg +log(asset_avg) , data = df)
 ```
 
 ```{r, results= "asis"}
 
 
-stargazer(fit.ols,fit.ols1, type="html", keep = c("linkage","success_cat","minister","industry", "land", "edu","serious_crime_avg","asset_avg"),order = c("linkage","success_cat","minister","industry",  "land", "edu","serious_crime_avg","asset_avg"),add.lines = list (c("Caste control", "Yes","Yes")),covariate.labels = c( "Political diversification","Minister", "Economic diversification", "Land ownership", "Educational inst.ownership", "Asset","Crime"))
+stargazer(fit.ols,fit.ols1, type="html", keep = c("linkage","success_cat","minister","ind_edu", "land", "serious_crime_avg","asset_avg"),order = c("linkage","success_cat","minister","ind_edu",  "land", "serious_crime_avg","asset_avg"),add.lines = list (c("Caste control", "Yes","Yes")),covariate.labels = c( "Political diversification","Minister", "Economic diversification", "Land ownership", "Asset","Crime"))
 ```
 
 ---
@@ -1565,6 +1590,21 @@ edu <- as.numeric(case_when( dyn_ae_ge_fam_uniq$edu_cat =="Only School" ~"1",
                                         TRUE ~"0"
 
                                        ))
+                            
+                             dyn_ae_ge_fam_uniq <- dyn_ae_ge_fam_uniq %>%  
+  mutate(edu_log = ifelse(edu_cat=="None",0,1)) %>%
+   rowwise() %>% 
+  mutate(ind_all = sum(ind_c1, ind_c2,ind_c3, ind_c4, ind_c5),
+         ind_edu = sum(ind_all+edu_log)) %>% ungroup() 
+                                  
+
+
+
+
+ind_edu <- dyn_ae_ge_fam_uniq$ind_edu
+
+
+
 industry <- dyn_ae_ge_fam_uniq$indus_count %>% replace_na(0) 
 
 #industry <- industry+school_college
@@ -1624,7 +1664,7 @@ delim_change <- dyn_ae_ge_fam_uniq$delim_change
 
 
 
-df <- tibble(success_cat, caste_uc, caste_yadav,caste_non_yadav_obc , caste_dalit , caste_muslim ,minister_duration ,industry , land , linkage,linkage_down, minister, edu, second_mem_dur, delim_change)
+df <- tibble(success_cat, caste_uc, caste_yadav,caste_non_yadav_obc , caste_dalit , caste_muslim ,minister_duration ,industry , land , linkage,linkage_down, minister, edu, second_mem_dur, delim_change, ind_edu)
 
 
 
@@ -1695,13 +1735,13 @@ success_cat<-factor( success_cat,levels = c( "Declining","Stable","Rising"))
 
 
 
-fit.multinom <- multinom(success_cat~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry +  land + linkage+edu)
+fit.multinom <- multinom(success_cat~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +ind_edu +  land + linkage)
 ```
 
 ```{r, results= "asis"}
 
 
-stargazer(fit.multinom, type="html", keep = c("linkage","success_cat","minister","industry", "land", "edu"),order = c("linkage","success_cat","minister","industry",  "land", "edu"),add.lines = list (c("Caste control", "Yes","Yes","Yes")),covariate.labels = c( "Political diversification","Minister", "Economic diversification", "Land ownership", "Educational inst.ownership"))
+stargazer(fit.multinom, type="html", keep = c("linkage","success_cat","minister","ind_edu", "land"),order = c("linkage","success_cat","minister","ind_edu",  "land"),add.lines = list (c("Caste control", "Yes","Yes","Yes")),covariate.labels = c( "Political diversification","Minister", "Economic diversification", "Land ownership"))
 ```
 
 
@@ -1715,13 +1755,13 @@ success_cat<-factor( success_cat,levels = c( "Stable","Rising","Declining"))
 
 
 
-fit.multinom <- multinom(success_cat~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry +  land + linkage+edu)
+fit.multinom <- multinom(success_cat~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +ind_edu +  land + linkage)
 ```
 
 ```{r, results= "asis"}
 
 
-stargazer(fit.multinom, type="html", keep = c("linkage","success_cat","minister","industry", "land", "edu"),order = c("linkage","success_cat","minister","industry",  "land", "edu"),add.lines = list (c("Caste control", "Yes","Yes","Yes")),covariate.labels = c( "Political diversification","Minister", "Economic diversification", "Land ownership", "Educational inst.ownership"))
+stargazer(fit.multinom, type="html", keep = c("linkage","success_cat","minister","ind_edu", "land"),order = c("linkage","success_cat","minister","ind_edu",  "land"),add.lines = list (c("Caste control", "Yes","Yes","Yes")),covariate.labels = c( "Political diversification","Minister", "Economic diversification", "Land ownership"))
 ```
 
 
@@ -1737,58 +1777,57 @@ success_cat<-factor( success_cat,levels = c( "Rising","Declining","Stable"))
 
 
 
-fit.multinom <- multinom(success_cat~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +industry +  land + linkage+edu)
+fit.multinom <- multinom(success_cat~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +ind_edu +  land + linkage)
 ```
 
 ```{r, results= "asis"}
 
 
-stargazer(fit.multinom, type="html", keep = c("linkage","success_cat","minister","industry", "land", "edu"),order = c("linkage","success_cat","minister","industry",  "land", "edu"),add.lines = list (c("Caste control", "Yes","Yes","Yes")),covariate.labels = c( "Political diversification","Minister", "Economic diversification", "Land ownership", "Educational inst.ownership"))
+stargazer(fit.multinom, type="html", keep = c("linkage","success_cat","minister","ind_edu", "land"),order = c("linkage","success_cat","minister","ind_edu",  "land"),add.lines = list (c("Caste control", "Yes","Yes","Yes")),covariate.labels = c( "Political diversification","Minister", "Economic diversification", "Land ownership"))
 ```
 
 ---
 
 
-## families - 
+<!-- ## families -  -->
 
 
-```{r}
+<!-- ```{r} -->
 
-fam_list_70 <- dyn_ae_ge_fam %>% ungroup()%>%  filter(success_cat!= "Rising" & year<2001  )%>% arrange(year)%>% distinct(family_id,.keep_all =TRUE) %>% select(year,constituency_no, constituency_name, success_cat)
- 
+<!-- fam_list_70 <- dyn_ae_ge_fam %>% ungroup()%>%  filter(success_cat!= "Rising" & year<2001  )%>% arrange(year)%>% distinct(family_id,.keep_all =TRUE) %>% select(year,constituency_no, constituency_name, success_cat) -->
 
-cen <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/francesca/UPdata.csv")
 
+<!-- cen <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/francesca/UPdata.csv") -->
 
-names(cen) <- tolower(names(cen))
 
+<!-- names(cen) <- tolower(names(cen)) -->
 
-cen_70 <- cen %>% select(ac_number_1976, plit71,p_w71)
 
+<!-- cen_70 <- cen %>% select(ac_number_1976, plit71,p_w71) -->
 
-cen_fam <- inner_join(fam_list_70, cen_70,by = c("constituency_no"= "ac_number_1976"))
 
+<!-- cen_fam <- inner_join(fam_list_70, cen_70,by = c("constituency_no"= "ac_number_1976")) -->
 
-cen_fam %>% group_by(success_cat) %>% summarise(mean(plit71), mean(p_w71))
 
-## no difference literate and worker population in 1917 when we compare stable to declining
+<!-- cen_fam %>% group_by(success_cat) %>% summarise(mean(plit71), mean(p_w71)) -->
 
+<!-- ## no difference literate and worker population in 1917 when we compare stable to declining -->
 
 
-```
 
+<!-- ``` -->
 
-### night lights
 
-```{r}
-fam_list_93 <- dyn_ae_ge_fam %>% ungroup()%>%  filter(success_cat!= "Rising" &year>1992  )%>% arrange(year)%>% distinct(family_id,.keep_all =TRUE) %>% select(year,constituency_no, constituency_name, success_cat)
+<!-- ### night lights -->
 
-nl <- read.csv("D:/projects & works/CPR_Verma/dyn_dev.csv")
+<!-- ```{r} -->
+<!-- fam_list_93 <- dyn_ae_ge_fam %>% ungroup()%>%  filter(success_cat!= "Rising" &year>1992  )%>% arrange(year)%>% distinct(family_id,.keep_all =TRUE) %>% select(year,constituency_no, constituency_name, success_cat) -->
 
-nl <- nl %>% filter(position==1) %>% select(year, ac07_id,term_growth, annual_growth)  
+<!-- nl <- read.csv("D:/projects & works/CPR_Verma/dyn_dev.csv") -->
 
-nl_93 <- nl %>% filter(year == 1993)
+<!-- nl <- nl %>% filter(position==1) %>% select(year, ac07_id,term_growth, annual_growth)   -->
 
+<!-- nl_93 <- nl %>% filter(year == 1993) -->
 
 
 
@@ -1796,152 +1835,153 @@ nl_93 <- nl %>% filter(year == 1993)
 
 
 
-nl_fam <- inner_join(nl_93, fam_list_93, by = c( "ac07_id" = "constituency_no"))
 
-nl_fam %>% group_by(success_cat) %>% summarise(mean(term_growth), mean(annual_growth))
+<!-- nl_fam <- inner_join(nl_93, fam_list_93, by = c( "ac07_id" = "constituency_no")) -->
 
-```
+<!-- nl_fam %>% group_by(success_cat) %>% summarise(mean(term_growth), mean(annual_growth)) -->
 
+<!-- ``` -->
 
-## lomg term
 
+<!-- ## lomg term -->
 
-```{r}
-dyn_ae_ge_fam %>%filter( success_cat != "Rising") %>% select(year, constituency_no,con_id_uniq, position, family_id, success_cat) %>% group_by(family_id,con_id_uniq) %>% summarise(n()) %>% group_by(family_id) %>% summarise(count = n()) %>% arrange(count) %>% filter(count ==1 )
 
+<!-- ```{r} -->
+<!-- dyn_ae_ge_fam %>%filter( success_cat != "Rising") %>% select(year, constituency_no,con_id_uniq, position, family_id, success_cat) %>% group_by(family_id,con_id_uniq) %>% summarise(n()) %>% group_by(family_id) %>% summarise(count = n()) %>% arrange(count) %>% filter(count ==1 ) -->
 
-dyn_ae_ge_fam_w <- dyn_ae_ge_fam %>% filter(position ==1& success_cat!= "Rising")
 
+<!-- dyn_ae_ge_fam_w <- dyn_ae_ge_fam %>% filter(position ==1& success_cat!= "Rising") -->
 
 
-nl_fam_all <- inner_join(nl, dyn_ae_ge_fam_w, by = c("year", "ac07_id" = "constituency_no"))
 
-nl_fam_all %>% group_by(success_cat) %>% summarise(count = n(),mean(term_growth), mean(annual_growth))
+<!-- nl_fam_all <- inner_join(nl, dyn_ae_ge_fam_w, by = c("year", "ac07_id" = "constituency_no")) -->
 
+<!-- nl_fam_all %>% group_by(success_cat) %>% summarise(count = n(),mean(term_growth), mean(annual_growth)) -->
 
-ggplot(nl_fam_all, aes(y=term_growth, x=success_cat))+
-  geom_point()
 
+<!-- ggplot(nl_fam_all, aes(y=term_growth, x=success_cat))+ -->
+<!--   geom_point() -->
 
-model <- lm(term_growth ~success_cat+ factor(year)+factor(ac07_id),data = nl_fam_all)
 
-summary(model)
+<!-- model <- lm(term_growth ~success_cat+ factor(year)+factor(ac07_id),data = nl_fam_all) -->
 
+<!-- summary(model) -->
 
 
-nl_fam_all %>%  group_by(success_cat) %>% summarise(n(), n_distinct(family_id))
 
-```
+<!-- nl_fam_all %>%  group_by(success_cat) %>% summarise(n(), n_distinct(family_id)) -->
 
+<!-- ``` -->
 
-## duration
 
-family duration = sum of all the assembly duration of the year in which the members have contested
+<!-- ## duration -->
 
-```{r}
+<!-- family duration = sum of all the assembly duration of the year in which the members have contested -->
 
+<!-- ```{r} -->
 
 
-dyn_ae_ge_fam %>% group_by(family_id) %>%distinct(year, .keep_all = TRUE) %>%  summarise(family_duration = sum(term_duration)) %>% 
-  ggplot(aes(family_duration))+
-  geom_histogram(binwidth = 5,  color = "steelblue")
 
+<!-- dyn_ae_ge_fam %>% group_by(family_id) %>%distinct(year, .keep_all = TRUE) %>%  summarise(family_duration = sum(term_duration)) %>%  -->
+<!--   ggplot(aes(family_duration))+ -->
+<!--   geom_histogram(binwidth = 5,  color = "steelblue") -->
 
 
-dyn_ae_ge_fam %>% group_by(family_id, success_cat) %>% summarise(family_duration = sum(term_duration)) %>% filter(family_duration<100) %>% 
-  
-  ggplot(aes(family_duration, fill = success_cat))+
-  geom_histogram(binwidth = 5, alpha = .7)
-
-
-dyn_ae_ge_fam %>%ungroup() %>% arrange(year) %>%   distinct(election_type, year) %>% kable()
-
-
-
- dyn_ae_ge_fam %>%
-   group_by(family_id) %>% 
-   distinct(year, .keep_all = TRUE) %>%
-  select(family_id,election_type, year, position, term_duration) %>%
-  arrange(family_id,year) %>%
-   mutate(year_diff = year- lag(year, default = 0),
-         # year_diff = ifelse(year_diff>lag(term_duration),0,year_diff),
-          year_diff_1 = lead(year_diff,default = 0),
-         year_diff_1 = ifelse(year_diff_1==0|year_diff_1>5|year_diff_1<0 ,term_duration, year_diff_1)) %>%
-   filter(family_id == "f0015702")
-
-
-  ## contest
-  
-  
- dyn_ae_ge_fam %>% 
-   group_by(family_id) %>% 
-   distinct(year, .keep_all = TRUE) %>%
-  arrange(family_id,year) %>% 
-   mutate(year_diff = year- lag(year, default = 0),
-         # year_diff = ifelse(year_diff>lag(term_duration),0,year_diff),
-          year_diff_1 = lead(year_diff,default = 0),
-         year_diff_1 = ifelse(year_diff_1==0|year_diff_1>5|year_diff_1<0 ,term_duration, year_diff_1)) %>% 
-  ungroup() %>% 
-    group_by(family_id) %>%
- summarise(family_duration = sum(year_diff_1)) %>%  
-  
-  ggplot(aes(family_duration))+
-  
-  geom_histogram(binwidth = 5,  color = "steelblue")
-
-
-
- 
-
- ## winning
- 
-  dyn_ae_ge_fam %>% 
-    filter(position==1) %>% 
-   group_by(family_id) %>% 
-   distinct(year, .keep_all = TRUE) %>%
-  arrange(family_id,year) %>% 
-   mutate(year_diff = year- lag(year, default = 0),
-         # year_diff = ifelse(year_diff>lag(term_duration),0,year_diff),
-          year_diff_1 = lead(year_diff,default = 0),
-         year_diff_1 = ifelse(year_diff_1==0|year_diff_1>5|year_diff_1<0 ,term_duration, year_diff_1)) %>% 
-  ungroup() %>% 
-    group_by(family_id) %>%
- summarise(family_duration = sum(year_diff_1)) %>%  
-  
-  ggplot(aes(family_duration))+
-  
-  geom_histogram(binwidth = 5,  color = "steelblue")
-
- 
- 
-
-```
-
-
-## succes cat
-
-```{r}
-
- ## succes cats - contest
- 
- 
-  dyn_ae_ge_fam %>% 
-   group_by(family_id) %>% 
-   distinct(year, .keep_all = TRUE) %>%
-  arrange(family_id,year) %>% 
-   mutate(year_diff = year- lag(year, default = 0),
-         # year_diff = ifelse(year_diff>lag(term_duration),0,year_diff),
-          year_diff_1 = lead(year_diff,default = 0),
-         year_diff_1 = ifelse(year_diff_1==0|year_diff_1>5|year_diff_1<0 ,term_duration, year_diff_1)) %>% 
-  ungroup() %>% 
-    group_by(family_id, success_cat) %>%
- summarise(family_duration = sum(year_diff_1)) %>%  
-  
-  ggplot(aes(family_duration, fill = success_cat))+
-  geom_histogram()
-  
-
-```
+
+<!-- dyn_ae_ge_fam %>% group_by(family_id, success_cat) %>% summarise(family_duration = sum(term_duration)) %>% filter(family_duration<100) %>%  -->
+
+<!--   ggplot(aes(family_duration, fill = success_cat))+ -->
+<!--   geom_histogram(binwidth = 5, alpha = .7) -->
+
+
+<!-- dyn_ae_ge_fam %>%ungroup() %>% arrange(year) %>%   distinct(election_type, year) %>% kable() -->
+
+
+
+<!--  dyn_ae_ge_fam %>% -->
+<!--    group_by(family_id) %>%  -->
+<!--    distinct(year, .keep_all = TRUE) %>% -->
+<!--   select(family_id,election_type, year, position, term_duration) %>% -->
+<!--   arrange(family_id,year) %>% -->
+<!--    mutate(year_diff = year- lag(year, default = 0), -->
+<!--          # year_diff = ifelse(year_diff>lag(term_duration),0,year_diff), -->
+<!--           year_diff_1 = lead(year_diff,default = 0), -->
+<!--          year_diff_1 = ifelse(year_diff_1==0|year_diff_1>5|year_diff_1<0 ,term_duration, year_diff_1)) %>% -->
+<!--    filter(family_id == "f0015702") -->
+
+
+<!--   ## contest -->
+
+
+<!--  dyn_ae_ge_fam %>%  -->
+<!--    group_by(family_id) %>%  -->
+<!--    distinct(year, .keep_all = TRUE) %>% -->
+<!--   arrange(family_id,year) %>%  -->
+<!--    mutate(year_diff = year- lag(year, default = 0), -->
+<!--          # year_diff = ifelse(year_diff>lag(term_duration),0,year_diff), -->
+<!--           year_diff_1 = lead(year_diff,default = 0), -->
+<!--          year_diff_1 = ifelse(year_diff_1==0|year_diff_1>5|year_diff_1<0 ,term_duration, year_diff_1)) %>%  -->
+<!--   ungroup() %>%  -->
+<!--     group_by(family_id) %>% -->
+<!--  summarise(family_duration = sum(year_diff_1)) %>%   -->
+
+<!--   ggplot(aes(family_duration))+ -->
+
+<!--   geom_histogram(binwidth = 5,  color = "steelblue") -->
+
+
+
+
+
+<!--  ## winning -->
+
+<!--   dyn_ae_ge_fam %>%  -->
+<!--     filter(position==1) %>%  -->
+<!--    group_by(family_id) %>%  -->
+<!--    distinct(year, .keep_all = TRUE) %>% -->
+<!--   arrange(family_id,year) %>%  -->
+<!--    mutate(year_diff = year- lag(year, default = 0), -->
+<!--          # year_diff = ifelse(year_diff>lag(term_duration),0,year_diff), -->
+<!--           year_diff_1 = lead(year_diff,default = 0), -->
+<!--          year_diff_1 = ifelse(year_diff_1==0|year_diff_1>5|year_diff_1<0 ,term_duration, year_diff_1)) %>%  -->
+<!--   ungroup() %>%  -->
+<!--     group_by(family_id) %>% -->
+<!--  summarise(family_duration = sum(year_diff_1)) %>%   -->
+
+<!--   ggplot(aes(family_duration))+ -->
+
+<!--   geom_histogram(binwidth = 5,  color = "steelblue") -->
+
+
+
+
+<!-- ``` -->
+
+
+<!-- ## succes cat -->
+
+<!-- ```{r} -->
+
+<!--  ## succes cats - contest -->
+
+
+<!--   dyn_ae_ge_fam %>%  -->
+<!--    group_by(family_id) %>%  -->
+<!--    distinct(year, .keep_all = TRUE) %>% -->
+<!--   arrange(family_id,year) %>%  -->
+<!--    mutate(year_diff = year- lag(year, default = 0), -->
+<!--          # year_diff = ifelse(year_diff>lag(term_duration),0,year_diff), -->
+<!--           year_diff_1 = lead(year_diff,default = 0), -->
+<!--          year_diff_1 = ifelse(year_diff_1==0|year_diff_1>5|year_diff_1<0 ,term_duration, year_diff_1)) %>%  -->
+<!--   ungroup() %>%  -->
+<!--     group_by(family_id, success_cat) %>% -->
+<!--  summarise(family_duration = sum(year_diff_1)) %>%   -->
+
+<!--   ggplot(aes(family_duration, fill = success_cat))+ -->
+<!--   geom_histogram() -->
+
+
+<!-- ``` -->
 
 
 <!-- # Political variables {.tabset} -->
@@ -2917,6 +2957,10 @@ fam_all <- inner_join(fam_life_all,fam_life_2, by = "family_id")
 
 
 ```{r results = "asis"}
+
+fam_df2 <- fam_df2 %>% select(-ind_edu.x, ind_edu = ind_edu.y)
+
+
 dead.surv1 <- coxph(Surv(fam_life, dead_10) ~ linkage +minister + ind_edu+ land + caste_uc + caste_yadav + caste_non_yadav_obc+caste_dalit+caste_muslim + factor(decade)  , data = subset(fam_df2 %>% filter(min_fam_year<2009)))
 
 

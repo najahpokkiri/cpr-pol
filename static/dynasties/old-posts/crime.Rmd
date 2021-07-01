@@ -1,0 +1,993 @@
+---
+title: 'Criminal Politicians and the constituency'
+date: "2020-06-29"
+params:
+  orig_date: "Original Publish Date: 29 June, 2020"
+  update_date: !r paste("Updated on:", format(Sys.time(), '%d %B, %Y'))
+output:
+  html_document:
+    theme: readable
+    toc: TRUE
+    toc_float: TRUE
+    toc_depth: 5
+    number_sections: false
+    fig_width: 6            
+editor_options: 
+  chunk_output_type: inline
+
+---
+
+
+---
+
+### Document History
+
+`r params$orig_date`
+
+`r params$update_date`
+
+---
+
+# NES {.tabset}
+
+
+```{r set up, warning=FALSE, include=FALSE, message= FALSE, cache = FALSE}
+
+knitr::opts_chunk$set(cache =FALSE,echo = FALSE, message=FALSE, warning = FALSE)
+
+##fig.width = 16/2, fig.height = 9/2
+
+library(haven)
+
+library(tidyverse)
+
+library(data.table)
+
+library(stargazer)
+
+library(kableExtra)
+`%!in%` = Negate(`%in%`)
+
+select <- dplyr::select
+
+"/" <- function(x,y) ifelse(y==0,0,base:::"/"(x,y))
+```
+
+
+```{r}
+nes <- haven::read_sav("D:/cpr/data/nes/NES_2014.sav")
+
+# View(head(nes))
+# 
+# dim(nes)
+# 
+# names(nes)
+
+state <- read.csv("D:/cpr/data/nes/nes_state_id.csv")
+
+
+nes <- inner_join(state, nes, by = "state_id")
+
+adr <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/adr/adr_tcpd_09_14_19.csv")
+
+names(adr) <- tolower(names(adr))
+```
+
+
+```{r}
+rally_meeting <- ifelse(nes$q6a==2,1,0)
+
+proces_natak <- ifelse(nes$q6b==2,1,0)
+  
+dd_canvas <- ifelse(nes$q6c==2,1,0)
+
+money_coll_cont <- ifelse(nes$q6d==2,1,0)
+  
+
+poster_leaflet <- ifelse(nes$q6e==2,1,0)
+
+party <- ifelse(nes$q12==2,1,0)
+
+cm <- ifelse(nes$q13a==2,1,0)
+
+rule_party <- ifelse(nes$q13b==2,1,0)
+
+pol_info <- ifelse(cm+rule_party>0,1,0)
+
+malpractise_increase <- ifelse(nes$q14==1,1,0)
+
+malpractise_var <- as.numeric(nes$q14)
+
+### Three possible ways --- a) estimate OLS == +2 increased, +1 same, 0 DK, -1 decreased, -2 never take place
+
+malpractise_cont <- case_when(nes$q14 ==1~2,
+                           nes$q14==2 ~1,
+                           nes$q14==8 ~0,
+                           nes$q14==3~-1,
+                           nes$q14==4~-2)
+
+home_visit <- ifelse(nes$q25a==2,1,0)
+
+call <-  ifelse(nes$q25b==2,1,0)
+
+handout <-  ifelse(nes$q25c==2,1,0)
+
+drive_ps <-  ifelse(nes$q25d==2,1,0)
+
+female <- ifelse(nes$z2==2,1,0)
+
+constituency <- nes$pc_id
+
+
+constituency_id <- paste0(nes$state_id,nes$pc_id)
+
+state <- nes$state_name
+
+caste <- nes$z5a
+
+
+age_nes <- as.numeric(nes$z1)  ## remove as it is the one with no response
+
+
+education_nes <- as.numeric(nes$z3) ## remove 9 no response
+
+bjp_vote <- ifelse(nes$q1a==2,1,0)
+
+
+urban <- ifelse(nes$z8!=1,1,0)
+
+unfair_election <- ifelse(nes$q20 ==3,1,0)
+
+
+
+# 2 - fair, 1 - somwhat fair, 0-  no opinin, -1 - unfiar
+
+
+fair_election_cont <- case_when(nes$q20 ==1~2,
+                           nes$q20==2 ~1,
+                           nes$q20==8~0,
+                           nes$q20==3~-1)
+
+fair_election_dummy <- ifelse(nes$q20==1,1,0)
+
+fair_election_var <- as.numeric(nes$q20) ## remove 8 - no opnion
+
+
+
+participation <- rally_meeting + proces_natak + dd_canvas + money_coll_cont+ poster_leaflet
+
+mobilisation <- home_visit+call+handout+ drive_ps
+
+
+
+nes_df <- tibble( mobilisation, participation,unfair_election ,fair_election_var, fair_election_dummy, fair_election_cont,
+                  malpractise_increase,malpractise_var,malpractise_cont ,caste,
+                  female,age_nes, education_nes,bjp_vote,urban,constituency, state, constituency_id)
+
+
+# corr_df <- nes_df %>% select(bjp_vote, urban)
+# 
+# #cor(bjp_vote, urban)
+
+
+
+# nes_ac <- nes_df %>% group_by(state, constituency) %>% summarise(avg_mobilisation = mean(mobilisation),
+#                                                        avg_participation = mean(participation))
+# 
+# 
+# 
+# nes_dyn <-inner_join(nes_ac, dyn_14, by = c("state"="state_name","constituency"="constituency_no"))
+# 
+
+#names(adr)
+
+
+
+
+
+adr <- adr %>% rowwise()%>% mutate(crime = sum(serious_crime + non_serious_crime),
+                                   criminal = ifelse(crime>0,1,0)) %>% ungroup()
+
+crime_14 <- adr %>%filter(year==2014)%>%  group_by(state_name, year, constituency_no) %>% 
+                                                     mutate(
+                                                       criminal_candidate = ifelse(sum(crime)>0,1,0),
+                                                       serious_crime_cand = ifelse(sum(serious_crime)>0,1,0),
+                                                               non_serious_crime_cand = ifelse(sum(non_serious_crime)>0,1,0),
+                                                       criminal_w = ifelse(crime>0 & position ==1,1,0),
+                                                        serious_criminal_w = ifelse(serious_crime>0 & position ==1,1,0),
+                                                               serious_crime_w = ifelse(serious_crime>0 & position ==1,1,0),
+                                                               non_serious_crime_w = ifelse(non_serious_crime>0 & position ==1,1,0),
+                                                       n_criminals= sum(criminal),
+                                                       serious_1_2 = ifelse(any( position %in% c(1,2)) & any( criminal==1),1,0),
+                                                       median_asset = median(as.numeric(total_assets), na.rm = TRUE),
+                                                       incumbent_cand = ifelse(sum(ifelse(incumbent==TRUE,1,0))>0,1,0),
+                                                       turnout = turnout_percentage
+                                                               )%>% ungroup() %>% distinct(state_name, year, constituency_no, .keep_all = TRUE)
+
+ 
+
+turnout_09 <- adr %>% filter(year==2009) %>% select(state_name, year, constituency_no, turnout_09=turnout_percentage) %>% distinct(state_name, year, constituency_no, .keep_all = TRUE) 
+
+crime_14 <- inner_join(crime_14, turnout_09, by = c("state_name","constituency_no" ))
+
+winner_09 <- adr %>%filter(year==2009)%>%  group_by(state_name, year, constituency_no) %>% summarise(serious_crime_w_09 = ifelse(serious_crime>0 & position ==1,1,0)) %>% ungroup() %>% distinct(state_name, year, constituency_no, .keep_all = TRUE)%>% select(c(1:1, 3:4))
+
+
+crime_df <- inner_join(winner_09,crime_14, by = c("state_name",  "constituency_no"))
+
+
+nes_adr <- inner_join(crime_df,nes_df,  by = c("state_name"="state","constituency_no" ="constituency"))
+
+#  names(nes_adr)
+
+```
+
+## data summary
+
+
+
+```{r}
+
+
+sum_df <- crime_df %>% summarise(across(c(3:3, serious_crime_w_09,criminal,serious_crime_cand,non_serious_crime_cand,criminal_w,serious_criminal_w,non_serious_crime_w,n_criminals), mean, na.rm = TRUE)) %>% melt() # %>%  kable(digits =2)
+
+
+title <- tibble(c("% of 2009 winners with serious criminal cases",
+           "% of ACs that have criminal candidates",
+           "%  of ACs that serious criminal candidates",
+           "% of ACs that have non-serious criminal candidates",
+           "% of ACs in which criminal candidate has won",
+           "% of ACs in which serious criminal has won",
+           "% of ACs in which non-serious criminal has won",
+           "Average number of criminals in an AC"))
+
+cbind(title,sum_df ) %>% setNames(c("Variable","Name","Value")) %>% select(1:1, 3:3) %>% kable(digits = 2) %>% kable_styling(full_width = FALSE)
+
+
+
+```
+
+<!-- ### 2 -->
+
+
+
+<!-- ```{r} -->
+
+<!--  nes_adr%>% group_by(criminal_w) %>% summarise(avg_mobilisation = mean(mobilisation), -->
+<!--                                                        avg_participation = mean(participation), -->
+<!--                                                avg_unfair = mean(unfair_election) -->
+<!--                                                ) %>% kable(digits =2) -->
+
+<!-- ``` -->
+
+<!-- ### 2 -->
+
+<!-- ```{r} -->
+
+<!--  nes_adr%>% group_by(serious_crime_w_09) %>% summarise(avg_mobilisation = mean(mobilisation), -->
+<!--                                                        avg_participation = mean(participation), -->
+<!--                                                        avg_unfair = mean(unfair_election) )%>% kable(digits =2) -->
+
+<!-- ``` -->
+
+<!-- ### 3 -->
+
+<!-- ```{r} -->
+<!--  nes_adr%>% group_by(serious_crime_cand )%>% summarise(avg_mobilisation = mean(mobilisation), -->
+<!--                                                        avg_participation = mean(participation), -->
+<!--                                                        avg_unfair = mean(unfair_election) )%>% kable(digits =2) -->
+<!-- ``` -->
+
+<!-- ### 4 -->
+
+<!-- ```{r} -->
+
+<!--  nes_adr%>% group_by(serious_crime_cand )%>% summarise(avg_mobilisation = mean(mobilisation), -->
+<!--                                                        avg_participation = mean(participation), -->
+<!--                                                        avg_unfair = mean(unfair_election) )%>% kable(digits =2) -->
+
+<!-- ``` -->
+
+
+## Regressions {.tabset}
+
+
+### participation
+
+```{r, results="asis"}
+
+library(lfe)
+
+nes_adr$reservation <- ifelse(nes_adr$constituency_type=="GEN",0,1)
+
+fit1 <- felm(participation~criminal_candidate+enop+reservation+ female+factor(caste)|state_name+constituency_no, data = nes_adr)
+
+#fit2 <- felm(participation~n_criminals +enop+reservation+ female+factor(caste)|state_name+constituency_no, data = nes_adr)
+
+fit3 <- felm(participation~serious_criminal_w+enop+reservation+ female+factor(caste)|state_name+constituency_no, data = nes_adr)
+
+fit4 <- felm(participation~serious_1_2 +enop+reservation+ female+factor(caste)|state_name+constituency_no, data = nes_adr)
+
+fit5<- felm(participation~serious_crime_cand +enop+reservation+ female+factor(caste)|state_name+constituency_no, data = nes_adr)
+
+fit6 <- felm(participation~serious_crime_w_09 +enop+reservation+ female+factor(caste)|state_name+constituency_no, data = nes_adr)
+
+
+
+
+addlines <- list( c("State fixed effects", "Yes","Yes","Yes","Yes", "Yes"),
+                   c("Constituency fixed effects", "Yes","Yes","Yes","Yes", "Yes"),
+                   c("Caste control ", "Yes","Yes","Yes","Yes", "Yes"),
+                  c("Age control ", "Yes","Yes","Yes","Yes", "Yes"),
+                  c("Education control ", "Yes","Yes","Yes","Yes", "Yes"))
+
+drop <- c("caste")
+
+
+stargazer::stargazer(fit1, fit3, fit4,fit5,fit6, type ="html",add.lines =  addlines, omit = drop)
+
+
+
+```
+
+### mobilisation
+
+```{r, results="asis"}
+
+
+
+fit1 <- felm(mobilisation~criminal_candidate+enop+reservation+ female+factor(caste)|state_name+constituency_no, data = nes_adr)
+
+#fit2 <- felm(mobilisation~n_criminals +enop+reservation+ female+factor(caste)|state_name+constituency_no, data = nes_adr)
+
+fit3 <- felm(mobilisation~serious_criminal_w+enop+reservation+ female+factor(caste)|state_name+constituency_no, data = nes_adr)
+
+fit4 <- felm(mobilisation~serious_1_2 +enop+reservation+ female+factor(caste)|state_name+constituency_no, data = nes_adr)
+
+fit5<- felm(mobilisation~serious_crime_cand +enop+reservation+ female+factor(caste)|state_name+constituency_no, data = nes_adr)
+
+fit6 <- felm(mobilisation~serious_crime_w_09 +enop+reservation+ female+factor(caste)|state_name+constituency_no, data = nes_adr)
+
+
+
+
+
+stargazer::stargazer(fit1, fit3, fit4,fit5,fit6, type ="html",add.lines =  addlines, omit = drop)
+
+```
+
+### fair election {.tabset}
+
+<!-- focus on fair election & malpractise -->
+
+
+<!-- make unfair fair  -->
+
+<!-- make it an ordinal variable -->
+
+<!-- dk will be in the centre -->
+
+<!-- another once chuck it out -->
+
+<!-- constituency fixed effects -  -->
+<!-- age control -->
+<!-- mention caste cotrol -->
+
+<!-- demographic control - education -->
+
+
+<!-- median asset - log -->
+
+<!-- serious winner 09 as control in all models -->
+
+<!-- whether they voted for BJP or not -->
+
+
+<!-- one model on turnout - how criminal candidate affect this -  -->
+<!-- men v/s women turnout - eci -->
+
+
+
+
+
+```{r}
+library(lfe)
+
+nes_adr$reservation <- ifelse(nes_adr$constituency_type=="GEN",0,1)
+
+nes_adr$pc_id_uniq <- paste0(nes_adr$state_name,nes_adr$constituency_no)
+
+addlines <- list( c("State fixed effects", "Yes","Yes","Yes","Yes", "Yes"),
+                   c("Constituency fixed effects", "Yes","Yes","Yes","Yes", "Yes"),
+                   c("Caste control ", "Yes","Yes","Yes","Yes", "Yes"),
+                  c("Age control ", "Yes","Yes","Yes","Yes", "Yes"),
+                  c("Education control ", "Yes","Yes","Yes","Yes", "Yes"))
+
+drop <- c("caste", "education_nes","age_nes")
+
+
+```
+
+
+
+
+
+Q14: Now compare the recently held election in your area with elections held in the past. Do you think in this election things like rigging, intimidation, fraud and other malpractices have increased, decreased or remained the same?
+
+Labels:
+ value                            label
+     1                     1: Increased
+     2                2: Same as before
+     3                     3: Decreased
+     4 4: Malpractices never take place
+     8          8: Can't say/Don't know
+
+
+
+
+#### fair election - dummy
+
+```{r, results="asis"}
+fit1 <- felm(fair_election_dummy~criminal_candidate+serious_crime_w_09+enop+reservation+ female+factor(caste)+factor(age_nes)+factor(education_nes)+log(median_asset)+bjp_vote+urban|state_name, data = nes_adr)
+
+#fit2 <- felm(fair_election_dummy~n_criminals +enop+reservation+ female+factor(caste)|state_name, data = nes_adr)
+
+fit3 <- felm(fair_election_dummy~serious_criminal_w+serious_crime_w_09+enop+reservation+ female+factor(caste)+factor(age_nes)+factor(education_nes)+log(median_asset)+bjp_vote+urban|state_name, data = nes_adr)
+
+fit4 <- felm(fair_election_dummy~serious_1_2 +serious_crime_w_09+enop+reservation+ female+factor(caste)+factor(age_nes)+factor(education_nes)+log(median_asset)+bjp_vote+urban|state_name, data = nes_adr)
+
+fit5<- felm(fair_election_dummy~serious_crime_cand+serious_crime_w_09 +enop+reservation+ female+factor(caste)+factor(age_nes)+factor(education_nes)+log(median_asset)+bjp_vote+urban|state_name, data = nes_adr)
+fit6 <- felm(fair_election_dummy~serious_crime_w_09 +enop+reservation+ female+factor(caste)+factor(age_nes)+factor(education_nes)+log(median_asset)+bjp_vote+urban|state_name, data = nes_adr)
+
+
+#stargazer::stargazer(fit1, type ="html",add.lines =  addlines, omit = drop)
+
+
+stargazer::stargazer(fit1, fit3, fit4,fit5,fit6, type ="html",add.lines =  addlines, omit = drop, title = "Fair elections dummy - all options included")
+
+
+
+
+
+
+```
+
+#### fair election removing the dummy excluding dk
+
+```{r, results="asis"}
+fit1 <- felm(fair_election_dummy~criminal_candidate+serious_crime_w_09+enop+reservation+ female+factor(caste)+factor(age_nes)+factor(education_nes)+log(median_asset)+bjp_vote+urban|state_name, data = subset(nes_adr %>% filter(fair_election_var!= 8)))
+
+#fit2 <- felm(fair_election_dummy~n_criminals +enop+reservation+ female+factor(caste)|state_name, data = nes_adr)
+
+fit3 <- felm(fair_election_dummy~serious_criminal_w+serious_crime_w_09+enop+reservation+ female+factor(caste)+factor(age_nes)+factor(education_nes)+log(median_asset)+bjp_vote+urban|state_name, data = subset(nes_adr %>% filter(fair_election_var!= 8)))
+
+fit4 <- felm(fair_election_dummy~serious_1_2 +serious_crime_w_09+enop+reservation+ female+factor(caste)+factor(age_nes)+factor(education_nes)+log(median_asset)+bjp_vote+urban|state_name, data = subset(nes_adr %>% filter(fair_election_var!= 8)))
+
+fit5<- felm(fair_election_dummy~serious_crime_cand+serious_crime_w_09 +enop+reservation+ female+factor(caste)+factor(age_nes)+factor(education_nes)+log(median_asset)+bjp_vote+urban|state_name, data = subset(nes_adr %>% filter(fair_election_var!= 8)))
+
+fit6 <- felm(fair_election_dummy~serious_crime_w_09 +enop+reservation+ female+factor(caste)+factor(age_nes)+factor(education_nes)+log(median_asset)+bjp_vote+urban|state_name, data = subset(nes_adr %>% filter(fair_election_var!= 8)))
+
+
+#stargazer::stargazer(fit1, type ="html",add.lines =  addlines, omit = drop)
+
+
+stargazer::stargazer(fit1, fit3, fit4,fit5,fit6, type ="html",add.lines =  addlines, omit = drop, title = "Fair election dummy - excluded dk")
+
+
+```
+
+
+
+#### Fair election continous variable
+
+```{r, results="asis"}
+
+
+
+fit1 <- felm(fair_election_cont~criminal_candidate+serious_crime_w_09+enop+reservation+ female+factor(caste)+factor(age_nes)+factor(education_nes)+log(median_asset)+bjp_vote+urban|state_name, data = nes_adr)
+
+#fit2 <- felm(malpractise_increase~n_criminals +enop+reservation+ female+factor(caste)|state_name, data = nes_adr)
+
+fit3 <- felm(fair_election_cont~serious_criminal_w+serious_crime_w_09+enop+reservation+ female+factor(caste)+factor(age_nes)+factor(education_nes)+log(median_asset)+bjp_vote+urban|state_name, data = nes_adr)
+
+fit4 <- felm(fair_election_cont~serious_1_2 +serious_crime_w_09+enop+reservation+ female+factor(caste)+factor(age_nes)+factor(education_nes)+log(median_asset)+bjp_vote+urban|state_name, data = nes_adr)
+
+fit5<- felm(fair_election_cont~serious_crime_cand+serious_crime_w_09 +enop+reservation+ female+factor(caste)+factor(age_nes)+factor(education_nes)+log(median_asset)+bjp_vote+urban|state_name, data = nes_adr)
+fit6 <- felm(fair_election_cont~serious_crime_w_09 +enop+reservation+ female+factor(caste)+factor(age_nes)+factor(education_nes)+log(median_asset)+bjp_vote+urban|state_name, data = nes_adr)
+
+
+#stargazer::stargazer(fit1, type ="html",add.lines =  addlines, omit = drop)
+
+
+stargazer::stargazer(fit1, fit3, fit4,fit5,fit6, type ="html",add.lines =  addlines, omit = drop, title = "Fair election - continous variable")
+
+
+```
+
+
+### malpractise {.tabset}
+
+ Q20: Thinking of the way elections are conducted in India, what do you feel - are elections fair, somewhat fair or unfair?
+
+
+Labels:
+ value            label
+     1          1: Fair
+     2 2: Somewhat fair
+     3        3: Unfair
+     8    8: No opinion
+
+#### Malpractise - binary
+
+```{r, results="asis"}
+
+fit1 <- felm(malpractise_increase~criminal_candidate+serious_crime_w_09+enop+reservation+ female+factor(caste)+factor(age_nes)+factor(education_nes)+log(median_asset)+bjp_vote+urban|state_name, data = nes_adr)
+
+#fit2 <- felm(malpractise_increase~n_criminals +enop+reservation+ female+factor(caste)|state_name, data = nes_adr)
+
+fit3 <- felm(malpractise_increase~serious_criminal_w+serious_crime_w_09+enop+reservation+ female+factor(caste)+factor(age_nes)+factor(education_nes)+log(median_asset)+bjp_vote+urban|state_name, data = nes_adr)
+
+fit4 <- felm(malpractise_increase~serious_1_2 +serious_crime_w_09+enop+reservation+ female+factor(caste)+factor(age_nes)+factor(education_nes)+log(median_asset)+bjp_vote+urban|state_name, data = nes_adr)
+
+fit5<- felm(malpractise_increase~serious_crime_cand+serious_crime_w_09 +enop+reservation+ female+factor(caste)+factor(age_nes)+factor(education_nes)+log(median_asset)+bjp_vote+urban|state_name, data = nes_adr)
+fit6 <- felm(malpractise_increase~serious_crime_w_09 +enop+reservation+ female+factor(caste)+factor(age_nes)+factor(education_nes)+log(median_asset)+bjp_vote+urban|state_name, data = nes_adr)
+
+
+#stargazer::stargazer(fit1, type ="html",add.lines =  addlines, omit = drop)
+
+
+stargazer::stargazer(fit1, fit3, fit4,fit5,fit6, type ="html",add.lines =  addlines, omit = drop, title = "Malpractise increase - all options included")
+
+```
+
+
+#### removing the dk
+
+```{r, results="asis"}
+fit1 <- felm(malpractise_increase~criminal_candidate+serious_crime_w_09+enop+reservation+ female+factor(caste)+factor(age_nes)+factor(education_nes)+log(median_asset)+bjp_vote+urban|state_name, data = subset(nes_adr %>% filter(malpractise_var!= 8)))
+
+#fit2 <- felm(malpractise_increase~n_criminals +enop+reservation+ female+factor(caste)|state_name, data = nes_adr)
+
+fit3 <- felm(malpractise_increase~serious_criminal_w+serious_crime_w_09+enop+reservation+ female+factor(caste)+factor(age_nes)+factor(education_nes)+log(median_asset)+bjp_vote+urban|state_name, data = subset(nes_adr %>% filter(malpractise_var!= 8)))
+
+fit4 <- felm(malpractise_increase~serious_1_2 +serious_crime_w_09+enop+reservation+ female+factor(caste)+factor(age_nes)+factor(education_nes)+log(median_asset)+bjp_vote+urban|state_name, data = subset(nes_adr %>% filter(malpractise_var!= 8)))
+
+fit5<- felm(malpractise_increase~serious_crime_cand+serious_crime_w_09 +enop+reservation+ female+factor(caste)+factor(age_nes)+factor(education_nes)+log(median_asset)+bjp_vote+urban|state_name, data = subset(nes_adr %>% filter(malpractise_var!= 8)))
+
+fit6 <- felm(malpractise_increase~serious_crime_w_09 +enop+reservation+ female+factor(caste)+factor(age_nes)+factor(education_nes)+log(median_asset)+bjp_vote+urban|state_name, data = subset(nes_adr %>% filter(malpractise_var!= 8)))
+
+
+#stargazer::stargazer(fit1, type ="html",add.lines =  addlines, omit = drop)
+
+
+stargazer::stargazer(fit1, fit3, fit4,fit5,fit6, type ="html",add.lines =  addlines, omit = drop, title = "Malpractise increase - excluded dk")
+```
+
+#### malpractise contd
+
+
+```{r, results="asis"}
+
+
+fit1 <- felm(malpractise_cont~criminal_candidate+serious_crime_w_09+enop+reservation+ female+factor(caste)+factor(age_nes)+factor(education_nes)+log(median_asset)+bjp_vote+urban|state_name, data = nes_adr)
+
+#fit2 <- felm(malpractise_increase~n_criminals +enop+reservation+ female+factor(caste)|state_name, data = nes_adr)
+
+fit3 <- felm(malpractise_cont~serious_criminal_w+serious_crime_w_09+enop+reservation+ female+factor(caste)+factor(age_nes)+factor(education_nes)+log(median_asset)+bjp_vote+urban|state_name, data = nes_adr)
+
+fit4 <- felm(malpractise_cont~serious_1_2 +serious_crime_w_09+enop+reservation+ female+factor(caste)+factor(age_nes)+factor(education_nes)+log(median_asset)+bjp_vote+urban|state_name, data = nes_adr)
+
+fit5<- felm(malpractise_cont~serious_crime_cand+serious_crime_w_09 +enop+reservation+ female+factor(caste)+factor(age_nes)+factor(education_nes)+log(median_asset)+bjp_vote+urban|state_name, data = nes_adr)
+fit6 <- felm(malpractise_cont~serious_crime_w_09 +enop+reservation+ female+factor(caste)+factor(age_nes)+factor(education_nes)+log(median_asset)+bjp_vote+urban|state_name, data = nes_adr)
+
+
+#stargazer::stargazer(fit1, type ="html",add.lines =  addlines, omit = drop)
+
+
+stargazer::stargazer(fit1, fit3, fit4,fit5,fit6, type ="html",add.lines =  addlines, omit = drop, title = "Malpractise - continous variable")
+
+```
+
+### turnout {.tabset}
+
+```{r}
+crime_all <- adr %>% filter(year!= "2009")%>%   group_by(state_name, year, constituency_no) %>% 
+                                                     mutate(
+                                                       criminal_candidate = ifelse(sum(crime)>0,1,0),
+                                                       serious_crime_cand = ifelse(sum(serious_crime)>0,1,0),
+                                                               non_serious_crime_cand = ifelse(sum(non_serious_crime)>0,1,0),
+                                                       criminal_w = ifelse(crime>0 & position ==1,1,0),
+                                                        serious_criminal_w = ifelse(serious_crime>0 & position ==1,1,0),
+                                                               serious_crime_w = ifelse(serious_crime>0 & position ==1,1,0),
+                                                               non_serious_crime_w = ifelse(non_serious_crime>0 & position ==1,1,0),
+                                                       n_criminals= sum(criminal),
+                                                       n_serious_criminal = sum(serious_crime_cand),
+                                                       serious_1_2 = ifelse(any( position %in% c(1,2)) & any( criminal==1),1,0),
+                                                       median_asset = median(as.numeric(total_assets), na.rm = TRUE),
+                                                       incumbent_cand = ifelse(sum(ifelse(incumbent==TRUE,1,0))>0,1,0),
+                                                       turnout = turnout_percentage
+                                                               )%>% ungroup() %>% distinct(state_name, year, constituency_no, .keep_all = TRUE)
+
+ 
+
+turnout_09 <- adr %>% filter(year==2009) %>% select(state_name,  constituency_no, lagged_turnout=turnout_percentage) %>% distinct(state_name,  constituency_no, .keep_all = TRUE) %>% mutate(year =2014)
+
+turnout_14 <- adr %>% filter(year==2014) %>% select(state_name,  constituency_no, lagged_turnout=turnout_percentage) %>% distinct(state_name,  constituency_no, .keep_all = TRUE) %>% ungroup() %>% mutate(year=2019)
+
+lagged_turnout <- rbind(turnout_09, turnout_14)
+
+crime_all <- inner_join(crime_all, lagged_turnout, by = c("state_name","constituency_no" ,"year"))
+
+
+winner_09 <- adr %>%filter(year==2009)%>%  group_by(state_name, year, constituency_no) %>% summarise(lagged_criminal_winner = ifelse(serious_crime>0 & position ==1,1,0)) %>% ungroup() %>% distinct(state_name, year, constituency_no, .keep_all = TRUE)%>% select(c(1:1, 3:4)) %>% mutate(year =2014) %>% ungroup()
+
+
+winner_14 <- adr %>%filter(year==2014)%>%  group_by(state_name, year, constituency_no) %>% summarise(lagged_criminal_winner = ifelse(serious_crime>0 & position ==1,1,0)) %>% ungroup() %>% distinct(state_name, year, constituency_no, .keep_all = TRUE)%>% select(c(1:1, 3:4))%>% mutate(year =2019)%>% ungroup()
+
+winner_all <- rbind(winner_09, winner_14)
+
+
+crime_all <- inner_join(crime_all,winner_all, by = c("state_name",  "constituency_no","year"))
+
+crime_all$pc_id_uniq <- paste0(crime_all$state_name,crime_all$constituency_no)
+
+
+
+```
+#### All turnout
+
+```{r, results="asis"}
+
+crime_all$reservation <- ifelse(crime_all$constituency_type=="GEN",0,1)
+
+fit1<- felm(turnout_percentage~criminal_candidate +enop+reservation+incumbent_cand +log(median_asset)+lagged_turnout + lagged_criminal_winner|pc_id_uniq +state_name+year, data = crime_all)
+
+fit2<- felm(turnout_percentage~serious_criminal_w+enop+reservation+incumbent_cand +log(median_asset)+lagged_turnout + lagged_criminal_winner|pc_id_uniq +state_name +year, data = crime_all)
+
+fit3<- felm(turnout_percentage~serious_1_2++enop+reservation+incumbent_cand+log(median_asset)+lagged_turnout + lagged_criminal_winner|pc_id_uniq +state_name + year, data = crime_all)
+
+
+fit4 <- felm(turnout_percentage~serious_crime_cand++enop+reservation+incumbent_cand+log(median_asset)+lagged_turnout + lagged_criminal_winner|pc_id_uniq +state_name +year, data = crime_all)
+
+
+
+
+addlines <- list( c("Constituency fixed effects", "Yes","Yes","Yes","Yes"),
+                  c("State fixed effects", "Yes","Yes","Yes","Yes"),
+                  c("Year fixed effects", "Yes","Yes","Yes","Yes")
+                   
+                 )
+
+drop <- c("caste", "education_nes","age_nes")
+
+stargazer::stargazer(fit1, fit2,fit3,fit4, type ="html",add.lines =  addlines, omit = drop, title = "Turnout percentage")
+
+#stargazer::stargazer(fit5, type ="html",add.lines =  addlines, omit = drop)
+
+
+```
+
+```{r}
+
+to_14 <- read.csv("D:/cpr/data/election/turnout/pc_turnout_14.csv")
+
+to_19 <- read.csv("D:/cpr/data/election/turnout/pc_turnout_19.csv") %>% mutate(year =2019, .before = ï..state_name)
+
+to_all <- data.table::rbindlist(list(to_14, to_19), use.names = FALSE)
+
+names(to_all)[1] <- "year"
+
+names(to_all)[7] <- "female_turnout"
+
+to_all$state_name <- tolower(to_all$state_name)
+
+#to_all$pc_name <- tolower(to_all$pc_name)
+#to_all <- to_all %>% mutate(state_name = ifelse(state_name=="orissa","odisha",state_name))
+
+
+crime_all_to <- inner_join(crime_all, to_all, by = c("year", "statename"="state_name", "constituency_no"="pc_no"))
+#to_all$pc_no
+
+crime_all_to$pc_id_uniq <- paste0(crime_all_to$state_name,crime_all_to$constituency_no)
+
+#head(crime_all_to$pc_id_uniq)
+
+```
+
+#### female turnout
+
+```{r, results="asis"}
+fit1<- felm(female_turnout~criminal_candidate +enop+reservation+incumbent_cand +log(median_asset)+lagged_turnout + lagged_criminal_winner|pc_id_uniq+state_name+year, data = crime_all_to)
+
+fit2<- felm(female_turnout~serious_criminal_w+enop+reservation+incumbent_cand +log(median_asset)+lagged_turnout + lagged_criminal_winner|pc_id_uniq++state_name +year, data = crime_all_to)
+
+fit3<- felm(female_turnout~serious_1_2++enop+reservation+incumbent_cand+log(median_asset)+lagged_turnout + lagged_criminal_winner|pc_id_uniq++state_name + year, data = crime_all_to)
+
+
+fit4 <- felm(female_turnout~serious_crime_cand++enop+reservation+incumbent_cand+log(median_asset)+lagged_turnout + lagged_criminal_winner|pc_id_uniq++state_name +year, data = crime_all_to)
+
+
+
+
+
+
+
+stargazer::stargazer(fit1, fit2,fit3,fit4, type ="html",add.lines =  addlines, omit = drop, title ="Female turnout percentage")
+
+#stargazer::stargazer(fit1 ,type ="html",add.lines =  addlines, omit = drop, title = "Female turnout percentage")
+
+
+
+
+```
+
+#### male turnout
+
+```{r, results = "asis"}
+fit1<- felm(male_turnout~criminal_candidate +enop+reservation+incumbent_cand +log(median_asset)+lagged_turnout + lagged_criminal_winner|state_name+year, data = crime_all_to)
+
+fit2<- felm(male_turnout~serious_criminal_w+enop+reservation+incumbent_cand +log(median_asset)+lagged_turnout + lagged_criminal_winner|state_name +year, data = crime_all_to)
+
+fit3<- felm(male_turnout~serious_1_2+enop+reservation+incumbent_cand+log(median_asset)+lagged_turnout + lagged_criminal_winner|state_name + year, data = crime_all_to)
+
+
+fit4 <- felm(male_turnout~serious_crime_cand+enop+reservation+incumbent_cand+log(median_asset)+lagged_turnout + lagged_criminal_winner|state_name +year, data = crime_all_to)
+
+
+
+
+
+stargazer::stargazer(fit1, fit2,fit3,fit4, type ="html",add.lines =  addlines, omit = drop, title = "Male turnout percentage")
+```
+
+
+
+
+
+
+# ACLED {.tabset}
+
+
+
+```{r}
+
+##acled - PCs
+# 
+# library(sf)
+# library(tidyverse)
+# 
+# library(data.table)
+# 
+# pc_shp <-  st_read("D:/cpr/data/shape-file/maps-master/parliamentary-constituencies/india_pc_2019.shp")
+# 
+# pc_up <- pc_shp %>% filter(ST_NAME == "UTTAR PRADESH")
+# 
+# 
+# 
+# pc_shp <- st_transform(pc_shp, 4326)
+# 
+# 
+# 
+# 
+# acled <- fread("D:/cpr/data/crime/acled_india_2016_21.csv")
+# 
+# names(acled) <- tolower(names(acled))
+# 
+# map2(acled$longitude, acled$latitude, ~st_point(c(.x, .y))) %>% 
+#   st_sfc(crs = 4326) %>% 
+#   st_sf(acled[,-(1:2)], .) -> acled
+# 
+# 
+# 
+# 
+# df <- bind_cols(
+#   acled,
+#   pc_shp[as.numeric(st_within(acled, pc_shp)),]) 
+# 
+# #df %>% filter(is.na(AC_NAME))
+# 
+# df %>% select(c(1:32, - `.`)) %>% as.tibble() %>% write.csv( "D:/cpr/data/crime/acled_pc.csv")
+# ## mapping test
+# 
+# library(leaflet)
+# library(htmltools)
+# 
+# head(acled,100) %>%
+# leaflet() %>%
+#     addTiles() %>%
+#     addMarkers(~longitude, ~latitude)
+
+```
+
+
+```{r}
+library(lubridate)
+
+
+
+acled <- fread("D:/cpr/data/crime/acled_pc.csv")
+
+# 
+# acled <- acled %>% mutate(date = lubridate::dmy(acled$event_date), .before = event_date,
+#                  election_year = ifelse(between(date,as.Date("2014-05-15"),as.Date("2019-05-15")),2014,2019),
+#                  month =   format_ISO8601(date, precision = "ym"),
+#                  state_name = tolower(state_name),
+#                  ) %>% 
+#                    group_by(election_year) %>% 
+#                    mutate(n_year = n_distinct(month)/12) %>% 
+#                    ungroup()
+                 
+acled <- acled %>% 
+  mutate(date = lubridate::dmy(acled$event_date), .before = event_date) %>% 
+  filter(between(date, as.Date("2019-01-01"),as.Date("2019-05-30"))) %>%
+  mutate(
+                 election_year = 2019,
+                 month =   format_ISO8601(date, precision = "ym"),
+                 state_name = tolower(state_name),
+                 ) 
+                   
+
+
+#filter(between(Date, as.Date("2015-09-05"),as.Date("2015-09-17")))
+
+# 
+# lubridate::as_date(head(acled$event_date))
+# 
+# lubridate::my(head(acled$e))
+```
+
+
+
+```{r}
+
+# names(acled)
+# table(acled$year)
+# 
+# table(is.na(acled$constituency_no))
+
+
+ acled_df <- acled %>% filter(!is.na(constituency_no))%>% group_by(election_year,state_name,constituency_no, event_type) %>% summarise(n_events = n(),
+                                                                                                                                       n_events_month = n_events/5)
+
+
+
+
+acled_df <- acled_df%>% mutate(violence = ifelse(event_type %in% c("Battles","Explosions/Remote violence","Strategic developments"),"Other violence",event_type))
+
+
+acled_protests<- acled_df %>% filter(violence =="Protests")
+
+acled_riots<- acled_df %>% filter(violence =="Riots")
+
+
+acled_civ<- acled_df %>% filter(violence =="Violence against civilians")
+
+
+acled_oth<- acled_df %>% filter(violence =="Other violence")
+
+crime_19 <- crime_all %>% filter(year==2019)
+
+acled_crime_1 <- left_join(crime_19, acled_protests, by = c("year" ="election_year","state_name","constituency_no")) %>% mutate(violence = "Protests")
+
+acled_crime_2 <- left_join(crime_19, acled_riots, by = c("year" ="election_year","state_name","constituency_no"))%>% mutate(violence = "Riots")
+
+
+acled_crime_3 <- left_join(crime_19, acled_civ, by = c("year" ="election_year","state_name","constituency_no"))%>% mutate(violence = "Violence against civilians")
+
+
+
+acled_crime_4 <- left_join(crime_19, acled_oth, by = c("year" ="election_year","state_name","constituency_no"))%>% mutate(violence = "Other violence")
+
+
+acled_crime <- rbindlist(list(acled_crime_1,acled_crime_2,acled_crime_3,acled_crime_4))
+
+acled_crime <- acled_crime %>% mutate(n_events_month=ifelse(is.na(n_events_month),0,n_events_month))
+
+acled_crime$reservation <- ifelse(acled_crime$constituency_type=="GEN",0,1)
+
+
+
+```
+
+## summary 
+
+```{r}
+
+acled %>% group_by(year, event_type) %>% summarise(count = n()) %>% pivot_wider(names_from = "year", values_from = "count")
+
+```
+
+## Protests
+
+```{r, results="asis"}
+
+library(lfe)
+
+
+
+fit1<- felm(n_events_month~serious_crime_w +enop+incumbent_cand +log(median_asset)+ lagged_criminal_winner|state_name,  data =subset(acled_crime %>% filter(violence =="Protests")))
+
+
+
+fit2<- felm(n_events_month~criminal_candidate+enop+incumbent_cand +log(median_asset)+ lagged_criminal_winner|state_name, data =subset(acled_crime %>% filter(violence =="Protests")))
+
+
+fit3<- felm(n_events_month~serious_1_2 +enop+incumbent_cand +log(median_asset)+ lagged_criminal_winner|state_name, data =subset(acled_crime %>% filter(violence =="Protests")))
+
+
+
+
+fit4<- felm(n_events_month~serious_crime_cand +enop+incumbent_cand +log(median_asset)+ lagged_criminal_winner|state_name, data =subset(acled_crime %>% filter(violence =="Protests")))
+
+addlines <- list( #c("Constituency fixed effects", "Yes","Yes","Yes","Yes"),
+                  #c("State fixed effects", "Yes","Yes","Yes","Yes"),
+                  c("Year fixed effects", "Yes","Yes","Yes","Yes")
+                   
+                 )
+
+
+stargazer::stargazer(fit1,fit2, fit3,fit4, type ="html", add.lines = addlines,dep.var.labels = "Number of protests in between Jan and May 2019")
+
+
+```
+
+## Violence against civilians
+
+```{r, results="asis"}
+
+fit1<- felm(n_events_month~serious_crime_w +enop+incumbent_cand +log(median_asset)+ lagged_criminal_winner|state_name, data =subset(acled_crime %>% filter(violence =="Violence against civilians")))
+
+
+
+fit2<- felm(n_events_month~criminal_candidate+enop+incumbent_cand +log(median_asset)+ lagged_criminal_winner|state_name, data =subset(acled_crime %>% filter(violence =="Violence against civilians")))
+
+
+fit3<- felm(n_events_month~serious_1_2 +enop+incumbent_cand +log(median_asset)+ lagged_criminal_winner|state_name, data =subset(acled_crime %>% filter(violence =="Violence against civilians")))
+
+
+
+
+
+fit4<- felm(n_events_month~serious_crime_cand +enop+incumbent_cand +log(median_asset)+ lagged_criminal_winner|state_name, data =subset(acled_crime %>% filter(violence =="Violence against civilians")))
+
+
+stargazer::stargazer(fit1,fit2, fit3,fit4, type ="html", add.lines = addlines,dep.var.labels = "Number of Violence against civilians happened between Jan and May 2019")
+
+
+
+
+#summary(felm(n_events_month~criminal_candidate, data = subset(acled_crime %>% filter(violence=="Protests"))))
+
+
+```
+
+
+## Riots
+
+```{r, results="asis"}
+fit1<- felm(n_events_month~serious_crime_w +enop+incumbent_cand +log(median_asset)+ lagged_criminal_winner|state_name, data =subset(acled_crime %>% filter(violence =="Riots")))
+
+
+
+fit2<- felm(n_events_month~criminal_candidate+enop+incumbent_cand +log(median_asset)+ lagged_criminal_winner|state_name, data =subset(acled_crime %>% filter(violence =="Riots")))
+
+
+fit3<- felm(n_events_month~serious_1_2 +enop+incumbent_cand +log(median_asset)+ lagged_criminal_winner|state_name, data =subset(acled_crime %>% filter(violence =="Riots")))
+
+
+
+
+fit4<- felm(n_events_month~serious_crime_cand +enop+incumbent_cand +log(median_asset)+ lagged_criminal_winner|state_name, data =subset(acled_crime %>% filter(violence =="Riots")))
+
+
+stargazer::stargazer(fit1,fit2, fit3,fit4, type ="html", add.lines = addlines,dep.var.labels = "Average number of riots happened in every month during Jan and May 2019")
+
+
+```
+
+
+
+
+
+
+

@@ -23,3 +23,21 @@ write.excel(table)
 `%!in%` = Negate(`%in%`)
 ```
 
+# winsorising
+
+```{r}
+
+pcap <- function(x){
+  for (i in which(sapply(x, is.numeric))) {
+  quantiles <- quantile( x[,i], c(.05, .95 ), na.rm =TRUE)
+  x[,i] = ifelse(x[,i] < quantiles[1] , quantiles[1], x[,i])
+  x[,i] = ifelse(x[,i] > quantiles[2] , quantiles[2], x[,i])}
+  x}
+
+# Replacing extreme values with percentiles
+abcd = pcap(mydata)
+  
+# Checking Percentile values of 7th variable
+quantile(abcd[,7], c(0.25,0.5,.95, .99, 1), na.rm = TRUE)
+```
+

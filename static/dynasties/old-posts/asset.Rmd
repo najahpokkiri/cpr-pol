@@ -1,0 +1,383 @@
+---
+title: "Untitled"
+author: "Najah"
+date: "19/06/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+
+
+
+library(tidyverse)
+
+library(data.table)
+
+```
+
+```{r}
+adr_all <- fread("D:/cpr/UP/up-dynasties/dyn_other_data/adr_candidatelevel.csv")
+
+
+names(adr_all) <- tolower(names(adr_all))
+
+
+
+
+#unique(adr_all$Year)
+
+
+adr_ae <- adr_all %>% filter(year %in% c(2012,2017))
+
+
+adr_ae %>% select(13:31) %>% summarise_all(~mean(., na.rm = TRUE))
+
+
+adr_ae %>% select(13:31) %>% summarise_each(funs(counts=sum(.==0,na.rm=TRUE)/length(adr_ae$total_assets)*100)) 
+
+  
+
+
+
+
+
+adr_ass <- adr_ae %>% select(c(35:35,34:34,1:1,13:31)) %>% distinct(year, constituency_no, position, .keep_all = TRUE) %>% select(c(1:4,"total_immovable_assets_totals","total_movable_assets_totals","total_immovable_assets_current_market_value","total_movable_assets_gross", everything()))
+
+
+names(adr_ass)
+
+
+
+```
+
+## dyn asset difference
+
+```{r}
+dyn <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/dyn_all.csv")
+
+dyn_ae <-  dyn %>% ungroup() %>% filter(year %in% c(2012, 2017)) %>% select(year, constituency_no, position, dyn_cum_2, family_id, rel_id_uniq)
+
+
+dyn_ae <- dyn_ae %>% mutate(fam_rel_id =  paste0(family_id, rel_id_uniq))
+
+adr_dyn_ass <- inner_join(dyn_ae, adr_ass, by = c("year", "constituency_no", "position"))
+```
+
+
+
+```{r}
+ggplot(adr_dyn_ass %>% filter(total_movable_assets_deposits<35080327159
+), aes(factor(dyn_cum_2), log(total_movable_assets_deposits)))+
+  geom_boxplot()
+
+```
+
+
+### movable assets
+
+
+```{r}
+
+
+ adr_dyn_ass%>% data.table::melt(1:10) %>% 
+  filter(grepl("immov",variable)) %>% 
+  group_by(year,variable,dyn_cum_2) %>% summarise(sum_cat =sum(as.numeric(value), na.rm = TRUE)) %>% 
+  
+  group_by(year,dyn_cum_2) %>% 
+  mutate(sum = sum(sum_cat), prop = sum_cat/sum) %>% 
+  ggplot(aes(factor(dyn_cum_2), prop, fill = reorder(variable, prop), label = ifelse(prop>.03,round(prop,2),"")))+
+  geom_bar(position ="fill",stat = "identity")+
+  facet_wrap(~year)+
+  geom_text(size = 2.5, position = position_stack(vjust = 0.5))+
+  scale_x_discrete(labels= c("non-dynast","dynast"))+
+  cowplot::theme_minimal_hgrid()+
+  labs(title = "Immovable assets", subtitle =  "2012 & 17 : winners and runnerups")+
+  #colorspace::scale_fill_discrete_diverging("green-orange")+
+  theme(
+    axis.title  = element_blank(), 
+    legend.title = element_blank(),
+    axis.text.y = element_blank()
+  )
+
+
+
+```
+
+
+
+#### winners
+
+
+```{r}
+ adr_dyn_ass%>% filter(position==1)%>%  data.table::melt(1:10) %>% 
+  filter(grepl("immov",variable)) %>% 
+  group_by(year,variable,dyn_cum_2) %>% summarise(sum_cat =sum(as.numeric(value), na.rm = TRUE)) %>% 
+  
+  group_by(year,dyn_cum_2) %>% 
+  mutate(sum = sum(sum_cat), prop = sum_cat/sum) %>% 
+  ggplot(aes(factor(dyn_cum_2), prop, fill = reorder(variable, prop), label = ifelse(prop>.03,round(prop,2),"")))+
+  geom_bar(position ="fill",stat = "identity")+
+  facet_wrap(~year)+
+  geom_text(size = 2.5, position = position_stack(vjust = 0.5))+
+  scale_x_discrete(labels= c("non-dynast","dynast"))+
+  cowplot::theme_minimal_hgrid()+
+  labs(title = "Immovable assets", subtitle =  "2012 & 17 : winners and runnerups")+
+  #colorspace::scale_fill_discrete_diverging("green-orange")+
+  theme(
+    axis.title  = element_blank(), 
+    legend.title = element_blank(),
+    axis.text.y = element_blank()
+  )
+```
+
+
+### immovable assets
+
+
+```{r}
+ adr_dyn_ass%>%filter(total_movable_assets_deposits<35080327159
+) %>%  data.table::melt(1:10) %>% group_by(year,variable,dyn_cum_2) %>% 
+   filter(grepl("total_movable",variable)) %>% 
+  summarise(sum_cat =sum(as.numeric(value), na.rm = TRUE))%>%
+  group_by(year,dyn_cum_2) %>% 
+  mutate(sum = sum(sum_cat), prop = sum_cat/sum) %>% 
+ 
+  ggplot(aes(factor(dyn_cum_2), prop, fill = reorder(variable, prop), label = ifelse(prop>.03,round(prop,2),"")))+
+  geom_bar(position ="stack",stat = "identity")+
+  facet_wrap(~year)+
+  geom_text(size = 2.5, position = position_stack(vjust = 0.5))+
+  scale_x_discrete(labels= c("non-dynast","dynast"))+
+  labs(title = "Movable assets", subtitle =  "2012 & 17 : winners and runnerups")+
+  #colorspace::scale_fill_discrete_diverging("green-orange")+
+
+  cowplot::theme_minimal_hgrid()+
+  theme(
+    axis.title  = element_blank(), 
+    legend.title = element_blank(),
+    axis.text.y = element_blank()
+  )
+
+
+
+```
+
+### winners
+
+```{r}
+ adr_dyn_ass%>%filter(total_movable_assets_deposits<35080327159& position ==1) %>%  data.table::melt(1:10) %>% group_by(year,variable,dyn_cum_2) %>% 
+   filter(grepl("total_movable",variable)) %>% 
+  summarise(sum_cat =sum(as.numeric(value), na.rm = TRUE))%>%
+  group_by(year,dyn_cum_2) %>% 
+  mutate(sum = sum(sum_cat), prop = sum_cat/sum) %>% 
+ 
+  ggplot(aes(factor(dyn_cum_2), prop, fill = reorder(variable, prop), label = ifelse(prop>.03,round(prop,2),"")))+
+  geom_bar(position ="stack",stat = "identity")+
+  facet_wrap(~year)+
+  geom_text(size = 2.5, position = position_stack(vjust = 0.5))+
+  scale_x_discrete(labels= c("non-dynast","dynast"))+
+  labs(title = "Movable assets", subtitle =  "2012 & 17 : winners and runnerups")+
+  #colorspace::scale_fill_discrete_diverging("green-orange")+
+
+  cowplot::theme_minimal_hgrid()+
+  theme(
+    axis.title  = element_blank(), 
+    legend.title = element_blank(),
+    axis.text.y = element_blank()
+  )
+
+```
+
+
+
+
+## growth change
+
+
+
+```{r}
+names(adr_ass)
+
+unique(adr_ass$year)
+
+
+adr_cand_12 <- adr_dyn_ass %>% filter(position %in% c(1,2)) %>% group_by(fam_rel_id) %>% mutate(appearance = n()) %>% filter(appearance==2) %>% filter(year ==2012) %>% setNames(paste0( names(.),'_12')) 
+
+
+
+adr_cand_17 <- adr_dyn_ass %>% filter(position %in% c(1,2)) %>% group_by(fam_rel_id) %>% mutate(appearance = n()) %>% filter(appearance==2) %>% filter(year ==2017) %>% select(-c("family_id","rel_id_uniq"))%>%  setNames(paste0( names(.),'_17'))
+
+
+cand_12_17 <- inner_join(adr_cand_12, adr_cand_17, by = c("fam_rel_id_12"= "fam_rel_id_17"))
+
+
+
+
+
+cand_12_17 <- cand_12_17 %>% mutate(across(8:50, as.numeric))
+
+cand_12_17 <- cand_12_17  %>% mutate(across(8:50 ,Winsorize,na.rm = TRUE))
+
+
+mov_change <- cand_12_17 %>%  filter(total_movable_assets_deposits_17<5000000
+) %>% mutate(
+  total_movable_assets_cash_diff = ifelse(total_movable_assets_cash_12!=0,((total_movable_assets_cash_17-total_movable_assets_cash_12)/total_movable_assets_cash_12)*100,0),
+  total_movable_assets_deposits_diff = ifelse(total_movable_assets_deposits_12!=0,((total_movable_assets_deposits_17-total_movable_assets_deposits_12)/total_movable_assets_deposits_12)*100,0),
+  total_movable_assets_bonds_diff = ifelse(total_movable_assets_bonds_12!=0,((total_movable_assets_bonds_17-total_movable_assets_bonds_12)/total_movable_assets_bonds_12)*100,0),
+  total_movable_assets_jewellery_diff = ifelse(total_movable_assets_jewellery_12!=0,((total_movable_assets_jewellery_17-total_movable_assets_jewellery_12)/total_movable_assets_jewellery_12)*100,0)
+  
+) %>% ungroup %>% select(c(1:2, "position_12",4:4,52:55))
+```
+
+
+```{r}
+ggplot(aes(variable, Winsorize(value), probs = c(.01,.99)), fill = factor(dyn_cum_2_12))
+
+mov_1_2 <- mov_change%>% melt(1:4) %>% filter(value!=0) %>% 
+  
+  ggplot(aes(variable, value, fill = factor(dyn_cum_2_12)))+
+
+  geom_boxplot()+
+  ylim(-100,1000)+
+  scale_x_discrete(labels =c( "Cash","deposits","Bonds","Jwellery"))+
+  theme_light()+
+  scale_fill_discrete(labels = c("non-dynast","Dynast"))+
+  labs(y = "% Increase",
+       
+       subtitle = "Winners & Runner ups")+
+  theme(
+    legend.title = element_blank(),
+    axis.title.x = element_blank(),
+    legend.position = "bottom"
+  )
+
+
+  
+  
+  mov_1 <- mov_change%>% melt(1:4) %>% filter(value!=0 & position_12==1) %>% 
+  
+  ggplot(aes(variable, value, fill = factor(dyn_cum_2_12)))+
+
+  geom_boxplot()+
+  ylim(-100,1000)+
+  scale_x_discrete(labels =c( "Cash","deposits","Bonds","Jwellery"))+
+  theme_light()+
+  scale_fill_discrete(labels = c("non-dynast","Dynast"))+
+  labs(y = "% Increase",
+       
+       subtitle = "Winners ")+
+  theme(
+    legend.title = element_blank(),
+    axis.title = element_blank(),
+    legend.position = "bottom"
+  )
+
+  
+  mov_1_2 +mov_1+
+    plot_annotation(
+    title = "Movable asset growth",
+  )+
+    plot_layout(guides = "collect") & theme(legend.position = "bottom")
+
+
+```
+
+
+##immov change
+
+```{r}
+
+names(cand_12_17)
+
+immov_change <- cand_12_17 %>%  filter(total_movable_assets_deposits_17<5000000
+) %>% mutate(
+  total_immovable_assets_agricultural_diff = ifelse(total_immovable_assets_agricultural_12!=0,((total_immovable_assets_agricultural_17-total_immovable_assets_agricultural_12)/total_immovable_assets_agricultural_12)*100,0),
+  total_immovable_assets_nonagricultural_diff = ifelse(total_immovable_assets_nonagricultural_12!=0,((total_immovable_assets_nonagricultural_17-total_immovable_assets_nonagricultural_12)/total_immovable_assets_nonagricultural_12)*100,0),
+  total_immovable_assets_commercial_diff = ifelse(total_immovable_assets_commercial_12!=0,((total_immovable_assets_commercial_17-total_immovable_assets_commercial_12)/total_immovable_assets_commercial_12)*100,0),
+  total_immovable_assets_assets_residential_diff = ifelse(total_immovable_assets_assets_residential_12!=0,((total_immovable_assets_assets_residential_17-total_immovable_assets_assets_residential_12)/total_immovable_assets_assets_residential_12)*100,0)
+  
+) %>% ungroup %>% select(c(1:2, "position_12",4:4,52:55))
+
+
+cand_12_17 %>% select(contains("immov"))
+
+cand_12_17 %>% filter(position_12==1)%>%  group_by( dyn_cum_2_12) %>% tally()
+
+cand_12_17 %>%   group_by( dyn_cum_2_12) %>% tally()
+
+```
+
+
+```{r}
+immov_1_2 <- immov_change%>% melt(1:4) %>% filter(value!=0) %>% 
+  
+  ggplot(aes(variable, value, fill = factor(dyn_cum_2_12)))+
+
+  geom_boxplot()+
+  ylim(-100,1000)+
+  scale_x_discrete(labels =c( "Agricultural","non-Agri","Commercial","Residential"))+
+  theme_light()+
+  scale_fill_discrete(labels = c("non-dynast","Dynast"))+
+  labs(y = "% Increase",
+       
+       subtitle = "Winners & Runner ups")+
+  theme(
+    legend.title = element_blank(),
+    axis.title.x = element_blank(),
+    legend.position = "bottom"
+  )
+
+
+  
+  
+immov_1 <-   immov_change%>% melt(1:4) %>% filter(value!=0 & position_12==1) %>% 
+  
+  ggplot(aes(variable, value, fill = factor(dyn_cum_2_12)))+
+
+  geom_boxplot()+
+  ylim(-100,1000)+
+scale_x_discrete(labels =c( "Agricultural","non-Agri","Commercial","Residential"))+
+  theme_light()+
+  scale_fill_discrete(labels = c("non-dynast","Dynast"))+
+  labs(y = "% Increase",
+       
+       subtitle = "Winners ")+
+  theme(
+    legend.title = element_blank(),
+    axis.title = element_blank(),
+    legend.position = "bottom"
+  )
+
+library(patchwork)
+
+  immov_1_2 +immov_1+
+    plot_annotation(
+    title = "Immovable asset growth",
+  )+
+    plot_layout(guides = "collect") & theme(legend.position = "bottom")
+    
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
