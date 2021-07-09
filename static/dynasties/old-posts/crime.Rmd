@@ -3,7 +3,7 @@ title: 'Criminal Politicians and the constituency'
 date: "2020-06-29"
 params:
   orig_date: "Original Publish Date: 29 June, 2020"
-  update_date: !r paste("Updated on:", format(Sys.time(), '%d %B, %Y'))
+  update_date: !r paste("Updated on:", format(Sys.time(), '%I:%m  %p -- %d %B, %Y'))
 output:
   html_document:
     theme: readable
@@ -14,11 +14,9 @@ output:
     fig_width: 6            
 editor_options: 
   chunk_output_type: inline
-
 ---
 
-
----
+------------------------------------------------------------------------
 
 ### Document History
 
@@ -26,10 +24,23 @@ editor_options:
 
 `r params$update_date`
 
----
+------------------------------------------------------------------------
+
+In this document we will trying to uncover how having criminal running in the elections affect the perception of voters and over all law and order in the constituency.
+
+In the first part we use the 2014 NES data to find the relation between the voters mobilisation and participation, voters perception on increase in malpractices and fair election to the criminal candidacy in a constituency. We denote criminality in vast array of variables. They are as follows:
+
+-   criminal\_candidate -There is at least one **criminal candidate** in a constituency
+
+-   serious\_criminal\_w - A **criminal candidate has won** that election
+
+-   serious\_1\_2 - Either the **winner or runner-up are serious criminal**
+
+-   serious\_crime\_cand - There is atl east one **serious criminal candidate** in the constituency
+
+-   serious\_crime\_w\_09 - A **serious criminal won** the 2009 election
 
 # NES {.tabset}
-
 
 ```{r set up, warning=FALSE, include=FALSE, message= FALSE, cache = FALSE}
 
@@ -50,9 +61,8 @@ library(kableExtra)
 
 select <- dplyr::select
 
-"/" <- function(x,y) ifelse(y==0,0,base:::"/"(x,y))
+#"/" <- function(x,y) ifelse(y==0,0,base:::"/"(x,y))
 ```
-
 
 ```{r}
 nes <- haven::read_sav("D:/cpr/data/nes/NES_2014.sav")
@@ -72,7 +82,6 @@ adr <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/adr/adr_tcpd_09_14_19.csv
 
 names(adr) <- tolower(names(adr))
 ```
-
 
 ```{r}
 rally_meeting <- ifelse(nes$q6a==2,1,0)
@@ -224,8 +233,6 @@ nes_adr <- inner_join(crime_df,nes_df,  by = c("state_name"="state","constituenc
 
 ## data summary
 
-
-
 ```{r}
 
 
@@ -249,13 +256,14 @@ cbind(title,sum_df ) %>% setNames(c("Variable","Name","Value")) %>% select(1:1, 
 
 <!-- ### 2 -->
 
-
-
 <!-- ```{r} -->
 
 <!--  nes_adr%>% group_by(criminal_w) %>% summarise(avg_mobilisation = mean(mobilisation), -->
+
 <!--                                                        avg_participation = mean(participation), -->
+
 <!--                                                avg_unfair = mean(unfair_election) -->
+
 <!--                                                ) %>% kable(digits =2) -->
 
 <!-- ``` -->
@@ -265,7 +273,9 @@ cbind(title,sum_df ) %>% setNames(c("Variable","Name","Value")) %>% select(1:1, 
 <!-- ```{r} -->
 
 <!--  nes_adr%>% group_by(serious_crime_w_09) %>% summarise(avg_mobilisation = mean(mobilisation), -->
+
 <!--                                                        avg_participation = mean(participation), -->
+
 <!--                                                        avg_unfair = mean(unfair_election) )%>% kable(digits =2) -->
 
 <!-- ``` -->
@@ -273,9 +283,13 @@ cbind(title,sum_df ) %>% setNames(c("Variable","Name","Value")) %>% select(1:1, 
 <!-- ### 3 -->
 
 <!-- ```{r} -->
+
 <!--  nes_adr%>% group_by(serious_crime_cand )%>% summarise(avg_mobilisation = mean(mobilisation), -->
+
 <!--                                                        avg_participation = mean(participation), -->
+
 <!--                                                        avg_unfair = mean(unfair_election) )%>% kable(digits =2) -->
+
 <!-- ``` -->
 
 <!-- ### 4 -->
@@ -283,16 +297,22 @@ cbind(title,sum_df ) %>% setNames(c("Variable","Name","Value")) %>% select(1:1, 
 <!-- ```{r} -->
 
 <!--  nes_adr%>% group_by(serious_crime_cand )%>% summarise(avg_mobilisation = mean(mobilisation), -->
+
 <!--                                                        avg_participation = mean(participation), -->
+
 <!--                                                        avg_unfair = mean(unfair_election) )%>% kable(digits =2) -->
 
 <!-- ``` -->
 
-
 ## Regressions {.tabset}
 
-
 ### participation
+
+The index of participation is a variable that indicates the participation of voters in the campaign process . This is a combination of 5 variables from the nes-14.
+
+-   
+
+participation \<- rally\_meeting + proces\_natak + dd\_canvas + money\_coll\_cont+ poster\_leaflet
 
 ```{r, results="asis"}
 
@@ -360,7 +380,6 @@ stargazer::stargazer(fit1, fit3, fit4,fit5,fit6, type ="html",add.lines =  addli
 
 <!-- focus on fair election & malpractise -->
 
-
 <!-- make unfair fair  -->
 
 <!-- make it an ordinal variable -->
@@ -370,11 +389,12 @@ stargazer::stargazer(fit1, fit3, fit4,fit5,fit6, type ="html",add.lines =  addli
 <!-- another once chuck it out -->
 
 <!-- constituency fixed effects -  -->
+
 <!-- age control -->
+
 <!-- mention caste cotrol -->
 
 <!-- demographic control - education -->
-
 
 <!-- median asset - log -->
 
@@ -382,13 +402,9 @@ stargazer::stargazer(fit1, fit3, fit4,fit5,fit6, type ="html",add.lines =  addli
 
 <!-- whether they voted for BJP or not -->
 
-
 <!-- one model on turnout - how criminal candidate affect this -  -->
+
 <!-- men v/s women turnout - eci -->
-
-
-
-
 
 ```{r}
 library(lfe)
@@ -408,22 +424,9 @@ drop <- c("caste", "education_nes","age_nes")
 
 ```
 
-
-
-
-
 Q14: Now compare the recently held election in your area with elections held in the past. Do you think in this election things like rigging, intimidation, fraud and other malpractices have increased, decreased or remained the same?
 
-Labels:
- value                            label
-     1                     1: Increased
-     2                2: Same as before
-     3                     3: Decreased
-     4 4: Malpractices never take place
-     8          8: Can't say/Don't know
-
-
-
+Labels: value label 1 1: Increased 2 2: Same as before 3 3: Decreased 4 4: Malpractices never take place 8 8: Can't say/Don't know
 
 #### fair election - dummy
 
@@ -476,9 +479,7 @@ stargazer::stargazer(fit1, fit3, fit4,fit5,fit6, type ="html",add.lines =  addli
 
 ```
 
-
-
-#### Fair election continous variable
+#### Fair election continuous variable
 
 ```{r, results="asis"}
 
@@ -504,18 +505,11 @@ stargazer::stargazer(fit1, fit3, fit4,fit5,fit6, type ="html",add.lines =  addli
 
 ```
 
-
 ### malpractise {.tabset}
 
- Q20: Thinking of the way elections are conducted in India, what do you feel - are elections fair, somewhat fair or unfair?
+Q20: Thinking of the way elections are conducted in India, what do you feel - are elections fair, somewhat fair or unfair?
 
-
-Labels:
- value            label
-     1          1: Fair
-     2 2: Somewhat fair
-     3        3: Unfair
-     8    8: No opinion
+Labels: value label 1 1: Fair 2 2: Somewhat fair 3 3: Unfair 8 8: No opinion
 
 #### Malpractise - binary
 
@@ -540,7 +534,6 @@ stargazer::stargazer(fit1, fit3, fit4,fit5,fit6, type ="html",add.lines =  addli
 
 ```
 
-
 #### removing the dk
 
 ```{r, results="asis"}
@@ -564,7 +557,6 @@ stargazer::stargazer(fit1, fit3, fit4,fit5,fit6, type ="html",add.lines =  addli
 ```
 
 #### malpractise contd
-
 
 ```{r, results="asis"}
 
@@ -634,6 +626,7 @@ crime_all$pc_id_uniq <- paste0(crime_all$state_name,crime_all$constituency_no)
 
 
 ```
+
 #### All turnout
 
 ```{r, results="asis"}
@@ -740,14 +733,7 @@ fit4 <- felm(male_turnout~serious_crime_cand+enop+reservation+incumbent_cand+log
 stargazer::stargazer(fit1, fit2,fit3,fit4, type ="html",add.lines =  addlines, omit = drop, title = "Male turnout percentage")
 ```
 
-
-
-
-
-
 # ACLED {.tabset}
-
-
 
 ```{r}
 
@@ -799,7 +785,6 @@ stargazer::stargazer(fit1, fit2,fit3,fit4, type ="html",add.lines =  addlines, o
 
 ```
 
-
 ```{r}
 library(lubridate)
 
@@ -835,8 +820,6 @@ acled <- acled %>%
 # 
 # lubridate::my(head(acled$e))
 ```
-
-
 
 ```{r}
 
@@ -889,7 +872,7 @@ acled_crime$reservation <- ifelse(acled_crime$constituency_type=="GEN",0,1)
 
 ```
 
-## summary 
+## summary
 
 ```{r}
 
@@ -961,7 +944,6 @@ stargazer::stargazer(fit1,fit2, fit3,fit4, type ="html", add.lines = addlines,de
 
 ```
 
-
 ## Riots
 
 ```{r, results="asis"}
@@ -984,10 +966,3 @@ stargazer::stargazer(fit1,fit2, fit3,fit4, type ="html", add.lines = addlines,de
 
 
 ```
-
-
-
-
-
-
-
