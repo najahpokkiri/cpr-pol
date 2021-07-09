@@ -523,7 +523,9 @@ vals <- data.table::rbindlist(list(n,unique_n,mean, sd,min, max), use.names = FA
 names(vals) <- str_remove( names(vals),"_n")
 
 
-cbind(stat, vals) %>% pivot_longer(cols = 2:13) %>% pivot_wider(names_from = stat, values_from = value) %>%  kable(digits = 2,  caption = "Summary of GE 5% data") %>% kable_styling(full_width = F)
+cbind(stat, vals) %>% 
+  #pivot_longer(cols = 2:13) %>% pivot_wider(names_from = stat, values_from = value) %>% 
+  kable(digits = 2,  caption = "Summary of GE 5% data") %>% kable_styling(full_width = F)
 
 ```
 
@@ -560,8 +562,21 @@ vals$dynast <- ifelse(vals$dynast==1,"Family","Non-fam")
 
 
 
-cbind(stat, vals) %>% pivot_longer(cols = 3:13) %>% pivot_wider(names_from = c(stat,dynast), values_from = value) %>%  kable(digits = 2,  caption = "Summary of GE 5% data") %>% kable_styling(full_width = F)
+cbind(stat, vals) %>%filter(dynast=="Family") %>% 
+  #pivot_longer(cols = 3:13) %>% pivot_wider(names_from = c(stat,dynast), values_from = value) %>% 
+  kable(digits = 2,  caption = "Summary of GE 5% data - Families") %>% kable_styling(full_width = F)
 
+
+
+```
+
+---
+
+
+```{r}
+cbind(stat, vals) %>%filter(dynast!="Family") %>% 
+  #pivot_longer(cols = 3:13) %>% pivot_wider(names_from = c(stat,dynast), values_from = value) %>% 
+  kable(digits = 2,  caption = "Summary of GE 5% data - Non-families") %>% kable_styling(full_width = F)
 
 
 ```
