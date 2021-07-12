@@ -473,7 +473,10 @@ lagged_margin <- dyn_ge_adr$lagged_margin
 lagged_turnout <- dyn_ge_adr$lagged_turnout
 
 
- dynast_1_2 <- dyn_ge_adr %>% group_by(state_name,year, constituency_no) %>% mutate(dynast_1_2 =ifelse(any( position %in% c(1,2)) & any( dyn==1),1,0)) %>%ungroup()%>% select(dynast_1_2)
+ dynast_1_2 <- dyn_ge_adr %>% group_by(state_name,year, constituency_no) %>% mutate(dynast_1_2 =ifelse( position %in% c(1,2) & any( dyn==1),1,0)) %>%ungroup()%>% select(dynast_1_2)
+ 
+ 
+ dynast_cand <- dyn_ge_adr %>% group_by(state_name,year, constituency_no) %>% mutate(dynast_cand=ifelse( any( dyn==1),1,0)) %>%ungroup()%>% select(dynast_cand)
  
 dyn_ge_adr$serious_criminal <- ifelse(as.numeric(dyn_ge_adr$serious_crime)>0,1,0)
  
@@ -482,7 +485,7 @@ criminal_1_2 <- dyn_ge_adr %>% group_by(state_name,year, constituency_no) %>% mu
 # 
 # df <- tibble(winner ,   incumbent,  turncoat , female , terms , dynast , assets  , serious_crime,  year,enop, reservation_SCST,recontest, constituency, party, vote_share_pc, inc, bjp, margin_percentage,  position, turnout, sub_region,immovable_assets,movable_assets,mov_assets_ratio , caste_uc, caste_sc, caste_muslim, caste_obc, dynast_1_2, lagged_margin, lagged_turnout)
 
-df <- tibble(winner ,   incumbent,  turncoat ,caste_UC_IC, female , terms , dynast , assets  , serious_crime, education,age, state,year,enop, reservation_SCST,recontest, constituency, party, vote_share_pc, inc, bjp, margin_percentage, dynast_winner, position, turnout, asset_winner, incumbent_winner, uc_ic_winner, ser_crime_winner,dynast_1_2, lagged_margin, lagged_turnout, criminal_1_2, constituency_no)
+df <- tibble(winner ,   incumbent,  turncoat ,caste_UC_IC, female , terms , dynast , assets  , serious_crime, education,age, state,year,enop, reservation_SCST,recontest, constituency, party, vote_share_pc, inc, bjp, margin_percentage, dynast_winner, position, turnout, asset_winner, incumbent_winner, uc_ic_winner, ser_crime_winner,dynast_1_2, lagged_margin, lagged_turnout, criminal_1_2, constituency_no, dynast_cand)
 # 
 # df_cor <- tibble(winner ,   incumbent,  turncoat , terms , dynast , assets  , serious_crime, education,age,year, enop,recontest)
 # 
@@ -784,20 +787,33 @@ align=TRUE, no.space=TRUE, order = order,add.lines=list)
 ```{r}
 
 names(dyn_ge) <- tolower(names(dyn_ge))
+# 
+# dyn_ge  %>% ungroup()  %>%  group_by(year ) %>% summarise(count = sum(position==1),
+#                                              dyn = sum(dyn[position==1]),
+#                                              prop_dyn = dyn/count,
+#                                              count_1_2 = sum(ifelse(dyn==1& position==2,1,0)) )
+# 
+# dyn_ge  %>% ungroup()  %>%  group_by(year ) %>% summarise(count = sum(position==1),
+#                                              dyn = sum(dyn[position==1]),
+#                                              prop_dyn = dyn/count,
+#                                              count_1_2 = sum(ifelse(dyn==1& position==2,1,0)) ,
+#                                               dyn_1_2 = sum(dyn[position %in% c(1,2)], na.rm =TRUE),
+#                                              prop_dyn_1_2 = dyn_1_2/count_1_2,
+#                                              
+#                                             ) %>%
+#   select(year, 4:4,7:7) %>% 
+#   kable(col.names = c("Year","Family politicians among winners",
+#                       "Family politicians among winners and runner ups"), digits = 2) %>% 
+#   kable_styling(full_width = F)
 
-dyn_ge  %>% ungroup()  %>% filter(position %in% c(1,2)) %>% group_by(year ) %>% summarise(count = sum(position==1),
-                                             dyn = sum(dyn[position==1]),
-                                             prop_dyn = dyn/count,
-                                             count_1_2 = n() ,
-                                              dyn_1_2 = sum(dyn),
-                                             prop_dyn_1_2 = dyn_1_2/count_1_2,
-                                             
-                                            ) %>%
-  select(year, 4:4,7:7) %>% 
-  kable(col.names = c("Year","Family politicians among winners",
-                      "Family politicians among winners and runner ups"), digits = 2) %>% 
+
+
+dyn_ge %>% mutate(pos = ifelse(position >2,"3+",position))%>% group_by(year, pos ,dyn) %>% summarise(count = n()) %>% group_by(year, pos) %>% 
+  mutate(total = sum(count), prop = count/total) %>% filter(dyn==1)%>% ungroup() %>% select(-dyn) %>% 
+  select(year, pos, prop) %>% 
+  pivot_wider(values_from = "prop", names_from ="year") %>% 
+  kable(digits =2) %>% 
   kable_styling(full_width = F)
-
 
 
 ```
@@ -886,8 +902,73 @@ select(state_name, year,prop_dyn_1_2) %>% filter(state_name %!in% c("jammu & kas
 
 #### turnout {.tabset}
 
-##### turnout
 
+
+##### dynast winner {.tabset}
+
+
+###### turnout
+
+```{r results="asis"}
+
+
+fit.1 <- felm(turnout~  dynast_winner+ reservation_SCST + margin_percentage+enop+criminal_1_2|0|0|state,data = subset(df %>% distinct(year,constituency,.keep_all =TRUE)))
+
+
+
+fit.2 <- felm(turnout~  dynast_winner+ reservation_SCST + margin_percentage+enop+criminal_1_2|year|0|state, data = subset(df %>% distinct(year,constituency,.keep_all =TRUE)))
+
+fit.3 <- felm(turnout~  dynast_winner+ reservation_SCST + margin_percentage+enop+criminal_1_2|state|0|state,data = subset(df %>% distinct(year,constituency,.keep_all =TRUE)))
+
+fit.4<- felm(turnout~  dynast_winner+ reservation_SCST + margin_percentage+enop+criminal_1_2| state+year|0|state, data = subset(df %>% distinct(year,constituency,.keep_all =TRUE)))
+
+
+
+
+fit.5<- felm(turnout~  dynast_winner+ reservation_SCST + margin_percentage+enop+criminal_1_2 | constituency_id+ state+year|0|state,data = subset(df %>% distinct(year,constituency,.keep_all =TRUE)))
+
+
+addlines <- list(c('Fixed effects', '' ,"Year", "State","Year and State","State, Year and Constituency"), c("Clustered SE" ,"State","State","State","State", "State"))
+
+
+ 
+stargazer(fit.1, fit.2, fit.3, fit.4, fit.5,type = "html", add.lines = addlines)
+```
+
+
+###### lagged turnout
+
+
+```{r results = "asis"}
+
+fit.1 <- felm(turnout~  dynast_winner+ reservation_SCST + margin_percentage+enop+criminal_1_2+lagged_turnout|0|0|state,data = subset(df %>% distinct(year,constituency,.keep_all =TRUE)))
+
+
+
+fit.2 <- felm(turnout~  dynast_winner+ reservation_SCST + margin_percentage+enop+criminal_1_2+lagged_turnout|year|0|state,data = subset(df %>% distinct(year,constituency,.keep_all =TRUE)))
+fit.3 <- felm(turnout~  dynast_winner+ reservation_SCST + margin_percentage+enop+criminal_1_2+lagged_turnout|state|0|state,data = subset(df %>% distinct(year,constituency,.keep_all =TRUE)))
+
+fit.4<- felm(turnout~  dynast_winner+ reservation_SCST + margin_percentage+enop+criminal_1_2+lagged_turnout| state+year|0|state,data = subset(df %>% distinct(year,constituency,.keep_all =TRUE)))
+
+
+
+
+fit.5<- felm(turnout~  dynast_winner+ reservation_SCST + margin_percentage+enop+criminal_1_2+lagged_turnout|constituency_id+ state+year|0|state,data = subset(df %>% distinct(year,constituency,.keep_all =TRUE)))
+
+
+addlines <- list(c('Fixed effects', '' ,"Year", "State","Year and State","State, Year and Constituency"), c("Clustered SE" ,"State","State","State","State", "State"))
+
+
+ 
+stargazer(fit.1, fit.2, fit.3, fit.4, fit.5,type = "html", add.lines = addlines, title = "lagged turnout")
+
+```
+
+
+
+##### dynast 1& 2 {.tabset}
+
+###### turnout
 
 ```{r results = "asis"}
 
@@ -919,7 +1000,69 @@ stargazer(fit.1, fit.2, fit.3, fit.4, fit.5,type = "html", add.lines = addlines)
 
 ```
 
-##### lagged turnout
+###### lagged turnout
+
+
+```{r results = "asis"}
+
+fit.1 <- felm(turnout~  dynast_1_2+ reservation_SCST + margin_percentage+enop+criminal_1_2+lagged_turnout|0|0|state,data = subset(df %>% distinct(year,constituency,.keep_all =TRUE)))
+
+
+
+fit.2 <- felm(turnout~  dynast_1_2+ reservation_SCST + margin_percentage+enop+criminal_1_2+lagged_turnout|year|0|state,data = subset(df %>% distinct(year,constituency,.keep_all =TRUE)))
+fit.3 <- felm(turnout~  dynast_1_2+ reservation_SCST + margin_percentage+enop+criminal_1_2+lagged_turnout|state|0|state,data = subset(df %>% distinct(year,constituency,.keep_all =TRUE)))
+
+fit.4<- felm(turnout~  dynast_1_2+ reservation_SCST + margin_percentage+enop+criminal_1_2+lagged_turnout| state+year|0|state,data = subset(df %>% distinct(year,constituency,.keep_all =TRUE)))
+
+
+
+
+fit.5<- felm(turnout~  dynast_1_2+ reservation_SCST + margin_percentage+enop+criminal_1_2+lagged_turnout|constituency_id+ state+year|0|state,data = subset(df %>% distinct(year,constituency,.keep_all =TRUE)))
+
+
+addlines <- list(c('Fixed effects', '' ,"Year", "State","Year and State","State, Year and Constituency"), c("Clustered SE" ,"State","State","State","State", "State"))
+
+
+ 
+stargazer(fit.1, fit.2, fit.3, fit.4, fit.5,type = "html", add.lines = addlines, title = "lagged turnout")
+
+```
+
+##### dynast contestant {.tabset}
+
+###### turnout
+
+```{r results = "asis"}
+
+
+
+fit.1 <- felm(turnout~  dynast_cand+ reservation_SCST + margin_percentage+enop+criminal_1_2|0|0|state,data = subset(df %>% distinct(year,constituency,.keep_all =TRUE)))
+
+
+
+fit.2 <- felm(turnout~  dynast_cand+ reservation_SCST + margin_percentage+enop+criminal_1_2|year|0|state, data = subset(df %>% distinct(year,constituency,.keep_all =TRUE)))
+
+fit.3 <- felm(turnout~  dynast_cand+ reservation_SCST + margin_percentage+enop+criminal_1_2|state|0|state,data = subset(df %>% distinct(year,constituency,.keep_all =TRUE)))
+
+fit.4<- felm(turnout~  dynast_cand+ reservation_SCST + margin_percentage+enop+criminal_1_2| state+year|0|state, data = subset(df %>% distinct(year,constituency,.keep_all =TRUE)))
+
+
+
+
+fit.5<- felm(turnout~  dynast_cand+ reservation_SCST + margin_percentage+enop+criminal_1_2 | constituency_id+ state+year|0|state,data = subset(df %>% distinct(year,constituency,.keep_all =TRUE)))
+
+
+addlines <- list(c('Fixed effects', '' ,"Year", "State","Year and State","State, Year and Constituency"), c("Clustered SE" ,"State","State","State","State", "State"))
+
+
+ 
+stargazer(fit.1, fit.2, fit.3, fit.4, fit.5,type = "html", add.lines = addlines)
+
+#summary(fit.4)
+
+```
+
+###### lagged turnout
 
 
 ```{r results = "asis"}
