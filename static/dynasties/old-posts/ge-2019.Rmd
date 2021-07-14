@@ -508,18 +508,18 @@ df <- tibble(winner ,   incumbent,  turncoat ,caste_UC_IC, female , terms , dyna
 
 
 ```{r}
-mean <- df %>% summarise_at( c("winner"  , "incumbent", "turncoat" ,"female" , "terms", "dynast", "assets", "serious_crime", "education","age" , "reservation_SCST", "caste_UC_IC"),~mean(., na.rm = TRUE))
+mean <- df %>%distinct(year, constituency,position, .keep_all = TRUE) %>% summarise_at( c("winner"  , "incumbent", "turncoat" ,"female" , "terms", "dynast", "assets", "serious_crime", "education","age" , "reservation_SCST", "caste_UC_IC"),~mean(., na.rm = TRUE))
 
-min <- df %>% summarise_at( c("winner"  , "incumbent", "turncoat" ,"female" , "terms", "dynast", "assets", "serious_crime", "education","age" , "reservation_SCST", "caste_UC_IC"),~min(., na.rm = TRUE))
+min <-  df %>%distinct(year, constituency,position, .keep_all = TRUE)  %>% summarise_at( c("winner"  , "incumbent", "turncoat" ,"female" , "terms", "dynast", "assets", "serious_crime", "education","age" , "reservation_SCST", "caste_UC_IC"),~min(., na.rm = TRUE))
 
-max <- df %>% summarise_at( c("winner"  , "incumbent", "turncoat" ,"female" , "terms", "dynast", "assets", "serious_crime", "education","age" , "reservation_SCST", "caste_UC_IC"),~max(., na.rm = TRUE))
+max <-  df %>%distinct(year, constituency,position, .keep_all = TRUE)  %>% summarise_at( c("winner"  , "incumbent", "turncoat" ,"female" , "terms", "dynast", "assets", "serious_crime", "education","age" , "reservation_SCST", "caste_UC_IC"),~max(., na.rm = TRUE))
 
-unique_n<- df %>% summarise_at( c("winner"  , "incumbent", "turncoat" ,"female" , "terms", "dynast", "assets", "serious_crime", "education","age" , "reservation_SCST", "caste_UC_IC"),list(n = "uniqueN"))
+unique_n<-  df %>%distinct(year, constituency,position, .keep_all = TRUE)  %>% summarise_at( c("winner"  , "incumbent", "turncoat" ,"female" , "terms", "dynast", "assets", "serious_crime", "education","age" , "reservation_SCST", "caste_UC_IC"),list(n = "uniqueN"))
 
-n<- df %>% summarise_at( c("winner"  , "incumbent", "turncoat" ,"female" , "terms", "dynast", "assets", "serious_crime", "education","age" , "reservation_SCST", "caste_UC_IC"),list(n = "length"))
+n<-  df %>%distinct(year, constituency,position, .keep_all = TRUE) %>% summarise_at( c("winner"  , "incumbent", "turncoat" ,"female" , "terms", "dynast", "assets", "serious_crime", "education","age" , "reservation_SCST", "caste_UC_IC"),list(n = "length"))
 
 
-sd<- df %>% summarise_at( c("winner"  , "incumbent", "turncoat" ,"female" , "terms", "dynast", "assets", "serious_crime", "education","age" , "reservation_SCST", "caste_UC_IC"),list(sd= "sd"))
+sd<-  df %>%distinct(year, constituency,position, .keep_all = TRUE)  %>% summarise_at( c("winner"  , "incumbent", "turncoat" ,"female" , "terms", "dynast", "assets", "serious_crime", "education","age" , "reservation_SCST", "caste_UC_IC"),list(sd= "sd"))
 
 stat <-as.data.frame(c("Length", "Unique-N","Mean", "SD","Min", "Max")) %>% rename("stat"=1:1)
 
@@ -617,11 +617,18 @@ ge0919 <-ge0919 %>% mutate(vote_share = cut(vote_share_percentage, breaks = c(-I
 
 
 
+
+
 ge0919 <- ge0919 %>% mutate(across(c(total_assets, total_liabilities, edu, age), as.numeric)) %>% mutate(assets_million = (total_assets)/1000000, liabilities_million = (total_liabilities)/1000000)
 
 
 
 count <- ge0919 %>% filter(!is.na(vote_share))%>% group_by(vote_share) %>% summarise(count = n())
+
+##
+
+
+
 
 
 ge0919 %>% filter(!is.na(vote_share))%>% group_by(vote_share) %>% summarise_at( c("vote_share_percentage", "incumbent", "turncoat" ,"female" , "no_terms", "assets_million", "liabilities_million","serious_crime","non_serious_crime", "edu","age" ),~mean(., na.rm = TRUE)) %>% inner_join(count, by ="vote_share")%>% select(1:1, 13:13, everything())%>% 
@@ -817,6 +824,22 @@ dyn_ge %>% mutate(pos = ifelse(position >2,"3+",position))%>% group_by(year, pos
 
 
 ```
+
+---
+
+
+```{r}
+
+dyn_ge  %>% ungroup()  %>% filter(position %in% c(1,2) ) %>% group_by(year ) %>% 
+  summarise(count = n(),
+            dynast = sum(dyn),
+            prop = dynast/count)%>%
+  select(year, prop) %>% kable(digits =2, caption = "Dynasts among winners and runner-ups") %>% 
+  kable_styling(full_width = F)
+```
+
+
+
 
 ---
 
