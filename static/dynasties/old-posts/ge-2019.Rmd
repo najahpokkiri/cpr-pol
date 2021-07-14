@@ -485,7 +485,11 @@ criminal_1_2 <- dyn_ge_adr %>% group_by(state_name,year, constituency_no) %>% mu
 # 
 # df <- tibble(winner ,   incumbent,  turncoat , female , terms , dynast , assets  , serious_crime,  year,enop, reservation_SCST,recontest, constituency, party, vote_share_pc, inc, bjp, margin_percentage,  position, turnout, sub_region,immovable_assets,movable_assets,mov_assets_ratio , caste_uc, caste_sc, caste_muslim, caste_obc, dynast_1_2, lagged_margin, lagged_turnout)
 
+
+
 df <- tibble(winner ,   incumbent,  turncoat ,caste_UC_IC, female , terms , dynast , assets  , serious_crime, education,age, state,year,enop, reservation_SCST,recontest, constituency, party, vote_share_pc, inc, bjp, margin_percentage, dynast_winner, position, turnout, asset_winner, incumbent_winner, uc_ic_winner, ser_crime_winner,dynast_1_2, lagged_margin, lagged_turnout, criminal_1_2, constituency_no, dynast_cand)
+
+df <- df %>% mutate(assets = (assets)/1000000)
 # 
 # df_cor <- tibble(winner ,   incumbent,  turncoat , terms , dynast , assets  , serious_crime, education,age,year, enop,recontest)
 # 
@@ -532,6 +536,7 @@ stat <-as.data.frame(c("Length", "Unique-N","Mean", "SD","Min", "Max")) %>% rena
 vals <- data.table::rbindlist(list(n,unique_n,mean, sd,min, max), use.names = FALSE) 
 names(vals) <- str_remove( names(vals),"_n")
 
+names(vals)[7] <- "assets (millions)"
 
 cbind(stat, vals) %>% 
   #pivot_longer(cols = 2:13) %>% pivot_wider(names_from = stat, values_from = value) %>% 
