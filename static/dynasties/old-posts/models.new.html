@@ -1755,8 +1755,13 @@ div.tocify {
 <div id="document-history" class="section level3">
 <h3>Document History</h3>
 <p>Original Publish Date: 18 May, 2020</p>
-<p>Updated on: 07:06 PM – 18 June, 2021</p>
+<p>Updated on: 06:07 PM – 20 July, 2021</p>
 <hr />
+<p>This is a refined version of the old <code>models</code> page. In this page we have only included regression on the UP data specifically focusing on the formation of political family. We explore the question of who gets to form a political family on using a few different data sets for different years. This has been done for variety of reasons.</p>
+<ul>
+<li><p>To ensure that our significant variables stays significant in different time settings.</p></li>
+<li><p>One of the caveats of our dynasty data is that, many of the variables are static and collected as recent as 2017 whereas our dynasty data goes back to 1970s. So, technically we are using their latest data point even to asses the possibility of family formation that might have happened long before that. We provide a solution to this by a few models that are limited to the post delimitation years using dynamic data provided by ADR.</p></li>
+</ul>
 </div>
 <div id="regressions" class="section level1">
 <h1>Regressions</h1>
@@ -1764,6 +1769,181 @@ div.tocify {
 <h2 class="tabset">UP</h2>
 <div id="ae---ge-all" class="section level3">
 <h3>AE - GE all</h3>
+<p>In this model we consider winners and runner-ups in the elections held between 197x to 2019 in Uttar Pradesh.</p>
+<p><span class="math display">\[{Political \ family} = \alpha +\beta_{1}Minister   +   \beta_{2} Economic  \ diversification  +  \beta_{3}Land \ ownership + \\ \beta_{3} Election \ won \ by  \ first\  member + \beta_{3}Female \ first member + Z +  \epsilon  \]</span></p>
+<p>Where the outcome of interest <span class="math inline">\({Political \ family}\)</span> is a dummy variable that is 1 if the family have been successful in forming a political family and 0 otherwise; $beta_{1}Minister $ is another dummy variable that is 1 if there was at least one minister from that family in the state cabinet; <span class="math inline">\(\beta_{2} Economic \ diversification\)</span> represents the number of industries and educational institutions owned by that particular family; <span class="math inline">\(\beta_{3}Land \ ownership\)</span> is continuous variable that denotes the land owned by a family; <span class="math inline">\(\beta_{3} Election \ won \ by \ first\  member\)</span> is continuous variable that is the number of elections won by the first member of the family; <span class="math inline">\(\beta_{3} Election \ won \ by \ first\  member\)</span> is dummy variable that is one if the first member of the family was a female 0 otherwise; <span class="math inline">\({Z}\)</span> is the constituency and candidate level controls; <span class="math inline">\({\epsilon }\)</span> is the error term clustered at the constituency level</p>
+<hr />
+<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+Summary of the AE GE all contestants unique data
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Measure
+</th>
+<th style="text-align:right;">
+Family
+</th>
+<th style="text-align:right;">
+Minister(Dummy)
+</th>
+<th style="text-align:right;">
+Economic diversification
+</th>
+<th style="text-align:right;">
+Land ownership (quartiles)
+</th>
+<th style="text-align:right;">
+Elections won by first family member
+</th>
+<th style="text-align:right;">
+Female first member
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Length
+</td>
+<td style="text-align:right;">
+4867.00
+</td>
+<td style="text-align:right;">
+4867.0
+</td>
+<td style="text-align:right;">
+4867.00
+</td>
+<td style="text-align:right;">
+4867.00
+</td>
+<td style="text-align:right;">
+4867.00
+</td>
+<td style="text-align:right;">
+4867.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Unique-N
+</td>
+<td style="text-align:right;">
+2.00
+</td>
+<td style="text-align:right;">
+2.0
+</td>
+<td style="text-align:right;">
+5.00
+</td>
+<td style="text-align:right;">
+5.00
+</td>
+<td style="text-align:right;">
+11.00
+</td>
+<td style="text-align:right;">
+2.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Mean
+</td>
+<td style="text-align:right;">
+0.07
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+<td style="text-align:right;">
+0.77
+</td>
+<td style="text-align:right;">
+2.11
+</td>
+<td style="text-align:right;">
+1.04
+</td>
+<td style="text-align:right;">
+0.05
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SD
+</td>
+<td style="text-align:right;">
+0.25
+</td>
+<td style="text-align:right;">
+0.3
+</td>
+<td style="text-align:right;">
+1.02
+</td>
+<td style="text-align:right;">
+1.20
+</td>
+<td style="text-align:right;">
+1.29
+</td>
+<td style="text-align:right;">
+0.23
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Min
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+1.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Max
+</td>
+<td style="text-align:right;">
+1.00
+</td>
+<td style="text-align:right;">
+1.0
+</td>
+<td style="text-align:right;">
+4.00
+</td>
+<td style="text-align:right;">
+5.00
+</td>
+<td style="text-align:right;">
+10.00
+</td>
+<td style="text-align:right;">
+1.00
+</td>
+</tr>
+</tbody>
+</table>
+<hr />
 <table style="text-align:center">
 <caption>
 <strong>Regression Results - AE-GE All</strong>
@@ -1817,16 +1997,16 @@ Political Family
 Minister
 </td>
 <td>
-0.129<sup>***</sup>
+0.126<sup>***</sup>
 </td>
 <td>
-0.128<sup>***</sup>
+0.126<sup>***</sup>
 </td>
 <td>
-0.129<sup>***</sup>
+0.126<sup>***</sup>
 </td>
 <td>
-0.129<sup>***</sup>
+0.126<sup>***</sup>
 </td>
 </tr>
 <tr>
@@ -1853,10 +2033,10 @@ Economic diversification
 0.045<sup>***</sup>
 </td>
 <td>
-0.037<sup>***</sup>
+0.036<sup>***</sup>
 </td>
 <td>
-0.044<sup>***</sup>
+0.043<sup>***</sup>
 </td>
 <td>
 0.035<sup>***</sup>
@@ -1883,7 +2063,7 @@ Economic diversification
 Land ownership
 </td>
 <td>
-0.023<sup>***</sup>
+0.022<sup>***</sup>
 </td>
 <td>
 0.015<sup>***</sup>
@@ -1916,16 +2096,16 @@ Land ownership
 Elections won by first member
 </td>
 <td>
-0.002
-</td>
-<td>
--0.001
+0.003
 </td>
 <td>
 0.001
 </td>
 <td>
--0.001
+0.003
+</td>
+<td>
+0.0004
 </td>
 </tr>
 <tr>
@@ -1949,7 +2129,7 @@ Elections won by first member
 First member - female
 </td>
 <td>
--0.025<sup>**</sup>
+-0.024<sup>**</sup>
 </td>
 <td>
 -0.039<sup>***</sup>
@@ -1983,6 +2163,39 @@ First member - female
 </tr>
 <tr>
 <td style="text-align:left">
+Fixed effects
+</td>
+<td>
+</td>
+<td>
+Decade
+</td>
+<td>
+Sub-region
+</td>
+<td>
+Deacde and Sub-region
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Clustered SE
+</td>
+<td>
+Constituency
+</td>
+<td>
+Constituency
+</td>
+<td>
+Constituency
+</td>
+<td>
+Constituency
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
 Caste control
 </td>
 <td>
@@ -2003,16 +2216,16 @@ Yes
 Observations
 </td>
 <td>
-4,866
+4,867
 </td>
 <td>
-4,866
+4,867
 </td>
 <td>
-4,866
+4,867
 </td>
 <td>
-4,866
+4,867
 </td>
 </tr>
 <tr>
@@ -2054,16 +2267,16 @@ Adjusted R<sup>2</sup>
 Residual Std. Error
 </td>
 <td>
-0.233 (df = 4855)
+0.233 (df = 4856)
 </td>
 <td>
-0.230 (df = 4852)
+0.230 (df = 4853)
 </td>
 <td>
-0.233 (df = 4848)
+0.233 (df = 4849)
 </td>
 <td>
-0.230 (df = 4845)
+0.230 (df = 4846)
 </td>
 </tr>
 <tr>
@@ -2082,6 +2295,7 @@ Residual Std. Error
 </div>
 <div id="ae-ge-all---won-elections" class="section level3">
 <h3>AE GE All - Won elections</h3>
+<p>This model is run only among entities who have atleast one an election.</p>
 <table style="text-align:center">
 <caption>
 <strong>Regression Results - AE-GE All</strong>
@@ -2135,29 +2349,29 @@ Political Family
 Minister
 </td>
 <td>
-0.128<sup>***</sup>
+0.123<sup>***</sup>
 </td>
 <td>
-0.127<sup>***</sup>
+0.123<sup>***</sup>
 </td>
 <td>
-0.129<sup>***</sup>
+0.124<sup>***</sup>
 </td>
 <td>
-0.128<sup>***</sup>
+0.124<sup>***</sup>
 </td>
 </tr>
 <tr>
 <td style="text-align:left">
 </td>
 <td>
-(0.020)
+(0.021)
 </td>
 <td>
 (0.019)
 </td>
 <td>
-(0.020)
+(0.021)
 </td>
 <td>
 (0.019)
@@ -2177,7 +2391,7 @@ Economic diversification
 0.054<sup>***</sup>
 </td>
 <td>
-0.042<sup>***</sup>
+0.041<sup>***</sup>
 </td>
 </tr>
 <tr>
@@ -2201,32 +2415,32 @@ Economic diversification
 Land ownership
 </td>
 <td>
+-0.014<sup>*</sup>
+</td>
+<td>
+-0.020<sup>***</sup>
+</td>
+<td>
+-0.015<sup>**</sup>
+</td>
+<td>
 -0.021<sup>***</sup>
-</td>
-<td>
--0.027<sup>***</sup>
-</td>
-<td>
--0.022<sup>***</sup>
-</td>
-<td>
--0.028<sup>***</sup>
 </td>
 </tr>
 <tr>
 <td style="text-align:left">
 </td>
 <td>
-(0.008)
+(0.007)
 </td>
 <td>
-(0.008)
+(0.007)
 </td>
 <td>
-(0.008)
+(0.007)
 </td>
 <td>
-(0.008)
+(0.007)
 </td>
 </tr>
 <tr>
@@ -2234,16 +2448,16 @@ Land ownership
 Elections won by first member
 </td>
 <td>
--0.040<sup>**</sup>
+-0.039<sup>**</sup>
 </td>
 <td>
--0.056<sup>***</sup>
+-0.055<sup>***</sup>
 </td>
 <td>
--0.043<sup>**</sup>
+-0.042<sup>**</sup>
 </td>
 <td>
--0.059<sup>***</sup>
+-0.058<sup>***</sup>
 </td>
 </tr>
 <tr>
@@ -2267,16 +2481,16 @@ Elections won by first member
 First member - female
 </td>
 <td>
-0.032<sup>***</sup>
+0.031<sup>***</sup>
 </td>
 <td>
-0.022<sup>***</sup>
+0.021<sup>***</sup>
 </td>
 <td>
-0.034<sup>***</sup>
+0.033<sup>***</sup>
 </td>
 <td>
-0.024<sup>***</sup>
+0.023<sup>***</sup>
 </td>
 </tr>
 <tr>
@@ -2297,6 +2511,39 @@ First member - female
 </tr>
 <tr>
 <td colspan="5" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Fixed effects
+</td>
+<td>
+</td>
+<td>
+Decade
+</td>
+<td>
+Sub-region
+</td>
+<td>
+Deacde and Sub-region
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Clustered SE
+</td>
+<td>
+Constituency
+</td>
+<td>
+Constituency
+</td>
+<td>
+Constituency
+</td>
+<td>
+Constituency
 </td>
 </tr>
 <tr>
@@ -2321,16 +2568,16 @@ Yes
 Observations
 </td>
 <td>
-2,942
+2,943
 </td>
 <td>
-2,942
+2,943
 </td>
 <td>
-2,942
+2,943
 </td>
 <td>
-2,942
+2,943
 </td>
 </tr>
 <tr>
@@ -2338,16 +2585,16 @@ Observations
 R<sup>2</sup>
 </td>
 <td>
-0.121
+0.119
 </td>
 <td>
-0.166
+0.164
 </td>
 <td>
-0.125
+0.123
 </td>
 <td>
-0.170
+0.167
 </td>
 </tr>
 <tr>
@@ -2355,16 +2602,16 @@ R<sup>2</sup>
 Adjusted R<sup>2</sup>
 </td>
 <td>
+0.116
+</td>
+<td>
+0.160
+</td>
+<td>
 0.118
 </td>
 <td>
 0.162
-</td>
-<td>
-0.120
-</td>
-<td>
-0.164
 </td>
 </tr>
 <tr>
@@ -2372,16 +2619,16 @@ Adjusted R<sup>2</sup>
 Residual Std. Error
 </td>
 <td>
-0.288 (df = 2931)
+0.288 (df = 2932)
 </td>
 <td>
-0.280 (df = 2928)
+0.281 (df = 2929)
 </td>
 <td>
-0.287 (df = 2924)
+0.288 (df = 2925)
 </td>
 <td>
-0.280 (df = 2921)
+0.280 (df = 2922)
 </td>
 </tr>
 <tr>
@@ -2400,6 +2647,262 @@ Residual Std. Error
 </div>
 <div id="ge-200919" class="section level3">
 <h3>GE 2009:19</h3>
+<p>This regression run amongst all the contestants in the general elections held during 2009:19 period.</p>
+<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+Summary of the GE 2009:19 contestants unique data
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Measure
+</th>
+<th style="text-align:right;">
+Family
+</th>
+<th style="text-align:right;">
+Minister dummy
+</th>
+<th style="text-align:right;">
+Economic diversification
+</th>
+<th style="text-align:right;">
+Land ownership(quartiles)
+</th>
+<th style="text-align:right;">
+Elections won by first member
+</th>
+<th style="text-align:right;">
+First member female
+</th>
+<th style="text-align:right;">
+Total assets (in millions)
+</th>
+<th style="text-align:right;">
+Serious crime
+</th>
+<th style="text-align:right;">
+Turncoat
+</th>
+<th style="text-align:right;">
+Incumbent
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Length
+</td>
+<td style="text-align:right;">
+2092.00
+</td>
+<td style="text-align:right;">
+2092.0
+</td>
+<td style="text-align:right;">
+2092.00
+</td>
+<td style="text-align:right;">
+2092.00
+</td>
+<td style="text-align:right;">
+2092.00
+</td>
+<td style="text-align:right;">
+2092.00
+</td>
+<td style="text-align:right;">
+2092.00
+</td>
+<td style="text-align:right;">
+2092.00
+</td>
+<td style="text-align:right;">
+2092.00
+</td>
+<td style="text-align:right;">
+2092.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Unique-N
+</td>
+<td style="text-align:right;">
+2.00
+</td>
+<td style="text-align:right;">
+2.0
+</td>
+<td style="text-align:right;">
+5.00
+</td>
+<td style="text-align:right;">
+5.00
+</td>
+<td style="text-align:right;">
+8.00
+</td>
+<td style="text-align:right;">
+2.00
+</td>
+<td style="text-align:right;">
+2017.00
+</td>
+<td style="text-align:right;">
+2.00
+</td>
+<td style="text-align:right;">
+2.00
+</td>
+<td style="text-align:right;">
+2.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Mean
+</td>
+<td style="text-align:right;">
+0.23
+</td>
+<td style="text-align:right;">
+0.2
+</td>
+<td style="text-align:right;">
+1.49
+</td>
+<td style="text-align:right;">
+2.94
+</td>
+<td style="text-align:right;">
+0.17
+</td>
+<td style="text-align:right;">
+0.07
+</td>
+<td style="text-align:right;">
+50.61
+</td>
+<td style="text-align:right;">
+0.26
+</td>
+<td style="text-align:right;">
+0.12
+</td>
+<td style="text-align:right;">
+0.23
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SD
+</td>
+<td style="text-align:right;">
+0.42
+</td>
+<td style="text-align:right;">
+0.4
+</td>
+<td style="text-align:right;">
+1.13
+</td>
+<td style="text-align:right;">
+1.11
+</td>
+<td style="text-align:right;">
+0.70
+</td>
+<td style="text-align:right;">
+0.25
+</td>
+<td style="text-align:right;">
+87.37
+</td>
+<td style="text-align:right;">
+0.44
+</td>
+<td style="text-align:right;">
+0.33
+</td>
+<td style="text-align:right;">
+0.42
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Min
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+1.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+0.50
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Max
+</td>
+<td style="text-align:right;">
+1.00
+</td>
+<td style="text-align:right;">
+1.0
+</td>
+<td style="text-align:right;">
+4.00
+</td>
+<td style="text-align:right;">
+5.00
+</td>
+<td style="text-align:right;">
+8.00
+</td>
+<td style="text-align:right;">
+1.00
+</td>
+<td style="text-align:right;">
+561.97
+</td>
+<td style="text-align:right;">
+1.00
+</td>
+<td style="text-align:right;">
+1.00
+</td>
+<td style="text-align:right;">
+1.00
+</td>
+</tr>
+</tbody>
+</table>
+<hr />
 <table style="text-align:center">
 <caption>
 <strong>Regression Results - AE-GE 09:19</strong>
@@ -2450,19 +2953,19 @@ Political Family
 </tr>
 <tr>
 <td style="text-align:left">
-minister
+Minister
 </td>
 <td>
 0.236<sup>***</sup>
 </td>
 <td>
-0.237<sup>***</sup>
+0.236<sup>***</sup>
 </td>
 <td>
 0.232<sup>***</sup>
 </td>
 <td>
-0.234<sup>***</sup>
+0.233<sup>***</sup>
 </td>
 </tr>
 <tr>
@@ -2483,26 +2986,26 @@ minister
 </tr>
 <tr>
 <td style="text-align:left">
-ind_edu
+Economic diversification
+</td>
+<td>
+0.079<sup>***</sup>
+</td>
+<td>
+0.081<sup>***</sup>
+</td>
+<td>
+0.076<sup>***</sup>
 </td>
 <td>
 0.078<sup>***</sup>
 </td>
-<td>
-0.080<sup>***</sup>
-</td>
-<td>
-0.075<sup>***</sup>
-</td>
-<td>
-0.077<sup>***</sup>
-</td>
 </tr>
 <tr>
 <td style="text-align:left">
 </td>
 <td>
-(0.011)
+(0.012)
 </td>
 <td>
 (0.012)
@@ -2516,7 +3019,7 @@ ind_edu
 </tr>
 <tr>
 <td style="text-align:left">
-land
+Land ownership
 </td>
 <td>
 0.033<sup>***</sup>
@@ -2549,19 +3052,19 @@ land
 </tr>
 <tr>
 <td style="text-align:left">
-log(total_assets)
+Total assets (log)
 </td>
 <td>
 0.025<sup>***</sup>
 </td>
 <td>
-0.019<sup>***</sup>
+0.020<sup>***</sup>
 </td>
 <td>
-0.025<sup>***</sup>
+0.026<sup>***</sup>
 </td>
 <td>
-0.019<sup>***</sup>
+0.021<sup>***</sup>
 </td>
 </tr>
 <tr>
@@ -2582,20 +3085,20 @@ log(total_assets)
 </tr>
 <tr>
 <td style="text-align:left">
-serious_crime
+Serious crime
 </td>
 <td>
--0.045<sup>**</sup>
-</td>
-<td>
--0.047<sup>**</sup>
-</td>
-<td>
--0.044<sup>**</sup>
+-0.043<sup>**</sup>
 </td>
 <td>
 -0.046<sup>**</sup>
 </td>
+<td>
+-0.043<sup>**</sup>
+</td>
+<td>
+-0.045<sup>**</sup>
+</td>
 </tr>
 <tr>
 <td style="text-align:left">
@@ -2615,26 +3118,26 @@ serious_crime
 </tr>
 <tr>
 <td style="text-align:left">
-n_elections_w
+Elections won by first member
 </td>
 <td>
-0.107<sup>***</sup>
+0.098<sup>***</sup>
 </td>
 <td>
-0.101<sup>***</sup>
+0.091<sup>***</sup>
 </td>
 <td>
-0.105<sup>***</sup>
+0.096<sup>***</sup>
 </td>
 <td>
-0.100<sup>***</sup>
+0.090<sup>***</sup>
 </td>
 </tr>
 <tr>
 <td style="text-align:left">
 </td>
 <td>
-(0.021)
+(0.022)
 </td>
 <td>
 (0.022)
@@ -2648,19 +3151,19 @@ n_elections_w
 </tr>
 <tr>
 <td style="text-align:left">
-mem1_female
-</td>
-<td>
--0.058<sup>**</sup>
+First member - female
 </td>
 <td>
 -0.059<sup>**</sup>
 </td>
 <td>
--0.058<sup>**</sup>
+-0.061<sup>**</sup>
 </td>
 <td>
 -0.059<sup>**</sup>
+</td>
+<td>
+-0.060<sup>**</sup>
 </td>
 </tr>
 <tr>
@@ -2681,13 +3184,13 @@ mem1_female
 </tr>
 <tr>
 <td style="text-align:left">
-turncoat
+Turncoat
 </td>
 <td>
 0.002
 </td>
 <td>
-0.002
+0.003
 </td>
 <td>
 -0.001
@@ -2714,19 +3217,19 @@ turncoat
 </tr>
 <tr>
 <td style="text-align:left">
-incumbent
-</td>
-<td>
--0.004
+Incumbent
 </td>
 <td>
 -0.006
 </td>
 <td>
--0.007
+-0.008
 </td>
 <td>
--0.010
+-0.009
+</td>
+<td>
+-0.012
 </td>
 </tr>
 <tr>
@@ -2739,7 +3242,7 @@ incumbent
 (0.021)
 </td>
 <td>
-(0.022)
+(0.021)
 </td>
 <td>
 (0.021)
@@ -2804,16 +3307,16 @@ Yes
 Observations
 </td>
 <td>
-2,050
+2,059
 </td>
 <td>
-2,050
+2,059
 </td>
 <td>
-2,050
+2,059
 </td>
 <td>
-2,050
+2,059
 </td>
 </tr>
 <tr>
@@ -2821,21 +3324,24 @@ Observations
 R<sup>2</sup>
 </td>
 <td>
-0.232
+0.230
 </td>
 <td>
-0.234
+0.233
 </td>
 <td>
-0.238
+0.236
 </td>
 <td>
-0.241
+0.239
 </td>
 </tr>
 <tr>
 <td style="text-align:left">
 Adjusted R<sup>2</sup>
+</td>
+<td>
+0.224
 </td>
 <td>
 0.226
@@ -2846,25 +3352,22 @@ Adjusted R<sup>2</sup>
 <td>
 0.230
 </td>
-<td>
-0.231
-</td>
 </tr>
 <tr>
 <td style="text-align:left">
 Residual Std. Error
 </td>
 <td>
-0.371 (df = 2035)
+0.372 (df = 2044)
 </td>
 <td>
-0.371 (df = 2031)
+0.371 (df = 2040)
 </td>
 <td>
-0.370 (df = 2028)
+0.371 (df = 2037)
 </td>
 <td>
-0.370 (df = 2024)
+0.370 (df = 2033)
 </td>
 </tr>
 <tr>
@@ -2883,6 +3386,7 @@ Residual Std. Error
 </div>
 <div id="ge-2009-19-elections-won" class="section level3">
 <h3>GE 2009 :19 elections won</h3>
+<p>This model is run among the contestants who have won at lease one election in their political career</p>
 <table style="text-align:center">
 <caption>
 <strong>Regression Results - AE-GE 09:19</strong>
@@ -2933,26 +3437,26 @@ Political Family
 </tr>
 <tr>
 <td style="text-align:left">
-minister
+Minister
 </td>
 <td>
 0.203<sup>***</sup>
 </td>
 <td>
-0.205<sup>***</sup>
+0.204<sup>***</sup>
 </td>
 <td>
 0.198<sup>***</sup>
 </td>
 <td>
-0.201<sup>***</sup>
+0.200<sup>***</sup>
 </td>
 </tr>
 <tr>
 <td style="text-align:left">
 </td>
 <td>
-(0.033)
+(0.032)
 </td>
 <td>
 (0.033)
@@ -2966,19 +3470,19 @@ minister
 </tr>
 <tr>
 <td style="text-align:left">
-ind_edu
-</td>
-<td>
-0.084<sup>***</sup>
+Economic diversification
 </td>
 <td>
 0.086<sup>***</sup>
 </td>
 <td>
-0.079<sup>***</sup>
+0.087<sup>***</sup>
 </td>
 <td>
-0.081<sup>***</sup>
+0.080<sup>***</sup>
+</td>
+<td>
+0.082<sup>***</sup>
 </td>
 </tr>
 <tr>
@@ -2999,7 +3503,7 @@ ind_edu
 </tr>
 <tr>
 <td style="text-align:left">
-land
+Land ownership
 </td>
 <td>
 0.039<sup>***</sup>
@@ -3032,13 +3536,7 @@ land
 </tr>
 <tr>
 <td style="text-align:left">
-log(total_assets)
-</td>
-<td>
-0.026<sup>***</sup>
-</td>
-<td>
-0.019<sup>**</sup>
+Total assets (log)
 </td>
 <td>
 0.028<sup>***</sup>
@@ -3046,12 +3544,18 @@ log(total_assets)
 <td>
 0.021<sup>**</sup>
 </td>
+<td>
+0.029<sup>***</sup>
+</td>
+<td>
+0.023<sup>**</sup>
+</td>
 </tr>
 <tr>
 <td style="text-align:left">
 </td>
 <td>
-(0.008)
+(0.009)
 </td>
 <td>
 (0.009)
@@ -3065,19 +3569,19 @@ log(total_assets)
 </tr>
 <tr>
 <td style="text-align:left">
-serious_crime
+Serious crime
 </td>
 <td>
--0.049<sup>*</sup>
+-0.048<sup>*</sup>
 </td>
 <td>
--0.051<sup>**</sup>
+-0.050<sup>*</sup>
 </td>
 <td>
--0.047<sup>*</sup>
+-0.046<sup>*</sup>
 </td>
 <td>
--0.049<sup>*</sup>
+-0.048<sup>*</sup>
 </td>
 </tr>
 <tr>
@@ -3098,19 +3602,19 @@ serious_crime
 </tr>
 <tr>
 <td style="text-align:left">
-n_elections_w
-</td>
-<td>
-0.097<sup>***</sup>
+Elections won by first member
 </td>
 <td>
 0.089<sup>***</sup>
 </td>
 <td>
-0.095<sup>***</sup>
+0.080<sup>***</sup>
 </td>
 <td>
-0.088<sup>***</sup>
+0.087<sup>***</sup>
+</td>
+<td>
+0.079<sup>***</sup>
 </td>
 </tr>
 <tr>
@@ -3126,25 +3630,25 @@ n_elections_w
 (0.021)
 </td>
 <td>
-(0.022)
+(0.021)
 </td>
 </tr>
 <tr>
 <td style="text-align:left">
-mem1_female
-</td>
-<td>
--0.079<sup>**</sup>
-</td>
-<td>
--0.084<sup>**</sup>
-</td>
-<td>
--0.077<sup>**</sup>
+First member - female
 </td>
 <td>
 -0.081<sup>**</sup>
 </td>
+<td>
+-0.086<sup>**</sup>
+</td>
+<td>
+-0.078<sup>**</sup>
+</td>
+<td>
+-0.083<sup>**</sup>
+</td>
 </tr>
 <tr>
 <td style="text-align:left">
@@ -3164,20 +3668,20 @@ mem1_female
 </tr>
 <tr>
 <td style="text-align:left">
-turncoat
-</td>
-<td>
--0.011
+Turncoat
 </td>
 <td>
 -0.012
 </td>
 <td>
--0.013
+-0.012
 </td>
 <td>
 -0.014
 </td>
+<td>
+-0.015
+</td>
 </tr>
 <tr>
 <td style="text-align:left">
@@ -3197,19 +3701,19 @@ turncoat
 </tr>
 <tr>
 <td style="text-align:left">
-incumbent
-</td>
-<td>
--0.030
+Incumbent
 </td>
 <td>
 -0.033
 </td>
 <td>
--0.035
+-0.036
 </td>
 <td>
--0.038<sup>*</sup>
+-0.037<sup>*</sup>
+</td>
+<td>
+-0.040<sup>*</sup>
 </td>
 </tr>
 <tr>
@@ -3287,16 +3791,16 @@ Yes
 Observations
 </td>
 <td>
-1,633
+1,641
 </td>
 <td>
-1,633
+1,641
 </td>
 <td>
-1,633
+1,641
 </td>
 <td>
-1,633
+1,641
 </td>
 </tr>
 <tr>
@@ -3304,16 +3808,16 @@ Observations
 R<sup>2</sup>
 </td>
 <td>
-0.210
+0.208
 </td>
 <td>
-0.214
+0.213
 </td>
 <td>
-0.218
+0.217
 </td>
 <td>
-0.222
+0.221
 </td>
 </tr>
 <tr>
@@ -3321,16 +3825,16 @@ R<sup>2</sup>
 Adjusted R<sup>2</sup>
 </td>
 <td>
-0.203
+0.202
+</td>
+<td>
+0.204
 </td>
 <td>
 0.206
 </td>
 <td>
-0.208
-</td>
-<td>
-0.210
+0.209
 </td>
 </tr>
 <tr>
@@ -3338,16 +3842,16 @@ Adjusted R<sup>2</sup>
 Residual Std. Error
 </td>
 <td>
-0.403 (df = 1618)
+0.404 (df = 1626)
 </td>
 <td>
-0.403 (df = 1614)
+0.403 (df = 1622)
 </td>
 <td>
-0.402 (df = 1611)
+0.403 (df = 1619)
 </td>
 <td>
-0.401 (df = 1607)
+0.402 (df = 1615)
 </td>
 </tr>
 <tr>
@@ -3363,194 +3867,129 @@ Residual Std. Error
 </td>
 </tr>
 </table>
-</div>
-<div id="new-fams" class="section level3">
-<h3>09-19 new fams</h3>
-<table style="text-align:center">
-<caption>
-<strong>Regression Results - New families - AE-GE 09:19</strong>
-</caption>
-<tr>
-<td colspan="2" style="border-bottom: 1px solid black">
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-</td>
-<td>
-<em>Dependent variable:</em>
-</td>
-</tr>
-<tr>
-<td>
-</td>
-<td colspan="1" style="border-bottom: 1px solid black">
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-</td>
-<td>
-Political Family
-</td>
-</tr>
-<tr>
-<td colspan="2" style="border-bottom: 1px solid black">
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-ind_edu
-</td>
-<td>
-0.032<sup>***</sup>
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-</td>
-<td>
-(0.009)
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-land
-</td>
-<td>
-0.018<sup>**</sup>
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-</td>
-<td>
-(0.008)
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-serious_crime
-</td>
-<td>
--0.028<sup>**</sup>
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-</td>
-<td>
-(0.014)
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-log(asset_avg)
-</td>
-<td>
-0.014<sup>***</sup>
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-</td>
-<td>
-(0.004)
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-dyn_08
-</td>
-<td>
-0.281<sup>***</sup>
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-</td>
-<td>
-(0.044)
-</td>
-</tr>
-<tr>
-<td colspan="2" style="border-bottom: 1px solid black">
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-Fixed effects
-</td>
-<td>
-Year and Sub-region
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-Clustered SE
-</td>
-<td>
-Constituency
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-Caste control
-</td>
-<td>
-Yes
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-Observations
-</td>
-<td>
-1,376
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-R<sup>2</sup>
-</td>
-<td>
-0.160
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-Adjusted R<sup>2</sup>
-</td>
-<td>
-0.150
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-Residual Std. Error
-</td>
-<td>
-0.244 (df = 1358)
-</td>
-</tr>
-<tr>
-<td colspan="2" style="border-bottom: 1px solid black">
-</td>
-</tr>
-<tr>
-<td style="text-align:left">
-<em>Note:</em>
-</td>
-<td style="text-align:right">
-<sup><em></sup>p&lt;0.1; <sup><strong></sup>p&lt;0.05; <sup></strong></em></sup>p&lt;0.01
-</td>
-</tr>
-</table>
+<!-- ### 09-19 new fams -->
+<!-- This model is run exclusively among the families in our main data set but are formed after 2008. -->
+<!-- ```{r} -->
+<!-- dyn_ae_ge_09_19  <- dyn_ae_ge %>% filter(year >2008)  -->
+<!--  dyn_ae_ge_09_19$id <- paste0( dyn_ae_ge_09_19$family_id, dyn_ae_ge_09_19$relative_id,  dyn_ae_ge_09_19$rel_id_rep) -->
+<!-- dyn_ae_ge_09_19 <-  dyn_ae_ge_09_19 %>% group_by(family_id ) %>% mutate(mem_tot = n_distinct(id)) -->
+<!--   #dyn_ae_ge_09_19  %>% select(year, family_id,id) -->
+<!-- mem_09 <- dyn_ae_ge_09_19 %>% filter(year ==2009)%>% group_by(family_id ) %>% mutate(mem_tot_cum = n_distinct(id)) %>% filter(year ==2009) -->
+<!-- mem_12 <- dyn_ae_ge_09_19 %>% filter(year %in% c(2009,2012))%>% group_by(family_id ) %>% mutate(mem_tot_cum = n_distinct(id))%>% filter(year ==2012) -->
+<!-- mem_14 <- dyn_ae_ge_09_19 %>% filter(year %in% c(2009,2012, 2014))%>% group_by(family_id ) %>% mutate(mem_tot_cum = n_distinct(id))%>% filter(year ==2014) -->
+<!-- mem_17<- dyn_ae_ge_09_19 %>% filter(year %in% c(2009,2012, 2014, 2017))%>% group_by(family_id ) %>% mutate(mem_tot_cum = n_distinct(id))%>% filter(year ==2017) -->
+<!-- mem_19<- dyn_ae_ge_09_19 %>% group_by(family_id ) %>% mutate(mem_tot_cum = n_distinct(id))%>% filter(year ==2019) -->
+<!-- mem_all <- rbind(mem_09,mem_12,mem_14, mem_17, mem_19) -->
+<!-- mem_tot_cum <- mem_all$mem_tot_cum -->
+<!-- dyn_ae_ge_09_19$mem_tot_cum <- mem_tot_cum  -->
+<!-- dyn_ae_ge_09_19  <- dyn_ae_ge_09_19 %>% mutate(dyn_cum_new = ifelse(mem_tot_cum>1,1,0), dyn_tot_new = ifelse(mem_tot>1,1,0)) -->
+<!-- # out <- dyn_ae_ge_09_19  %>% select(year, family_id, relative_id, rel_id_rep, id, mem_tot, mem_tot_cum, dyn_cum_new, dyn_tot_new) -->
+<!-- # #  -->
+<!-- #  write.csv(out,"D:/cpr/UP/up-dynasties/dyn_other_data/dyn_post08.csv") -->
+<!-- #dyn_ae_ge_09_19  %>% distinct(family_id, .keep_all = TRUE) %>% group_by(dyn_tot_new) %>% summarise(n()) -->
+<!-- ``` -->
+<!-- ```{r} -->
+<!-- fam_dyn <- dyn_ae_ge %>% filter(year<2009)%>% arrange(-year)%>% distinct(family_id, .keep_all = TRUE) %>% select(family_id, dyn_08 = dyn_cum_2) -->
+<!-- dyn_ae_ge_09_19 <- left_join(dyn_ae_ge_09_19, fam_dyn, by = "family_id") -->
+<!-- fam_year <-dyn_ae_ge_09_19 %>% arrange( -dyn_cum_new, year) %>%  distinct(family_id, .keep_all = TRUE) %>% select(family_id, fam_year =year) -->
+<!-- dyn_ae_ge_09_19 <- left_join(dyn_ae_ge_09_19, fam_year, by = "family_id") -->
+<!-- dyn_ae_ge_09_19 <- dyn_ae_ge_09_19 %>% group_by(family_id) %>% mutate(asset_avg = mean(total_assets[year<=fam_year],na.rm = TRUE), serious_crime_avg =mean(serious_crime[year<=fam_year],na.rm = TRUE)) -->
+<!-- dyn_ae_ge_09_19_uniq <- dyn_ae_ge_09_19 %>% arrange( -dyn_cum_new, year) %>% filter()%>% distinct(family_id, .keep_all = TRUE)  -->
+<!-- # dyn_ae_ge_09_19_uniq %>% filter(family_id=="f7200003") -->
+<!-- ``` -->
+<!-- ```{r} -->
+<!-- dynast <- dyn_ae_ge_09_19_uniq$dyn_cum_new -->
+<!-- mem_08 <- dyn_ae_ge_09_19_uniq$n_mem - dyn_ae_ge_09_19_uniq$mem_tot -->
+<!-- dyn_08 <- ifelse(is.na(dyn_ae_ge_09_19_uniq$dyn_08),0,dyn_ae_ge_09_19_uniq$dyn_08) -->
+<!-- industry <-  dyn_ae_ge_09_19_uniq $indus_count %>% replace_na(0) -->
+<!-- industry_rent_thick <-  dyn_ae_ge_09_19_uniq  $indus_rt %>% replace_na(0) -->
+<!-- industry_non_rent_thick <-  dyn_ae_ge_09_19_uniq  $indus_nrt %>% replace_na(0) -->
+<!-- caste_uc <- ifelse( dyn_ae_ge_09_19_uniq  $caste_groups == "Upper Caste", 1,0) -->
+<!-- caste_yadav <- ifelse( dyn_ae_ge_09_19_uniq  $caste_groups == "Yadav", 1,0) -->
+<!-- caste_muslim <- ifelse( dyn_ae_ge_09_19_uniq  $caste_groups == "Muslim", 1,0) -->
+<!-- caste_dalit <- ifelse( dyn_ae_ge_09_19_uniq  $caste_groups == "Dalit", 1,0) -->
+<!-- caste_non_yadav_obc <- ifelse( dyn_ae_ge_09_19_uniq  $caste_groups == "Non-Yadav OBC", 1,0) -->
+<!-- turncoat <-  dyn_ae_ge_09_19_uniq $turncoat -->
+<!-- vote_share <-  dyn_ae_ge_09_19_uniq $vote_share_percentage -->
+<!-- N_minister <-  dyn_ae_ge_09_19_uniq  $n_sc_minster%>% replace_na(0) -->
+<!-- n_mem <- dyn_ae_ge_09_19_uniq $n_mem -->
+<!-- minister_duration <-  dyn_ae_ge_09_19_uniq $minister_dur/n_mem -->
+<!-- minister_duration <- minister_duration %>% replace_na(0) -->
+<!-- minister <-ifelse( dyn_ae_ge_09_19_uniq$min_dur_yr>0,1,0)%>% replace_na(0)  -->
+<!-- n_elections_w <-  dyn_ae_ge_09_19_uniq $n_el_w_pat_ge_09_19 -->
+<!-- school <-  dyn_ae_ge_09_19_uniq $school%>% replace_na(0) -->
+<!-- college <-  dyn_ae_ge_09_19_uniq  $college%>% replace_na(0) -->
+<!-- school_college <- paste(school, college, sep = "") -->
+<!-- school_college <- case_when(school_college == "00"~ 0, -->
+<!--                             TRUE ~ 1) -->
+<!-- #n_elections_w <-ifelse(n_elections_w >=5,5 ,n_elections_w) -->
+<!-- #    -->
+<!-- #  dyn_ae_ge_09_19_uniq $edu <- as.numeric(paste( dyn_ae_ge_09_19_uniq $school,  dyn_ae_ge_09_19_uniq $college, sep = "")) -->
+<!-- #  -->
+<!-- #  -->
+<!-- #  dyn_ae_ge_09_19_uniq $edu_cat <- ifelse( dyn_ae_ge_09_19_uniq $edu ==10,1,ifelse( dyn_ae_ge_09_19_uniq $edu ==1,2,ifelse( dyn_ae_ge_09_19_uniq  ==11,3,0))) -->
+<!-- # #  -->
+<!-- #  dyn_ae_ge_09_19_uniq $edu_cat <- case_when( dyn_ae_ge_09_19_uniq $edu ==10 ~"Only School", -->
+<!-- #                                          dyn_ae_ge_09_19_uniq $edu ==1~"Only College", -->
+<!-- #                                          dyn_ae_ge_09_19_uniq $edu ==11~"Both School & College", -->
+<!-- #                                         TRUE ~"None" -->
+<!-- #  -->
+<!-- #                                         ) -->
+<!-- #  -->
+<!-- # edu <- as.numeric(case_when( dyn_ae_ge_09_19_uniq $edu_cat =="Only School" ~"1", -->
+<!-- #                                          dyn_ae_ge_09_19_uniq $edu_cat =="Only College" ~"2", -->
+<!-- #                                          dyn_ae_ge_09_19_uniq $edu_cat =="Both School & College" ~"3", -->
+<!-- #                                         TRUE ~"0" -->
+<!-- #  -->
+<!-- #                                         )) -->
+<!-- industry <-  dyn_ae_ge_09_19_uniq $indus_count %>% replace_na(0)  -->
+<!-- #industry <- industry+school_college -->
+<!--  dyn_ae_ge_09_19_uniq  <-  dyn_ae_ge_09_19_uniq  %>% mutate(land = as.numeric(land) -->
+<!--                                             ) -->
+<!--  land <- as.numeric( dyn_ae_ge_09_19_uniq $land) %>% replace_na(0) -->
+<!-- land <- as.numeric(cut(land, breaks = c(0,1,100,250,500,Inf), include.lowest =TRUE, labels = c("0","1","2","3","4"))) -->
+<!-- total_assets <- as.numeric( dyn_ae_ge_09_19_uniq  $total_assets) -->
+<!-- asset_avg <- dyn_ae_ge_09_19_uniq$asset_avg -->
+<!-- assets_above_median <- ifelse( dyn_ae_ge_09_19_uniq  $total_assets>median( dyn_ae_ge_09_19_uniq  $total_assets),1,0) -->
+<!-- serious_crime <- ifelse( dyn_ae_ge_09_19_uniq  $serious_crime>0, TRUE, FALSE) -->
+<!-- serious_crime_avg <- dyn_ae_ge_09_19_uniq$serious_crime_avg -->
+<!-- winner <- ifelse( dyn_ae_ge_09_19_uniq  $position==1, 1,0) -->
+<!-- pc<-  dyn_ae_ge_09_19_uniq $constituency_name -->
+<!-- year <-  dyn_ae_ge_09_19_uniq $year -->
+<!-- linkage <- ifelse( dyn_ae_ge_09_19_uniq $level3 %in% c("AE", "GE"),0,1) -->
+<!-- linkage_down <- ifelse( dyn_ae_ge_09_19_uniq $level_cum %in% c("AE-LB", "GE-AE-LB","GE-LB"),1,0) -->
+<!-- sub_region <- dyn_ae_ge_09_19_uniq$sub_region -->
+<!--  dyn_ae_ge_09_19_uniq $land <-  as.numeric( dyn_ae_ge_09_19_uniq $land)  -->
+<!--  election_type <- dyn_ae_ge_09_19_uniq$election_type -->
+<!--  incumbent <- dyn_ae_ge_09_19_uniq$incumbent -->
+<!--  constituency <-  dyn_ae_ge_09_19_uniq$constituency_name -->
+<!--  mem1_female <-  ifelse( dyn_ae_ge_09_19_uniq$mem1_gender=="F",1,0) -->
+<!--  ind_edu <- dyn_ae_ge_09_19_uniq$ind_edu -->
+<!-- df <- tibble(dynast , caste_uc, caste_yadav,caste_non_yadav_obc , caste_dalit , caste_muslim ,minister ,industry ,ind_edu ,linkage, n_elections_w,   serious_crime, turncoat, winner, vote_share, year, election_type, sub_region, incumbent,constituency, asset_avg, dyn_08,serious_crime_avg, land -->
+<!--              ) -->
+<!-- ``` -->
+<!-- ```{r} -->
+<!-- fit.1 <- felm(dynast ~  log(asset_avg) +  serious_crime+ land +ind_edu + dyn_08 + caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim |sub_region|0|constituency, data =subset(df %>% filter(asset_avg>0))) -->
+<!-- ``` -->
+<!-- ```{r} -->
+<!-- # order = c("minister","industry",  "land", "edu","total_assets","serious_crime",     "n_elections_w","mem1_female", "turncoat","incumbent","winner") -->
+<!-- #  -->
+<!-- addlines <- list(c('Fixed effects',"Year and Sub-region"), c("Clustered SE" ,"Constituency"), c("Caste control", "Yes")) -->
+<!-- #  -->
+<!-- cov_labels <- c( "Economic diversification", "Land ownership","Serious crime", "Total assets (log)",) -->
+<!-- #  -->
+<!-- #  -->
+<!-- #  -->
+<!-- #  drop <- c("caste_uc", "caste_yadav","caste_non_yadav_obc", "caste_dalit", "caste_muslim","(Intercept)","Constant") -->
+<!-- ``` -->
+<!-- ```{r results= "asis"} -->
+<!-- stargazer(fit.1,dep.var.labels = c("Political Family"),title="Regression Results - New families - AE-GE 09:19",order= order, type = "html", -->
+<!-- align=TRUE,  no.space=TRUE,add.lines=addlines, omit = drop, covariate.labels = cov_labels) -->
+<!-- ``` -->
 </div>
 <div id="pc" class="section level3">
 <h3>5 PC</h3>
-<div id="data-summary" class="section level4">
-<h4>data summary</h4>
+<hr />
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
@@ -3993,7 +4432,6 @@ Residual Std. Error
 <!-- ge0919 <- fread("D:/cpr/UP/up-dynasties/dyn_other_data/adr/adr_tcpd_09_14_19.csv") -->
 <!-- names(ge0919) <- tolower(names(ge0919)) -->
 <!-- ``` -->
-</div>
 </div>
 </div>
 </div>
