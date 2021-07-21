@@ -584,7 +584,7 @@ In this model we consider winners and runner-ups in the elections held between 1
  $${Political \ family} = \alpha +\beta_{1}Minister   +   \beta_{2} Economic  \ diversification  +  \beta_{3}Land \ ownership + \\ \beta_{3} Election \ won \ by  \ first\  member + \beta_{3}Female \ first member + Z +  \epsilon  $$
 
 
-Where the outcome of interest  ${Political \ family}$ is a dummy variable that is 1 if the family have been successful in forming a political family and 0 otherwise; $beta_{1}Minister $ is another dummy variable that is 1 if there was at least one minister from that family in the state cabinet; $\beta_{2} Economic  \ diversification$ represents the number of industries and educational institutions owned by that particular family;  $\beta_{3}Land \ ownership$ is continuous variable that denotes the land owned by a family; $\beta_{3} Election \ won \ by  \ first\  member$ is continuous variable that is the number of elections won by the first member of the family; $\beta_{3} Election \ won \ by  \ first\  member$  is dummy variable that is one if the first member of the family was a female 0 otherwise; ${Z}$ is the constituency and candidate level controls; ${\epsilon }$ is the error term clustered at the constituency level
+Where the outcome of interest  ${Political \ family}$ is a dummy variable that is 1 if the family have been successful in forming a political family and 0 otherwise; $beta_{1}Minister$ is another dummy variable that is 1 if there was at least one minister from that family in the state cabinet; $\beta_{2} Economic  \ diversification$ represents the number of industries and educational institutions owned by that particular family;  $\beta_{3}Land \ ownership$ is continuous variable that denotes the land owned by a family; $\beta_{3} Election \ won \ by  \ first\  member$ is continuous variable that is the number of elections won by the first member of the family; $\beta_{3} Election \ won \ by  \ first\  member$  is dummy variable that is one if the first member of the family was a female 0 otherwise; ${Z}$ is the constituency and candidate level controls; ${\epsilon }$ is the error term clustered at the constituency level
 
 
 
@@ -680,7 +680,7 @@ align=TRUE,  no.space=TRUE,add.lines=addlines, omit = drop)
 
 ### AE GE All - Won elections
 
-This model is run only among entities who have atleast one an election.
+This model is run only among entities who have at least one an election.
 
 
 
@@ -824,6 +824,11 @@ dyn_ae_ge$total_assets <- DescTools::Winsorize(as.numeric(dyn_ae_ge$total_assets
 ```
 
 ### GE 2009:19
+
+
+This is run among the elections that happened post delimitation, limited to winner and the runner-up
+
+- the dataframe in the 
 
 
 
@@ -1105,7 +1110,7 @@ fit.1 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit +
 fit.2<- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +minister +ind_edu  + land + n_elections_w+mem1_female+ log(total_assets)  +  serious_crime+turncoat+incumbent|year|0|constituency, data = subset(df %>% filter(total_assets>0 & n_el_w>=1)))
 
 
-fit.3 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +minister +ind_edu + land + n_elections_w+ mem1_female+ log(total_assets)  +  serious_crime+turncoat+incumbent|sub_region|0|constituency, data = subset(df %>% filter(total_assets>0 & n_el_w>=1)))
+fit.3 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +minister +ind_edu + land + n_elections_w+ mem1_female+ log(total_assets)  +  serious_crime+turncoat+incumbent |sub_region|0|constituency, data = subset(df %>% filter(total_assets>0 & n_el_w>=1)))
 
 
 
@@ -1423,7 +1428,10 @@ library(lfe)
 dyn_ae <- readxl::read_xlsx("D:/cpr/UP/up-dynasties/dyn_other_data/TCPD_UP_VS_16_17_RK.xlsx")
 
 
-dyn_ae <- dyn_ae %>% select(5:6, 10:10,14:14)
+#dyn_ae %>% rename_all(tolower)%>% select(1:1, 3:3, 4:4, 8:8, 10:14)
+
+
+dyn_ae <- dyn_ae %>% select(3:4, 8:8, 12:12)
 
 
 
@@ -1510,6 +1518,8 @@ incumbent <- dyn_ae_ge_adr$incumbent
 recontest <- dyn_ae_ge_adr$recontest
 
 #bjp <- dyn_ae_ge_adr$bjp
+
+#dyn_ae_ge_adr %>% arrange(-year) %>% distinct(family_id)
 
 female<- ifelse(dyn_ae_ge_adr$sex=="F",1,0)
 
@@ -1612,6 +1622,9 @@ lagged_turnout <- dyn_ae_ge_adr$lagged_turnout
 
 
  dynast_1_2 <- dyn_ae_ge_adr %>% group_by(year, constituency_no) %>% mutate(dynast_1_2 =ifelse(any( position %in% c(1,2)) & any( dyn==1),1,0)) %>%ungroup()%>% select(dynast_1_2)
+ 
+ 
+ 
 
 df <- tibble(winner ,   incumbent,  turncoat , female , terms , dynast , assets  , serious_crime,  year,enop, reservation_SCST,recontest, constituency, party, vote_share_pc, inc, bjp, margin_percentage,  position, turnout, sub_region,immovable_assets,movable_assets,mov_assets_ratio , caste_uc, caste_sc, caste_muslim, caste_obc, dynast_1_2, lagged_margin, lagged_turnout)
 
@@ -1652,14 +1665,14 @@ df %>% summarise_at(  c("dynast","turncoat","recontest", "incumbent"),~mean(., n
 
 
 ```{r}
-fit.1 <- felm(dynast ~  log(assets)  +  serious_crime+turncoat+  terms +female +caste_uc +caste_obc +caste_muslim+caste_sc |0|0|constituency, data = subset(df %>% filter(!is.na(assets)& assets>0)))
+fit.1 <- felm(dynast ~  log(assets)  +  serious_crime+turncoat+   +caste_uc +caste_obc +caste_muslim+caste_sc |0|0|constituency, data = subset(df %>% filter(!is.na(assets)& assets>0)))
 
-fit.2 <- felm(dynast ~  log(assets)  +  serious_crime+turncoat+  terms +female +caste_uc +caste_obc +caste_muslim+caste_sc |year|0|constituency, data = subset(df %>% filter(!is.na(assets)& assets>0)))
+fit.2 <- felm(dynast ~  log(assets)  +  serious_crime+turncoat+   +caste_uc +caste_obc +caste_muslim+caste_sc |year|0|constituency, data = subset(df %>% filter(!is.na(assets)& assets>0)))
 
 
-fit.3 <- felm(dynast ~  log(assets)  +  serious_crime+turncoat+  terms +female +caste_uc +caste_obc +caste_muslim+caste_sc |sub_region|0|constituency, data = subset(df %>% filter(!is.na(assets)& assets>0)))
+fit.3 <- felm(dynast ~  log(assets)  +  serious_crime+turncoat+  +caste_uc +caste_obc +caste_muslim+caste_sc |sub_region|0|constituency, data = subset(df %>% filter(!is.na(assets)& assets>0)))
 
-fit.4 <- felm(dynast ~  log(assets)  +  serious_crime+turncoat+  terms +female +caste_uc +caste_obc +caste_muslim+caste_sc |year+sub_region|0|constituency, data = subset(df %>% filter(!is.na(assets)& assets>0)))
+fit.4 <- felm(dynast ~  log(assets)  +  serious_crime+turncoat+caste_uc +caste_obc +caste_muslim+caste_sc |year+sub_region|0|constituency, data = subset(df %>% filter(!is.na(assets)& assets>0)))
 
 
 
