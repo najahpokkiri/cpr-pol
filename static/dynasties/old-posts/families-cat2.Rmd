@@ -2625,7 +2625,14 @@ s_econ1 <- ggsurvplot(survfit(Surv(fam_life, dead) ~industry , data = subset(fam
 ```{r}
 ggsurvplot(survfit(Surv(fam_life, dead) ~ land, data = fam_df1), 
      xlab = "Years", 
-     ylab = "Overall survival probability")
+     ylab = "Overall survival probability",
+     
+     
+            title = "Survival of political families wrt economic diversification",
+     subtitle = "Land measured in bhigas",
+     ggtheme = theme_light(),
+      legend.labs = c("No land","Below 100","101-250","251-500", "Above 500"),
+     legend = "bottom")
 ```
 
 ### caste
@@ -2663,17 +2670,18 @@ ggsurvplot(survfit(Surv(fam_life, dead) ~ land, data = fam_df1),
      xlab = "Years", 
      ylab = "Overall survival probability",
      ggtheme = theme_light(),
-     subtitle = "Pre-90")
+     subtitle = "Pre-90", legend= "bottom")
 
 dc2<- ggsurvplot(survfit(Surv(fam_life, dead) ~caste , data = subset(fam_df1 %>% filter(decade == "Post-90" &caste!= "Others"))), 
                  title = "",
      xlab = "Years", 
      ylab = "",
      ggtheme = theme_light(),
-     subtitle = "Post-90")
+     subtitle = "Post-90",
+     legend= "none")
 
 
-dc1$plot +dc2$plot
+dc1$plot +dc2$plot 
 
 
 
@@ -2892,7 +2900,7 @@ fit.surv <- coxph(Surv(fam_life, dead) ~ linkage +minister + industry + land + e
 
 
 
-stargazer(fit.surv, type="html", keep = c("linkage","minister","industry", "land", "edu"),order = c("linkage","success_cat","minister","industry",  "land", "edu"),add.lines = list (c("Caste control", "Yes")),covariate.labels = c( "Political diversification","Minister", "Economic diversification", "Land ownership", "Educational inst.ownership"), title = "Coax hazard regression")
+stargazer(fit.surv, type="html",dep.var.labels = "Family life span", keep = c("linkage","minister","industry", "land", "edu"),order = c("linkage","success_cat","minister","industry",  "land", "edu"),add.lines = list (c("Caste control", "Yes")),covariate.labels = c( "Political diversification","Minister", "Economic diversification", "Land ownership", "Educational inst.ownership"), title = "Coax hazard regression")
 
 
 
@@ -2935,8 +2943,8 @@ fit.surv3 <- coxph(Surv(fam_life, dead) ~ linkage +minister + industry + land + 
 
 
 
-stargazer(fit.surv1, fit.surv2, fit.surv3,
-          type="html", keep = c("linkage","minister","industry", "land", "edu"),order = c("linkage","success_cat","minister","industry",  "land", "edu"),add.lines = list (c("Start","All","Post 1980","Post 1990"),c("Caste control", "Yes","Yes", "Yes"), c("Decade control","Yes","Yes", "Yes")),covariate.labels = c( "Political diversification","Minister", "Economic diversification", "Land ownership", "Educational inst.ownership"), title = "Coax hazard regression")
+stargazer(fit.surv1, fit.surv2, fit.surv3,dep.var.labels = "Family life span",
+          type="html", keep = c("linkage","minister","industry", "land", "edu"),order = c("linkage","success_cat","minister","industry",  "land", "edu"),add.lines = list (c("Start","All","Post 80","Post 90"),c("Caste control", "Yes","Yes", "Yes"), c("Decade control","Yes","Yes", "Yes")),covariate.labels = c( "Political diversification","Minister", "Economic diversification", "Land ownership", "Educational inst.ownership"), title = "Coax hazard regression")
 ```
 
 
@@ -3051,8 +3059,8 @@ dead.surv3 <- coxph(Surv(fam_life, dead_15) ~ linkage +minister + ind_edu + land
 
 
 
-stargazer(dead.surv1, dead.surv3, dead.surv2,
-          type="html", keep = c("linkage","minister","ind_edu", "land"),order = c("linkage","success_cat","minister","ind_edu",  "land"),add.lines = list (c("Active","last 10 years","last 5 years","last 15 years"),c("Caste control", "Yes","Yes", "Yes"), c("Decade control","Yes","Yes", "Yes")),covariate.labels = c( "Political diversification","Minister", "Economic diversification", "Land ownership"), title = "cox hazard proportional model")
+stargazer(dead.surv1, dead.surv3, dead.surv2,dep.var.labels = c("Family life span","Family life span","Family life span"),
+          type="html", keep = c("linkage","minister","ind_edu", "land"),order = c("linkage","success_cat","minister","ind_edu",  "land"),add.lines = list (c("Years","last 10 years","last 5 years","last 15 years"),c("Caste control", "Yes","Yes", "Yes"), c("Decade control","Yes","Yes", "Yes")),covariate.labels = c( "Political diversification","Minister", "Economic diversification", "Land ownership"), title = "cox hazard proportional model")
 
 
 
