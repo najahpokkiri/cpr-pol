@@ -1057,7 +1057,7 @@ order = c("minister","ind_edu",  "land", "edu","total_assets","serious_crime",  
 
 addlines <- list(c('Fixed effects', '' ,"Year", "Sub-region","Year and Sub-region"), c("Clustered SE" ,"Constituency","Constituency","Constituency","Constituency"), c("Caste control", "Yes","Yes","Yes","Yes"))
 
-cov_labels <- c( "Minister", "Economic diversification", "Land ownership", "Total assets (log)","Serious crime","Elections won by first member","First member - female", "Turncoat","Incumbent")
+cov_labels <- c( "Minister", "Economic diversification", "Land ownership", "Total assets (log)","Serious crime")
 
 
 
@@ -1128,7 +1128,7 @@ order = c("minister","ind_edu",  "land", "total_assets","serious_crime",     "n_
 
 addlines <- list(c('Fixed effects', '' ,"Year", "Sub-region","Year and Sub-region"), c("Clustered SE" ,"Constituency","Constituency","Constituency","Constituency"), c("Caste control", "Yes","Yes","Yes","Yes"))
 
-cov_labels <- c( "Minister", "Economic diversification", "Land ownership",  "Total assets (log)","Serious crime","Elections won by first member","First member - female", "Turncoat","Incumbent")
+cov_labels <- c( "Minister", "Economic diversification", "Land ownership",  "Total assets (log)","Serious crime", "Turncoat","Incumbent")
 
 
 
