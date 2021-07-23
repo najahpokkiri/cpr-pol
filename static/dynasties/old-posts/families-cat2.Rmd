@@ -70,9 +70,20 @@ dyn_ae_ge <- dyn_ae_ge  %>% group_by(election_id) %>% mutate(term_duration= max(
 
 dyn_ae_ge <- dyn_ae_ge %>% group_by(family_id) %>% mutate(n_mem = n_distinct(rel_id_uniq),max_year = max(year), min_year = min(year),life_span = max_year-min_year+term_duration)
 
-   dyn_ae_ge <- dyn_ae_ge %>% group_by(family_id) %>% mutate(n_el_w =n_distinct(election_id[position==1]), n_el_c = n_distinct(election_id))
+   dyn_ae_ge <- dyn_ae_ge %>% group_by(family_id) %>% mutate(n_el_w =n_distinct(election_id[position==1]), n_el_c = n_distinct(election_id),
+                                                             n_el_w_pat_ae_ge = length(year[relative_id==1 & position ==1 &  dyn_cum_2 ==0]))
+   
+   
   
+gender <- dyn_ae_ge  %>% filter(relative_id==1) %>% select(family_id,mem1_gender =sex) %>% distinct(family_id, .keep_all = TRUE)
 
+# gender_tot <- dyn_ae_ge  %>% filter(relative_id==1) %>% select(family_id,mem1_gender =sex, dyn_tot_2) %>% distinct(family_id, .keep_all = TRUE)
+
+dyn_ae_ge <- left_join(dyn_ae_ge, gender, by = "family_id")
+
+
+  
+dyn_ae_ge  <- dyn_ae_ge  %>% group_by(family_id) %>% mutate(n_el_w_pat_ae_ge = length(year[relative_id==1 & position ==1 &  dyn_cum_2 ==0]))
 
 
 dyn_ae <- dyn %>% filter(election_type =="AE")
@@ -378,7 +389,41 @@ fam_life <-  dyn_ae_ge_fam  %>%
          year_diff_1 = ifelse(year_diff_1==0|year_diff_1>5|year_diff_1<0 ,term_duration, year_diff_1)) %>%
    group_by(family_id) %>% 
    summarise(fam_life = sum(year_diff_1))
+
+
 dyn_ae_ge_fam_uniq <- dyn_ae_ge_fam  %>% group_by(family_id)%>% arrange(election_id)%>% distinct(family_id, .keep_all = TRUE)
+
+ dyn_ae_ge_fam_uniq$edu <- as.numeric(paste( dyn_ae_ge_fam_uniq$school,  dyn_ae_ge_fam_uniq$college, sep = ""))
+
+
+ dyn_ae_ge_fam_uniq$edu_cat <- ifelse( dyn_ae_ge_fam_uniq$edu ==10,1,ifelse( dyn_ae_ge_fam_uniq$edu ==1,2,ifelse( dyn_ae_ge_fam_uniq ==11,3,0)))
+# 
+ dyn_ae_ge_fam_uniq$edu_cat <- case_when( dyn_ae_ge_fam_uniq$edu ==10 ~"Only School",
+                                         dyn_ae_ge_fam_uniq$edu ==1~"Only College",
+                                         dyn_ae_ge_fam_uniq$edu ==11~"Both School & College",
+                                        TRUE ~"None"
+
+                                        )
+
+edu <- as.numeric(case_when( dyn_ae_ge_fam_uniq$edu_cat =="Only School" ~"1",
+                                         dyn_ae_ge_fam_uniq$edu_cat =="Only College" ~"2",
+                                         dyn_ae_ge_fam_uniq$edu_cat =="Both School & College" ~"3",
+                                        TRUE ~"0"
+
+                                       ))
+
+                            
+                             dyn_ae_ge_fam_uniq <- dyn_ae_ge_fam_uniq %>%  
+  mutate(edu_log = ifelse(edu_cat=="None",0,1)) %>%
+   rowwise() %>% 
+  mutate(ind_all = sum(ind_c1, ind_c2,ind_c3, ind_c4, ind_c5),
+         ind_edu = sum(ind_all+edu_log)) %>% ungroup() 
+                                  
+
+
+
+
+
 
 
  
@@ -527,173 +572,26 @@ year_entry <- ggplot(fam_tab %>% filter(diff>=0), aes(diff))+
 ## Viz & summary {.tabset}
 
 
-### caste composition {.tabset}
+### A note on the life span metric
 
 
-#### families
-
-
-```{r}
-dyn_ae_ge$caste_groups <- factor(dyn_ae_ge$caste_groups, levels = c("Upper Caste","Yadav","Non-Yadav OBC","Dalit" , "Muslim"  ,"Others" ))
-
-
-dyn_ae_ge %>% filter(dyn_cum_2 ==1) %>% distinct(family_id, .keep_all = TRUE)%>% group_by(caste_groups) %>% summarise(count = n(), prop = count/322 *100)%>% mutate(caste = "caste") %>% 
-  ggplot(aes(caste, prop, fill = caste_groups, label = round(prop,0)))+
-    geom_col()+
-      geom_text(size = 2.5, position = position_stack(vjust = 0.5))+
-
-    colorspace::scale_fill_discrete_qualitative(palette= "dark3" )+
-
-    theme_minimal()+
-  theme(aspect.ratio=4/2)+
-labs(title = "Caste composition of families ",x = "", y = "", fill = "Caste Groups")+
-    theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
-  theme(plot.background = element_blank(),
-        axis.line.x = element_line(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        axis.text.y = element_blank()
-  ) 
-
-
-
+  Life span is a metric that measures the years that a family or politicains have been active in politcs. Since our dynasty data data starts from 1974 and ends with politicinas who are in term till 2024, this duration of period will start from 2/3/5/6 and end at 50 years. So within this period, the maximum life span that a family can have is 50 years. 
   
-```
+In simple words, this metric checks if a politician or a family was active ina certain year and adds up that year. We binary value is given to every year that is 1 for someone's presence and 0 otherwise. Here we have to note that, we do not consider how many members are present at a time rather we just consider that the family was active in that particular year. 
 
-####  elite categories
+We define active in politics as being either runner-up or winner that election. Few examples:
 
-```{r}
-# dyn_lb  <- dyn_lb %>% mutate(level_log = ifelse(level == "LB",FALSE,TRUE))
-# 
-# dyn_lb_uniq <- dyn_lb %>% arrange (-year) %>%  distinct(family_id, .keep_all = TRUE)
-# 
-# count_tot  <-  dim(dyn_lb_uniq %>% filter(dyn_tot ==1))[1]
-# dyn_lb_uniq %>% filter(dyn_tot ==1) %>% group_by(level_log) %>% summarise(prop = n()/count_tot) %>% kable(caption = "Family linkages", col.names = c("Connection", "Proportion"), digits = 2) %>% kable_styling(bootstrap_options = "striped")
+- Politician A contested in 1974, 2002 and his son contested in 2017. The life span of this family would be 15 years. See that we add a value of one for each year they are in power.
 
+- A politician and his wife contested together in 2012 and later on his wife resigned from assembly and contested in 2014 Loksabha election. In this case, this family's life span would be 7 years
 
-dyn_ae_ge_fam_uniq$caste_groups <- factor(dyn_ae_ge_fam_uniq$caste_groups, levels = c("Upper Caste","Yadav","Non-Yadav OBC","Dalit" , "Muslim"  ,"Others" ))
-
-
-
-dyn_ae_ge_fam_uniq %>% filter(caste_groups!= "NA") %>% group_by(success_cat, caste_groups) %>% summarise( count = n()) %>% group_by(success_cat) %>% mutate(sum = sum(count), prop = count/sum) %>% select(success_cat, caste_groups, prop) %>% 
-  ggplot(aes(factor(success_cat), prop, fill = caste_groups,label = round(prop,2)))+
-   geom_bar(stat="identity", position = "stack")+
-    geom_text(size = 2.5, position = position_stack(vjust = 0.5))+ 
-  colorspace::scale_fill_discrete_qualitative(palette= "dark3" )+
-  coord_fixed(ratio =5)+
-    theme_minimal()+
-      
-    labs(title = "Caste composition among families wrt success  ",x = "", y = "Proportion", fill = "") +
-    theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
-  theme(plot.background = element_blank(),
-        axis.line.x = element_line(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        axis.text.y = element_blank()
-  ) 
-
-
-
-```
-
-
-
-
-### Life span wrt caste
-
-So life span is one variable that takes an absolute difference between the year they first appeared and last appeared- this a flawed measure because this does not take the number of elections you have contested into consideration.We came with another metric to solve this - that a measure that is takes the terms that you have been active into account peaking at 50 years. (ie 1974 -2024 difference)
-
-- the first plot uses the flawed measure and the second one uses the latest one which we have used in the survival models.
-
-
-```{r}
-ylim1 = boxplot.stats(dyn_ae_ge_fam_uniq$life_span)$stats[c(1, 5)]
-
-
-dyn_ae_ge_fam_uniq %>% group_by(caste_groups) %>% 
-  summarise(mean(life_span),
-            median(life_span)) %>% kable(digits = 2) %>% 
-  kable_styling(full_width = F)
-
-# ggplot(dyn_ae_ge_fam_uniq %>% filter(caste_groups!= "Others"),aes(x = reorder(as.factor(caste_groups),-life_span, median), life_span)) +
-#   geom_boxplot(outlier.shape = NA)+
-#  # scale_x_discrete(labels=(c("Non - Family", "Family")))+
-#   coord_cartesian(ylim = ylim1*1.05)+
-#   theme_minimal()+
-#   labs(title = "Family life span wrt caste groups ",x = "", y = "Life span \n (in years)") +
-#   
-#   theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
-#         plot.background = element_blank(),
-#         plot.title = element_text(family = "serif",hjust = 0.5, size = 20, 
-#                                   margin= margin(0,0,20,0)), 
-#         text = element_text(color = "gray20", family = "serif"),
-#         legend.title = element_blank(),
-#         legend.text = element_text(size = 15),
-#         axis.text = element_text(face = "italic", size = 13),
-#         axis.title = element_text(vjust = -1, size = 16),        
-#         axis.ticks = element_blank()
-#   ) 
-# 
-
-
-```
-
-
----
-
-```{r}
-
+ **This metric also have some flaws, some of them are;**
  
-fam_span2%>% group_by(caste_groups) %>% 
-  summarise(mean(fam_life),
-            median(fam_life)) %>% kable(digits = 2) %>% 
-  kable_styling(full_width = F)
+- this does not diffrentiate between a winner and runner-up
+
+- this does not compensate for the years in which multiple members are cotesting together.
 
 
-```
-
-
----
-
-```{r}
-ggplot(fam_span2 %>% filter(caste_groups!= "Others"),aes(x = reorder(as.factor(caste_groups),-fam_life, median), fam_life)) +
-  geom_boxplot(outlier.shape = NA)+
- # scale_x_discrete(labels=(c("Non - Family", "Family")))+
-  coord_cartesian(ylim = ylim1*1.05)+
-  theme_minimal()+
-  labs(title = "Family life span wrt caste groups ",x = "", y = "Life span \n (in years)") +
-
-  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
-        plot.background = element_blank(),
-        plot.title = element_text(family = "serif",hjust = 0.5, size = 20,
-                                  margin= margin(0,0,20,0)),
-        text = element_text(color = "gray20", family = "serif"),
-        legend.title = element_blank(),
-        legend.text = element_text(size = 15),
-        axis.text = element_text(face = "italic", size = 13),
-        axis.title = element_text(vjust = -1, size = 16),
-        axis.ticks = element_blank()
-  )
-
-
-
-```
-
----
-
-```{r}
-ggplot(dyn_ae_ge_fam_uniq %>% filter(caste_groups!= "Others"),aes(life_span, fill = factor(caste_groups)))+
-  geom_density(alpha =.5 )+
-  theme(legend.position = "bottom")
-
-
-```
-
----
-
-```{r}
-dyn_ae_ge_fam_uniq %>% filter(caste_groups!= "Others") %>% group_by(caste_groups) %>% summarise(mean = mean(life_span), median = median(life_span)) %>% kable(digits =0) %>% kable_styling(full_width = F)
-```
 
 
 
@@ -789,7 +687,16 @@ dyn_ae_ge_fam_uniq$land_cat <- cut(dyn_ae_ge_fam_uniq$land, breaks = c(0,1,100,2
 
     geom_bar(position = "stack", stat = "identity")+
      geom_text(size = 2.5, position = position_stack(vjust = 0.5))+
-    theme_light()
+    theme_light()+
+        theme_minimal()+
+    labs(title = "Land holdings wrt success  ",x = "", y = "Proportion", fill = "") +
+    theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
+  theme(plot.background = element_blank(),
+        axis.line.x = element_line(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.y = element_blank()
+       )
 
 
 #   geom_histogram(binwidth = 50, color = "steelblue")+
@@ -956,6 +863,188 @@ dyn_ae_ge_fam_uniq %>% group_by(success_cat) %>% summarise(mean(land, na.rm = TR
 
 ---
 
+## caste  {.tabset}
+
+
+### caste composition
+
+
+```{r}
+dyn_ae_ge$caste_groups <- factor(dyn_ae_ge$caste_groups, levels = c("Upper Caste","Yadav","Non-Yadav OBC","Dalit" , "Muslim"  ,"Others" ))
+
+
+dyn_ae_ge %>% filter(dyn_cum_2 ==1) %>% distinct(family_id, .keep_all = TRUE)%>% group_by(caste_groups) %>% summarise(count = n(), prop = count/322 *100)%>% mutate(caste = "caste") %>% 
+  ggplot(aes(caste, prop, fill = caste_groups, label = round(prop,0)))+
+    geom_col()+
+      geom_text(size = 2.5, position = position_stack(vjust = 0.5))+
+
+    colorspace::scale_fill_discrete_qualitative(palette= "dark3" )+
+
+    theme_minimal()+
+  theme(aspect.ratio=4/2)+
+labs(title = "Caste composition of families ",x = "", y = "", fill = "Caste Groups")+
+    theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
+  theme(plot.background = element_blank(),
+        axis.line.x = element_line(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.y = element_blank()
+  ) 
+
+
+
+  
+```
+
+
+
+
+###  elite categories
+
+```{r}
+# dyn_lb  <- dyn_lb %>% mutate(level_log = ifelse(level == "LB",FALSE,TRUE))
+# 
+# dyn_lb_uniq <- dyn_lb %>% arrange (-year) %>%  distinct(family_id, .keep_all = TRUE)
+# 
+# count_tot  <-  dim(dyn_lb_uniq %>% filter(dyn_tot ==1))[1]
+# dyn_lb_uniq %>% filter(dyn_tot ==1) %>% group_by(level_log) %>% summarise(prop = n()/count_tot) %>% kable(caption = "Family linkages", col.names = c("Connection", "Proportion"), digits = 2) %>% kable_styling(bootstrap_options = "striped")
+
+
+dyn_ae_ge_fam_uniq$caste_groups <- factor(dyn_ae_ge_fam_uniq$caste_groups, levels = c("Upper Caste","Yadav","Non-Yadav OBC","Dalit" , "Muslim"  ,"Others" ))
+
+
+
+dyn_ae_ge_fam_uniq %>% filter(caste_groups!= "NA") %>% group_by(success_cat, caste_groups) %>% summarise( count = n()) %>% group_by(success_cat) %>% mutate(sum = sum(count), prop = count/sum) %>% select(success_cat, caste_groups, prop) %>% 
+  ggplot(aes(factor(success_cat), prop, fill = caste_groups,label = round(prop,2)))+
+   geom_bar(stat="identity", position = "stack")+
+    geom_text(size = 2.5, position = position_stack(vjust = 0.5))+ 
+  colorspace::scale_fill_discrete_qualitative(palette= "dark3" )+
+
+  coord_fixed(ratio =5)+
+    theme_minimal()+
+      
+    labs(title = "Caste composition among families wrt success  ",x = "", y = "Proportion", fill = "") +
+    theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
+  theme(plot.background = element_blank(),
+        axis.line.x = element_line(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.y = element_blank()
+  ) 
+
+
+
+```
+
+
+### land
+```{r}
+
+
+dyn_ae_ge_fam_uniq %>% filter(caste_groups!= "NA" & caste_groups!= "Others") %>% group_by( caste_groups,ind_edu) %>% summarise( count = n()) %>% group_by(caste_groups) %>% mutate(sum = sum(count), prop = count/sum) %>% select(ind_edu, caste_groups, prop) %>% 
+  ggplot(aes(factor(caste_groups), prop, fill = factor(ind_edu),label = round(prop,2)))+
+   geom_bar(stat="identity", position = "stack")+
+    geom_text(size = 2.5, position = position_stack(vjust = 0.5))+ 
+  colorspace::scale_fill_discrete_qualitative(palette= "dark3" )+
+  coord_fixed(ratio =5)+
+    theme_minimal()+
+    scale_x_discrete(labels =(c ("Dalit","Muslim", "Non-Yadav \n OBC","Upper \n Caste","Yadav"    )))+
+      
+    labs(title = "Economic diversification wrt caste groups  ",x = "", y = "Proportion", fill = "") +
+    theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
+  theme(plot.background = element_blank(),
+        axis.line.x = element_line(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.y = element_blank()
+       )
+
+
+```
+
+### industries
+
+```{r}
+dyn_ae_ge_fam_uniq %>% filter(caste_groups!= "Others")%>% group_by(caste_groups, land_cat) %>% summarise(count = n()) %>%
+    group_by(caste_groups) %>% mutate(sum = sum(count), pc = count/sum) %>%
+    ggplot(aes(caste_groups,pc, fill = land_cat, label = round(pc,2)))+
+
+    geom_bar(position = "stack", stat = "identity")+
+     geom_text(size = 2.5, position = position_stack(vjust = 0.5))+
+    theme_light()+
+      theme_minimal()+
+    scale_x_discrete(labels =(c ("Dalit","Muslim", "Non-Yadav \n OBC","Upper \n Caste","Yadav"    )))+
+      
+    labs(title = "land holdings wrt caste groups  ",x = "", y = "Proportion", fill = "") +
+    theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
+  theme(plot.background = element_blank(),
+        axis.line.x = element_line(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.y = element_blank()
+       )
+```
+
+
+### Life span wrt caste
+
+
+
+
+---
+
+```{r}
+
+ 
+fam_span2%>% group_by(caste_groups) %>% 
+  summarise(mean(fam_life),
+            median(fam_life)) %>% kable(digits = 2) %>% 
+  kable_styling(full_width = F)
+
+
+```
+
+
+---
+
+```{r}
+ggplot(fam_span2 %>% filter(caste_groups!= "Others"),aes(x = reorder(as.factor(caste_groups),-fam_life, median), fam_life)) +
+  geom_boxplot(outlier.shape = NA)+
+ # scale_x_discrete(labels=(c("Non - Family", "Family")))+
+  #coord_cartesian(ylim = ylim1*1.05)+
+  theme_minimal()+
+  labs(title = "Family life span wrt caste groups ",x = "", y = "Life span \n (in years)") +
+
+  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
+        plot.background = element_blank(),
+        plot.title = element_text(family = "serif",hjust = 0.5, size = 20,
+                                  margin= margin(0,0,20,0)),
+        text = element_text(color = "gray20", family = "serif"),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 15),
+        axis.text = element_text(face = "italic", size = 13),
+        axis.title = element_text(vjust = -1, size = 16),
+        axis.ticks = element_blank()
+  )
+
+
+
+```
+
+---
+
+```{r}
+ggplot(dyn_ae_ge_fam_uniq %>% filter(caste_groups!= "Others"),aes(life_span, fill = factor(caste_groups)))+
+  geom_density(alpha =.5 )+
+  theme(legend.position = "bottom")
+
+
+```
+
+
+
+---
+
 
 
 <!-- # Family new analyses -->
@@ -1044,6 +1133,128 @@ dyn_ae_ge_fam_uniq %>% group_by(success_cat) %>% summarise(mean(land, na.rm = TR
 ```
 
 
+### life span graphs
+
+```{r}
+fam_ls_w <- ggplot(fam_span2)+
+  geom_density(aes(x=fam_life, y = ..density..),size = 1, color = 'black')+
+  geom_vline(aes(xintercept = median(fam_span2$fam_life), color = "median"))+
+  geom_vline(aes(xintercept = mean(fam_span2$fam_life), color = "mean",show.legend  =TRUE))+
+   scale_color_manual(name = "statistics", values = c(median = "red", mean = "blue"))+
+ scale_y_continuous(limits = c(0,.07),
+  labels = scales::number_format(accuracy = 0.01))+
+ theme_bw()+
+  
+  labs(subtitle = "Life span of families", x= "", y = "Density")
+
+
+
+
+
+## after second mme
+
+fam_life_2 <-  dyn_ae_ge_fam %>%
+   group_by(family_id) %>% 
+  filter(dyn_cum_2 ==1) %>% 
+   distinct(year, .keep_all = TRUE) %>%
+  select(family_id,election_type, year, position, term_duration) %>%
+  
+  arrange(family_id,year) %>%
+   mutate(year_diff = year- lag(year, default = 0),
+         # year_diff = ifelse(year_diff>lag(term_duration),0,year_diff),
+          year_diff_1 = lead(year_diff,default = 0),
+         year_diff_1 = ifelse(year_diff_1==0|year_diff_1>5|year_diff_1<0 ,term_duration, year_diff_1)) %>%
+   group_by(family_id) %>% 
+   summarise(fam_life2 = sum(year_diff_1), min_fam_year= min(year))
+##
+fam_span3 <- inner_join(dyn_ae_ge_fam_uniq ,fam_life_2, by = "family_id")
+
+
+fam_ls_wo <- ggplot(fam_span3)+
+  geom_density(aes(x=fam_life2, y = ..density..),size = 1, color = 'black')+
+  geom_vline(aes(xintercept = median(fam_span3$fam_life2), color = "median"))+
+  geom_vline(aes(xintercept = mean(fam_span3$fam_life2), color = "mean",show.legend  =TRUE))+
+   scale_color_manual(name = "statistics", values = c(median = "red", mean = "blue"))+
+scale_y_continuous(limits = c(0,.07),
+  labels = scales::number_format(accuracy = 0.01))+
+ theme_bw()+
+  labs(subtitle = "Life span of families  \n after second member entry", y = "", x= "Years")
+
+## non-fam
+
+
+ dyn_ae_ge$fam_rel_uniq_id <- paste(dyn_ae_ge$family_id, dyn_ae_ge$rel_id_uniq, sep = "")
+ 
+dyn_ae_ge <- dyn_ae_ge %>% group_by(fam_rel_uniq_id) %>% mutate(n_elections_won = n_distinct(election_id[position ==1])) %>% ungroup(fam_rel_uniq_id)
+
+dyn_non_fam_w <- dyn_ae_ge %>% filter(dyn_tot_2==0 &n_elections_won >=1)%>% group_by(family_id) %>% mutate(max_year = max(year), min_year = min(year)) 
+
+non_fam_life <- dyn_non_fam_w %>% 
+   group_by(family_id) %>% 
+   distinct(year, .keep_all = TRUE) %>%
+  select(family_id,election_type, year, position, term_duration) %>%
+  arrange(family_id,year) %>%
+   mutate(year_diff = year- lag(year, default = 0),
+         # year_diff = ifelse(year_diff>lag(term_duration),0,year_diff),
+          year_diff_1 = lead(year_diff,default = 0),
+         year_diff_1 = ifelse(year_diff_1==0|year_diff_1>5|year_diff_1<0 ,term_duration, year_diff_1)) %>%
+   group_by(family_id) %>% 
+   summarise(non_fam_life = sum(year_diff_1))
+dyn_ae_ge_fam_uniq <- dyn_ae_ge_fam  %>% group_by(family_id)%>% arrange(election_id)%>% distinct(family_id, .keep_all = TRUE)
+
+
+non_fam_span <- inner_join(dyn_non_fam_w , non_fam_life, by = "family_id")
+
+
+
+
+# medx <- median(dyn_non_fam_w$life_span)
+# meanx <- mean(dyn_non_fam_w$life_span)
+
+# dyn_non_fam_w %>% filter(life_span>42)
+
+
+ind_ls <-  ggplot(non_fam_span )+
+  geom_density(aes(x=non_fam_life, y = ..density..),size = 1, color = 'black')+
+   labs(subtitle = "Life span of non-families \n who have atleast one", x= "", y = "")+
+  xlim(0,50)+
+  ylim(.0,.07)+
+  geom_vline(aes(xintercept = median(non_fam_span $non_fam_life), color = "median"))+
+  geom_vline(aes(xintercept = mean(non_fam_span $non_fam_life), color = "mean",show.legend  =TRUE))+
+   scale_color_manual(name = "statistics", values = c(median = "red", mean = "blue"))+
+  scale_y_continuous(limits = c(0,.07),
+  labels = scales::number_format(accuracy = 0.01))+
+ theme_bw()
+
+## years to second member entry
+
+
+fam_life_3 <- inner_join(fam_life, fam_life_2, by = "family_id") %>% mutate(diff = fam_life- fam_life2)
+
+
+
+year_entry <- ggplot(fam_life_3, aes(diff))+
+  geom_density(size = 1, color = 'black')+
+  labs(subtitle = "Years to second member entry", x = "Years",y = "Density")+
+  #xlim(0,45)
+  ylim(.0,.07)+
+  geom_vline(aes(xintercept =  median(fam_life_3$diff), color = "median"))+
+  geom_vline(aes(xintercept =  mean(fam_life_3$diff), color = "mean",show.legend  =TRUE))+
+   scale_color_manual(name = "statistics", values = c(median = "red", mean = "blue"))+
+  scale_y_continuous(limits = c(0,.07),
+  labels = scales::number_format(accuracy = 0.01))+
+ theme_bw()
+
+library(ggpubr)
+
+ggpubr::ggarrange(fam_ls_w, ind_ls, year_entry,fam_ls_wo ,common.legend = TRUE, legend = "bottom", align = "hv")
+
+
+# inner_join(dyn_ae_ge, fam_life_3, by = "family_id") %>% write.csv("D:/cpr/UP/up-dynasties/dyn_other_data/fam_life_test.csv")
+
+
+```
+
 # Regressions {.tabset}
 
 ## All famileis
@@ -1103,6 +1314,11 @@ n_mem <- dyn_ae_ge_fam_uniq$n_mem
 
 minister_duration <- minister_duration/n_mem
 
+mem1_female <-  if_else(dyn_ae_ge_fam_uniq$mem1_gender=="F",1,0,missing = 0)
+
+
+n_elections_w <-  dyn_ae_ge_fam_uniq$n_el_w_pat_ae_ge
+
 
 
 minister <-ifelse(dyn_ae_ge_fam_uniq$min_dur_yr>0,1,0)%>% replace_na(0)
@@ -1113,6 +1329,8 @@ post_2002 <- ifelse(dyn_ae_ge_fam_uniq$year >=2002,1,0)
 
 
 #n_elections_w<- as.numeric(dyn_ae_ge_fam_uniq$n_el_w)
+
+
  dyn_ae_ge_fam_uniq$edu <- as.numeric(paste( dyn_ae_ge_fam_uniq$school,  dyn_ae_ge_fam_uniq$college, sep = ""))
 
 
@@ -1143,7 +1361,6 @@ edu <- as.numeric(case_when( dyn_ae_ge_fam_uniq$edu_cat =="Only School" ~"1",
 
 
 
-industry <- dyn_ae_ge_fam_uniq$indus_count %>% replace_na(0) 
 
 ind_edu <- dyn_ae_ge_fam_uniq$ind_edu
 
@@ -1210,7 +1427,7 @@ caste_groups <- dyn_ae_ge_fam_uniq$caste_groups
 
 
 
-df <- tibble(family_id,constituency,success_cat, caste_uc, caste_yadav,caste_non_yadav_obc , caste_dalit , caste_muslim ,minister_duration ,industry , land , linkage,linkage_down, minister, edu, second_mem_dur, delim_change, election_type, caste_groups, ind_edu)
+df <- tibble(family_id,constituency,success_cat, caste_uc, caste_yadav,caste_non_yadav_obc , caste_dalit , caste_muslim ,minister_duration ,industry , land , linkage,linkage_down, minister, edu, second_mem_dur, delim_change, election_type, caste_groups, ind_edu, mem1_female, n_elections_w)
 
 
 fam_df <- df
@@ -1238,7 +1455,7 @@ stat <-as.data.frame(c("Length","Length","Length", "Unique-N","Unique-N","Unique
 vals <- data.table::rbindlist(list(n,unique_n,mean, sd,min, max), use.names = FALSE)
 
 
-cbind(stat, vals) %>% kable(digits = 2, col.names = c("Measure", "Elite catagory", "Political diversification","Minister duration(Months)","Economic diversification","Land ownership(Deciles)", "Years for second member"), caption = "Summary of family data") %>% kable_styling(full_width = F)
+# cbind(stat, vals) %>% kable(digits = 2, col.names = c("Measure", "Elite catagory", "Political diversification","Minister duration(Months)","Economic diversification","Land ownership(Deciles)", "Years for second member"), caption = "Summary of family data") %>% kable_styling(full_width = F)
 
 
 ```
@@ -1285,13 +1502,13 @@ success_cat<-factor( success_cat,levels = c( "Declining","Stable","Rising"))
 
 
 
-fit.multinom <- multinom(success_cat~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +ind_edu +  land + linkage)
+fit.multinom <- multinom(success_cat~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister_duration +ind_edu +  land + linkage + n_elections_w + mem1_female)
 ```
 
 ```{r, results= "asis"}
 
 
-stargazer(fit.multinom, type="html", keep = c("linkage","success_cat","minister","ind_edu", "land"),order = c("linkage","success_cat","minister","ind_edu",  "land"),add.lines = list (c("Caste control", "Yes","Yes","Yes")),covariate.labels = c( "Political diversification","Minister", "Economic diversification", "Land ownership"))
+stargazer(fit.multinom, type="html", keep = c("linkage","success_cat","minister","ind_edu", "land","n_elections_w","mem1_female"),order = c("linkage","success_cat","minister","ind_edu",  "land", "n_elections_w","mem1_female"),add.lines = list (c("Caste control", "Yes","Yes","Yes")),covariate.labels = c( "Political diversification","Minister", "Economic diversification", "Land ownership", "Elections won by founder","Female founder"))
 ```
 
 
@@ -1335,6 +1552,7 @@ fit.multinom <- multinom(success_cat~  caste_uc+ caste_yadav+caste_non_yadav_obc
 
 stargazer(fit.multinom, type="html", keep = c("linkage","success_cat","minister","indu_edu", "land"),order = c("linkage","success_cat","minister","ind_edu",  "land"),add.lines = list (c("Caste control", "Yes","Yes","Yes")),covariate.labels = c( "Political diversification","Minister", "Economic diversification", "Land ownership"))
 ```
+
 
 ---
 
@@ -1583,9 +1801,19 @@ fit.ols1<- felm(stable~  caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit
 
 
 stargazer(fit.ols,fit.ols1, type="html", keep = c("linkage","success_cat","minister","ind_edu", "land", "serious_crime_avg","asset_avg"),order = c("linkage","success_cat","minister","ind_edu",  "land", "serious_crime_avg","asset_avg"),add.lines = list (c("Caste control", "Yes","Yes")),covariate.labels = c( "Political diversification","Minister", "Economic diversification", "Land ownership", "Asset","Crime"))
-```
 
+```
 ---
+
+#### summary
+
+```{r}
+cbind(stat, vals) %>% kable(digits = 2, col.names = c("Measure", "Elite catagory", "Political diversification","Minister duration(Months)","Economic diversification","Land ownership(Deciles)", "Years for second member"), caption = "Summary of family data") %>% kable_styling(full_width = F)
+
+```
+---
+
+
 
 ## Won elections
 
@@ -1678,7 +1906,7 @@ edu <- as.numeric(case_when( dyn_ae_ge_fam_uniq$edu_cat =="Only School" ~"1",
                                   
 
 
-
+industry <- dyn_ae_ge_fam_uniq$indus_count %>% replace_na(0)
 
 ind_edu <- dyn_ae_ge_fam_uniq$ind_edu
 
@@ -1768,7 +1996,7 @@ stat <-as.data.frame(c("Length","Length","Length", "Unique-N","Unique-N","Unique
 vals <- data.table::rbindlist(list(n,unique_n,mean, sd,min, max), use.names = FALSE)
 
 
-cbind(stat, vals) %>% kable(digits = 2, col.names = c("Measure", "Elite catagory", "Political diversification","Minister duration(Months)","Economic diversification","Land ownership(Deciles)", "Years for second member"), caption = "Summary of family data") %>% kable_styling(full_width = F)
+# cbind(stat, vals) %>% kable(digits = 2, col.names = c("Measure", "Elite catagory", "Political diversification","Minister duration(Months)","Economic diversification","Land ownership(Deciles)", "Years for second member"), caption = "Summary of family data") %>% kable_styling(full_width = F)
 
 
 ```
@@ -1866,6 +2094,9 @@ stargazer(fit.multinom, type="html", keep = c("linkage","success_cat","minister"
 ```
 
 ---
+
+
+
 
 
 <!-- ## families -  -->
