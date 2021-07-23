@@ -823,7 +823,7 @@ dyn_ae_ge$total_assets <- DescTools::Winsorize(as.numeric(dyn_ae_ge$total_assets
 
 ```
 
-### GE 2009:19
+### AE-GE 2009:19
 
 
 This is run among the elections that happened post delimitation, limited to winner and the runner-up
@@ -1034,17 +1034,17 @@ cbind(stat, vals) %>% kable(digits = 2, col.names = c("Measure", "Family", "Mini
 
 ```{r}
 
-fit.1 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +minister +ind_edu  + land+ n_elections_w+mem1_female+ log(total_assets)  +  serious_crime+turncoat+incumbent|0|0|constituency, data = subset(df %>% filter(total_assets>0)))
+fit.1 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +minister +ind_edu  + land+  log(total_assets)  +  serious_crime+turncoat+incumbent|0|0|constituency, data = subset(df %>% filter(total_assets>0)))
 
 
-fit.2<- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +minister +ind_edu  + land +n_elections_w+mem1_female+ log(total_assets)  +  serious_crime+turncoat+incumbent|year|0|constituency, data = subset(df %>% filter(total_assets>0)))
+fit.2<- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +minister +ind_edu  + land +log(total_assets)  +  serious_crime+turncoat+incumbent|year|0|constituency, data = subset(df %>% filter(total_assets>0)))
 
 
-fit.3 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +minister +ind_edu  + land + n_elections_w+ mem1_female+ log(total_assets)  +  serious_crime+turncoat+incumbent|sub_region|0|constituency, data = subset(df %>% filter(total_assets>0)))
+fit.3 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +minister +ind_edu  + land +  log(total_assets)  +  serious_crime+turncoat+incumbent|sub_region|0|constituency, data = subset(df %>% filter(total_assets>0)))
 
 
 
-fit.4 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister +ind_edu  + land + n_elections_w+mem1_female+  log(total_assets)  +  serious_crime+turncoat+incumbent|year+sub_region|0|constituency,data = subset(df %>% filter(total_assets>0)))
+fit.4 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister +ind_edu  + land +   log(total_assets)  +  serious_crime+turncoat+incumbent|year+sub_region|0|constituency,data = subset(df %>% filter(total_assets>0)))
 
 
 
@@ -1097,7 +1097,7 @@ align=TRUE,  no.space=TRUE,add.lines=addlines, omit = drop, covariate.labels = c
 
 
 
-### GE 2009 :19 elections won
+### AE-GE 2009 :19 elections won
 
 
 This model is run among the contestants who have won at lease one election in their political career
@@ -1105,16 +1105,16 @@ This model is run among the contestants who have won at lease one election in th
 
 ```{r}
 
-fit.1 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +minister +ind_edu  + land + n_elections_w+mem1_female+ log(total_assets)  +  serious_crime+turncoat+incumbent|0|0|constituency, data = subset(df %>% filter(total_assets>0 & n_el_w>=1)))
+fit.1 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +minister +ind_edu  + land + log(total_assets)  +  serious_crime+turncoat+incumbent|0|0|constituency, data = subset(df %>% filter(total_assets>0 & n_el_w>=1)))
 
-fit.2<- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +minister +ind_edu  + land + n_elections_w+mem1_female+ log(total_assets)  +  serious_crime+turncoat+incumbent|year|0|constituency, data = subset(df %>% filter(total_assets>0 & n_el_w>=1)))
-
-
-fit.3 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +minister +ind_edu + land + n_elections_w+ mem1_female+ log(total_assets)  +  serious_crime+turncoat+incumbent |sub_region|0|constituency, data = subset(df %>% filter(total_assets>0 & n_el_w>=1)))
+fit.2<- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +minister +ind_edu  + land +  log(total_assets)  +  serious_crime+turncoat+incumbent|year|0|constituency, data = subset(df %>% filter(total_assets>0 & n_el_w>=1)))
 
 
+fit.3 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +minister +ind_edu + land + log(total_assets)  +  serious_crime+turncoat+incumbent |sub_region|0|constituency, data = subset(df %>% filter(total_assets>0 & n_el_w>=1)))
 
-fit.4 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister +ind_edu  + land + n_elections_w+mem1_female+  log(total_assets)  +  serious_crime+turncoat+incumbent|year+sub_region|0|constituency,data = subset(df %>% filter(total_assets>0 & n_el_w>=1)))
+
+
+fit.4 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister +ind_edu  + land +   log(total_assets)  +  serious_crime+turncoat+incumbent|year+sub_region|0|constituency,data = subset(df %>% filter(total_assets>0 & n_el_w>=1)))
 
 
 
