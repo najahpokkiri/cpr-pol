@@ -861,12 +861,12 @@ fam_ls_w <- ggplot(fam_span2)+
   geom_density(aes(x=fam_life, y = ..density..),size = 1, color = 'black')+
   geom_vline(aes(xintercept = median(fam_span2$fam_life), color = "median"))+
   geom_vline(aes(xintercept = mean(fam_span2$fam_life), color = "mean",show.legend  =TRUE))+
-   scale_color_manual(name = "statistics", values = c(median = "red", mean = "blue"))+
+   scale_color_manual(name = "stats", values = c(median = "red", mean = "blue"))+
  scale_y_continuous(limits = c(0,.07),
   labels = scales::number_format(accuracy = 0.01))+
  theme_bw()+
   
-  labs(subtitle = "Life span of families", x= "", y = "Density")
+  labs(subtitle = "Life span of families", x= "Years", y = "Density")
 
 
 
@@ -888,18 +888,18 @@ fam_life_2 <-  dyn_ae_ge_fam %>%
    group_by(family_id) %>% 
    summarise(fam_life2 = sum(year_diff_1), min_fam_year= min(year))
 ##
-fam_span3 <- inner_join(dyn_ae_ge_fam_uniq ,fam_life_2, by = "family_id")
-
-
-fam_ls_wo <- ggplot(fam_span3)+
-  geom_density(aes(x=fam_life2, y = ..density..),size = 1, color = 'black')+
-  geom_vline(aes(xintercept = median(fam_span3$fam_life2), color = "median"))+
-  geom_vline(aes(xintercept = mean(fam_span3$fam_life2), color = "mean",show.legend  =TRUE))+
-   scale_color_manual(name = "statistics", values = c(median = "red", mean = "blue"))+
-scale_y_continuous(limits = c(0,.07),
-  labels = scales::number_format(accuracy = 0.01))+
- theme_bw()+
-  labs(subtitle = "Life span of families  \n after second member entry", y = "", x= "Years")
+# fam_span3 <- inner_join(dyn_ae_ge_fam_uniq ,fam_life_2, by = "family_id")
+# 
+# 
+# fam_ls_wo <- ggplot(fam_span3)+
+#   geom_density(aes(x=fam_life2, y = ..density..),size = 1, color = 'black')+
+#   geom_vline(aes(xintercept = median(fam_span3$fam_life2), color = "median"))+
+#   geom_vline(aes(xintercept = mean(fam_span3$fam_life2), color = "mean",show.legend  =TRUE))+
+#    scale_color_manual(name = "statistics", values = c(median = "red", mean = "blue"))+
+# scale_y_continuous(limits = c(0,.07),
+#   labels = scales::number_format(accuracy = 0.01))+
+#  theme_bw()+
+#   labs(subtitle = "Life span of families  \n after second member entry", y = "", x= "Years")
 
 ## non-fam
 
@@ -937,12 +937,12 @@ non_fam_span <- inner_join(dyn_non_fam_w , non_fam_life, by = "family_id")
 
 ind_ls <-  ggplot(non_fam_span )+
   geom_density(aes(x=non_fam_life, y = ..density..),size = 1, color = 'black')+
-   labs(subtitle = "Life span of non-families \n who have atleast one", x= "", y = "")+
+   labs(subtitle = "Life span of non-families \n who have atleast one", x= "Years", y = "")+
   xlim(0,50)+
   ylim(.0,.07)+
   geom_vline(aes(xintercept = median(non_fam_span $non_fam_life), color = "median"))+
   geom_vline(aes(xintercept = mean(non_fam_span $non_fam_life), color = "mean",show.legend  =TRUE))+
-   scale_color_manual(name = "statistics", values = c(median = "red", mean = "blue"))+
+   scale_color_manual(name = "stats", values = c(median = "red", mean = "blue"))+
   scale_y_continuous(limits = c(0,.07),
   labels = scales::number_format(accuracy = 0.01))+
  theme_bw()
@@ -954,21 +954,24 @@ fam_life_3 <- inner_join(fam_life, fam_life_2, by = "family_id") %>% mutate(diff
 
 
 
-year_entry <- ggplot(fam_life_3, aes(diff))+
-  geom_density(size = 1, color = 'black')+
-  labs(subtitle = "Years to second member entry", x = "Years",y = "Density")+
-  #xlim(0,45)
-  ylim(.0,.07)+
-  geom_vline(aes(xintercept =  median(fam_life_3$diff), color = "median"))+
-  geom_vline(aes(xintercept =  mean(fam_life_3$diff), color = "mean",show.legend  =TRUE))+
-   scale_color_manual(name = "statistics", values = c(median = "red", mean = "blue"))+
-  scale_y_continuous(limits = c(0,.07),
-  labels = scales::number_format(accuracy = 0.01))+
- theme_bw()
+# year_entry <- ggplot(fam_life_3, aes(diff))+
+#   geom_density(size = 1, color = 'black')+
+#   labs(subtitle = "Years to second member entry", x = "Years",y = "Density")+
+#   #xlim(0,45)
+#   ylim(.0,.07)+
+#   geom_vline(aes(xintercept =  median(fam_life_3$diff), color = "median"))+
+#   geom_vline(aes(xintercept =  mean(fam_life_3$diff), color = "mean",show.legend  =TRUE))+
+#    scale_color_manual(name = "statistics", values = c(median = "red", mean = "blue"))+
+#   scale_y_continuous(limits = c(0,.07),
+#   labels = scales::number_format(accuracy = 0.01))+
+#  theme_bw()
 
 library(ggpubr)
 
 ggpubr::ggarrange(fam_ls_w, ind_ls, year_entry,fam_ls_wo ,common.legend = TRUE, legend = "bottom", align = "hv")
+
+
+ggpubr::ggarrange(fam_ls_w, ind_ls ,common.legend = TRUE, legend = "bottom", align = "hv")
 
 
 # inner_join(dyn_ae_ge, fam_life_3, by = "family_id") %>% write.csv("D:/cpr/UP/up-dynasties/dyn_other_data/fam_life_test.csv")
@@ -976,6 +979,64 @@ ggpubr::ggarrange(fam_ls_w, ind_ls, year_entry,fam_ls_wo ,common.legend = TRUE, 
 
 ```
 
+
+```{r}
+
+
+first_member <- dyn_ae_ge_fam %>% group_by(family_id) %>% filter(year== min(year)) %>% arrange(family_id, relative_id) %>% distinct(family_id, .keep_all = TRUE) %>% select(family_id, first_member = relative_id) %>% mutate(first_member = ifelse(is.na(first_member),4,first_member))
+
+dyn_entry <- dyn_ae_ge_fam %>% filter(dyn_cum_2 ==1
+                         ) %>% group_by(family_id)%>% mutate(dyn_year= min(year))  %>%filter(year==dyn_year) %>% group_by(family_id) %>% mutate(same_entry = ifelse(any(relative_id ==first_member),1,0)) %>%  select(family_id,year, dyn_year, same_entry)%>% 
+  distinct(family_id, .keep_all =TRUE) 
+
+ind_exit <- dyn_ae_ge_fam %>% filter(dyn_cum_2 ==0
+                         ) %>% group_by(family_id)%>% mutate(ind_year= max(year))  %>%filter(year==ind_year) %>% group_by(family_id) %>% mutate(same_entry = ifelse(any(relative_id ==1),1,0)) %>% 
+  distinct(family_id, .keep_all =TRUE) %>% rowwise() %>% mutate(year = year+term_duration)%>%  select(family_id,year)
+
+dyn_entry_exit <- right_join(ind_exit, dyn_entry, by = "family_id") %>% 
+ mutate(entry_years = year.y - year.x,
+        entry_years = ifelse(is.na(entry_years) |same_entry ==1|entry_years<=0 , 0,entry_years))
+
+
+ year_entry <- ggplot(dyn_entry_exit, aes(entry_years))+
+  geom_density(size = 1, color = 'black')+
+  labs(subtitle = "Years to second member entry", x = "Years",y = "Density")+
+  #xlim(0,45)
+  ylim(.0,.25)+
+  geom_vline(aes(xintercept =  median(dyn_entry_exit$entry_years), color = "median"))+
+  geom_vline(aes(xintercept =  mean(dyn_entry_exit$entry_years), color = "mean",show.legend  =TRUE))+
+   scale_color_manual(name = "stats", values = c(median = "red", mean = "blue"))+
+  #scale_y_continuous(limits = c(0,.07),
+  #labels = scales::number_format(accuracy = 0.01))+
+ theme_bw()
+ 
+ dyn_ae_ge_fam <- inner_join(dyn_ae_ge_fam, first_member, by = "family_id")
+
+# dyn_ae_ge_fam %>% filter(dyn_cum_2 ==1
+#                          ) %>% group_by(family_id)%>% mutate(dyn_year= min(year))  %>%filter(year==dyn_year) %>% group_by(family_id) %>% mutate(same_entry = ifelse(any(relative_id ==first_member),1,0)) %>%  select(family_id,year, dyn_year, same_entry) %>% 
+#   group_by(family_id) %>% mutate(count = n()) %>% filter(same_entry==1 & count ==1)
+
+
+fam_life_3g <- inner_join(dyn_entry_exit ,fam_life, by = "family_id") %>% 
+  mutate(fam_life_3g = fam_life- entry_years)
+
+median <- median(fam_life_3g$fam_life_3g)
+
+mean <- mean(fam_life_3g$fam_life_3g)
+
+fam_ls_wo <- ggplot(fam_life_3g)+
+  geom_density(aes(x=fam_life_3g, y = ..density..),size = 1, color = 'black')+
+  geom_vline(aes(xintercept = median, color = "median"))+
+  geom_vline(aes(xintercept = mean, color = "mean",show.legend  =TRUE))+
+   scale_color_manual(name = "stats", values = c(median = "red", mean = "blue"))+
+#scale_y_continuous(limits = c(0,.07),
+  #labels = scales::number_format(accuracy = 0.01))+
+ theme_bw()+
+  labs(subtitle = "Life span of families  exluding years took for the second member entry", y = "", x= "Years")
+
+fam_life_3g %>% filter(fam_life_3g <0)
+ 
+```
 
 
 ## caste  {.tabset}

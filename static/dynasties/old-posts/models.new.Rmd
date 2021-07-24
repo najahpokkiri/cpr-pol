@@ -552,7 +552,7 @@ decade <- dyn_ae_ge_uniq$year_cat
 
 
 
-constituency <- dyn_ae_ge_uniq$constituency_name
+constituency <- dyn_ae_ge_uniq$pc_name
 
 # association <- dyn_ae_ge_uniq$association_fam %>% replace_na(0)
 # 
@@ -648,7 +648,7 @@ fit.4 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit +
 
 order = c("minister","ind_edu",  "land", "n_elections_w","mem1_female")
 
- addlines <- list(c('Fixed effects', '' ,"Decade", "Sub-region","Deacde and Sub-region"), c("Clustered SE" ,"Constituency","Constituency","Constituency","Constituency"), c("Caste control", "Yes","Yes","Yes","Yes"))
+ addlines <- list(c('Fixed effects', '' ,"Decade", "Sub-region","Deacde and Sub-region"), c("Clustered SE" ,"PC", "PC", "PC","PC"), c("Caste control", "Yes","Yes","Yes","Yes"))
 
 #addlines <- list( c("Caste control", "Yes","Yes","Yes","Yes"))
 
@@ -722,7 +722,7 @@ fit.4 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit +
 
 order = c("minister","ind_edu", "edu","n_elections_w","mem1_female")
 
- addlines <- list(c('Fixed effects', '' ,"Decade", "Sub-region","Deacde and Sub-region"), c("Clustered SE" ,"Constituency","Constituency","Constituency","Constituency"), c("Caste control", "Yes","Yes","Yes","Yes"))
+ addlines <- list(c('Fixed effects', '' ,"Decade", "Sub-region","Deacde and Sub-region"), c("Clustered SE" , "PC", "PC", "PC", "PC"), c("Caste control", "Yes","Yes","Yes","Yes"))
 
 #addlines <- list( c("Caste control", "Yes","Yes","Yes","Yes"))
 
@@ -979,7 +979,9 @@ sub_region <- dyn_ae_ge_09_19$sub_region
  
  incumbent <- dyn_ae_ge_09_19$incumbent
  
- constituency <-  dyn_ae_ge_09_19$constituency_name
+ constituency <-  dyn_ae_ge_09_19$pc_name
+ 
+ 
  
  mem1_female <-  if_else( dyn_ae_ge_09_19$mem1_gender=="F",1,0, missing = 0)
  
@@ -1034,17 +1036,29 @@ cbind(stat, vals) %>% kable(digits = 2, col.names = c("Measure", "Family", "Mini
 
 ```{r}
 
-fit.1 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +minister +ind_edu  + land+  log(total_assets)  +  serious_crime+turncoat+incumbent|0|0|constituency, data = subset(df %>% filter(total_assets>0)))
+# fit.1 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +minister +ind_edu  + land+  log(total_assets)  +  serious_crime+turncoat+incumbent|0|0|constituency, data = subset(df %>% filter(total_assets>0)))
+# 
+# 
+# fit.2<- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +minister +ind_edu  + land +log(total_assets)  +  serious_crime+turncoat+incumbent|year|0|constituency, data = subset(df %>% filter(total_assets>0)))
+# 
+# 
+# fit.3 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +minister +ind_edu  + land +  log(total_assets)  +  serious_crime+turncoat+incumbent|sub_region|0|constituency, data = subset(df %>% filter(total_assets>0)))
+# 
+# 
+# 
+# fit.4 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister +ind_edu  + land +   log(total_assets)  +  serious_crime+turncoat+incumbent|year+sub_region|0|constituency,data = subset(df %>% filter(total_assets>0)))
+
+fit.1 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim   + log(total_assets)  +  serious_crime+turncoat|0|0|constituency, data = subset(df %>% filter(total_assets>0)))
 
 
-fit.2<- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +minister +ind_edu  + land +log(total_assets)  +  serious_crime+turncoat+incumbent|year|0|constituency, data = subset(df %>% filter(total_assets>0)))
+fit.2<- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim    +log(total_assets)  +  serious_crime+turncoat|year|0|constituency, data = subset(df %>% filter(total_assets>0)))
 
 
-fit.3 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +minister +ind_edu  + land +  log(total_assets)  +  serious_crime+turncoat+incumbent|sub_region|0|constituency, data = subset(df %>% filter(total_assets>0)))
+fit.3 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim   +  log(total_assets)  +  serious_crime+turncoat|sub_region|0|constituency, data = subset(df %>% filter(total_assets>0)))
 
 
 
-fit.4 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister +ind_edu  + land +   log(total_assets)  +  serious_crime+turncoat+incumbent|year+sub_region|0|constituency,data = subset(df %>% filter(total_assets>0)))
+fit.4 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim   +   log(total_assets)  +  serious_crime+turncoat|year+sub_region|0|constituency,data = subset(df %>% filter(total_assets>0)))
 
 
 
@@ -1055,9 +1069,9 @@ fit.4 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit +
 
 order = c("minister","ind_edu",  "land", "edu","total_assets","serious_crime",     "n_elections_w","mem1_female", "turncoat","incumbent","winner")
 
-addlines <- list(c('Fixed effects', '' ,"Year", "Sub-region","Year and Sub-region"), c("Clustered SE" ,"Constituency","Constituency","Constituency","Constituency"), c("Caste control", "Yes","Yes","Yes","Yes"))
+addlines <- list(c('Fixed effects', '' ,"Year", "Sub-region","Year and Sub-region"), c("Clustered SE" ,"PC","PC","PC","PC"), c("Caste control", "Yes","Yes","Yes","Yes"))
 
-cov_labels <- c( "Minister", "Economic diversification", "Land ownership", "Total assets (log)","Serious crime")
+cov_labels <- c( "Total assets (log)","Serious crime", "Turncoat")
 
 
 
@@ -1105,16 +1119,16 @@ This model is run among the contestants who have won at lease one election in th
 
 ```{r}
 
-fit.1 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +minister +ind_edu  + land + log(total_assets)  +  serious_crime+turncoat+incumbent|0|0|constituency, data = subset(df %>% filter(total_assets>0 & n_el_w>=1)))
+fit.1 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim   +  log(total_assets)  +  serious_crime+turncoat|sub_region|0|constituency, data = subset(df %>% filter(total_assets>0 & n_el_w>=1)))
 
-fit.2<- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +minister +ind_edu  + land +  log(total_assets)  +  serious_crime+turncoat+incumbent|year|0|constituency, data = subset(df %>% filter(total_assets>0 & n_el_w>=1)))
-
-
-fit.3 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim  +minister +ind_edu + land + log(total_assets)  +  serious_crime+turncoat+incumbent |sub_region|0|constituency, data = subset(df %>% filter(total_assets>0 & n_el_w>=1)))
+fit.2<- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim   +  log(total_assets)  +  serious_crime+turncoat|sub_region|0|constituency, data = subset(df %>% filter(total_assets>0 & n_el_w>=1)))
 
 
+fit.3 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim   +  log(total_assets)  +  serious_crime+turncoat|sub_region|0|constituency, data = subset(df %>% filter(total_assets>0 & n_el_w>=1)))
 
-fit.4 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +minister +ind_edu  + land +   log(total_assets)  +  serious_crime+turncoat+incumbent|year+sub_region|0|constituency,data = subset(df %>% filter(total_assets>0 & n_el_w>=1)))
+
+
+fit.4 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim   +  log(total_assets)  +  serious_crime+turncoat|sub_region|0|constituency,data = subset(df %>% filter(total_assets>0 & n_el_w>=1)))
 
 
 
@@ -1126,7 +1140,7 @@ fit.4 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit +
 
 order = c("minister","ind_edu",  "land", "total_assets","serious_crime",     "n_elections_w","mem1_female", "turncoat","incumbent","winner")
 
-addlines <- list(c('Fixed effects', '' ,"Year", "Sub-region","Year and Sub-region"), c("Clustered SE" ,"Constituency","Constituency","Constituency","Constituency"), c("Caste control", "Yes","Yes","Yes","Yes"))
+addlines <- list(c('Fixed effects', '' ,"Year", "Sub-region","Year and Sub-region"), c("Clustered SE" ,"PC", "PC", "PC","PC"), c("Caste control", "Yes","Yes","Yes","Yes"))
 
 cov_labels <- c( "Minister", "Economic diversification", "Land ownership",  "Total assets (log)","Serious crime", "Turncoat","Incumbent")
 
@@ -1420,18 +1434,29 @@ align=TRUE,  no.space=TRUE,add.lines=addlines, omit = drop,covariate.labels = co
 
 ```{r}
 
+
+ac_map <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/ac_pc/PC_AC_mapping.csv") %>%  
+  rename_all(tolower) %>%filter(state_name == "Uttar_Pradesh")%>% select(constituency_no,pc_name)
+
+
+
+pc_map <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/ac_pc/PC_AC_mapping.csv") %>%  
+  rename_all(tolower) %>%filter(state_name == "Uttar_Pradesh")%>% select(constituency_no= pc_no, pc_name) %>% distinct(constituency_no, .keep_all =TRUE)
+
+
 library(fixest)
 
 library(lfe)
 
 
-dyn_ae <- readxl::read_xlsx("D:/cpr/UP/up-dynasties/dyn_other_data/TCPD_UP_VS_16_17_RK.xlsx")
+dyn_ae <- readxl::read_xlsx("D:/cpr/UP/up-dynasties/dyn_other_data/TCPD_UP_VS_16_17_RK.xlsx")%>% 
+  inner_join(ac_map, by =c("Constituency_No"= "constituency_no"))
 
 
 #dyn_ae %>% rename_all(tolower)%>% select(1:1, 3:3, 4:4, 8:8, 10:14)
 
 
-dyn_ae <- dyn_ae %>% select(3:4, 8:8, 12:12)
+dyn_ae <- dyn_ae %>% select(3:4, 8:8, 12:12, pc_name)
 
 
 
@@ -1441,7 +1466,7 @@ adr_ae_12 <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/adr/up_12_adr.csv")
 
 adr_ae_17 <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/adr/up_17_adr.csv")
 
-adr_ae <- rbindlist (list(adr_ae_12, adr_ae_17), use.names = TRUE, fill= TRUE)
+adr_ae <- rbindlist (list(adr_ae_12, adr_ae_17), use.names = TRUE, fill= TRUE) 
 
 
 
@@ -1460,12 +1485,13 @@ dyn_ae_adr <- dyn_ae_adr %>% rename ( dyn= dynast)
 
 
 
-dyn_ge <- readxl::read_xlsx("D:/cpr/UP/up-dynasties/dyn_other_data/UP_TCPD_GE_091419 _April_21.xlsx")
+dyn_ge <- readxl::read_xlsx("D:/cpr/UP/up-dynasties/dyn_other_data/UP_TCPD_GE_091419 _April_21.xlsx")%>% 
+  inner_join(pc_map, by =c("Constituency_No"= "constituency_no"))
 
 
 
 
-dyn_ge <-dyn_ge %>% select( 3:5,15:15)
+dyn_ge <-dyn_ge %>% select( 3:5,15:15, pc_name)
 
 
 
@@ -1590,7 +1616,7 @@ turnout <- dyn_ae_ge_adr$turnout_percentage
 
 year <- dyn_ae_ge_adr$year
 
-constituency <- dyn_ae_ge_adr$constituency_no
+constituency <- dyn_ae_ge_adr$pc_name
 
 party <- dyn_ae_ge_adr$party
 
@@ -1626,7 +1652,7 @@ lagged_turnout <- dyn_ae_ge_adr$lagged_turnout
  
  
 
-df <- tibble(winner ,   incumbent,  turncoat , female , terms , dynast , assets  , serious_crime,  year,enop, reservation_SCST,recontest, constituency, party, vote_share_pc, inc, bjp, margin_percentage,  position, turnout, sub_region,immovable_assets,movable_assets,mov_assets_ratio , caste_uc, caste_sc, caste_muslim, caste_obc, dynast_1_2, lagged_margin, lagged_turnout)
+df <-data.frame(winner ,   incumbent,  turncoat , female , terms , dynast , assets  , serious_crime,  year,enop, reservation_SCST,recontest, constituency, party, vote_share_pc, inc, bjp, margin_percentage,  position, turnout, sub_region,immovable_assets,movable_assets,mov_assets_ratio , caste_uc, caste_sc, caste_muslim, caste_obc, dynast_1_2, lagged_margin, lagged_turnout)
 
 
 
@@ -1648,7 +1674,11 @@ df <- tibble(winner ,   incumbent,  turncoat , female , terms , dynast , assets 
 ##year break -up
 
 table(dyn_ae_ge_adr$year) %>% kable() %>% kable_styling(full_width = F)
+
+
 ```
+
+
 
 
 
@@ -1665,6 +1695,8 @@ df %>% summarise_at(  c("dynast","turncoat","recontest", "incumbent"),~mean(., n
 
 
 ```{r}
+
+
 fit.1 <- felm(dynast ~  log(assets)  +  serious_crime+turncoat+   +caste_uc +caste_obc +caste_muslim+caste_sc |0|0|constituency, data = subset(df %>% filter(!is.na(assets)& assets>0)))
 
 fit.2 <- felm(dynast ~  log(assets)  +  serious_crime+turncoat+   +caste_uc +caste_obc +caste_muslim+caste_sc |year|0|constituency, data = subset(df %>% filter(!is.na(assets)& assets>0)))
@@ -1686,7 +1718,7 @@ fit.4 <- felm(dynast ~  log(assets)  +  serious_crime+turncoat+caste_uc +caste_o
 
 order = c("minister","industry",  "land", "edu","total_assets","serious_crime",     "n_elections_w","mem1_female", "turncoat","incumbent","winner")
 
-addlines <- list(c('Fixed effects', '' ,"Year", "Sub-region","Year and Sub-region"), c("Clustered SE" ,"Constituency","Constituency","Constituency","Constituency"), c("Caste control", "Yes","Yes","Yes","Yes"))
+addlines <- list(c('Fixed effects', '' ,"Year", "Sub-region","Year and Sub-region"), c("Clustered SE" ,"PC","PC","PC","PC"), c("Caste control", "Yes","Yes","Yes","Yes"))
 
 cov_labels <- c( "Minister", "Economic diversification", "Land ownership", "Educational inst. ownership ", "Total assets (log)","Serious crime","Elections won by first member","First member - female", "Turncoat","Incumbent")
 
@@ -1705,7 +1737,7 @@ stargazer(fit.1,fit.2, fit.3,fit.4,dep.var.labels = c("Political Family"),title=
 align=TRUE,  no.space=TRUE,add.lines=addlines, omit = drop)
 
 # 
-# stargazer(fit.1, type = "text")
+# stargazer(fit.1, type = "html")
 
 
 
