@@ -990,8 +990,6 @@ ggpubr::ggarrange(fam_ls_w, ind_ls ,common.legend = TRUE, legend = "bottom", ali
 
 
 ```{r}
-
-
 isrt_memberf <- dyn_ae_ge_fam %>% group_by(family_id) %>% filter(year== min(year)) %>% arrange(family_id, relative_id) %>% distinct(family_id, .keep_all = TRUE) %>% select(family_id, first_member = relative_id) %>% mutate(first_member = ifelse(is.na(first_member),4,first_member))
 
 dyn_entry <- dyn_ae_ge_fam %>% filter(dyn_cum_2 ==1
@@ -1005,9 +1003,12 @@ ind_exit <- dyn_ae_ge_fam %>% filter(dyn_cum_2 ==0
 dyn_entry_exit <- right_join(ind_exit, dyn_entry, by = "family_id") %>% 
  mutate(entry_years =dyn_year - ind_year,
         entry_years = ifelse(is.na(entry_years) |same_entry ==1|entry_years<=0 , 0,entry_years))
+```
 
+---
 
- year_entry <- ggplot(dyn_entry_exit, aes(entry_years))+
+```{r}
+ggplot(dyn_entry_exit, aes(entry_years))+
   geom_density(size = 1, color = 'black')+
   labs(subtitle = "Years to second member entry", x = "Years",y = "Density")+
   #xlim(0,45)
@@ -1043,9 +1044,6 @@ fam_ls_wo <- ggplot(fam_life_3g)+
  theme_bw()+
   labs(subtitle = "Life span of families  exluding years took for the second member entry", y = "", x= "Years")
 
-dyn_entry_exit %>% filter(is.na(entry_years))
-
-dyn_ae_ge %>% filter(family_id =="f0005702" )
  
 ```
 
@@ -1276,8 +1274,7 @@ labels <-  c( "Political diversification", "Economic diversification", "Land own
 
 lines <- list (c("Caste control", "Yes"))
 
-stargazer(fit.life, type="html
-          ", keep = keep,order = order, covariate.labels = labels,
+stargazer(fit.life, type="html", keep = keep,order = order, covariate.labels = labels,
           add.lines = lines)
 
 # 
@@ -1298,56 +1295,21 @@ stargazer(fit.life, type="html
 dyn_ae_ge$caste_groups <- factor(dyn_ae_ge$caste_groups, levels = c("Upper Caste","Yadav","Non-Yadav OBC","Dalit" , "Muslim"  ,"Others" ))
 
 
-caste_all <- dyn_ae_ge %>% filter(dyn_cum_2 ==1) %>% distinct(family_id, .keep_all = TRUE)%>% group_by(caste_groups) %>% summarise(count = n(), prop = count/322 *100)%>% mutate(caste = "All") %>% 
-  ggplot(aes(caste, prop, fill = caste_groups, label = round(prop,0)))+
-    geom_col()+
-      geom_text(size = 2.5, position = position_stack(vjust = 0.5))+
 
-    colorspace::scale_fill_discrete_qualitative(palette= "dark3" )+
+ sep <- dyn_ae_ge_fam_uniq %>% filter(caste_groups!= "NA") %>% group_by(success_cat, caste_groups) %>% summarise( count = n()) %>% group_by(success_cat) %>% mutate(sum = sum(count), prop = count/sum) %>% select(success_cat, caste_groups, prop)
+ 
+all <- dyn_ae_ge %>% filter(dyn_cum_2 ==1) %>% distinct(family_id, .keep_all = TRUE)%>% group_by(caste_groups) %>% summarise(count = n(), prop = count/322 )%>% mutate(caste = "All") %>% select(success_cat = caste,caste_groups, prop) 
 
-    theme_minimal()+
-  theme(aspect.ratio=5/2)+
-labs(x = "", y = "", fill = "Caste Groups")+
-    theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
-  theme(plot.background = element_blank(),
-        axis.line.x = element_line(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        axis.text.y = element_blank(), 
-        legend.position = "none"
-  ) 
+all_sep <- rbindlist(list(all, sep), use.names = TRUE)
 
-
-
-  
-```
-
-
-
-
-
-```{r}
-# dyn_lb  <- dyn_lb %>% mutate(level_log = ifelse(level == "LB",FALSE,TRUE))
-# 
-# dyn_lb_uniq <- dyn_lb %>% arrange (-year) %>%  distinct(family_id, .keep_all = TRUE)
-# 
-# count_tot  <-  dim(dyn_lb_uniq %>% filter(dyn_tot ==1))[1]
-# dyn_lb_uniq %>% filter(dyn_tot ==1) %>% group_by(level_log) %>% summarise(prop = n()/count_tot) %>% kable(caption = "Family linkages", col.names = c("Connection", "Proportion"), digits = 2) %>% kable_styling(bootstrap_options = "striped")
-
-
-dyn_ae_ge_fam_uniq$caste_groups <- factor(dyn_ae_ge_fam_uniq$caste_groups, levels = c("Upper Caste","Yadav","Non-Yadav OBC","Dalit" , "Muslim"  ,"Others" ))
-
-
-
-caste_sep <- dyn_ae_ge_fam_uniq %>% filter(caste_groups!= "NA") %>% group_by(success_cat, caste_groups) %>% summarise( count = n()) %>% group_by(success_cat) %>% mutate(sum = sum(count), prop = count/sum) %>% select(success_cat, caste_groups, prop) %>% 
-  ggplot(aes(factor(success_cat), prop, fill = caste_groups,label = round(prop,2)))+
+  ggplot(all_sep, aes(factor(success_cat), prop, fill = caste_groups,label = round(prop,2)))+
    geom_bar(stat="identity", position = "stack")+
     geom_text(size = 2.5, position = position_stack(vjust = 0.5))+ 
   colorspace::scale_fill_discrete_qualitative(palette= "dark3" )+
   #coord_fixed(ratio =5)+
     theme_minimal()+
       
-    labs(x = "", y = "Proportion", fill = "") +
+    labs(title = "Caste composition",x = "", y = "Proportion", fill = "") +
     theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
   theme(plot.background = element_blank(),
         axis.line.x = element_line(),
@@ -1361,8 +1323,6 @@ caste_sep <- dyn_ae_ge_fam_uniq %>% filter(caste_groups!= "NA") %>% group_by(suc
 
 library (patchwork)
 
-caste_all + caste_sep+
-  plot_annotation(title = "Caste composition")
 ```
 
 
@@ -1628,13 +1588,13 @@ fam_df2$success_cat<-factor( fam_df2$success_cat,levels = c( "Declining","Stable
 
 
 
-fit.multinom <- multinom(success_cat~ pol_div +  ind_edu +  land + entry_years +n_elections_w +caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim , data = fam_df2)
+fit.multinom <- multinom(success_cat~ pol_div +  ind_edu +  land + caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim , data = fam_df2)
 ```
 
 ```{r}
- keep <- c("pol_div","success_cat","ind_edu", "land","entry_years", "n_elections_w")
+ keep <- c("pol_div","success_cat","ind_edu", "land")
 
-order <- c("pol_div","success_cat","ind_edu",  "land", "years to entry", "n_elections_w")
+order <- c("pol_div","success_cat","ind_edu",  "land")
 
 
  lines <-  list (c("Caste control", "Yes","Yes","Yes"))
@@ -1658,7 +1618,7 @@ stargazer(fit.multinom, type="html",
 fam_df2$success_cat<-factor( fam_df2$success_cat,levels = c( "Stable","Rising","Declining"))
 
 
-fit.multinom <- multinom(success_cat~ pol_div +  ind_edu +  land + entry_years +n_elections_w +caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim , data = fam_df2)
+fit.multinom <- multinom(success_cat~ pol_div +  ind_edu +  land + caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim , data = fam_df2)
 ```
 
 
@@ -1679,7 +1639,7 @@ stargazer(fit.multinom, type="html",
 ```{r message = FALSE, warning = FALSE, echo = FALSE}
 fam_df2$success_cat<-factor( fam_df2$success_cat,levels = c( "Rising","Declining","Stable"))
 
-fit.multinom <- multinom(success_cat~ pol_div +  ind_edu +  land + entry_years +n_elections_w +caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim , data = fam_df2)
+fit.multinom <- multinom(success_cat~ pol_div +  ind_edu +  land +caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim , data = fam_df2)
 ```
 
 
@@ -3191,7 +3151,7 @@ dead.surv2 <- coxph(Surv(fam_life, dead_5) ~  pol_div +minister + ind_edu + land
 dead.surv3 <- coxph(Surv(fam_life, dead_15) ~  pol_div +minister + ind_edu + land + entry_years +n_elections_w+ caste_uc + caste_yadav + caste_non_yadav_obc+caste_dalit+caste_muslim + factor(decade)  ,data = subset(fam_df3 %>% filter(min_fam_year<2005)))
 
 
- lines <-  list (c("Last ** years","5","10","5"),c("Caste control", "Yes","Yes", "Yes"), c("Decade control","Yes","Yes", "Yes"))
+ lines <-  list (c("Last ** years","15","10","5"),c("Caste control", "Yes","Yes", "Yes"), c("Decade control","Yes","Yes", "Yes"))
  
 stargazer(dead.surv3, dead.surv1, dead.surv2,type = "html", keep = keep,order = order, covariate.labels = labels,
           add.lines = lines,column.separate = c(1:3),
