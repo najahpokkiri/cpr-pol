@@ -1755,7 +1755,7 @@ div.tocify {
 <div id="document-history" class="section level3" number="0.0.1">
 <h3 number="0.0.1"><span class="header-section-number">0.0.1</span> Document History</h3>
 <p>Original Publish Date: 21 July, 2020</p>
-<p>Updated on: 05:07 PM – 27 July, 2021</p>
+<p>Updated on: 09:07 PM – 27 July, 2021</p>
 <hr />
 <p>In this post we further analyse the families. We categorised them into two - declining and rising. We track down all the families started in 1970s till 2007. Then we assess their performance in the elections held after 2007. This includes 3 General elections and 2 Assembly elections. If they have one at least one election in these 5 elections we call them rising dynasties and rest of them as declining dynasties.</p>
 <hr />
@@ -2306,6 +2306,7 @@ Stable
 </div>
 <div id="life-span-regression" class="section level3" number="1.3.3">
 <h3 number="1.3.3"><span class="header-section-number">1.3.3</span> life span regression</h3>
+<p><span class="math display">\[{Life \ span \ of \ family} = \alpha +\beta_{1}Political \ diversification   {_i}   +   \beta_{2} Economic  \ diversification{_i}  +  \\ \beta_{3}Land \ ownership{_i} + \beta_{3} Years \ to \ second\\ member \ entry{_i} + \\ \beta_{3} Election \ won \ by  \ first\  member{_i}  + Z +  \epsilon  \]</span></p>
 <table style="text-align:center">
 <tr>
 <td colspan="2" style="border-bottom: 1px solid black">
@@ -2713,6 +2714,7 @@ Yadav
 <p>This is a multinomial logit model that regresses three success categories. Rising families are the reference ones. Results do not have any constituency variable here since this is regressed at family level.</p>
 <div id="declining-ref." class="section level3" number="2.1.1">
 <h3 number="2.1.1"><span class="header-section-number">2.1.1</span> Declining ref.</h3>
+<p><span class="math display">\[ \left(logit \right){Political \ family \ class} = \alpha +\beta_{1}Political \ diversification  {_i}   +   \beta_{2} Economic  \ diversification{_i}  +  \\ \beta_{3}Land \ ownership{_i}   + Z +  \epsilon  \]</span></p>
 <pre><code>## # weights:  30 (18 variable)
 ## initial  value 353.753157 
 ## iter  10 value 328.883869
@@ -5081,32 +5083,32 @@ DV: Family life span
 Political diversification
 </td>
 <td>
--0.826<sup>**</sup>
+-0.623<sup>***</sup>
+</td>
+<td>
+-0.491<sup>***</sup>
 </td>
 <td>
 -0.749<sup>***</sup>
 </td>
 <td>
--0.623<sup>***</sup>
-</td>
-<td>
--0.491<sup>***</sup>
+-0.826<sup>**</sup>
 </td>
 </tr>
 <tr>
 <td style="text-align:left">
 </td>
 <td>
-(0.384)
+(0.197)
+</td>
+<td>
+(0.159)
 </td>
 <td>
 (0.243)
 </td>
 <td>
-(0.197)
-</td>
-<td>
-(0.159)
+(0.384)
 </td>
 </tr>
 <tr>
@@ -5126,32 +5128,32 @@ Political diversification
 Economic diversification
 </td>
 <td>
--0.590<sup>***</sup>
+-0.418<sup>***</sup>
+</td>
+<td>
+-0.264<sup>***</sup>
 </td>
 <td>
 -0.382<sup>***</sup>
 </td>
 <td>
--0.418<sup>***</sup>
-</td>
-<td>
--0.264<sup>***</sup>
+-0.590<sup>***</sup>
 </td>
 </tr>
 <tr>
 <td style="text-align:left">
 </td>
 <td>
-(0.165)
+(0.103)
+</td>
+<td>
+(0.084)
 </td>
 <td>
 (0.118)
 </td>
 <td>
-(0.103)
-</td>
-<td>
-(0.084)
+(0.165)
 </td>
 </tr>
 <tr>
@@ -5171,32 +5173,32 @@ Economic diversification
 Land ownership
 </td>
 <td>
--0.064
+0.036
+</td>
+<td>
+0.049<sup>***</sup>
 </td>
 <td>
 0.019
 </td>
 <td>
-0.036
-</td>
-<td>
-0.049<sup>***</sup>
+-0.064
 </td>
 </tr>
 <tr>
 <td style="text-align:left">
 </td>
 <td>
-(0.045)
+(0.022)
+</td>
+<td>
+(0.016)
 </td>
 <td>
 (0.026)
 </td>
 <td>
-(0.022)
-</td>
-<td>
-(0.016)
+(0.045)
 </td>
 </tr>
 <tr>
@@ -5216,32 +5218,32 @@ Land ownership
 Years to second member entry
 </td>
 <td>
-0.088
+0.042
+</td>
+<td>
+0.001
 </td>
 <td>
 0.034
 </td>
 <td>
-0.042
-</td>
-<td>
-0.001
+0.088
 </td>
 </tr>
 <tr>
 <td style="text-align:left">
 </td>
 <td>
-(0.163)
+(0.101)
+</td>
+<td>
+(0.086)
 </td>
 <td>
 (0.119)
 </td>
 <td>
-(0.101)
-</td>
-<td>
-(0.086)
+(0.163)
 </td>
 </tr>
 <tr>
@@ -5261,32 +5263,32 @@ Years to second member entry
 Elections won by founder
 </td>
 <td>
--0.271
+-0.297<sup>***</sup>
+</td>
+<td>
+-0.373<sup>***</sup>
 </td>
 <td>
 -0.276<sup>**</sup>
 </td>
 <td>
--0.297<sup>***</sup>
-</td>
-<td>
--0.373<sup>***</sup>
+-0.271
 </td>
 </tr>
 <tr>
 <td style="text-align:left">
 </td>
 <td>
-(0.188)
+(0.086)
+</td>
+<td>
+(0.072)
 </td>
 <td>
 (0.107)
 </td>
 <td>
-(0.086)
-</td>
-<td>
-(0.072)
+(0.188)
 </td>
 </tr>
 <tr>
@@ -5310,16 +5312,16 @@ Elections won by founder
 Last ** years
 </td>
 <td>
-20
+10
 </td>
 <td>
-15
+5
 </td>
 <td>
 10
 </td>
 <td>
-5
+15
 </td>
 </tr>
 <tr>
@@ -5361,16 +5363,16 @@ Yes
 Observations
 </td>
 <td>
-123
+200
+</td>
+<td>
+258
 </td>
 <td>
 163
 </td>
 <td>
-200
-</td>
-<td>
-258
+123
 </td>
 </tr>
 <tr>
@@ -5378,16 +5380,16 @@ Observations
 R<sup>2</sup>
 </td>
 <td>
-0.276
+0.318
+</td>
+<td>
+0.305
 </td>
 <td>
 0.284
 </td>
 <td>
-0.318
-</td>
-<td>
-0.305
+0.276
 </td>
 </tr>
 <tr>
@@ -5395,16 +5397,16 @@ R<sup>2</sup>
 Max. Possible R<sup>2</sup>
 </td>
 <td>
-0.905
+0.988
+</td>
+<td>
+0.994
 </td>
 <td>
 0.979
 </td>
 <td>
-0.988
-</td>
-<td>
-0.994
+0.905
 </td>
 </tr>
 <tr>
@@ -5412,16 +5414,16 @@ Max. Possible R<sup>2</sup>
 Log Likelihood
 </td>
 <td>
--124.668
+-400.354
+</td>
+<td>
+-606.848
 </td>
 <td>
 -287.505
 </td>
 <td>
--400.354
-</td>
-<td>
--606.848
+-124.668
 </td>
 </tr>
 <tr>
@@ -5429,16 +5431,16 @@ Log Likelihood
 Wald Test (df = 12)
 </td>
 <td>
-26.080<sup>**</sup>
+64.670<sup>***</sup>
+</td>
+<td>
+78.430<sup>***</sup>
 </td>
 <td>
 46.480<sup>***</sup>
 </td>
 <td>
-64.670<sup>***</sup>
-</td>
-<td>
-78.430<sup>***</sup>
+26.080<sup>**</sup>
 </td>
 </tr>
 <tr>
@@ -5446,16 +5448,16 @@ Wald Test (df = 12)
 LR Test (df = 12)
 </td>
 <td>
-39.682<sup>***</sup>
+76.410<sup>***</sup>
+</td>
+<td>
+93.979<sup>***</sup>
 </td>
 <td>
 54.431<sup>***</sup>
 </td>
 <td>
-76.410<sup>***</sup>
-</td>
-<td>
-93.979<sup>***</sup>
+39.682<sup>***</sup>
 </td>
 </tr>
 <tr>
@@ -5463,16 +5465,16 @@ LR Test (df = 12)
 Score (Logrank) Test (df = 12)
 </td>
 <td>
-33.003<sup>***</sup>
+72.175<sup>***</sup>
+</td>
+<td>
+86.123<sup>***</sup>
 </td>
 <td>
 51.828<sup>***</sup>
 </td>
 <td>
-72.175<sup>***</sup>
-</td>
-<td>
-86.123<sup>***</sup>
+33.003<sup>***</sup>
 </td>
 </tr>
 <tr>

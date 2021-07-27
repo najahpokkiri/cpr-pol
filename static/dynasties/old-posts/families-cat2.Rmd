@@ -1209,12 +1209,18 @@ fam_df2 <-  inner_join(fam_df, life_span_df, by = "family_id") %>% inner_join(in
 fam_df2 <- fam_df2 %>% rowwise() %>% mutate(pol_div = minister + org_fam +linkage ) %>% ungroup()
 
 
-fit.life <- felm(fam_life ~  pol_div+ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim +ind_edu +  land +entry_years + n_elections_w ,data = fam_df2)
+fit.life <- felm(fam_life ~  pol_div +ind_edu +  land +entry_years + n_elections_w+ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim ,data = fam_df2)
 
 
 
 # fam_df2 %>%select(-delim_change) %>%  filter_all(any_vars(is.na(.)))
 ```
+
+
+
+$${Life \ span \ of \ family} = \alpha +\beta_{1}Political \ diversification   {_i}   +   \beta_{2} Economic  \ diversification{_i}  +  \\ \beta_{3}Land \ ownership{_i} + \beta_{3} Years \ to \ second\\ member \ entry{_i} + \\ \beta_{3} Election \ won \ by  \ first\  member{_i}  + Z +  \epsilon  $$
+
+
 
 ```{r, results= "asis"}
 
@@ -1507,6 +1513,9 @@ vals <- data.table::rbindlist(list(n,unique_n,mean, sd,min, max), use.names = FA
 ```
 
 ### Declining ref.
+
+$$ \left(logit \right){Political \ family \ class} = \alpha +\beta_{1}Political \ diversification  {_i}   +   \beta_{2} Economic  \ diversification{_i}  +  \\ \beta_{3}Land \ ownership{_i}   + Z +  \epsilon  $$
+
 
 ```{r message = FALSE, warning = FALSE, echo = FALSE}
 
@@ -3005,9 +3014,9 @@ dead.surv3 <- coxph(Surv(fam_life, dead_15) ~  pol_div +minister + ind_edu + lan
 dead.surv4 <- coxph(Surv(fam_life, dead_20) ~  pol_div +minister + ind_edu + land + entry_years +n_elections_w+ caste_uc + caste_yadav + caste_non_yadav_obc+caste_dalit+caste_muslim + factor(decade)  ,data = subset(fam_df3 %>% filter(min_fam_year<2001)))
 
 
- lines <-  list (c("Last ** years","20","15","10","5"),c("Caste control", "Yes","Yes", "Yes", "Yes"), c("Decade control","Yes","Yes", "Yes", "Yes"))
+ lines <-  list (c("Last ** years","10","5","10","15"),c("Caste control", "Yes","Yes", "Yes", "Yes"), c("Decade control","Yes","Yes", "Yes", "Yes"))
  
-stargazer(dead.surv4,dead.surv3, dead.surv1, dead.surv2,type = "html", keep = keep,order = order, covariate.labels = labels,
+stargazer(dead.surv1,dead.surv2, dead.surv3, dead.surv4,type = "html", keep = keep,order = order, covariate.labels = labels,
           add.lines = lines,column.separate = c(1:3),
           header = FALSE,title = "Coax hazard regression", dep.var.labels.include = FALSE, dep.var.caption = "DV: Family life span")
 
