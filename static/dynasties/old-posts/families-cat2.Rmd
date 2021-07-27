@@ -594,7 +594,7 @@ ggplot(edu_tab , aes(x= reorder(as.factor(edu),-prop), prop )) +
 
 ```
 
-### Land wrt elite cat.
+### Land wrt elite cat. and caste
 
 
 we were using boxplot for this earlier, then we switched to box plot since the barplot was not showing any visible difference.
@@ -612,7 +612,7 @@ dyn_ae_ge_fam_uniq$land <- ifelse(dyn_ae_ge_fam_uniq$land>1000,1000,dyn_ae_ge_fa
 dyn_ae_ge_fam_uniq$land_cat <- cut(dyn_ae_ge_fam_uniq$land, breaks = c(0,1,100,250,500,Inf), include.lowest =TRUE, labels = c( "very small", "small", "medium", "large", "very large"))
 
 
-  dyn_ae_ge_fam_uniq %>% group_by(success_cat, land_cat) %>% summarise(count = n()) %>%
+  land_elite <- dyn_ae_ge_fam_uniq %>% group_by(success_cat, land_cat) %>% summarise(count = n()) %>%
     group_by(success_cat) %>% mutate(sum = sum(count), pc = count/sum) %>%
     ggplot(aes(success_cat,pc, fill = land_cat, label = round(pc,2)))+
 
@@ -626,29 +626,51 @@ dyn_ae_ge_fam_uniq$land_cat <- cut(dyn_ae_ge_fam_uniq$land, breaks = c(0,1,100,2
         axis.line.x = element_line(),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
-        axis.text.y = element_blank()
+        axis.text.y = element_blank(), 
+        legend.position = "none"
+       )
+  
+ land_elite_df <-dyn_ae_ge_fam_uniq %>% group_by(success_cat, land_cat) %>% summarise(count = n()) %>%
+     group_by(success_cat) %>% mutate(sum = sum(count), pc = count/sum)  %>% select(success_cat, land_cat,pc)  %>% mutate(group = "Famliy class")
+
+land_caste_df <- dyn_ae_ge_fam_uniq %>% filter(caste_groups!= "Others")%>% group_by(caste_groups, land_cat) %>% summarise(count = n()) %>%
+    group_by(caste_groups) %>% mutate(sum = sum(count), pc = count/sum) %>% 
+  select(success_cat = caste_groups, land_cat,pc) %>% mutate(group = "Caste")
+
+land_caste_df  <- land_caste_df %>% mutate(success_cat = case_when(as.character(success_cat)== "Upper Caste" ~ "UC",
+                                                 as.character(success_cat) == "Non-Yadav OBC" ~"OBC",
+                                                 TRUE ~as.character(success_cat)))
+land_caste_df$success_cat<- factor(land_caste_df$success_cat, levels = c("UC","Yadav","OBC","Dalit" , "Muslim"   ))
+
+
+
+fam_caste_df <- rbindlist(list(land_elite_df, land_caste_df), use.names = TRUE)
+
+
+ ggplot(fam_caste_df, aes(success_cat,pc, fill = land_cat, label = round(pc,2)))+
+
+    geom_bar(position = "stack", stat = "identity")+
+     geom_text(size = 2.5, position = position_stack(vjust = 0.5))+
+      theme_minimal()+
+   facet_wrap(~group,scales = "free")+
+  #coord_fixed(ratio = 2)+
+  #theme(aspect.ratio=4/2)+
+  scale_fill_discrete(labels = c( "very small", "small", "medium", "large", "very large"))+
+    #scale_x_discrete(labels =c ("Upper \n  Caste","Yadav","Non \n Yadav \n OBC","Dalit" , "Muslim", "Declining", "Rising", "Stable"))+
+      
+   labs(title = "land holdings  ",x = "", y = "", fill = "") +
+    #theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
+  theme(plot.background = element_blank(),
+        axis.line.x = element_line(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.y = element_blank(),
+        legend.position = "bottom",
+        axis.title = element_blank(), 
+        axis.text = element_text(size = 10)
        )
 
 
-#   geom_histogram(binwidth = 50, color = "steelblue")+
-#   facet_wrap(~success_cat) %
-
-# ggplot(dyn_ae_ge_fam_uniq %>% filter(land<600), aes(success_cat,land))+
-#   geom_boxplot()+
-#   
-#     geom_boxplot(outlier.shape = NA)+
-#  # ylim(0,1000)+
-#   theme_minimal()
-# 
-# land <- dyn_ae_ge_fam_uniq %>% filter(land<600) 
-# 
-# ggplot(dyn_ae_ge_fam_uniq %>% filter(land<600), aes(land, fill = success_cat))+
-#   #stat_density(trim = .5)
-#   geom_density(alpha = .5 )
-#   geom_boxplot()+
-#     geom_boxplot(outlier.shape = NA)+
-#  # ylim(0,1000)+
-#   theme_minimal()
 ```
 
 ---
@@ -3084,7 +3106,8 @@ fam_all <- inner_join(fam_life_all,fam_life_2, by = "family_id")
                 
                 dead_10 = ifelse(max_year>2008,1,2),
                 dead_5 = ifelse(max_year>2012,1,2),
-                dead_15 = ifelse(max_year>2004,1,2)
+                dead_15 = ifelse(max_year>2004,1,2),
+                dead_20 = ifelse(max_year>2000,1,2)
  )
  
  
@@ -3128,14 +3151,14 @@ fam_all <- inner_join(fam_life_all,fam_life_2, by = "family_id")
 - In this section we provide three different cut off to assess whether  a family is dead or not. for eg: If a family is not has to been contesting in las x years we would consider them as dead. The number of families included in the model also change according to the cut-off because we can only include the family that has formed  on or before the cut off years. The break up looks like this:
 
 
-| Cut off | 5 years(2013) | 10 years(2009) | 15 years(2005) |
+| Cut off | 5 years(2012) | 10 years(2009) | 15 years(2005) |
 |---------|---------|----------|----------|
 | alive   | 128     | 110      | 97       |
 | dead    | 130     | 90       | 66       |
 | total   | 258     | 200      | 163      |
 
 
-
+ added 20 years - 2001 cut off
 
 ```{r results = "asis"}
 # 
@@ -3151,9 +3174,12 @@ dead.surv2 <- coxph(Surv(fam_life, dead_5) ~  pol_div +minister + ind_edu + land
 dead.surv3 <- coxph(Surv(fam_life, dead_15) ~  pol_div +minister + ind_edu + land + entry_years +n_elections_w+ caste_uc + caste_yadav + caste_non_yadav_obc+caste_dalit+caste_muslim + factor(decade)  ,data = subset(fam_df3 %>% filter(min_fam_year<2005)))
 
 
- lines <-  list (c("Last ** years","15","10","5"),c("Caste control", "Yes","Yes", "Yes"), c("Decade control","Yes","Yes", "Yes"))
+dead.surv4 <- coxph(Surv(fam_life, dead_20) ~  pol_div +minister + ind_edu + land + entry_years +n_elections_w+ caste_uc + caste_yadav + caste_non_yadav_obc+caste_dalit+caste_muslim + factor(decade)  ,data = subset(fam_df3 %>% filter(min_fam_year<2001)))
+
+
+ lines <-  list (c("Last ** years","20","15","10","5"),c("Caste control", "Yes","Yes", "Yes", "Yes"), c("Decade control","Yes","Yes", "Yes", "Yes"))
  
-stargazer(dead.surv3, dead.surv1, dead.surv2,type = "html", keep = keep,order = order, covariate.labels = labels,
+stargazer(dead.surv4,dead.surv3, dead.surv1, dead.surv2,type = "html", keep = keep,order = order, covariate.labels = labels,
           add.lines = lines,column.separate = c(1:3),
           header = FALSE,title = "Coax hazard regression", dep.var.labels.include = FALSE, dep.var.caption = "DV: Family life span")
 
