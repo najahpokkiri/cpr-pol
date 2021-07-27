@@ -1218,7 +1218,7 @@ fit.life <- felm(fam_life ~  pol_div +ind_edu +  land +entry_years + n_elections
 
 
 
-$${Life \ span \ of \ family} = \alpha +\beta_{1}Political \ diversification   {_i}   +   \beta_{2} Economic  \ diversification{_i}  +  \\ \beta_{3}Land \ ownership{_i} + \beta_{3} Years \ to \ second\\ member \ entry{_i} + \\ \beta_{3} Election \ won \ by  \ first\  member{_i}  + Z +  \epsilon  $$
+$${Life \ span \ of \ family} = \alpha +\beta_{1}Political \ diversification   {_i}   +   \beta_{2} Economic  \ diversification{_i}  +  \\ \beta_{3}Land \ ownership{_i} + \beta_{4} Years \ to \ second \  member \ entry{_i} + \\ \beta_{5} Election \ won \ by  \ first\  member{_i}  + Z +  \epsilon  $$
 
 
 
@@ -2939,10 +2939,10 @@ fam_all <- inner_join(fam_life_all,fam_life_2, by = "family_id")
  
  fam_all <- fam_all %>% mutate(
                 
-                dead_10 = ifelse(max_year>2008,1,2),
-                dead_5 = ifelse(max_year>2012,1,2),
+                dead_10 = ifelse(max_year>2009,1,2),
+                dead_5 = ifelse(max_year>2014,1,2),
                 dead_15 = ifelse(max_year>2004,1,2),
-                dead_20 = ifelse(max_year>2000,1,2)
+                dead_20 = ifelse(max_year>1999,1,2)
  )
  
  
@@ -2986,7 +2986,7 @@ fam_all <- inner_join(fam_life_all,fam_life_2, by = "family_id")
 +---------+---------+----------+----------+----------+
 | Cut off | 5 years | 10 years | 15 years | 20 years |
 |         |         |          |          |          |
-|         | (2012)  | (2009)   | (2005)   | (2001)   |
+|         | (2014)  | (2009)   | (2004)   | (1999)   |
 +=========+=========+==========+==========+==========+
 | alive   | 128     | 110      | 97       | 92       |
 +---------+---------+----------+----------+----------+
@@ -3006,15 +3006,15 @@ dead.surv1 <- coxph(Surv(fam_life, dead_10) ~  pol_div +minister + ind_edu + lan
 
 
 
-dead.surv2 <- coxph(Surv(fam_life, dead_5) ~  pol_div +minister + ind_edu + land + entry_years +n_elections_w +  caste_uc + caste_yadav + caste_non_yadav_obc+caste_dalit+caste_muslim  + factor(decade) ,  data = subset(fam_df3 %>% filter(min_fam_year<2013)))
+dead.surv2 <- coxph(Surv(fam_life, dead_5) ~  pol_div +minister + ind_edu + land + entry_years +n_elections_w +  caste_uc + caste_yadav + caste_non_yadav_obc+caste_dalit+caste_muslim  + factor(decade) ,  data = subset(fam_df3 %>% filter(min_fam_year<2014)))
 
-dead.surv3 <- coxph(Surv(fam_life, dead_15) ~  pol_div +minister + ind_edu + land + entry_years +n_elections_w+ caste_uc + caste_yadav + caste_non_yadav_obc+caste_dalit+caste_muslim + factor(decade)  ,data = subset(fam_df3 %>% filter(min_fam_year<2005)))
-
-
-dead.surv4 <- coxph(Surv(fam_life, dead_20) ~  pol_div +minister + ind_edu + land + entry_years +n_elections_w+ caste_uc + caste_yadav + caste_non_yadav_obc+caste_dalit+caste_muslim + factor(decade)  ,data = subset(fam_df3 %>% filter(min_fam_year<2001)))
+dead.surv3 <- coxph(Surv(fam_life, dead_15) ~  pol_div +minister + ind_edu + land + entry_years +n_elections_w+ caste_uc + caste_yadav + caste_non_yadav_obc+caste_dalit+caste_muslim + factor(decade)  ,data = subset(fam_df3 %>% filter(min_fam_year<2004)))
 
 
- lines <-  list (c("Last ** years","10","5","10","15"),c("Caste control", "Yes","Yes", "Yes", "Yes"), c("Decade control","Yes","Yes", "Yes", "Yes"))
+dead.surv4 <- coxph(Surv(fam_life, dead_20) ~  pol_div +minister + ind_edu + land + entry_years +n_elections_w+ caste_uc + caste_yadav + caste_non_yadav_obc+caste_dalit+caste_muslim + factor(decade)  ,data = subset(fam_df3 %>% filter(min_fam_year<1999)))
+
+
+ lines <-  list (c("Cut-off years","2009","2014","2004","1999"),c("Caste control", "Yes","Yes", "Yes", "Yes"), c("Decade control","Yes","Yes", "Yes", "Yes"))
  
 stargazer(dead.surv1,dead.surv2, dead.surv3, dead.surv4,type = "html", keep = keep,order = order, covariate.labels = labels,
           add.lines = lines,column.separate = c(1:3),
