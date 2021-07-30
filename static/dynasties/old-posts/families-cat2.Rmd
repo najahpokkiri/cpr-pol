@@ -2063,23 +2063,27 @@ stargazer(fit.declining, fit.rising, fit.stable, type="html",
           covariate.labels = labels)
 ```
 
-### Stable v/s declining
+### Declining
+
 
 
 ```{r results = "asis"}
 
-fam_df$stable<-ifelse(fam_df$success_cat=="Stable", 1,0)
-
-fit.stable <- felm(stable~ pol_div +  ind_edu +  land + entry_years +n_elections_w +caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim , data = subset(fam_df %>% filter(success_cat!= "Rising")))
 
 fam_df$declining<-ifelse(fam_df$success_cat=="Declining", 1,0)
 
 fit.declining <- felm(declining~ pol_div +  ind_edu +  land + entry_years +n_elections_w +caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim , data = subset(fam_df %>% filter(success_cat!= "Rising")))
 
+keep <- c("pol_div","success_cat","ind_edu", "land", "entry_years"  ,"n_elections_w")
+
+order <- c("pol_div","success_cat","ind_edu",  "land")
+
+labels <-  c( "Political diversification", "Economic diversification", "Land ownership", "Years to second member entry","Elections won by founder")
+
  lines <-  list (c("Caste control", "Yes","Yes","Yes"))
  
 
-stargazer(fit.declining, fit.stable, type="html",
+stargazer(fit.declining,  type="html",
           keep = keep, order = order,
           add.lines = lines,
           covariate.labels = labels)
