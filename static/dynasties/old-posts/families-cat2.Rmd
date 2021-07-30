@@ -698,7 +698,7 @@ dyn_ae_ge_fam_uniq<- dyn_ae_ge_fam_uniq %>% mutate(indus_rt = case_when(indus_2 
                                   TRUE~ "non-rent-thick"))
 
 
-dyn_ae_ge_fam_uniq %>% filter(indus_rt != "0") %>% group_by(success_cat, indus_rt) %>% summarise(count = n()) %>% group_by(success_cat) %>% mutate(sum = sum(count), prop = count/sum) %>% select(success_cat, indus_rt, prop) %>% kable(captioni = "industry ownership wrt rent extraction type", col.names = c("Politician's identity","rent-type", "Proportion"), digits = 2) %>% kable_styling(bootstrap_options = "striped")
+dyn_ae_ge_fam_uniq %>% filter(indus_rt != "0") %>% group_by(success_cat, indus_rt) %>% summarise(count = n()) %>% group_by(success_cat) %>% mutate(sum = sum(count), prop = count/sum) %>% select(success_cat, indus_rt, prop) %>% filter(success_cat != "Rising") %>% kable(caption = "industry ownership wrt rent extraction type", col.names = c("Politician's identity","rent-type", "Proportion"), digits = 2) %>% kable_styling(bootstrap_options = "striped")
 ```
 
 ------------------------------------------------------------------------
@@ -1042,7 +1042,7 @@ fam_df <- fam_df %>% mutate(pol_div1= ifelse(pol_div %in% c(2,3), 3, pol_div),
 
 fam_df %>% group_by(success_cat) %>% summarise(lnkage = mean(linkage),
                                                 minister = mean(minister),
-                                                org = mean(org_fam)) %>% 
+                                                org = mean(org_fam)) %>% filter(success_cat!= "Rising") %>% 
   melt(1:1) %>% 
   
 ggplot( aes(variable, y = value, fill = success_cat, label = round(value,2)))+
@@ -1128,6 +1128,255 @@ ggplot( aes(variable, y = value, fill = caste_groups, label = round(value,2)))+
 
 
 ------------------------------------------------------------------------
+
+### Median bars {.tabset}
+
+`Rising` category not included.
+
+#### Pol div
+
+
+
+**wrt caste groups**
+
+```{r}
+#library(Rmisc)
+
+fam_df$econ_div <- fam_df$ind_edu
+
+mean_df <- Rmisc::summarySE(subset(fam_df %>% filter(success_cat!= "Rising")), measurevar = "pol_div", groupvars = c("caste_groups"))
+
+
+mean_df$caste_groups <- factor(mean_df$caste_groups)
+
+ggplot(mean_df %>% filter(caste_groups!= "Others"), aes(x=caste_groups, y=pol_div)) + 
+    geom_bar(position=position_dodge(), stat="identity",
+             colour="black", # Use black outlines,
+             size=.3) +      # Thinner lines
+    geom_errorbar(aes(ymin=pol_div-se, ymax=pol_div+se),
+                  size=.3,    # Thinner lines
+                  width=.2,
+                  position=position_dodge(.9)) +
+    xlab("") +
+    ylab("Political diversification") +
+    # scale_fill_hue(name="Supplement type", # Legend label, use darker colors
+    #                breaks=c("OJ", "VC"),
+    #                labels=c("Orange juice", "Ascorbic acid")) +
+    ggtitle("Political diversification \nwrt caste groups") +
+    theme_bw()
+```
+
+-------
+
+
+**wrt land holdings**
+
+```{r}
+mean_df <- Rmisc::summarySE(subset(fam_df %>% filter(success_cat!= "Rising")), measurevar = "pol_div", groupvars = c("land"))
+
+
+mean_df$land <-  factor(mean_df$land)
+
+ggplot(mean_df , aes(x=land, y=pol_div)) + 
+    geom_bar(position=position_dodge(), stat="identity",
+             colour="black", # Use black outlines,
+            # size=.3
+            ) +      # Thinner lines
+    geom_errorbar(aes(ymin=pol_div-se, ymax=pol_div+se),
+                  size=.3,    # Thinner lines
+                  width=.2,
+                  position=position_dodge(.9)) +
+    xlab("") +
+    ylab("Mean political diversification") +
+  #theme(aspect.ratio=3/2)+
+  
+    # scale_fill_hue(name="Supplement type", # Legend label, use darker colors
+    #                breaks=c("OJ", "VC"),
+    #                labels=c("Orange juice", "Ascorbic acid")) +
+    ggtitle("Political diversification \nwrt land holdings") +
+  scale_x_discrete(labels = c("Very small", "Small", "Medium", "Large", "Very large"))+
+    theme_bw()
+
+
+
+
+
+
+```
+
+
+<!-- ```{r} -->
+
+
+
+<!-- mean_df <- Rmisc::Rmisc::summarySE(fam_df, measurevar = "minister_duration", groupvars = c("caste_groups")) -->
+
+
+<!-- mean_df$caste_groups <- factor(mean_df$caste_groups) -->
+
+<!-- min <- ggplot(mean_df %>% filter(caste_groups!= "Others"), aes(x=caste_groups, y=minister_duration)) +  -->
+<!--     geom_bar(position=position_dodge(), stat="identity", -->
+<!--              colour="black", # Use black outlines, -->
+<!--              size=.3) +      # Thinner lines -->
+<!--     geom_errorbar(aes(ymin=minister_duration-se, ymax=minister_duration+se), -->
+<!--                   size=.3,    # Thinner lines -->
+<!--                   width=.2, -->
+<!--                   position=position_dodge(.9)) + -->
+<!--     xlab("") + -->
+<!--     ylab("n months") + -->
+<!--     # scale_fill_hue(name="Supplement type", # Legend label, use darker colors -->
+<!--     #                breaks=c("OJ", "VC"), -->
+<!--     #                labels=c("Orange juice", "Ascorbic acid")) + -->
+<!--     ggtitle("Average months as a minister \nwrt caste groups") + -->
+<!--     theme_bw() -->
+
+
+<!-- mean_df <- Rmisc::Rmisc::summarySE(fam_df, measurevar = "linkage", groupvars = c("caste_groups")) -->
+
+
+<!-- mean_df$caste_groups <- factor(mean_df$caste_groups) -->
+
+<!-- link <- ggplot(mean_df %>% filter(caste_groups!= "Others"), aes(x=caste_groups, y=linkage)) +  -->
+<!--     geom_bar(position=position_dodge(), stat="identity", -->
+<!--              colour="black", # Use black outlines, -->
+<!--              size=.3) +      # Thinner lines -->
+<!--     geom_errorbar(aes(ymin=linkage-se, ymax=linkage+se), -->
+<!--                   size=.3,    # Thinner lines -->
+<!--                   width=.2, -->
+<!--                   position=position_dodge(.9)) + -->
+<!--     xlab("") + -->
+<!--     ylab("Proportion") + -->
+<!--     # scale_fill_hue(name="Supplement type", # Legend label, use darker colors -->
+<!--     #                breaks=c("OJ", "VC"), -->
+<!--     #                labels=c("Orange juice", "Ascorbic acid")) + -->
+<!--     ggtitle("Proportion of families with ministers \nwrt caste groups") + -->
+<!--     theme_bw() -->
+
+
+
+<!-- ##org -->
+
+
+<!-- mean_df <- Rmisc::Rmisc::summarySE(fam_df, measurevar = "org_fam", groupvars = c("caste_groups")) -->
+
+
+<!-- mean_df$caste_groups <- factor(mean_df$caste_groups) -->
+
+<!-- org<- ggplot(mean_df %>% filter(caste_groups!= "Others"), aes(x=caste_groups, y=org_fam)) +  -->
+<!--     geom_bar(position=position_dodge(), stat="identity", -->
+<!--              colour="black", # Use black outlines, -->
+<!--              size=.3) +      # Thinner lines -->
+<!--     geom_errorbar(aes(ymin=org_fam-se, ymax=org_fam+se), -->
+<!--                   size=.3,    # Thinner lines -->
+<!--                   width=.2, -->
+<!--                   position=position_dodge(.9)) + -->
+<!--     xlab("") + -->
+<!--     ylab("Proportion") + -->
+<!--     # scale_fill_hue(name="Supplement type", # Legend label, use darker colors -->
+<!--     #                breaks=c("OJ", "VC"), -->
+<!--     #                labels=c("Orange juice", "Ascorbic acid")) + -->
+<!--     ggtitle("Proportion of families with party role \nwrt caste groups") + -->
+<!--     theme_bw() -->
+<!-- org -->
+<!-- ``` -->
+
+<!-- ### pol div regression -->
+
+
+<!-- ```{r} -->
+<!-- minister + org_fam +linkage -->
+
+<!-- fit.poldiv <- felm(pol_div ~    land + entry_years +n_elections_w +caste_uc+ caste_yadav+ caste_dalit + caste_muslim , data = fam_df) -->
+
+
+
+<!-- fit.econdiv <- felm(econ_div ~    land + entry_years +n_elections_w +caste_uc+ caste_yadav+ caste_dalit + caste_muslim , data = fam_df) -->
+
+
+
+
+
+<!-- order = c( "land", "entry_years","n_elections_w") -->
+
+<!-- labels <-  c( "Land ownership", "Years to second member entry","Elections won by founder") -->
+
+
+<!-- stargazer(fit.poldiv,fit.econdiv, type="text",omit = c("onstant"), -->
+<!--           covariate.labels = labels,dep.var.labels = c("Political diversification", "Economic diversification")) -->
+
+<!-- #### minister -->
+
+<!-- fit.minister <- felm(minister ~    land + entry_years +n_elections_w +caste_uc+ caste_yadav+ caste_dalit + caste_muslim , data = fam_df) -->
+
+<!-- fit.linkage <- felm(linkage ~    land + entry_years +n_elections_w +caste_uc+ caste_yadav+ caste_dalit + caste_muslim , data = fam_df) -->
+
+<!-- fit.org<- felm(org_fam ~    land + entry_years +n_elections_w +caste_uc+ caste_yadav+ caste_dalit + caste_muslim , data = fam_df) -->
+
+
+
+<!-- stargazer(fit.linkage, fit.minister, fit.org,type="text",omit = c("Constant"), -->
+<!--           covariate.labels = labels,dep.var.labels = c("Multiple levels", "minister", "organisation")) -->
+<!-- ``` -->
+
+
+#### econ div
+
+*** wrt land holdings**
+
+```{r}
+mean_df <- Rmisc::summarySE(subset(fam_df %>% filter(success_cat!= "Rising")), measurevar = "econ_div", groupvars = c("caste_groups"))
+
+
+mean_df$caste_groups <- factor(mean_df$caste_groups)
+
+ggplot(mean_df %>% filter(caste_groups!= "Others"), aes(x=caste_groups, y=econ_div)) + 
+    geom_bar(position=position_dodge(), stat="identity",
+             colour="black", # Use black outlines,
+             size=.3) +      # Thinner lines
+    geom_errorbar(aes(ymin=econ_div-se, ymax=econ_div+se),
+                  size=.3,    # Thinner lines
+                  width=.2,
+                  position=position_dodge(.9)) +
+    xlab("") +
+    ylab("Economic diversification") +
+    # scale_fill_hue(name="Supplement type", # Legend label, use darker colors
+    #                breaks=c("OJ", "VC"),
+    #                labels=c("Orange juice", "Ascorbic acid")) +
+    ggtitle("Economic diversification \nwrt caste groups") +
+    theme_bw()
+```
+
+-----
+
+**wrt land holdings**
+
+```{r}
+mean_df <- Rmisc::summarySE(subset(fam_df %>% filter(success_cat!= "Rising")), measurevar = "econ_div", groupvars = c("land"))
+
+
+mean_df$land <-  factor(mean_df$land)
+
+ggplot(mean_df , aes(x=land, y=econ_div)) + 
+    geom_bar(position=position_dodge(), stat="identity",
+             colour="black", # Use black outlines,
+             size=.3) +      # Thinner lines
+    geom_errorbar(aes(ymin=econ_div-se, ymax=econ_div+se),
+                  size=.3,    # Thinner lines
+                  width=.2,
+                  position=position_dodge(.9)) +
+    xlab("") +
+    ylab("Economic diversification") +
+    # scale_fill_hue(name="Supplement type", # Legend label, use darker colors
+    #                breaks=c("OJ", "VC"),
+    #                labels=c("Orange juice", "Ascorbic acid")) +
+    ggtitle("Economic diversification \nwrt land holdings") +
+  scale_x_discrete(labels = c("Very small", "Small", "Medium", "Large", "Very large"))+
+    theme_bw()
+
+```
+
+
+
 
 ## Life span {.tabset}
 
@@ -1337,6 +1586,12 @@ stargazer(fit.life, type="html", keep = keep,order = order, covariate.labels = l
 
 ```
 
+### family formation
+
+```{r}
+fam_life_2 %>% filter(min_fam_year>=2009) %>% group_by(min_fam_year) %>% summarise(count = n()) %>% mutate(prop = count/122) %>% select(yar = 1:1, prop) %>% kable(digits = 2) %>% kable_styling(full_width = F)
+
+```
 ## caste {.tabset}
 
 ### caste composition
@@ -1346,8 +1601,7 @@ dyn_ae_ge$caste_groups <- factor(dyn_ae_ge$caste_groups, levels = c("Upper Caste
 
 
 
- sep <- dyn_ae_ge_fam_uniq %>% filter(caste_groups!= "NA") %>% group_by(success_cat, caste_groups) %>% summarise( count = n()) %>% group_by(success_cat) %>% mutate(sum = sum(count), prop = count/sum) %>% select(success_cat, caste_groups, prop)
- 
+ sep <- dyn_ae_ge_fam_uniq %>% filter(caste_groups!= "NA") %>% group_by(success_cat, caste_groups) %>% summarise( count = n()) %>% group_by(success_cat) %>% mutate(sum = sum(count), prop = count/sum) %>% select(success_cat, caste_groups, prop) %>% filter(success_cat!= "Rising")
 all <- dyn_ae_ge %>% filter(dyn_cum_2 ==1) %>% distinct(family_id, .keep_all = TRUE)%>% group_by(caste_groups) %>% summarise(count = n(), prop = count/322 )%>% mutate(caste = "All") %>% select(success_cat = caste,caste_groups, prop) 
 
 all_sep <- rbindlist(list(all, sep), use.names = TRUE)
@@ -1454,7 +1708,6 @@ fam_span2%>% group_by(caste_groups) %>%
 ------------------------------------------------------------------------
 
 ```{r}
-
 fam_span2 $caste_groups <- factor(fam_span2$caste_groups, levels = c("Upper Caste","Yadav","Non-Yadav OBC","Dalit" , "Muslim"  ,"Others" ))
 
 ggplot(fam_span2 %>% filter(caste_groups!= "Others"),aes(x = caste_groups, fam_life)) +
@@ -1475,10 +1728,10 @@ ggplot(fam_span2 %>% filter(caste_groups!= "Others"),aes(x = caste_groups, fam_l
         axis.title = element_text(vjust = -1, size = 16),
         axis.ticks = element_blank()
   )
-
-
-
 ```
+
+
+
 
 
 <!-- # Family new analyses -->
@@ -1782,7 +2035,11 @@ stargazer(fit.multinom, type="html",
 
 ```
 
-## OLS
+## OLS{.tabset}
+
+
+### All family class: All families
+
 
 ```{r, results="asis"}
 fam_df$stable<-ifelse(fam_df$success_cat=="Stable", 1,0)
@@ -1805,6 +2062,32 @@ stargazer(fit.declining, fit.rising, fit.stable, type="html",
           add.lines = lines,
           covariate.labels = labels)
 ```
+
+### Stable v/s declining
+
+
+```{r results = "asis"}
+
+fam_df$stable<-ifelse(fam_df$success_cat=="Stable", 1,0)
+
+fit.stable <- felm(stable~ pol_div +  ind_edu +  land + entry_years +n_elections_w +caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim , data = subset(fam_df %>% filter(success_cat!= "Rising")))
+
+fam_df$declining<-ifelse(fam_df$success_cat=="Declining", 1,0)
+
+fit.declining <- felm(declining~ pol_div +  ind_edu +  land + entry_years +n_elections_w +caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim , data = subset(fam_df %>% filter(success_cat!= "Rising")))
+
+ lines <-  list (c("Caste control", "Yes","Yes","Yes"))
+ 
+
+stargazer(fit.declining, fit.stable, type="html",
+          keep = keep, order = order,
+          add.lines = lines,
+          covariate.labels = labels)
+
+```
+
+
+
 
 <!-- #### Stable v/s rising - post 09 -->
 
@@ -3056,7 +3339,7 @@ lines <- list (c("Caste control", "Yes"))
 
 
 stargazer(fit.surv, type="html", keep = keep,order = order, covariate.labels = labels,
-          add.lines = lines,dep.var.labels = "Family life span",title = "Coax hazard regression")
+          add.lines = lines,dep.var.labels = "Family decline",title = "Coax hazard regression")
 
 
 
@@ -3102,7 +3385,7 @@ fit.surv3 <- coxph(Surv(fam_life, dead) ~ pol_div +minister + ind_edu + land + e
  lines <- list (c("Start","All","Post 80","Post 90"),c("Caste control", "Yes","Yes", "Yes"), c("Decade control","Yes","Yes", "Yes"))
 
 stargazer(fit.surv1, fit.surv2, fit.surv3,type = "html", keep = keep,order = order, covariate.labels = labels,
-          add.lines = lines,dep.var.labels = "Family life span",title = "Coax hazard regression")
+          add.lines = lines,dep.var.labels = "Family decline",title = "Coax hazard regression")
 
 
 ```
@@ -3214,7 +3497,7 @@ dead.surv4 <- coxph(Surv(fam_life, dead_20) ~  pol_div +minister + ind_edu + lan
  
 stargazer(dead.surv1,dead.surv2, dead.surv3, dead.surv4,type = "html", keep = keep,order = order, covariate.labels = labels,
           add.lines = lines,column.separate = c(1:3),
-          header = FALSE,title = "Coax hazard regression", dep.var.labels.include = FALSE, dep.var.caption = "DV: Family life span")
+          header = FALSE,title = "Coax hazard regression", dep.var.labels.include = FALSE, dep.var.caption = "DV: Family decline")
 
 
 
