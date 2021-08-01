@@ -641,25 +641,41 @@ dyn_ae_ge_fam_uniq %>% group_by(success_cat) %>% summarise(mean(land, na.rm = TR
 
 ### Industries {.tabset}
 
-#### family-cat
+In first two tabs we look at the proportion of entities within that category who owns a specific business.  
+
+How it's done:
+
+In the manipulated dataset every business is coded as  a binary variable. Take the case of petrol pumps(`ind_c1`), that entities column will be marked as `1` if they own a petrol pump, `0` otherwise.
+
+To calculate the proportion of entities that own a specific business, we calculate the  mean of that variable for all unique observations in that group. 
+
+#### fam v/s non-fam
+
+```{r}
+transpose <- data.table::transpose
+
+Industries <-  c("Petrol Pumps","Construction & Transport","Brick klin and Sand mining","Agri business","Shops and showrooms","Small Business","Unknown")
+
+
+dyn_ae_ge_uniq <-dyn_ae_ge %>% filter( family_id != "" ) %>% group_by(family_id) %>% arrange(-year) %>% distinct(family_id, .keep_all= TRUE)
+
+dyn_ae_ge_uniq %>% ungroup() %>%group_by(dyn_tot_2) %>%  summarise_at( c("ind_c1","ind_c2","ind_c3","ind_c4","ind_c5","ind_c6","ind_c7"),~mean(., na.rm = TRUE)) %>%select(-dyn_tot_2) %>% transpose() %>% cbind(Industries) %>% rename("Non-fam" = `V1`, "Fam" = `V2`) %>% select(Industries,"Fam", "Non-fam") %>% 
+   kable(digits = 2, col.names = c("Industries","% of owners among  fam","% of owners among Non- fam")) %>% kable_styling(full_width = F)
+
+
+```
+
+#### Stable v/s declining
 
 ```{r}
 
 
-
-
-
-# 
-# cbind(dyn_ae_ge_fam_uniq %>% ungroup() %>% filter(success_cat=="Stable")%>%   summarise_at( c("ind_c1","ind_c2","ind_c3","ind_c4","ind_c5","ind_c6","ind_c7"),~mean(., na.rm = TRUE)) %>% transpose(),
-#       dyn_ae_ge_fam_uniq %>% ungroup() %>% filter(success_cat=="Rising")%>%   summarise_at( c("ind_c1","ind_c2","ind_c3","ind_c4","ind_c5","ind_c6","ind_c7"),~mean(., na.rm = TRUE)) %>% transpose(),
-#       dyn_ae_ge_fam_uniq %>% ungroup() %>% filter(success_cat=="Declining")%>%   summarise_at( c("ind_c1","ind_c2","ind_c3","ind_c4","ind_c5","ind_c6","ind_c7"),~mean(., na.rm = TRUE)) %>% transpose()) %>% cbind(Industries)%>%setNames(make.names(names(.), unique = TRUE)) %>% as.tibble() %>%  rename( "Stable"  =1:1, "Rising" =2:2, "Declining" = 3:3) %>% select(4:4, everything()) %>% kable(digits = 2, col.names = c("Industries","% of owners among Stable fam","% of owners among Rising fam","% of owners among Declining fam")) %>% kable_styling(full_width = F)
-
-  
-
-#dyn_ae_ge_fam_uniq %>% select(indus_1, indus_2, indus_3)    
-
-
+dyn_ae_ge_fam_uniq %>%filter(success_cat!= "Rising") %>%group_by(success_cat) %>%  summarise_at( c("ind_c1","ind_c2","ind_c3","ind_c4","ind_c5","ind_c6","ind_c7"),~mean(., na.rm = TRUE)) %>%select(-success_cat) %>% transpose() %>% cbind(Industries) %>% rename("Declining" = `V1`, "Stable" = `V2`) %>% 
+  select(Industries,"Stable", "Declining") %>% 
+   kable(digits = 2, col.names = c("Industries","% of owners among stable families","% of owners among declining families")) %>% kable_styling(full_width = F)
 ```
+
+#### Count
 
 ```{r}
 dyn_ae_ge_fam_uniq <-dyn_ae_ge_fam_uniq %>% mutate(ind_rt = case_when(ind_2 == 0 ~ "0", ind_2 %in% c(1,5)~ "rent-thick",
@@ -1821,112 +1837,210 @@ ggplot(fam_span2 %>% filter(caste_groups!= "Others"),aes(x = caste_groups, fam_l
 ```
 
 
-<!-- # ADR {.tabset} -->
-
-<!-- ```{r} -->
-<!-- adr_ae_12 <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/adr/up_12_adr.csv") -->
-
-
-
-<!-- adr_ae_17 <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/adr/up_17_adr.csv") -->
-
-<!-- adr_ae <- rbindlist (list(adr_ae_12, adr_ae_17), use.names = TRUE, fill= TRUE) -->
-
-<!-- adr_ae$total_assets <- DescTools::Winsorize(as.numeric(adr_ae$total_assets), na.rm = TRUE,probs = c(.01,.99)) -->
-
-<!-- adr_ae$total_movable_assets_totals <- DescTools::Winsorize(as.numeric(adr_ae$total_movable_assets_totals ), na.rm = TRUE,probs = c(.01,.99)) -->
-
-
-<!-- adr_ae$total_immovable_assets_totals <- DescTools::Winsorize(as.numeric(adr_ae$total_immovable_assets_totals ), na.rm = TRUE,probs = c(.01,.99)) -->
-
-<!-- adr_ae <- adr_ae %>% select(-(1:9)) -->
-
-
-
-<!-- dyn_ae_adr <- inner_join(dyn_ae, adr_ae, by =c("Year", "Constituency_No", "Position")) -->
-
-<!-- names(dyn_ae_adr) <- tolower(names(dyn_ae_adr)) -->
-
-<!-- dyn_ae_adr <- dyn_ae_adr %>% rename ( dyn= dynast) -->
-
-
-
-<!-- # adr_ge <- fread("D:/cpr/UP/up-dynasties/dyn_other_data/adr_candidatelevel.csv") -->
-<!-- #  -->
-<!-- #  -->
-<!-- # adr_ge <- adr_ge %>% select(-c(2:10)) -->
-<!-- #  -->
-<!-- # dyn_ge_adr <- inner_join(dyn_ge, adr_ge, by = c("Year" , "Constituency_No" , "Position" = "position")) -->
-<!-- #  -->
-<!-- # names(dyn_ge_adr) <- tolower(names(dyn_ge_adr)) -->
-<!-- #  -->
-<!-- #  -->
-<!-- #  -->
-<!-- #  -->
-<!-- # dyn_ge_adr$state_name <- NULL -->
-<!-- #  -->
-<!-- #  -->
-<!-- # #dyn_ge_adr  <- dyn_ge_adr %>% select(-c(58:63,7:10, 11:13, 15:21)) -->
-<!-- #  -->
-<!-- # dyn_ae_ge_adr <- rbindlist(list(dyn_ae_adr, dyn_ge_adr), use.names = TRUE, fill = TRUE) -->
-
-<!-- dyn_ae_adr$total_assets <- as.numeric(dyn_ae_adr$total_assets ) -->
-
-<!-- #  -->
-<!-- # dyn_ge_adr  <- dyn_ge_adr %>% mutate(edu = case_when(education %in% c("5th Pass","10th Pass","8th Pass") ~"10", -->
-<!-- #                                   education == "12th Pass" ~"12", -->
-<!-- #                                   education %in% c("Graduate","Graduate Professional") ~"14", -->
-<!-- #                                   education == "Post Graduate" ~ "16", -->
-<!-- #                                   education == "Doctorate" ~"18", -->
-<!-- #                                   education %in% c("Literate","Others") ~"5", -->
-<!-- #                                   TRUE ~ "0" -->
-<!-- #                                    -->
-<!-- #                                    -->
-<!-- #                                   )) -->
-
-
-<!-- caste_uc <- ifelse(dyn_ae_adr$caste_rec%in% c("IC","UC","uc"),1,0) -->
-
-<!-- caste_muslim <- as.numeric(case_when(grepl( "muslim",dyn_ae_adr$caste_rec, ignore.case = TRUE) ~"1", -->
-<!--                    TRUE ~"0")) -->
-
-
-<!-- caste_sc <- ifelse(dyn_ae_adr$caste_rec %in% c("SC","ST"),1,0) -->
-
-<!-- caste_obc<- ifelse(dyn_ae_adr$caste_rec =="OBC",1,0) -->
-
-
-<!-- dyn_ae_adr <- dyn_ae_adr %>% mutate(caste_groups = case_when(caste_rec%in% c("IC","UC","uc")~"Upper Caste", -->
-<!--                                                grepl( "muslim",caste_rec, ignore.case = TRUE) ~"Muslim", -->
-<!--                                                caste_rec =="OBC"~"OBC", -->
-<!--                                                caste_rec %in% c("SC","ST") ~"Dalit", -->
-<!--                                                TRUE ~"Others" -->
-
-
-
-<!--                                                )) -->
-
-<!-- adr_dyn_fam <- adr_ae %>% rename_all(tolower)%>% filter(position %in%c(1,2)) %>% distinct(year, constituency_no, position, .keep_all = TRUE) %>% inner_join((dyn_ae_ge %>% select(year, constituency_no, position, family_id, relative_id, rel_id_rep)), by = c("year","constituency_no", "position")) %>% inner_join(fam_df, by = "family_id") -->
-<!-- ``` -->
 
 <!-- ## mean table -->
 
 <!-- ```{r} -->
-<!-- adr_dyn_fam %>% group_by(success_cat) %>%  -->
+<!-- adr_dyn_fam %>% group_by(success_cat) %>% -->
 <!--   summarise(count = n(), -->
 <!--             mean_total_asset_million = mean(total_assets)/1000000, -->
 <!--             mean_immovable_assets_million = mean(total_movable_assets_totals)/1000000, -->
 <!--              mean_immovable_assets_million= mean(total_immovable_assets_totals)/1000000, -->
 <!--             mean_serious_case = mean(serious_crime), -->
 <!--             mean_non_serios_crime = mean(non_serious_crime) -->
-<!--             ) %>%  -->
-<!--   kable(digits = 2) %>%  -->
+<!--             ) %>% -->
+<!--   kable(digits = 2) %>% -->
 <!--   kable_styling(full_width = F) -->
 
 <!-- ``` -->
+# ADR {.tabset}
+
+```{r}
+
+adr <-fread("D:/cpr/UP/up-dynasties/dyn_other_data/adr_candidatelevel.csv", stringsAsFactors = FALSE)
+
+
+adr  <- adr %>% mutate(
+  total_assets =  DescTools::Winsorize(as.numeric(total_assets), na.rm = TRUE,probs = c(.01,.99)),
+  total_movable_assets_totals =DescTools::Winsorize(as.numeric( total_movable_assets_totals), na.rm = TRUE,probs = c(.01,.99)),
+  total_immovable_assets_totals =DescTools::Winsorize(as.numeric( total_immovable_assets_totals), na.rm = TRUE,probs = c(.01,.99))
+  )
+
+adr_fam <- adr %>% rename_all(tolower)%>% filter(position %in%c(1,2)) %>% distinct(year, constituency_no, position, .keep_all = TRUE) %>% inner_join((dyn_ae_ge %>% select(year, constituency_no, position, family_id, relative_id, rel_id_rep)), by = c("year","constituency_no", "position")) %>% inner_join(fam_df, by = "family_id")
+
+adr_non_fam <- adr %>% rename_all(tolower)%>% filter(position %in%c(1,2)) %>% distinct(year, constituency_no, position, .keep_all = TRUE) %>% inner_join((dyn_ae_ge %>% select(year, constituency_no, position, family_id, relative_id, rel_id_rep)), by = c("year","constituency_no", "position")) %>% left_join(fam_df, by = "family_id") %>% 
+  mutate(success_cat = ifelse(is.na(success_cat), "Non-fam", success_cat)) %>% 
+  mutate(election_type =ifelse(year %in%c(2012,2017), "AE", "GE"))
+
+
+```
+## assets
+
+```{r}
+
+adr_non_fam$year1 <- factor(adr_non_fam$year, levels = c(2012,2017, 2014, 2019))
+
+# ae <- ggplot(adr_non_fam %>% filter(year %in% c(2012, 2017)), aes(success_cat, log(total_assets)))+
+#   geom_boxplot(outlier.shape = NA)+
+#   facet_wrap(~year ,nrow = 1)+
+#   labs(title = "Total assets wrt family class",
+#        y = "Total assets (log)")+
+#   scale_y_continuous(limits = c(10,20), breaks = c(10,12,14,16,18,20))+
+#   theme_light()+
+#   theme(
+#     axis.title.x = element_blank(),
+#     text = element_text(family = "serif"),
+#      axis.text.x = element_blank(),
+#     panel.grid.major.x = element_blank(),
+#     panel.grid.minor.y =element_blank() ,
+#   )
+
+# ge <- ggplot(adr_non_fam %>% filter(year %in% c(2014, 2019)), aes(success_cat, log(total_assets)))+
+#   geom_boxplot(outlier.shape = NA)+
+#   facet_wrap(~year ,nrow = 1)+
+#   labs(title = "",
+#        y = "Total assets (log)")+
+#   scale_y_continuous(limits = c(15,20), breaks = c(15,16,17,18,19,20))+
+#   theme_light()+
+#   theme(
+#     axis.title.x = element_blank(),
+#     text = element_text(family = "serif"),
+#     panel.grid.major.x = element_blank(),
+#     panel.grid.minor.y =element_blank() ,
+#      #axis.text.x = element_blank()
+#   )
+# 
+# 
+# ae/ge
+ggplot(adr_non_fam %>% filter(year!= 2009), aes(success_cat, log(total_assets)))+
+  geom_boxplot(outlier.shape = NA)+
+  facet_grid(~year)+
+  theme_light()+
+  theme(
+    axis.title.x = element_blank(),
+    axis.text.x = element_text(angle= 90),
+    text = element_text(family = "serif")
+  )+
+  ylim(c(14,18))+
+  labs(title = "Total assets wrt family class",
+       y = "Total assets (log)")
+
+
+   
+```
+
+
+## movable+ immovable -  stacked
+
+```{r}
+
+adr_fam <- adr_fam %>%
+  rowwise() %>% 
+  mutate(sum_assets= total_immovable_assets_totals +total_movable_assets_totals ) 
+  
+  
+  adr_fam %>% 
+    group_by(year,success_cat) %>%
+
+    summarise(sum_mov = sum( total_movable_assets_totals, na.rm = TRUE),
+              sum_immov = sum( total_immovable_assets_totals, na.rm = TRUE),
+              
+              sum_ass = sum(sum_assets),
+              prop_mov = sum_mov/ sum_ass,
+              prop_immov = 1- prop_mov) %>% 
+    select(year, success_cat, prop_mov, prop_immov) %>% 
+    ungroup() %>% 
+    pivot_longer(3:4) %>% 
+    ggplot(aes(success_cat, value, fill = name))+
+    geom_bar(stat= "identity", position = "stack")+
+    facet_wrap(~year, nrow =1)+
+    theme(
+    axis.title = element_blank(),
+    legend.position = "bottom",
+    legend.title = element_blank(), axis.text.y = element_blank(),
+    axis.ticks = element_blank()
+  )+
+  ggtitle("movable + immovable assets")
+
+```
+
+
+## criminaltiy
+
+```{r}
+adr_fam %>% group_by(year,success_cat) %>%
+  summarise(serious_crime_avg = mean(serious_crime),
+            non_serious_crime_avg = mean(non_serious_crime)) %>% 
+  
+  ggplot(aes(factor(year), non_serious_crime_avg, fill =factor(success_cat)))+
+  geom_bar(stat = "identity", position = "dodge")+
+    theme(
+    axis.title.x = element_blank(),
+    legend.position = "bottom",
+    legend.title = element_blank()
+  )+
+  ggtitle("non_serious crime average")
+
+adr_non_fam  <- adr_non_fam %>% mutate(serious_criminal = ifelse(serious_crime>0,1,0)
+                                       )
+
+adr_non_fam %>% filter(year !=2009)%>% group_by(year,success_cat) %>% 
+  summarise(serious_criminal_prop = mean(serious_criminal)) %>% 
+  ggplot(aes(factor(year), serious_criminal_prop, fill= success_cat))+
+  geom_bar(stat= "identity",
+           position = "dodge")+
+    theme_light()+
+      theme(
+    axis.title.x = element_blank(),
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.y =element_blank() ,
+    text = element_text(family= "serif"))+
+  labs (title = "Serious criminals among family politicians", y =" Proportion")+
+  ylim(c(0,.5))
+  
 
 
 
+```
+
+<!-- ## asset growth -->
+
+<!-- ```{r} -->
+
+<!-- ##runner ups & winners -->
+
+<!-- adr_non_fam <- adr_non_fam %>% mutate(uniq_id = paste0(family_id, relative_id, rel_id_rep), -->
+<!--                                       fam = ifelse(success_cat!="Non-fam","Fam", success_cat )) %>% rowwise() %>%  -->
+<!--   mutate(sum_assets= total_immovable_assets_totals +total_movable_assets_totals ) -->
+
+<!--  asset_change_1_2 <- adr_non_fam %>% filter(year ==2012) %>% select(uniq_id, total_assets_12 = sum_assets) %>% inner_join((adr_non_fam %>% filter(year ==2017) %>% select(uniq_id, total_assets_17 = sum_assets, success_cat, fam)), by = "uniq_id" ) %>% rowwise() %>%  -->
+<!--   mutate(pc_change = (total_assets_17-total_assets_12)/ total_assets_12 ) %>%  -->
+<!--   filter(! is.infinite(pc_change)) -->
+<!-- # %>% (fam) %>% summarise(count = n(), -->
+<!-- #mean_delta =mean(pc_change, na.rm = TRUE) -->
+<!--                                       ) -->
+<!--  #%>% kable(digits = 2) -->
+
+
+<!-- asset_change_1 <- adr_non_fam %>% filter(year ==2012 & position ==1) %>% select(uniq_id, total_assets_12 = sum_assets) %>% inner_join((adr_non_fam %>% filter(year ==2017& position ==1) %>% select(uniq_id, total_assets_17 = sum_assets, success_cat, fam)), by = "uniq_id" ) %>% rowwise() %>%  -->
+<!--   mutate(pc_change = (total_assets_17-total_assets_12)/ total_assets_12 ) %>%  -->
+<!--   filter(! is.infinite(pc_change))  -->
+<!-- #%>% group_by(fam) %>% summarise(count = n(), -->
+<!-- #                                      mean_delta =mean(pc_change, na.rm = TRUE) -->
+<!-- #                                      ) -->
+<!-- #%>% kable(digits = 2) -->
+<!-- library(tidymodels) -->
+<!-- library(infer) -->
+
+<!-- ## using t test to see if these change in percentages are real -->
+
+<!-- asset_change_1 %>%  -->
+<!-- infer::t_test(formula = pc_change ~ fam, -->
+<!--       alternative = "two-sided") -->
+
+<!-- ``` -->
 
 # Regressions {.tabset}
 

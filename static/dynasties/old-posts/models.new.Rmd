@@ -330,31 +330,36 @@ dyn_ae_ge <- merge(dyn_ae_ge,dyn_cabinet, by ="family_id", allow.cartesian = TRU
 
 
 
-inv <- read.csv("D:/cpr/UP/up-dynasties/ae_ge_lb_who_is_who.csv")
+  inv <- read.csv("D:/cpr/UP/up-dynasties/ae_ge_lb_who_is_who.csv")
+  
+  inv <- inv %>% filter(election_type == "AE")
+  
+  inv <- inv %>% group_by(family_id) %>% mutate(association_fam = ifelse(sum(association_inv, na.rm = TRUE)>0,1,0),
+                                         org_fam = ifelse(sum(org_inv, na.rm = TRUE)>0,1,0),
+                                         pol_fam =ifelse(sum(poitical_inv, na.rm = TRUE)>0,1,0)) %>% ungroup()
+  
+  #inv <- inv %>% select(-family_id)
+  
+  
+  inv <- inv  %>% dp
+  lyr::select(election_type,year,family_id,constituency_no,position,association_inv,org_inv, poitical_inv , pol_fam, association_fam, org_fam)
+  
+   
+  
+  dyn_ae_ge <-  merge(dyn_ae_ge,inv, by = c("election_type","year","constituency_no","position"), all.x =TRUE )
+  
+  inv %>% group_by(family_id) %>% summarise(sum(org_inv, association_inv, poitical_inv))
+  
+  
+  inv_fam <- inv %>% distinct(family_id, .keep_all = TRUE) %>%select(family_id, pol_fam, association_fam, org_fam) 
+  
 
-inv <- inv %>% filter(election_type == "AE")
-
-inv <- inv %>% group_by(family_id) %>% mutate(association_fam = ifelse(sum(association_inv, na.rm = TRUE)>0,1,0),
-                                       org_fam = ifelse(sum(org_inv, na.rm = TRUE)>0,1,0),
-                                       pol_fam =ifelse(sum(poitical_inv, na.rm = TRUE)>0,1,0)) %>% ungroup()
-
-#inv <- inv %>% select(-family_id)
-
-
-
-inv <- inv  %>% dplyr::select(election_type,year,constituency_no,position,association_inv,org_inv, poitical_inv , pol_fam, association_fam, org_fam)
-
-
-
-dyn_ae_ge <-  merge(dyn_ae_ge,inv, by = c("election_type","year","constituency_no","position"), all.x =TRUE )
-
-
-
-
-
-
-
-
+  inv_df <- left_join(dyn_ae_ge_fam_uniq, inv_fam, by = "family_id") %>% select(family_id, pol_fam, association_fam, org_fam) %>% mutate_all(~replace(., is.na(.), 0))
+  
+  inv_df %>% summarise(mean(pol_fam), 
+                       mean(association_fam),
+                       mean(org_fam)) %>% 
+    kable(digits =2, col.names = c("Political inv", "Associational inv", " Organisational inv"))
 
 ```
 
