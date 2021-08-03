@@ -661,11 +661,27 @@ dyn_ae_ge_uniq <-dyn_ae_ge %>% filter( family_id != "" ) %>% group_by(family_id)
 
 dyn_ae_ge_uniq %>% ungroup() %>%group_by(dyn_tot_2) %>%  summarise_at( c("ind_c1","ind_c2","ind_c3","ind_c4","ind_c5","ind_c6","ind_c7"),~mean(., na.rm = TRUE)) %>%select(-dyn_tot_2) %>% transpose() %>% cbind(Industries) %>% rename("Non-fam" = `V1`, "Fam" = `V2`) %>% select(Industries,"Fam", "Non-fam") %>% 
    kable(digits = 2, col.names = c("Industries","% of owners among  fam","% of owners among Non- fam")) %>% kable_styling(full_width = F)
+biz <- dyn_ae_ge_uniq %>% ungroup() %>%group_by(dyn_tot_2) %>%  summarise_at( c("ind_c1","ind_c2","ind_c3","ind_c4","ind_c5","ind_c6","ind_c7"),~mean(., na.rm = TRUE)) %>%select(-dyn_tot_2) %>% transpose() %>% cbind(Industries) %>% rename("Non-fam" = `V1`, "Fam" = `V2`) %>% select(Industries,"Fam", "Non-fam")
+# dyn_ae_ge_fam %>% 
+# infer::t_test(formula = ind_c1 ~stable, 
+#        alternative = "two-sided",order = c("0", "1")) 
+# 
+# dyn_ae_ge_uniq$fam <- ifelse(dyn_ae_ge_uniq$dyn_tot_2==1, "Fam", "Non-fam")
+# 
+# dyn_ae_ge_uniq$petrol <- ifelse(dyn_ae_ge_uniq$ind_c1==1, "yes", "no")
+# 
+# infer::chisq_test(dyn_ae_ge_uniq ,fam ~petrol)
+# 
+# testor <- tibble(dyn_ae_ge_uniq$fam, dyn_ae_ge_uniq$petrol)
+# 
+# fisher.test(testor)
 
 
 ```
 
-#### Stable v/s declining
+#### Stable v/s declining {.tabset}
+
+##### prev
 
 ```{r}
 
@@ -673,8 +689,37 @@ dyn_ae_ge_uniq %>% ungroup() %>%group_by(dyn_tot_2) %>%  summarise_at( c("ind_c1
 dyn_ae_ge_fam_uniq %>%filter(success_cat!= "Rising") %>%group_by(success_cat) %>%  summarise_at( c("ind_c1","ind_c2","ind_c3","ind_c4","ind_c5","ind_c6","ind_c7"),~mean(., na.rm = TRUE)) %>%select(-success_cat) %>% transpose() %>% cbind(Industries) %>% rename("Declining" = `V1`, "Stable" = `V2`) %>% 
   select(Industries,"Stable", "Declining") %>% 
    kable(digits = 2, col.names = c("Industries","% of owners among stable families","% of owners among declining families")) %>% kable_styling(full_width = F)
+
+
+
+
 ```
 
+
+##### Invereted
+
+```{r}
+
+
+dyn_ae_ge_fam_uniq %>% ungroup() %>% filter(success_cat != "Rising")%>% select(success_cat, "ind_c1","ind_c2","ind_c3","ind_c4","ind_c5","ind_c6","ind_c7") %>% 
+  melt(1:1) %>% 
+  filter(value ==1) %>% 
+  group_by(variable,success_cat) %>% 
+  summarise(count = n()) %>%
+  group_by(variable) %>% 
+  mutate(sum = sum(count), prop = count/sum) %>% 
+  select(1:2, 5:5) %>% 
+  pivot_wider(names_from = variable,
+              values_from = prop) %>%
+  slice(2:2,1:1) %>% 
+  kable(digits = 2,
+        col.names = c("family class","Petrol Pumps","Construction & Transport","Brick klin and Sand mining","Agri business","Shops and showrooms","Small Business","Unknown")) %>% 
+  kable_styling(full_width = F) 
+
+
+```
+
+ 
 #### Count
 
 ```{r}
@@ -724,20 +769,22 @@ rt <- dyn_ae_ge_fam_uniq %>% filter(indus_rt != "0") %>% group_by(success_cat, i
 
 
 
-ggplot(rt,aes(x = success_cat, y = prop, fill = indus_rt, label = round(prop,2)))+
+ggplot(subset(rt %>% filter(success_cat != "Rising")) ,aes(x = success_cat, y = prop, fill = indus_rt, label = round(prop,2)))+
   geom_bar(position = "stack", stat= "identity")+
       geom_text(size = 2.5, position = position_stack(vjust = 0.5))+
     colorspace::scale_fill_discrete_qualitative(palette= "dark3" )+
   coord_fixed(ratio =4)+
     theme_minimal()+
-labs(title = "Industry composition among family Catagoreis ",x = "", y = "Proportion of industry")+
+labs(title = "Industry composition  ",x = "", y = "Proportion of industry")+
     theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
   theme(plot.background = element_blank(),
         axis.line.x = element_line(),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         axis.text.y = element_blank(),
-        legend.title= element_blank()
+        legend.title= element_blank(),
+        axis.title.y = element_blank(),
+        text = element_text("serif")
   ) 
 
 ```
@@ -1149,7 +1196,7 @@ ggplot( aes(variable, y = value, fill = caste_groups, label = round(value,2)))+
 
 `Rising` category not included.
 
-#### Pol div
+#### caste - pol & econ div
 
 
 
@@ -1184,41 +1231,6 @@ ggplot(mean_df %>% filter(caste_groups!= "Others"), aes(x=caste_groups, y=pol_di
 
 -------
 
-
-**wrt land holdings**
-
-```{r}
-mean_df <- Rmisc::summarySE(subset(fam_df %>% filter(success_cat!= "Rising")), measurevar = "pol_div", groupvars = c("land"))
-
-
-mean_df$land <-  factor(mean_df$land)
-
-ggplot(mean_df , aes(x=land, y=pol_div)) + 
-    geom_bar(position=position_dodge(), stat="identity",
-             colour="black", # Use black outlines,
-            # size=.3
-            ) +      # Thinner lines
-    geom_errorbar(aes(ymin=pol_div-se, ymax=pol_div+se),
-                  size=.3,    # Thinner lines
-                  width=.2,
-                  position=position_dodge(.9)) +
-    xlab("") +
-    ylab("Mean political diversification") +
-  #theme(aspect.ratio=3/2)+
-  
-    # scale_fill_hue(name="Supplement type", # Legend label, use darker colors
-    #                breaks=c("OJ", "VC"),
-    #                labels=c("Orange juice", "Ascorbic acid")) +
-    ggtitle("Political diversification \nwrt land holdings") +
-  scale_x_discrete(labels = c("Very small", "Small", "Medium", "Large", "Very large"))+
-    theme_bw()
-
-
-
-
-
-
-```
 
 
 <!-- ```{r} -->
@@ -1335,9 +1347,9 @@ ggplot(mean_df , aes(x=land, y=pol_div)) +
 <!-- ``` -->
 
 
-#### econ div
+**econ div**
 
-*** wrt land holdings**
+
 
 ```{r}
 mean_df <- Rmisc::summarySE(subset(fam_df %>% filter(success_cat!= "Rising")), measurevar = "econ_div", groupvars = c("caste_groups"))
@@ -1364,33 +1376,52 @@ ggplot(mean_df %>% filter(caste_groups!= "Others"), aes(x=caste_groups, y=econ_d
 
 -----
 
-**wrt land holdings**
+
+
+#### land - pol & econ div
+
+
 
 ```{r}
-mean_df <- Rmisc::summarySE(subset(fam_df %>% filter(success_cat!= "Rising")), measurevar = "econ_div", groupvars = c("land"))
+mean_df_pol <- Rmisc::summarySE(subset(fam_df %>% filter(success_cat!= "Rising")), measurevar = "pol_div", groupvars = c("land")) %>% mutate(cat = "Political diverisfication") %>% rename(  div = pol_div)
+
+
+mean_df_econ <- Rmisc::summarySE(subset(fam_df %>% filter(success_cat!= "Rising")), measurevar = "econ_div", groupvars = c("land"))%>% mutate(cat = "Economic diversification") %>% rename(div = econ_div)
+
+
+mean_df <- rbindlist(list(mean_df_econ, mean_df_pol), use.names = TRUE)
+
 
 
 mean_df$land <-  factor(mean_df$land)
 
-ggplot(mean_df , aes(x=land, y=econ_div)) + 
+pol_div_land <- ggplot(mean_df , aes(x=land, y=div)) + 
     geom_bar(position=position_dodge(), stat="identity",
              colour="black", # Use black outlines,
-             size=.3) +      # Thinner lines
-    geom_errorbar(aes(ymin=econ_div-se, ymax=econ_div+se),
+            # size=.3
+            ) +      # Thinner lines
+    geom_errorbar(aes(ymin=div-se, ymax=div+se),
                   size=.3,    # Thinner lines
                   width=.2,
                   position=position_dodge(.9)) +
+  facet_wrap(~cat, scales = "free_y")+
     xlab("") +
-    ylab("Economic diversification") +
+    ylab("Mean diversification") +
+  #theme(aspect.ratio=3/2)+
+  
     # scale_fill_hue(name="Supplement type", # Legend label, use darker colors
     #                breaks=c("OJ", "VC"),
-    #                labels=c("Orange juice", "Ascorbic acid")) +
-    ggtitle("Economic diversification \nwrt land holdings") +
+    #                labels=c("Orange juice", "Ascorbic acid")) ++
   scale_x_discrete(labels = c("Very small", "Small", "Medium", "Large", "Very large"))+
     theme_bw()
 
-```
 
+
+
+
+
+```
+`
 
 
 
@@ -1405,6 +1436,26 @@ ggplot(mean_df , aes(x=land, y=econ_div)) +
 ```{r}
 fam_span2%>%  group_by(success_cat) %>% summarise(mean(fam_life)) %>% kable(caption = "Average life span", digits = 0, col.names = c("Success", "Life span")) %>% kable_styling(full_width = F)
 ```
+
+
+```{r}
+# fam_df%>% filter(success_cat != "Rising")%>%  group_by(success_cat) %>% summarise(mean(fam_life2)) %>% kable(caption = "Average life span", digits = 0, col.names = c("Success", "Life span")) %>% kable_styling(full_width = F)
+# 
+# 
+# ggplot(subset(fam_df %>% filter(success_cat!= "Rising")), aes(fam_life2, fill = success_cat))+
+#   geom_density()+
+#   labs(title = "life span of families \nafter famly formation", x = "Years")+
+#   ylim(c(.0,.08))+
+#   theme_light()+
+#   theme(legend.position = "bottom",
+#         text = element_text(family = "serif"),
+#         legend.title = element_blank(),
+#         axis.title.y= element_blank(), 
+#         panel.grid.major.x = element_blank(),
+#         panel.grid.minor = element_blank())
+```
+
+
 
 ### life span graphs
 
@@ -1439,6 +1490,8 @@ fam_life_2 <-  dyn_ae_ge_fam %>%
          year_diff_1 = ifelse(year_diff_1==0|year_diff_1>5|year_diff_1<0 ,term_duration, year_diff_1)) %>%
    group_by(family_id) %>% 
    summarise(fam_life2 = sum(year_diff_1), min_fam_year= min(year))
+
+ fam_df <- inner_join(fam_df, fam_life_2, by = "family_id")
 ##
 # fam_span3 <- inner_join(dyn_ae_ge_fam_uniq ,fam_life_2, by = "family_id")
 # 
@@ -1642,6 +1695,16 @@ all_sep <- rbindlist(list(all, sep), use.names = TRUE)
   ) 
 
 library (patchwork)
+  
+## 200
+  
+  fam_df$caste_groups <- factor(fam_df$caste_groups, levels = c("Upper Caste","Yadav","Non-Yadav OBC","Dalit" , "Muslim"  ,"Others" ))
+
+ sep <- fam_df %>% filter(success_cat!= "Rising") %>% filter(caste_groups!= "NA") %>% group_by( caste_groups,success_cat) %>% summarise( count = n()) %>% group_by(caste_groups) %>% mutate(sum = sum(count), prop = count/sum) %>% select( caste_groups,success_cat, prop) %>% 
+   kable(digits = 2) %>% kable_styling(full_width = F)
+ 
+ 
+ ### land
 
 ```
 
@@ -1681,7 +1744,6 @@ dyn_ae_ge_fam_uniq %>% filter(caste_groups!= "NA" & caste_groups!= "Others") %>%
 ### Land
 
 ```{r}
-
 dyn_ae_ge_fam_uniq$caste_groups <- factor(dyn_ae_ge_fam_uniq$caste_groups, levels = c("Upper Caste","Yadav","Non-Yadav OBC","Dalit" , "Muslim"  ,"Others" ))
 
 dyn_ae_ge_fam_uniq %>% filter(caste_groups!= "Others")%>% group_by(caste_groups, land_cat) %>% summarise(count = n()) %>%
@@ -1704,6 +1766,34 @@ dyn_ae_ge_fam_uniq %>% filter(caste_groups!= "Others")%>% group_by(caste_groups,
         panel.grid.minor = element_blank(),
         axis.text.y = element_blank()
        )
+```
+
+----
+
+
+
+
+### land fam
+
+```{r}
+
+
+
+land_lev <- c("1"=  "very small","2"=  "small", "3"= "medium", "4"= "large","5"= "very large")
+
+
+
+
+fam_df$land_cat <-factor(land_lev[as.character(fam_df$land)], levels = land_lev)
+
+fam_df$land_cat <- fct_recode(fam_df$land_cat,  "small" = "very small")
+
+fam_df%>% filter(caste_groups!= "Others" & success_cat != "Rising")%>% group_by( land_cat,success_cat) %>% summarise(count = n()) %>%
+    group_by(land_cat) %>% mutate(sum = sum(count), pc = count/sum) %>%
+    select(-sum) %>% kable(digits = 2) %>% 
+  kable_styling(full_width = F)
+
+  
 ```
 
 ### Life span wrt caste
@@ -1853,6 +1943,7 @@ ggplot(fam_span2 %>% filter(caste_groups!= "Others"),aes(x = caste_groups, fam_l
 <!--   kable_styling(full_width = F) -->
 
 <!-- ``` -->
+
 # ADR {.tabset}
 
 ```{r}
@@ -2200,7 +2291,8 @@ labels <-  c( "Political diversification", "Economic diversification", "Land own
 stargazer(fit.declining,  type="html",
           keep = keep, order = order,
           add.lines = lines,
-          covariate.labels = labels)
+          covariate.labels = labels,
+          dep.var.labels = c("Family decline"))
 
 ```
 
@@ -2995,6 +3087,8 @@ cbind(stat, vals) %>% kable(digits = 2, col.names = c("Measure", "Elite catagory
 -->
 ```
 
+
+
 # survival analysis 00 {.tabset}
 
 You might note that there are only 200 families in the survival analysis. This is because of the fact that, a main proponent of the survival analysis the variable dead which tells you which all families still alive or not.
@@ -3010,7 +3104,7 @@ library(survminer)
 dyn_life <- dyn_ae_ge %>% filter(dyn_tot_2==1)%>% group_by(family_id) %>%  mutate(fam_life_c=sum(term_duration), fam_life_w = sum(term_duration[position ==1])) %>% arrange(-year) %>% distinct(family_id, .keep_all= TRUE) %>% select(family_id, year, fam_life_c, fam_life_w) %>% ungroup() %>% mutate(cen= ifelse(year>2012,1,0))
 
 
-fam_life <-  dyn_ae_ge_fam %>%filter(success_cat!= "Rising") %>% 
+fam_life <-  dyn_ae_ge_fam %>%
    group_by(family_id) %>% 
    distinct(year, .keep_all = TRUE) %>%
   select(family_id,election_type, year, position, term_duration) %>%
@@ -3048,7 +3142,7 @@ fam_life <-  dyn_ae_ge_fam %>%filter(success_cat!= "Rising") %>%
  
  
  
- fam_df<- inner_join(fam, fam_df, by = "family_id")
+ fam_df<- right_join(fam, fam_df, by = "family_id")
  
  
  
@@ -3081,12 +3175,15 @@ fam_df <- left_join(fam_df, sub_reg, by =c("election_type","constituency"="const
 #    group_by(family_id) %>% 
 #    summarise(fam_life2 = sum(year_diff_1), min_fam_year= min(year))
 # 
- fam_df <- inner_join(fam_df, fam_life_2, by = "family_id")
+
 # 
 # # 
 # fam_df3<-  fam_df %>% select(entry_years, pol_div, family_id) %>% inner_join(fam_df3, by = "family_id")
 
 ```
+
+
+
 
 ## Base survival plots {.tabset}
 
@@ -3225,7 +3322,6 @@ splots2 <- list()
 
 splots2[[1]] <- ggsurvplot(survfit(Surv(fam_life2,dead) ~1 , data = subset(fam_df %>% filter(success_cat!= "Rising")) ), 
            title = "Survival of families",
-           subtitle = "Once after they become a family",
      xlab = "Years", 
      ylab = "Overall survival probability",
      risk.table = TRUE,
@@ -3489,7 +3585,7 @@ stargazer(fit.surv, type="html", keep = keep,order = order, covariate.labels = l
 
 ## year entry sensitivity
 
-Here we are running models on families a three different models for families that are started in those particular period in last 70 years. Aim of these models is to show that variables are still relavant irrespective of the families commencenmt year and age
+Here we are running models on families a three different models for families that are started in those particular period in last 70 years. Aim of these models is to show that variables are still relevant irrespective of the families commencenmt year and age
 
 ```{r results = "asis"}
 fit.surv1 <- coxph(Surv(fam_life, dead) ~pol_div +minister + ind_edu + land + entry_years +n_elections_w + caste_uc + caste_yadav + caste_non_yadav_obc+caste_dalit+caste_muslim + factor(decade) , data = fam_df)
@@ -3507,6 +3603,8 @@ stargazer(fit.surv1, fit.surv2, fit.surv3,type = "html", keep = keep,order = ord
 
 
 ```
+
+
 
 ## Censoring sensitivity
 
@@ -3603,7 +3701,7 @@ dead.surv1 <- coxph(Surv(fam_life, dead_10) ~  pol_div +minister + ind_edu + lan
 
 
 
-dead.surv2 <- coxph(Surv(fam_life, dead_5) ~  pol_div +minister + ind_edu + land + entry_years +n_elections_w +  caste_uc + caste_yadav + caste_non_yadav_obc+caste_dalit+caste_muslim  + factor(decade) ,  data = subset(fam_df %>% filter(min_fam_year<2014 &success_cat!= "Rising")))
+dead.surv2 <- coxph(Surv(fam_life, dead_5) ~  pol_div +minister + ind_edu + land + entry_years +n_elections_w +  caste_uc + caste_yadav + caste_non_yadav_obc+caste_dalit+caste_muslim  + factor(decade) ,  data = subset(fam_df %>% filter(min_fam_year<2014)))
 
 dead.surv3 <- coxph(Surv(fam_life, dead_15) ~  pol_div +minister + ind_edu + land + entry_years +n_elections_w+ caste_uc + caste_yadav + caste_non_yadav_obc+caste_dalit+caste_muslim + factor(decade)  ,data = subset(fam_df %>% filter(min_fam_year<2004 &success_cat!= "Rising")))
 
@@ -3654,7 +3752,7 @@ life span variable in both plots are the ones that arecounted only after they eb
      ylab = "",
      #ylab = "Overall survival probability",
      ggtheme = theme_light(),
-     subtitle = " wrt economic diversification",
+     subtitle = "Economic diversification",
      #title = "Survival of political families wrt economic diversification",
      legend.labs = c("Low","High")
      )
@@ -3679,7 +3777,7 @@ life span variable in both plots are the ones that arecounted only after they eb
      ylab = "Overall survival probability",
        xlab = "Years", 
      ggtheme = theme_light(),
-     subtitle = " wrt political diversification",
+     subtitle = " Political diversification",
      #title = "Survival of political families wrt economic diversification",
    legend.labs = c("low",  "high")
   )
