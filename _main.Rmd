@@ -1,0 +1,168 @@
+---
+site: blogdown:::blogdown_site
+---
+
+<!--chapter:end:index.Rmd-->
+
+---
+title: "Untitled"
+author: "Najah"
+date: "20/05/2021"
+output: html_document
+---
+
+
+```{r}
+ind <- read.csv("D:/projects & works/CPR_Verma/UP/dyn_ae_ge-29.04.20.csv")
+
+
+ind %>% distinct(family_id, .keep_all = TRUE) %>% select(family_id, indus_2, indus_3, indus_4) %>%data.table::melt(1:1) %>% group_by(value) %>% summarise(count = n()) %>% arrange(-count)%>%  kable()
+```
+
+```{r}
+ind_cols <-  c("indus_2", "indus_3", "indus_4")
+
+#indus <- ind %>% distinct(family_id, .keep_all = TRUE) #%>% select(family_id, indus_2, indus_3, indus_4)
+
+
+
+##petrol 
+
+ind_1 <- 1
+
+## construction and transport
+
+ind_2 <- c(2,4,5)
+
+## brick clin and sand mining
+
+ind_3 <- c(3,7)
+
+##  agri buisiness
+
+ind_4 <- c(6,8)
+
+## shops and show room
+
+ind_5 <- c(9,10,11,12)
+
+## small buisiness
+
+ind_6 <- c(0,13,14)
+
+ind_7 <- c("",NA)
+
+## NA
+
+ind <-  ind %>% rowwise()%>%  mutate(ind_count =sum(ifelse(as.numeric(indus_2)>0,1,0),ifelse(as.numeric(indus_3)>0,1,0), ifelse(as.numeric(indus_4)>0,1,0))) %>% ungroup()
+
+
+
+ind <- ind%>% 
+  rowwise() %>% 
+  mutate(ind_c1 = case_when(indus_2 ==1 ~1,
+                           indus_3 == 1 ~1,
+                           indus_4==1 ~1,
+                           TRUE~0),
+         ind_c2 = case_when(indus_2 %in% ind_2~1,
+                           indus_3 %in% ind_2 ~1,
+                           indus_4 %in% ind_2 ~1,
+                           TRUE~0),
+                  ind_c3 = case_when(indus_2 %in% ind_3~1,
+                           indus_3 %in% ind_3 ~1,
+                           indus_4 %in% ind_3 ~1,
+                           TRUE~0),
+                  ind_c4 = case_when(indus_2 %in% ind_4~1,
+                           indus_3 %in% ind_4 ~1,
+                           indus_4 %in% ind_4 ~1,
+                           TRUE~0),
+                  ind_c5 = case_when(indus_2 %in% ind_5~1,
+                           indus_3 %in% ind_5 ~1,
+                           indus_4 %in% ind_5 ~1,
+                           TRUE~0),
+                  ind_c6 = case_when(indus_2 %in% ind_6&ind_count %in%c(1,NA,0)~1,
+                           indus_3 %in% ind_6 &ind_count %in%c(1,NA,0) ~1,
+                           indus_4 %in% ind_6&ind_count %in%c(1,NA,0) ~1,
+                           TRUE~0),
+                  ind_c7 = case_when(indus_2 %in% ind_7&ind_count %in%c(NA,0) ~1,
+                           indus_3 %in% ind_7&ind_count %in%c(NA,0) ~1,
+                           indus_4 %in% ind_7&ind_count %in%c(NA,0)  ~1,
+                           TRUE~0)
+         ) %>% ungroup()
+
+# head(ind $ind_count,20)
+# 
+ ind %>% select(indus_2, indus_3, indus_4, ind_count, ind_c6,ind_c7 )
+
+```
+
+
+```{r}
+
+ind_df <- ind %>% select(election_type, year,constituency_no, position, ind_c1, ind_c2,ind_c3, ind_c4, ind_c5, ind_c6,ind_c7)
+
+## merge
+
+dyn_all <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/dyn/dyn_all.csv")
+
+dyn_ind <- left_join(dyn_all, ind_df, by = c("election_type", "year","constituency_no", "position"))
+
+ind_uniq <- dyn_ind %>% arrange(election_level)%>% distinct(family_id, .keep_all = TRUE) %>% select(family_id ,ind_c1, ind_c2,ind_c3, ind_c4, ind_c5, ind_c6, ind_c7) 
+
+
+dyn_all <- left_join(dyn_all, ind_uniq, by = "family_id")
+
+write.csv(dyn_all, "D:/cpr/UP/up-dynasties/dyn_other_data/dyn_all.csv")
+
+dyn_ae_ge <- dyn_all %>% filter(election_level!= "LB")
+
+```
+
+
+
+
+```{r}
+
+
+Industries <-  c("Petrol Pumps","Construction & Transport","Brick klin and Sand mining","Agri business","Shops and showrooms","Small Business","Unknown")
+
+dyn_ae_ge%>% distinct(family_id, .keep_all =TRUE)%>% summarise_at( c("ind_c1","ind_c2","ind_c3","ind_c4","ind_c5","ind_c6","ind_c7"),~mean(., na.rm = TRUE)) %>%  transpose() %>% cbind(Industries) %>% select(2:2,1:1)%>%  kable(digits = 2, col.names = c("Industries","% of owners")) %>% kable_styling(full_width = F)
+
+```
+
+
+
+```{r}
+
+
+cbind(dyn_ae_ge %>% filter(dyn_cum_2==1)%>%   summarise_at( c("ind_c1","ind_c2","ind_c3","ind_c4","ind_c5","ind_c6","ind_c7"),~mean(., na.rm = TRUE)) %>% transpose(),
+
+dyn_ae_ge %>% filter(dyn_cum_2==0)%>%   summarise_at( c("ind_c1","ind_c2","ind_c3","ind_c4","ind_c5","ind_c6","ind_c7"),~mean(., na.rm = TRUE)) %>% transpose()) %>% as.data.frame()%>% rename("fam" = 1:1,"non-fam" = 2:2) %>% cbind(Industries) %>% select(3:3,1:2)%>%  kable(digits = 2, col.names = c("Industries","% of owners among fam","% of owners among non-fam")) %>% kable_styling(full_width = F)
+
+```
+
+
+```{r}
+dyn_ae_ge %>%   rowwise() %>% mutate(ind_all = sum(ind_c1 +ind_c2+ind_c3,ind_c4,ind_c5,ind_c6)) %>% distinct(family_id, .keep_all = TRUE) %>% 
+  ggplot(aes(ind_all, fill = factor(dyn_cum_2)))+
+  geom_density()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!--chapter:end:industry_misc.Rmd-->
+

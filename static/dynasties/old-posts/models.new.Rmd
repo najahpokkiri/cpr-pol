@@ -47,6 +47,14 @@ library(lfe)
 
 select <- dplyr::select
 
+summarise <- dplyr::summarise
+filter <- dplyr::filter
+mutate <- dplyr::mutate
+
+
+
+rename <- dplyr::rename
+
 #"/" <- function(x,y) ifelse(y==0,0,base:::"/"(x,y))
 ```
 
@@ -341,25 +349,24 @@ dyn_ae_ge <- merge(dyn_ae_ge,dyn_cabinet, by ="family_id", allow.cartesian = TRU
   #inv <- inv %>% select(-family_id)
   
   
-  inv <- inv  %>% dp
-  lyr::select(election_type,year,family_id,constituency_no,position,association_inv,org_inv, poitical_inv , pol_fam, association_fam, org_fam)
-  
-   
-  
-  dyn_ae_ge <-  merge(dyn_ae_ge,inv, by = c("election_type","year","constituency_no","position"), all.x =TRUE )
-  
-  inv %>% group_by(family_id) %>% summarise(sum(org_inv, association_inv, poitical_inv))
-  
-  
-  inv_fam <- inv %>% distinct(family_id, .keep_all = TRUE) %>%select(family_id, pol_fam, association_fam, org_fam) 
-  
-
-  inv_df <- left_join(dyn_ae_ge_fam_uniq, inv_fam, by = "family_id") %>% select(family_id, pol_fam, association_fam, org_fam) %>% mutate_all(~replace(., is.na(.), 0))
-  
-  inv_df %>% summarise(mean(pol_fam), 
-                       mean(association_fam),
-                       mean(org_fam)) %>% 
-    kable(digits =2, col.names = c("Political inv", "Associational inv", " Organisational inv"))
+  # inv <- inv  %>% dplyr::select(election_type,year,family_id,constituency_no,position,association_inv,org_inv, poitical_inv , pol_fam, association_fam, org_fam)
+  # 
+  #  
+  # 
+  # dyn_ae_ge <-  merge(dyn_ae_ge,inv, by = c("election_type","year","constituency_no","position"), all.x =TRUE )
+  # 
+  # inv %>% group_by(family_id) %>% summarise(sum(org_inv, association_inv, poitical_inv))
+  # 
+  # 
+  # inv_fam <- inv %>% distinct(family_id, .keep_all = TRUE) %>%select(family_id, pol_fam, association_fam, org_fam) 
+  # 
+  # 
+  # inv_df <- left_join(dyn_ae_ge_fam_uniq, inv_fam, by = "family_id") %>% select(family_id, pol_fam, association_fam, org_fam) %>% mutate_all(~replace(., is.na(.), 0))
+  # 
+  # inv_df %>% summarise(mean(pol_fam), 
+  #                      mean(association_fam),
+  #                      mean(org_fam)) %>% 
+  #   kable(digits =2, col.names = c("Political inv", "Associational inv", " Organisational inv"))
 
 ```
 
@@ -380,21 +387,21 @@ dyn_ae_ge <- merge(dyn_ae_ge,dyn_cabinet, by ="family_id", allow.cartesian = TRU
 #         theme(aspect.ratio=16/9)
 
 
-dyn_ae_ge_fam <- dyn_ae_ge  %>% filter(dyn_tot_2 == 1)
-
-
-
-fam_tab <- rbind(dyn_ae_ge_fam %>% group_by(family_id) %>% filter( dyn_cum_2==0 ) %>% slice(which.min(year))%>% select(year, family_id,dyn_cum_2, relative_id),
-
-dyn_ae_ge_fam %>% group_by(family_id) %>% filter(dyn_cum_2==1  ) %>% slice(which.min(year)) %>% select(year, family_id,dyn_cum_2 )) %>%pivot_wider(values_from = year, names_from= dyn_cum_2) 
-
-
-
-
-fam_tab <- fam_tab %>% mutate(`0` = ifelse(is.na(`0`), `1`,`0`), diff = `1`-`0`)
-
-
-
+# dyn_ae_ge_fam <- dyn_ae_ge  %>% filter(dyn_tot_2 == 1)
+# 
+# 
+# 
+# fam_tab <- rbind(dyn_ae_ge_fam %>% group_by(family_id) %>% filter( dyn_cum_2==0 ) %>% slice(which.min(year))%>% select(year, family_id,dyn_cum_2, relative_id),
+# 
+# dyn_ae_ge_fam %>% group_by(family_id) %>% filter(dyn_cum_2==1  ) %>% slice(which.min(year)) %>% select(year, family_id,dyn_cum_2 )) %>%pivot_wider(values_from = year, names_from= dyn_cum_2) 
+# 
+# 
+# 
+# 
+# fam_tab <- fam_tab %>% mutate(`0` = ifelse(is.na(`0`), `1`,`0`), diff = `1`-`0`)
+# 
+# 
+# 
 
 
 ```
@@ -659,7 +666,7 @@ order = c("minister","ind_edu",  "land", "n_elections_w","mem1_female")
 
  drop <- c("caste_uc", "caste_yadav","caste_non_yadav_obc", "caste_dalit", "caste_muslim","(Intercept)","Constant")
 
-cov_labels <- c( "Minister", "Economic diversification", "Land ownership",  "Elections won by first member","First member - female")
+cov_labels <- c( "Political Diversification <br>(only cabinet)", "Economic diversification", "Land ownership",  "Elections won by first member","First member - female")
 
  
 
@@ -733,7 +740,7 @@ order = c("minister","ind_edu", "edu","n_elections_w","mem1_female")
 
  drop <- c("caste_uc", "caste_yadav","caste_non_yadav_obc", "caste_dalit", "caste_muslim","(Intercept)","Constant")
 
-cov_labels <- c( "Minister", "Economic diversification", "Land ownership",  "Elections won by first member","First member - female")
+cov_labels <- c(  "Political Diversification <br>(only cabinet)", "Economic diversification", "Land ownership",  "Elections won by first member","First member - female")
 
  
 

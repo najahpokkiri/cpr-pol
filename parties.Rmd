@@ -1,0 +1,351 @@
+---
+title: 'Partiess'
+author: ""
+date: '2020-06-10'
+params:
+  orig_date: "Original Publish Date: 04 June, 2021"
+  update_date: !r paste("Updated on:", format(Sys.time(), '%I:%m  %p -- %d %B, %Y'))t.
+output:
+  html_document:
+    theme: readable
+    toc: TRUE
+    toc_float: TRUE
+    toc_depth: 5
+    number_sections: TRUE
+    fig_width: 5         
+editor_options: 
+  chunk_output_type: inline
+
+---
+
+
+```{r set up, warning=FALSE, include=FALSE, message= FALSE}
+
+knitr::opts_chunk$set(cache = FALSE,echo = FALSE, message=FALSE, warning = FALSE)
+
+##fig.width = 16/2, fig.height = 9/2
+
+library(tidyverse)
+library(data.table)
+library(knitr)
+library(kableExtra)
+library(scales)
+library(gridExtra)
+library(stargazer)
+`%!in%` = Negate(`%in%`)
+
+select <- dplyr::select
+
+names(ae_all) <- make.unique(names(ae_all))
+```
+
+# Party
+
+
+## India {.tabset}
+
+
+
+
+```{r}
+dyn_ge <- fread("D:/cpr/UP/up-dynasties/dyn_other_data/tcpd_ge_09_14_19_dyn.csv")
+
+
+ge_all <- fread("D:/cpr/data/tcpd/TCPD_GE_all.csv")
+
+  names(dyn_ge) <- tolower(names(dyn_ge))
+
+#dyn_ge <-dyn_ge %>% select(1:1, 3:5,13:18)
+
+
+#  dyn_ge$State_Name <- tolower(dyn_ge$State_Name)
+# 
+
+#  size = 3, position (vjust = 0.5)
+#  
+#  dyn_ge <-  dyn_ge %>% mutate(party = ifelse(party =="Rashtriya Janata Dal", "RJD",party))
+# 
+# dyn_ge%>%filter(party %!in% c("RLD","JD(S)")) %>% group_by(year,party) %>% summarise(count = n(), dyn = sum(dyn), prop = dyn/count) %>% arrange(-count) %>%filter(dyn>5)%>% 
+#   ggplot(aes(reorder(party, -prop), prop))+
+#  
+#   geom_bar(stat= "identity", fill = "steelblue")+
+#     facet_wrap(~year, scales="free_x")+
+#   #coord_flip()+
+#   labs("Family politicians in Loksabha", x = "Party",y = "Proportion")+
+#   #ylim(0,.75)+
+#   theme_bw()+
+#  theme(axis.text.x = element_text(angle = 90))
+```
+
+
+### Contestants - all
+
+```{r}
+dyn_ge %>%filter(party %!in% c("RLD","JD(S)")) %>% group_by(year,party) %>% summarise(count = n(), dyn = sum(dyn), prop = dyn/count) %>% arrange(-count) %>%filter(dyn>5)%>% 
+  ggplot(aes(reorder(party, -prop), prop))+
+ 
+  geom_bar(stat= "identity", fill = "steelblue")+
+ 
+  facet_wrap(~year)+
+  coord_flip()+
+  labs(title = "Family politicians among Loksabha contestants", x = "Party",y = "Proportion")+
+  #ylim(0,.75)+
+  theme_bw()
+ #theme(axis.text.x = element_text(angle = 90))
+```
+
+### winners - all
+
+```{r}
+dyn_ge %>%filter(party %!in% c("RLD","JD(S)")& position ==1) %>% group_by(year,party) %>% summarise(count = n(), dyn = sum(dyn), prop = dyn/count) %>% arrange(-count) %>%filter(dyn>5)%>% 
+  ggplot(aes(reorder(party, -prop), prop))+
+ 
+  geom_bar(stat= "identity", fill = "steelblue")+
+ 
+  facet_wrap(~year)+
+  coord_flip()+
+  labs(title = "Family politicians among Loksabha MPs", x = "Party",y = "Proportion")+
+  #ylim(0,.75)+
+  theme_bw()
+ #theme(axis.text.x = element_text(angle = 90))
+```
+
+
+### Contestants - BJP & INC
+
+```{r}
+##
+
+
+dyn_ge %>% filter(party %in% c("BJP","INC")) %>%  group_by(year,party) %>% summarise(count = n(), dyn = sum(dyn), prop = dyn/count) %>% arrange(-count) %>% 
+  ggplot(aes(factor(year), prop, fill = party))+
+  geom_bar(stat= "identity",position ="dodge" )+
+  scale_fill_manual(values= c("darkorange1","steelblue4"))+
+
+  labs(title = "Family politicians among Loksabha contestants", x = "",y = "Proportion")+
+  ylim(0,.4)+
+  theme_minimal()+
+  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
+        legend.position = "bottom",
+        plot.background = element_blank(),
+        plot.title = element_text( size = 18, family = "serif"),
+        plot.subtitle = element_text( size = 15,
+                                     margin = margin(t = 0, r = 0, b = 20, l = 0)),
+        text = element_text(color = "gray20",family = "serif"),
+        axis.text.x = element_text( 
+                                   hjust = .5, vjust = 0),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 12),
+        axis.text = element_text(face = "italic", size = 10),
+        axis.title = element_text(vjust = -1, size = 15),        
+        axis.ticks = element_blank(),
+        panel.grid.major = element_line(color = "gray50", size = .5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+         axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+        axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+        axis.line.x = element_line()
+  )
+```
+
+### Winners BJP & INC
+
+```{r}
+## winners
+
+
+dyn_ge %>% filter(party %in% c("BJP","INC")& position ==1) %>%  group_by(year,party) %>% summarise(count = n(), dyn = sum(dyn), prop = dyn/count) %>% arrange(-count) %>% 
+  ggplot(aes(factor(year), prop, fill = party))+
+  geom_bar(stat= "identity",position ="dodge" )+
+  scale_fill_manual(values= c("darkorange1","steelblue4"))+
+
+  
+  labs(title = "Family politicians among  MPs", x = "",y = "Proportion")+
+ # ylim(0,.4)+
+  theme_minimal()+
+  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
+        legend.position = "bottom",
+        plot.background = element_blank(),
+        plot.title = element_text( size = 18, family = "serif"),
+        plot.subtitle = element_text( size = 15,
+                                     margin = margin(t = 0, r = 0, b = 20, l = 0)),
+        text = element_text(color = "gray20",family = "serif"),
+        axis.text.x = element_text( 
+                                   hjust = .5, vjust = 0),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 12),
+        axis.text = element_text(face = "italic", size = 10),
+        axis.title = element_text(vjust = -1, size = 15),        
+        axis.ticks = element_blank(),
+        panel.grid.major = element_line(color = "gray50", size = .5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+         axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+        axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+        axis.line.x = element_line()
+  ) 
+
+
+```
+
+
+
+
+
+## UP {.tabset}
+
+### Contestants
+
+
+```{r}
+up_ae_5pc <- readxl::read_xlsx("D:/cpr/UP/up-dynasties/dyn_other_data/TCPD_UP_VS_16_17_RK.xlsx")
+
+
+
+names(up_ae_5pc) <- tolower(names(up_ae_5pc))
+
+
+#dyn_ae <- dyn_ae %>% select(5:6, 10:10,14:14)
+
+
+contestants <- up_ae_5pc %>%filter(poll_no ==0) %>% filter(party %in% c("INC","BSP","SP","BJP")) %>% group_by(year,party) %>% summarise(count = n(), dyn = sum(dynast), prop = dyn/count) %>% arrange(-count) %>%
+  ggplot(aes(factor(year), prop, fill = party))+
+  geom_bar(stat= "identity",position ="dodge" )+
+  scale_fill_manual(values= c("darkorange1","cornflowerblue","steelblue4","firebrick2"))+
+
+  
+  labs(title = "Family politicians among  UP assembly contestants", x = "",y = "Proportion")+
+ #ylim(0,.4)+
+  theme_minimal()+
+  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
+        legend.position = "bottom",
+        plot.background = element_blank(),
+        plot.title = element_text( size = 18, family = "serif"),
+        plot.subtitle = element_text( size = 15,
+                                     margin = margin(t = 0, r = 0, b = 20, l = 0)),
+        text = element_text(color = "gray20",family = "serif"),
+        axis.text.x = element_text( 
+                                   hjust = .5, vjust = 0),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 12),
+        axis.text = element_text(face = "italic", size = 10),
+        axis.title = element_text(vjust = -1, size = 15),        
+        axis.ticks = element_blank(),
+        panel.grid.major = element_line(color = "gray50", size = .5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+         axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+        axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+        axis.line.x = element_line()
+  )
+```
+
+
+
+### winners
+
+```{r}
+
+winners <- up_ae_5pc %>%filter(poll_no ==0& position ==1) %>% filter(party %in% c("INC","BSP","SP","BJP")) %>% group_by(year,party) %>% summarise(count = n(), dyn = sum(dynast), prop = dyn/count) %>% arrange(-count) %>%
+  ggplot(aes(factor(year), prop, fill = party))+
+  geom_bar(stat= "identity",position ="dodge" )+
+  scale_fill_manual(values= c("darkorange1","cornflowerblue","steelblue4","firebrick2"))+
+
+  
+  labs(title = "Family politicians among  UP MLAs", x = "",y = "Proportion")+
+ ylim(0,.5)+
+  theme_minimal()+
+  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
+        legend.position = "bottom",
+        plot.background = element_blank(),
+        plot.title = element_text( size = 18, family = "serif"),
+        plot.subtitle = element_text( size = 15,
+                                     margin = margin(t = 0, r = 0, b = 20, l = 0)),
+        text = element_text(color = "gray20",family = "serif"),
+        axis.text.x = element_text( 
+                                   hjust = .5, vjust = 0),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 12),
+        axis.text = element_text(face = "italic", size = 10),
+        axis.title = element_text(vjust = -1, size = 15),        
+        axis.ticks = element_blank(),
+        panel.grid.major = element_line(color = "gray50", size = .5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+         axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+        axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+        axis.line.x = element_line()
+  ) 
+
+
+# ggpubr::ggarrange(contestants, winners, common.legend = TRUE)
+
+
+## grid
+
+win_df <- up_ae_5pc %>%filter(poll_no ==0& position ==1) %>% filter(party %in% c("INC","BSP","SP","BJP")) %>% group_by(year,party) %>% summarise(count = n(), dyn = sum(dynast), prop = dyn/count) %>% arrange(-count) %>% mutate(type ="Winners" )
+
+cont_df <- up_ae_5pc %>%filter(poll_no ==0) %>% filter(party %in% c("INC","BSP","SP","BJP")) %>% group_by(year,party) %>% summarise(count = n(), dyn = sum(dynast), prop = dyn/count) %>% arrange(-count) %>% mutate(type ="Contestants")
+
+
+win_cont_df <- rbind(win_df, cont_df)
+
+
+  ggplot(win_cont_df,aes(factor(year), prop, fill = party))+
+  geom_bar(stat= "identity",position ="dodge" )+
+  scale_fill_manual(values= c("darkorange1","cornflowerblue","steelblue4","firebrick2"))+
+
+  
+  labs(title = "Family politicians in UP assembly elections", x = "",y = "Proportion")+
+facet_wrap(~type)+
+  theme_minimal()+
+    ylim(0,.5)+
+  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
+        legend.position = "bottom",
+        plot.background = element_blank(),
+        plot.title = element_text( size = 18, family = "serif"),
+        plot.subtitle = element_text( size = 15,
+                                     margin = margin(t = 0, r = 0, b = 20, l = 0)),
+        text = element_text(color = "gray20",family = "serif"),
+        axis.text.x = element_text( 
+                                   hjust = .5, vjust = 0),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 12),
+        axis.text = element_text(face = "italic", size = 10),
+        axis.title = element_text(vjust = -1, size = 15),        
+        axis.ticks = element_blank(),
+        panel.grid.major = element_line(color = "gray50", size = .5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+         axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+        axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+        axis.line.x = element_line()
+  ) 
+
+
+```
+
+
+```{r}
+up_ge_5pc <- readxl::read_xlsx("D:/cpr/UP/up-dynasties/dyn_other_data/UP_TCPD_GE_091419 _April_21.xlsx")
+
+names(up_ge_5pc) <- tolower(names(up_ge_5pc))
+
+
+up_ge_5pc %>%  filter(party %in% c("INC","BSP","SP","BJP")) %>% group_by(year,party) %>% summarise(count = n(), dyn = sum(dyn), prop = dyn/count) %>% arrange(-count) %>%
+  ggplot(aes(reorder(party, -prop), prop, label = dyn))+
+ 
+  geom_bar(stat= "identity", fill = "steelblue")+
+   geom_text(color = "black", size = 3)+
+  facet_wrap(~year)+
+  coord_flip()+
+  labs(title = "Family politicians inLoksabha from UP", x = "Party",y = "Proportion")+
+ # ylim(0,.4)+
+  theme_bw()
+
+
+
+```
+
+
+
