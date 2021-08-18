@@ -245,41 +245,9 @@ names(composite_score)  <- c("Measure", "Non_dynast", "Dynast")
 names(importance1)   <- c("Measure", "Non_dynast", "Dynast")
 
 
-df2 = tidyr::gather(importance1, group, value, -Measure)
+#df2 = tidyr::gather(importance1, group, value, -Measure)
   
 
-
-
-imp <- ggplot(importance1, aes(y =  Measure)) + 
-     geom_point(data = df2, aes(x = value, color = group), size = 3) +
-     geom_dumbbell(aes(x = Non_dynast, xend = Dynast), size=3, colour = "#dddddd",
-                size = 3,
-                colour_x = "#FAAB18",
-                colour_xend = "#1380A1") +
-  scale_y_discrete(limits = rev(levels(performance1$Measure)))+
-
-  labs(title = "Pressing issues of the constituents",
-      
-       x = "Rating",
-       y = "",
-       caption = "Source: ADR-Daksh Survey Report")+
-    xlim(0,5)+
- scale_color_manual(name = "", values = c("#1380A1","#FAAB18") )+
-  theme_minimal()+
-  theme(panel.grid.major.x= element_blank(),
-        panel.grid.minor.x = element_blank(), 
-        axis.line.x = element_line())
-
-
-
-
-# 
-#   finalise_plot(plot_name = imp_score,
-#               source = "Source: ADR-Daksh Survey Report",
-#               save_filepath = "ADR_importance_score.png",
-#               width_pixels = 640,
-#               height_pixels = 450)
-#
 
 
 
@@ -292,19 +260,29 @@ imp <- ggplot(importance1, aes(y =  Measure)) +
 names(performance1)   <- c("Measure", "Non_dynast", "Dynast")
 
 
-df2 = tidyr::gather(performance1, group, value, -Measure)
-
 
   
-pf <- ggplot(performance1, aes(y =  Measure)) + 
+ performance1 <- performance1 %>% mutate(cat = "Performance of the MPs")
+ 
+ importance1 <- importance1 %>% mutate(cat = "Pressing issues of the constituents")
+ 
+# df2 = tidyr::gather(importance1, group, value, -Measure)
+ 
+ pf_imp <- rbindlist(list(performance1, importance1), use.names = TRUE)
+ 
+ df2 = tidyr::gather(performance1, group, value, -c(Measure, cat)) %>% mutate(value = as.numeric(value))
+
+
+
+  p2_1 <- ggplot(pf_imp, aes(y =  Measure)) + 
      geom_point(data = df2, aes(x = value, color = group), size = 3) +
      geom_dumbbell(aes(x = Non_dynast, xend = Dynast), size=3, colour = "#dddddd",
                 size = 3,
                 colour_x = "#FAAB18",
                 colour_xend = "#1380A1") +
+    facet_wrap(~cat)+
   scale_y_discrete(limits = rev(levels(performance1$Measure)))+
-
-  labs(title = "Performance of MPs ",
+    labs(title = "Performance of MPs ",
        
        x = "Rating",
        y = "",
@@ -314,26 +292,10 @@ pf <- ggplot(performance1, aes(y =  Measure)) +
   theme_minimal()+
   theme(panel.grid.major.x= element_blank(),
         panel.grid.minor.x = element_blank(), 
-        axis.line.x = element_line())
+        axis.line.x = element_line(),
+        title= element_blank())
 
-
-
-
-ggpubr::ggarrange(imp, pf, 2, common.legend = TRUE)
-
-library(patchwork)
-combined <- imp / pf & theme(legend.position = "bottom")
-combined + plot_layout(guides = "collect")
-
-combined <- imp + pf + plot_layout(guides = "collect") & theme(legend.position = "bottom")
-  
-  # finalise_plot(plot_name = perf_score,
-  #             source = "Source: ADR-Daksh Survey Report",
-  #             save_filepath = "ADR_performance_score.png",
-  #             width_pixels = 640,
-  #             height_pixels = 450)
-  
-  
+ggsave("D:/cpr/thesis/figures/fig_2_1.png", p2_1,width = 8, height =4, dpi = 300, units ="in" )
  
 ```
 

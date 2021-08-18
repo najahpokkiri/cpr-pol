@@ -179,8 +179,6 @@ ggplot(subset(taluqdars,!is.na(revenue_1930)),aes(x = reorder(as.factor(active_p
 ### revenue - active status - density
 
 ```{r}
-
-
 taluqdars %>% filter(!is.na(revenue_1930)) %>% group_by(active_politics) %>% tally()
 ggplot(taluqdars %>% filter(!is.na(revenue_1930)), aes(revenue_1930, fill= factor(active_politics)))+
   geom_density()+
@@ -206,6 +204,7 @@ all <- ggplot(taluqdars %>% filter(!is.na(revenue_1930)&revenue_1930<400000), ae
   geom_boxplot()+
   scale_y_continuous(labels = unit_format(unit = "Lakhs", scale = 1e-5))+
     scale_x_discrete(labels = c("Active","Dormant","Never joined politics"))+
+  labs(x = "", y = "Revenue - 1930")+
   labs(x = "")+
   theme_light()+
   theme(
@@ -223,6 +222,32 @@ single <- ggplot(taluqdars %>% mutate(type ="All")%>% filter(!is.na(revenue_1930
 
 
 single+all+plot_annotation(title = "Taluqdar revenue wrt status")+plot_layout(widths = c(1, 2))
+```
+
+
+
+
+
+```{r}
+
+ p3_8 <- ggplot(taluqdars %>% filter(!is.na(revenue_1930)&revenue_1930<400000), aes(factor(active_politics),revenue_1930 ))+
+  geom_boxplot()+
+  scale_y_continuous(labels = unit_format(unit = "Lakhs", scale = 1e-5))+
+    scale_x_discrete(labels = c("Active","Dormant","Never joined politics"))+
+  labs( y = "Revenue collection 1930",
+        caption= "Source:  Allahabad Pioneer Press")+
+ 
+ 
+  theme_light()+
+  theme(
+   
+    panel.grid.major.x = element_blank(),
+    axis.title.x = element_blank(),
+    text = element_text(family = "serif")
+  )
+
+ggsave("D:/cpr/thesis/figures/fig_3_8.png", p3_8,width = 5, height =3, dpi = 300, units ="in" )
+
 ```
 
 

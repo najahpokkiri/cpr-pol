@@ -1,0 +1,171 @@
+---
+title: "Political families: 1989-2019"
+params:
+  orig_date: "Original Publish Date: 18 August, 2021"
+  update_date: !r paste("Updated on:", format(Sys.time(), '%I:%m  %p -- %d %B, %Y'))
+
+output:
+  html_document:
+    theme: readable
+    toc: TRUE
+    toc_float: TRUE
+    toc_depth: 5
+    number_sections: false
+    fig_width: 6
+editor_options:
+  chunk_output_type: inline
+
+---
+
+---
+
+### Document History
+
+`r params$orig_date`
+
+`r params$update_date`
+
+---
+
+```{r set up, warning=FALSE, include=FALSE, message= FALSE}
+
+knitr::opts_chunk$set(cache = FALSE,echo = FALSE, message=FALSE, warning = FALSE)
+
+##fig.width = 16/2, fig.height = 9/2
+
+library(tidyverse)
+library(data.table)
+library(knitr)
+library(kableExtra)
+
+
+library(stargazer)
+`%!in%` = Negate(`%in%`)
+
+library(lfe)
+
+select <- dplyr::select
+
+summarise <- dplyr::summarise
+filter <- dplyr::filter
+mutate <- dplyr::mutate
+
+
+
+rename <- dplyr::rename
+
+```
+
+
+
+```{r reading files}
+
+pc5 <- fread("D:/cpr/UP/up-dynasties/dyn_other_data/dyn5_89_19.csv") %>% 
+  rename_all(tolower) %>% select(state_name, year, constituency_no, 
+                                 position,caste_rec,dyn, source,
+                                 background = "background/dynasty", notes)%>% 
+  mutate(state_name = str_replace_all(state_name,"_", " ")) %>% 
+  distinct(state_name, year, constituency_no, 
+                                 position,.keep_all = TRUE)
+
+# names(pc5)
+
+ge_all <- fread("D:/cpr/data/tcpd/ge_all_0821.csv") %>% rename_all(tolower) %>% 
+  mutate(state_name = str_replace_all(state_name,"_", " ")) %>% 
+   distinct(state_name, year, constituency_no, 
+                                 position,.keep_all = TRUE)
+
+# unique(ge_all$state_name)
+# 
+# unique(pc5$state_name)
+# 
+# ge_all2 <- fread("D:/cpr/data/tcpd/TCPD_GE_all.csv") %>% rename_all(tolower)
+
+## close to 2000 obs are not matching - tried with old and new tcpd files 
+## it was the dashes in the new tcpd files that was casuing the problems - so removed dashes from both the files.
+## even then there were more observation when i matched - removed duplicates from the tcpd file - then got exact match
+
+# str_replace_all(head(ge_all$state_name), "_", " ")
+
+
+tcpd_dyn5 <- inner_join(pc5, ge_all, by = c("state_name", "year","constituency_no","position"))
+
+
+
+```
+
+
+# Preliminary analysis {.tabset}
+
+## Data summary
+
+
+```{r results="asis", warning=FALSE}
+summarytools::dfSummary(tcpd_dyn5,
+                        plain.ascii  = FALSE, 
+          style        = "grid", 
+          graph.magnif = 0.75, 
+          valid.col    = FALSE,
+          headings = FALSE,
+           tmp.img.dir  = "/tmp")
+```
+
+
+## Dynasts
+
+```{r results="asis", warning=FALSE}
+summarytools::dfSummary(tcpd_dyn5$dyn,
+                        plain.ascii  = FALSE, 
+          style        = "grid", 
+          graph.magnif = 0.75, 
+          valid.col    = FALSE,
+          headings = FALSE,
+           tmp.img.dir  = "/tmp")
+```
+## Incumbents
+
+  
+
+```{r, results = "asis"}
+# summarytools::ctable(x = tcpd_dyn5$dyn  , 
+#                      y= tcpd_dyn5$incumbent,
+#        
+#        prop = "r",
+#        headings = FALSE,
+#          method = "render",
+#        totals = FALSE)
+library(summarytools)
+library(magrittr)
+tcpd_dyn5 %$%  # Acts like with(tobacco, ...)
+  ctable(x = dyn , y = incumbent,
+          prop = "r",
+         headings = FALSE,
+         totals = FALSE,
+         style = 'rmarkdown'
+          ) 
+  #print(method = "browser")
+```
+
+
+## Turncoats
+
+```{r, results = "asis"}
+tcpd_dyn5 %$%  # Acts like with(tobacco, ...)
+  ctable(x = dyn , y = turncoat,
+          prop = "r",
+         headings = FALSE,
+         totals = FALSE,
+         style = 'rmarkdown'
+          ) 
+  #print(method = "browser")
+```
+
+
+
+
+
+
+
+
+
+

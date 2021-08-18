@@ -521,7 +521,7 @@ post_delim <- ggplot(ac_shp_sh)+
     label.size = NA
     )+
   cowplot::theme_map()+
-  labs(title = "Post - Delim")
+  labs(subtitle = "Post - 2008")
   
 
 
@@ -546,13 +546,23 @@ pre_delim <- ggplot(  ac_shp_09_sh)+
     label.size = NA
     )+
   cowplot::theme_map()+
-  labs(title = "Pre- Delim")
+  labs(subtitle = "Pre- 2008")
 
 
 library(patchwork)
 
+# library(magick)
+# 
+# pc <- image_read("d:/cpr/thesis/figures/fig_5_11.png")
 
-pre_delim+ post_delim +plot_annotation(title = "ACs in Saharanpur district")
+p5_1 <-  pre_delim+ post_delim
+
+ggsave("D:/cpr/thesis/figures/fig_5_1.png", p5_1,width = 5, height =3.5, dpi = 300, units ="in" )
+
+# 
+# image_ggplot(pc) + patch
+# 
+# image_ggplot(pc)
 
 ```
 

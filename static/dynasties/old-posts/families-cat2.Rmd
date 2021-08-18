@@ -604,9 +604,40 @@ land_caste_df  <- land_caste_df %>% mutate(success_cat = case_when(as.character(
                                                  as.character(success_cat) == "Non-Yadav OBC" ~"OBC",
                                                  TRUE ~as.character(success_cat)))
 land_caste_df$success_cat<- factor(land_caste_df$success_cat, levels = c("UC","Yadav","OBC","Dalit" , "Muslim"   ))
+```
 
 
 
+<!-- ```{r} -->
+
+<!--  ggplot(fam_caste_df %>% filter(group =="Famliy class"), aes(success_cat,pc, fill = land_cat, label = round(pc,2)))+ -->
+
+<!--     geom_bar(position = "stack", stat = "identity")+ -->
+<!--      geom_text(size = 2.5, position = position_stack(vjust = 0.5))+ -->
+<!--       theme_minimal()+ -->
+
+<!--   #coord_fixed(ratio = 2)+ -->
+<!--   #theme(aspect.ratio=4/2)+ -->
+<!--   scale_fill_discrete(labels = c( "very small", "small", "medium", "large", "very large"))+ -->
+<!--     #scale_x_discrete(labels =c ("Upper \n  Caste","Yadav","Non \n Yadav \n OBC","Dalit" , "Muslim", "Declining", "Rising", "Stable"))+ -->
+
+<!--    labs(title = "land holdings  ",x = "", y = "", fill = "") + -->
+<!--     #theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+ -->
+<!--   theme(plot.background = element_blank(), -->
+<!--         axis.line.x = element_line(), -->
+<!--         panel.grid.major = element_blank(), -->
+<!--         panel.grid.minor = element_blank(), -->
+<!--         axis.text.y = element_blank(), -->
+<!--         legend.position = "bottom", -->
+<!--         axis.title = element_blank(),  -->
+<!--         axis.text = element_text(size = 10) -->
+<!--        ) -->
+
+
+<!-- ``` -->
+
+
+```{r}
 fam_caste_df <- rbindlist(list(land_elite_df, land_caste_df), use.names = TRUE)
 
 
@@ -672,7 +703,7 @@ land_caste_df$success_cat<- factor(land_caste_df$success_cat, levels = c("UC","Y
  df5$success_cat<- factor(df5$success_cat, levels = c("Upper Caste","OBC","Dalit" , "Muslim"   ))
   
  
-  ggplot(  df5
+  p4_2 <- ggplot(  df5
   , aes(success_cat,pc, fill = land_cat, label = round(pc,2)))+
 
     geom_bar(position = "stack", stat = "identity")+
@@ -680,22 +711,26 @@ land_caste_df$success_cat<- factor(land_caste_df$success_cat, levels = c("UC","Y
       theme_minimal()+
   #coord_fixed(ratio = 2)+
   #theme(aspect.ratio=4/2)+
-  scale_fill_discrete(labels = c( "very small", "small", "medium", "large", "very large"))+
+  scale_fill_grey(labels = c( "very small", "small", "medium", "large", "very large"))+
     #scale_x_discrete(labels =c ("Upper \n  Caste","Yadav","Non \n Yadav \n OBC","Dalit" , "Muslim", "Declining", "Rising", "Stable"))+
       
-   labs(title = "land holdings  ",x = "", y = "", fill = "") +
+   labs(x = "", y = "", fill = "", caption = "Source: Uttar Pradesh Political Families data set"
+) +
     #theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
   theme(plot.background = element_blank(),
         axis.line.x = element_line(),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         axis.text.y = element_blank(),
-        legend.position = "bottom",
+        #legend.position = "bottom",
         axis.title = element_blank(), 
         axis.text = element_text(size = 10),
-        text = element_text(family = "serif")
+        text = element_text(family = "serif"),
+        legend.position = "top"
        )
+
   
+  ggsave("D:/cpr/thesis/figures/fig_4_2.png", p4_2,width = 5, height =4, dpi = 300, units ="in" )
 ```
 
 ------------------------------------------------------------------------
@@ -747,6 +782,7 @@ biz <- dyn_ae_ge_uniq %>% ungroup() %>%group_by(dyn_tot_2) %>%  summarise_at( c(
 # 
 # fisher.test(testor)
 
+kableExtra::kable(biz, digits =2,format = "latex")
 
 ```
 
@@ -769,7 +805,7 @@ dyn_ae_ge_fam_uniq %>%filter(success_cat!= "Rising") %>%group_by(success_cat) %>
 
 ##### Invereted
 
-```{r}
+```{r results="asis"}
 
 
 dyn_ae_ge_fam_uniq %>% ungroup() %>% filter(success_cat != "Rising")%>% select(success_cat, "ind_c1","ind_c2","ind_c3","ind_c4","ind_c5","ind_c6","ind_c7") %>% 
@@ -785,7 +821,7 @@ as.data.table() %>%  as.data.table() %>%  melt(1:1) %>%
   slice(2:2,1:1) %>% 
   kable(digits = 2,
         col.names = c("family class","Petrol Pumps","Construction & Transport","Brick klin and Sand mining","Agri business","Shops and showrooms","Small Business","Unknown")) %>% 
-  kable_styling(full_width = F) 
+kable_styling(full_width = F) 
 
 
 ```
@@ -840,14 +876,18 @@ rt <- dyn_ae_ge_fam_uniq %>% filter(indus_rt != "0") %>% group_by(success_cat, i
 
 
 
-ggplot(subset(rt %>% filter(success_cat != "Rising")) ,aes(x = success_cat, y = prop, fill = indus_rt, label = round(prop,2)))+
+p4_4 <- ggplot(subset(rt %>% filter(success_cat != "Rising")) ,aes(x = success_cat, y = prop, fill = indus_rt, label = round(prop,2)))+
   geom_bar(position = "stack", stat= "identity")+
       geom_text(size = 2.5, position = position_stack(vjust = 0.5))+
-    colorspace::scale_fill_discrete_qualitative(palette= "dark3" )+
-  coord_fixed(ratio =4)+
+  scale_fill_grey()+
+   #colorspace::scale_fill_discrete_qualitative(palette= "dark3" )+
+  coord_fixed(ratio =2)+
     theme_minimal()+
-labs(title = "Industry composition  ",x = "", y = "Proportion of industry")+
-    theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
+labs(#title = "Industry composition  ",
+  caption= "Source: Uttar Pradesh Political Families data set"
+,
+  x = "", y = "Proportion of industry")+
+
   theme(plot.background = element_blank(),
         axis.line.x = element_line(),
         panel.grid.major = element_blank(),
@@ -855,8 +895,14 @@ labs(title = "Industry composition  ",x = "", y = "Proportion of industry")+
         axis.text.y = element_blank(),
         legend.title= element_blank(),
         axis.title.y = element_blank(),
-        text = element_text("serif")
+        text = element_text("serif"),
+        
+        legend.position = "top"
   ) 
+
+
+p4_4
+  ggsave("D:/cpr/thesis/figures/fig_4_4.png", p4_4,width = 4, height =4, dpi = 300, units ="in" )
 
 ```
 
@@ -1183,7 +1229,7 @@ dyn_ae_ge_uniq1$success_cat1 <- ifelse(dyn_ae_ge_uniq1$success_cat== "Non-famili
 
 
 
-mean_df_pol2 <- Rmisc::summarySE(dyn_ae_ge_uniq1, measurevar = "pol_div", groupvars = c("success_cat1"))%>% mutate(div = "Political diversification")
+mean_df_pol2 <- Rmisc::summarySE(dyn_ae_ge_uniq1, measurevar = "minister", groupvars = c("success_cat1"))%>% mutate(div = "Political diversification")
 
 
 # mean_df$success_cat <- factor(mean_df$success_cat, levels = c("Non_fam", "Rising", "Stable"))
@@ -1225,62 +1271,58 @@ mean_df_econ1 <- Rmisc::summarySE(dyn_ae_ge_uniq1, measurevar = "econ_div", grou
 econ_pol_df2 <- rbindlist(list(mean_df_pol2,mean_df_econ1), use.names = FALSE)
 
 # mean_df$success_cat <- factor(mean_df$success_cat, levels = c("Non_fam", "Rising", "Stable"))
-ggplot(econ_pol_df2, aes(x=success_cat1, y=pol_div)) + 
+p3_10 <- ggplot(econ_pol_df2, aes(x=success_cat1, y=minister)) + 
     geom_bar(position=position_dodge(), stat="identity",
              colour="black", # Use black outlines,
              size=.3) +      # Thinner lines
-    geom_errorbar(aes(ymin=pol_div-se, ymax=pol_div+se),
+    geom_errorbar(aes(ymin=minister-se, ymax=minister+se),
                   size=.3,    # Thinner lines
                   width=.2,
                   position=position_dodge(.9)) +
   facet_wrap(~div, scales = "free_y")+
-  # scale_y_continuous(breaks = c(0.0,1.0,2.0), labels = scales::number_format(accuracy = 0.1))+
-    xlab("") +
-    ylab("") +
-    # scale_fill_hue(name="Supplement type", # Legend label, use darker colors
-    #                breaks=c("OJ", "VC"),
-    #                labels=c("Orange juice", "Ascorbic acid")) +
-    #ggtitle("Economic diversification ") +
+
     theme_bw()+
-  theme(text = element_text(family = "serif"))
-
-#pol_non_fam +econ_non_fam
-
-```
-
-```{r}
-## al entitis mean bar
-
-std <- function(x) sd(x)/sqrt(length(x))
-
-all_df <- dyn_ae_ge_uniq1 %>% summarise(mean = mean(econ_div),
-                                       se = std(econ_div))  %>% mutate(cat = "All entities")
-
-# mean_df$success_cat <- factor(mean_df$success_cat, levels = c("Non_fam", "Rising", "Stable"))
-ggplot(all_df, aes(x=cat, y=mean)) + 
-    geom_bar(position=position_dodge(),width = 0.5, stat="identity",
-             colour="black", # Use black outlines,
-             size=.3) +      # Thinner lines
-    geom_errorbar(aes(ymin=mean-se, ymax=mean+se),
-                  size=.3,    # Thinner lines
-                  width=.2,
-                  position=position_dodge(.9)) +
-  ylim(c(0,1))+
-  
-  coord_fixed(ratio =2)+
-    xlab("") +
-    ylab("") +
-    # scale_fill_hue(name="Supplement type", # Legend label, use darker colors
-    #                breaks=c("OJ", "VC"),
-    #                labels=c("Orange juice", "Ascorbic acid")) +
-    ggtitle("Economic diversification ") +
-    theme_bw()+
-  theme(text = element_text(family = "serif"))
-
-#pol_non_fam +econ_non_fam
+  labs(caption = "Note: Political diveriscation includes only cabinet position",
+       y = "Mean")+
+  scale_x_discrete(labels = c("Family", "Non_family"))+
+  theme(text = element_text(family = "serif"),
+        axis.title.x =element_blank() )
+  ggsave("D:/cpr/thesis/figures/fig_3_10.png", p3_10,width = 5, height =3.5, dpi = 300, units ="in" )
 
 ```
-```
+
+
+<!-- ```{r} -->
+<!-- ## rising exclusiv -->
+
+<!-- dyn_ae_ge_uniq1$econ_div <- dyn_ae_ge_uniq1$ind_edu                           -->
+
+<!-- mean_df_econ1 <- Rmisc::summarySE(dyn_ae_ge_uniq1, measurevar = "econ_div", groupvars = c("success_cat1")) %>% mutate(div = "Economic diversification") -->
+
+<!-- econ_pol_df2 <- rbindlist(list(mean_df_pol2,mean_df_econ1), use.names = FALSE) -->
+
+
+<!-- ggplot(econ_pol_df2, aes(x=success_cat1, y=pol_div)) +  -->
+<!--     geom_bar(position=position_dodge(), stat="identity", -->
+<!--              colour="black", # Use black outlines, -->
+<!--              size=.3) +      # Thinner lines -->
+<!--     geom_errorbar(aes(ymin=pol_div-se, ymax=pol_div+se), -->
+<!--                   size=.3,    # Thinner lines -->
+<!--                   width=.2, -->
+<!--                   position=position_dodge(.9)) + -->
+<!--   facet_wrap(~div, scales = "free_y")+ -->
+<!-- scale_x_discrete(labels = c(""))+ -->
+<!--     theme_bw()+ -->
+<!--       labs(caption = "Political diveriscation - Only cabinet position")+ -->
+<!--   theme(text = element_text(family = "serif")) -->
+
+<!-- #pol_non_fam +econ_non_fam -->
+
+
+
+<!-- ``` -->
+
+
 
 
 
@@ -1432,6 +1474,8 @@ fam_df$land_cat <-factor(land_lev[as.character(fam_df$land)], levels = land_lev)
 fam_df %>% group_by(success_cat, land_cat) %>% summarise(count = n())%>% pivot_wider(values_from = count, names_from = success_cat) %>% kable() %>% kable_styling() 
 
 fam_df %>% group_by(success_cat, caste_groups) %>% summarise(count = n())%>% pivot_wider(values_from = count, names_from = success_cat) %>% kable() %>% kable_styling() 
+
+
 ```
 
 ### political diversification wrt family class
@@ -1441,7 +1485,7 @@ fam_df %>% group_by(success_cat, caste_groups) %>% summarise(count = n())%>% piv
 fam_df <- fam_df %>% mutate(pol_div1= ifelse(pol_div %in% c(2,3), 3, pol_div),
                               pol_div1 = factor(pol_div1, levels = c(3,2,1,0)))
 
-fam_df %>% group_by(success_cat) %>% summarise(lnkage = mean(linkage),
+p4_5 <- fam_df %>% group_by(success_cat) %>% summarise(lnkage = mean(linkage),
                                                 minister = mean(minister),
                                                 org = mean(org_fam)) %>% filter(success_cat!= "Rising") %>% 
   as.data.table() %>%  melt(1:1) %>% 
@@ -1454,11 +1498,15 @@ ggplot( aes(variable, y = value, fill = success_cat, label = round(value,2)))+
   #coord_fixed(ratio =5)+
     theme_minimal()+
       
-    labs(title = "Political diversification wrt family class", subtitle = "Proportion of families") +
+    labs(#title = "Political diversification wrt family class",
+      caption= "Source: Uttar Pradesh Political Families data set"
+
+      ) +
   scale_x_discrete(labels = c(  "Contesting at \n multiple levels","Cabinet position","Party organisation"))+
-    colorspace::scale_fill_discrete_qualitative(palette= "dark3" )+
+  scale_fill_grey()+
+    #colorspace::scale_fill_discrete_qualitative(palette= "dark3" )+
  # theme(legend.position = "bottom",plot.title = element_text(hjust = 0.5))+
-  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
+  theme(
         #plot.title = element_text(hjust = 0.5, size = 18, family = "serif", 
          #                         margin = margin(t = 0, r = 0, b = 20, l = 0)), 
         text = element_text(color = "gray20",family = "serif"),
@@ -1471,12 +1519,17 @@ ggplot( aes(variable, y = value, fill = success_cat, label = round(value,2)))+
         axis.ticks.y = element_blank(),
         axis.line= element_line(color = "gray40", size = .5),
         axis.line.y = element_blank(),
-        panel.grid.major = element_line(color = "gray50", size = .5),
+        #panel.grid.major = element_line(color = "gray50", size = .5),
         panel.grid.minor = element_blank(),
         panel.grid.major.x = element_blank(),
-        legend.position = "bottom"
-          
+        legend.position = "bottom",
+       
+        
   )
+ p4_5
+
+  ggsave("D:/cpr/thesis/figures/fig_4_5.png", p4_5,width = 5, height =3.5, dpi = 300, units ="in" )
+
 ```
 
 
@@ -1525,6 +1578,9 @@ ggplot( aes(variable, y = value, fill = caste_groups, label = round(value,2)))+
         legend.position = "bottom"
           
   )
+
+
+
 ```
 
 
@@ -1731,46 +1787,57 @@ ggplot( aes(variable, y = value, fill = caste_groups, label = round(value,2)))+
 <!-- ``` -->
 
 
-<!-- ```{r} -->
-<!-- mean_df_pol <- Rmisc::summarySE(subset(fam_df %>% filter(success_cat!= "Rising")), measurevar = "pol_div", groupvars = c("land")) %>% mutate(cat = "Political diverisfication") %>% rename(  div = pol_div) -->
+```{r}
 
-
-<!-- mean_df_econ <- Rmisc::summarySE(subset(fam_df %>% filter(success_cat!= "Rising")), measurevar = "econ_div", groupvars = c("land"))%>% mutate(cat = "Economic diversification") %>% rename(div = econ_div) -->
-
-
-<!-- mean_df <- rbindlist(list(mean_df_econ, mean_df_pol), use.names = TRUE) -->
-
-
-
-<!-- mean_df$land <-  factor(mean_df$land) -->
-
-<!-- pol_div_land <- ggplot(mean_df , aes(x=land, y=div)) +  -->
-<!--     geom_bar(position=position_dodge(), stat="identity", -->
-<!--              colour="black", # Use black outlines, -->
-<!--             # size=.3 -->
-<!--             ) +      # Thinner lines -->
-<!--     geom_errorbar(aes(ymin=div-se, ymax=div+se), -->
-<!--                   size=.3,    # Thinner lines -->
-<!--                   width=.2, -->
-<!--                   position=position_dodge(.9)) + -->
-<!--   facet_wrap(~cat, scales = "free_y")+ -->
-<!--     xlab("") + -->
-<!--     ylab("Mean diversification") + -->
-<!--   #theme(aspect.ratio=3/2)+ -->
-
-<!--     # scale_fill_hue(name="Supplement type", # Legend label, use darker colors -->
-<!--     #                breaks=c("OJ", "VC"), -->
-<!--     #                labels=c("Orange juice", "Ascorbic acid")) ++ -->
-<!--   scale_x_discrete(labels = c("Very small", "Small", "Medium", "Large", "Very large"))+ -->
-<!--     theme_bw() -->
+std <- function(x) sd(x)/sqrt(length(x))
+ all_df_land <- rbindlist(list(fam_df %>% filter(success_cat!= "Rising") %>% group_by(land) %>% 
+  summarise(mean = mean(pol_div),
+                                       se = std(pol_div)) %>% mutate(cat = "Political diversification"),
+ fam_df %>% filter(success_cat!= "Rising") %>% group_by(land) %>% 
+  summarise(mean = mean(econ_div),
+                                       se = std(econ_div)) %>% mutate(cat = "Economic diversification")))
 
 
 
 
 
 
-<!-- ``` -->
-<!-- ` -->
+
+
+
+
+all_df_land$land <-  factor(all_df_land$land)
+
+p4_3 <- ggplot(all_df_land , aes(x=land, y=mean)) +
+    geom_bar(position=position_dodge(), stat="identity",
+             colour="black", # Use black outlines,
+            # size=.3
+            ) +      # Thinner lines
+    geom_errorbar(aes(ymin=mean-se, ymax=mean+se),
+                  size=.3,    # Thinner lines
+                  width=.2,
+                  position=position_dodge(.9)) +
+  facet_wrap(~cat, scales = "free_y")+
+  labs(y = "Mean", 
+       caption= "Source: Uttar Pradesh Political Families data set")+
+  #theme(aspect.ratio=3/2)+
+
+    # scale_fill_hue(name="Supplement type", # Legend label, use darker colors
+    #                breaks=c("OJ", "VC"),
+    #                labels=c("Orange juice", "Ascorbic acid")) ++
+ scale_x_discrete(labels = c("Very \nsmall", "Small", "Medium", "Large", "Very \nlarge"))+
+    theme_bw()+
+  theme(axis.title.x = element_blank(),
+        text = element_text("serif"))
+
+
+p4_3
+  ggsave("D:/cpr/thesis/figures/fig_4_3.png", p4_3,width = 5, height =3, dpi = 300, units ="in" )
+
+
+
+```
+
 
 
 
@@ -1813,12 +1880,28 @@ fam_ls_w <- ggplot(fam_span2)+
   geom_density(aes(x=fam_life, y = ..density..),size = 1, color = 'black')+
   geom_vline(aes(xintercept = median(fam_span2$fam_life), color = "median"))+
   geom_vline(aes(xintercept = mean(fam_span2$fam_life), color = "mean",show.legend  =TRUE))+
-   scale_color_manual(name = "stats", values = c(median = "red", mean = "blue"))+
+   scale_color_manual(name = "stats", values = c(median = "grey50", mean = "grey0"))+
  scale_y_continuous(limits = c(0,.07),
   labels = scales::number_format(accuracy = 0.01))+
- theme_bw()+
+ theme_bw()+ theme(text = element_text(family = "serif"))+
   
-  labs(subtitle = "Life span of families", x= "Years", y = "Density")
+  labs(subtitle = "Families", x= "Years", y = "Density")+
+   theme(
+        
+        text = element_text(color = "gray20",family = "serif"),
+        legend.title = element_blank(),
+       
+        axis.title= element_blank(),
+       
+        axis.ticks.y = element_blank(),
+       
+        axis.line.y = element_blank(),
+        
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        legend.position = "bottom"
+          
+  )
 
 
 
@@ -1891,15 +1974,35 @@ non_fam_span <- inner_join(dyn_non_fam_w , non_fam_life, by = "family_id")
 
 ind_ls <-  ggplot(non_fam_span )+
   geom_density(aes(x=non_fam_life, y = ..density..),size = 1, color = 'black')+
-   labs(subtitle = "Life span of non-families \n who have atleast one", x= "Years", y = "")+
+   labs(subtitle = "Non-Families", x= "Years", y = "",
+        
+)+
   xlim(0,50)+
   ylim(.0,.07)+
   geom_vline(aes(xintercept = median(non_fam_span $non_fam_life), color = "median"))+
   geom_vline(aes(xintercept = mean(non_fam_span $non_fam_life), color = "mean",show.legend  =TRUE))+
-   scale_color_manual(name = "stats", values = c(median = "red", mean = "blue"))+
+   scale_color_manual(name = "stats", values = c(median = "grey50", mean = "grey0"))+
   scale_y_continuous(limits = c(0,.07),
   labels = scales::number_format(accuracy = 0.01))+
- theme_bw()
+ theme_bw()+
+   theme(
+        
+        text = element_text(color = "gray20",family = "serif"),
+        legend.title = element_blank(),
+       
+        axis.title= element_blank(),
+       
+        axis.ticks.y = element_blank(),
+       
+        axis.line.y = element_blank(),
+        
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        legend.position = "bottom",
+        axis.text.y=element_text(colour="white")
+          
+  )
+  
 
 ## years to second member entry
 
@@ -1907,28 +2010,24 @@ ind_ls <-  ggplot(non_fam_span )+
 fam_life_3 <- inner_join(fam_life, fam_life_2, by = "family_id") %>% mutate(diff = fam_life- fam_life2)
 
 
-
-# year_entry <- ggplot(fam_life_3, aes(diff))+
-#   geom_density(size = 1, color = 'black')+
-#   labs(subtitle = "Years to second member entry", x = "Years",y = "Density")+
-#   #xlim(0,45)
-#   ylim(.0,.07)+
-#   geom_vline(aes(xintercept =  median(fam_life_3$diff), color = "median"))+
-#   geom_vline(aes(xintercept =  mean(fam_life_3$diff), color = "mean",show.legend  =TRUE))+
-#    scale_color_manual(name = "statistics", values = c(median = "red", mean = "blue"))+
-#   scale_y_continuous(limits = c(0,.07),
-#   labels = scales::number_format(accuracy = 0.01))+
-#  theme_bw()
-
 library(ggpubr)
 # 
 # ggpubr::ggarrange(fam_ls_w, ind_ls, year_entry,fam_ls_wo ,common.legend = TRUE, legend = "bottom", align = "hv")
 # 
 
-ggpubr::ggarrange(fam_ls_w, ind_ls ,common.legend = TRUE, legend = "bottom", align = "hv")
+p3_5 <- ggpubr::ggarrange(fam_ls_w, ind_ls ,common.legend = TRUE, legend = "bottom", align = "hv")
 
+p3_5
 
+  ggsave("D:/cpr/thesis/figures/fig_3_5.png", p3_5,width = 5, height =3, dpi = 300, units ="in" )
 # inner_join(dyn_ae_ge, fam_life_3, by = "family_id") %>% write.csv("D:/cpr/UP/up-dynasties/dyn_other_data/fam_life_test.csv")
+
+
+```
+
+
+```{r}
+rmarkdown::pandoc_convert("D:/cpr/thesis/chaps_word/Chapter4_Aug2.docx", to = "latex",output = "D:/cpr/thesis/chaps_word/Chapter4_Aug2_c1.tex", options = c("-V geometry:margin=.5in"))
 
 
 ```
@@ -1936,19 +2035,52 @@ ggpubr::ggarrange(fam_ls_w, ind_ls ,common.legend = TRUE, legend = "bottom", ali
 ------------------------------------------------------------------------
 
 ```{r}
-ggplot(dyn_entry_exit, aes(entry_years))+
+p3_4 <- ggplot(dyn_entry_exit, aes(entry_years))+
   geom_density(size = 1, color = 'black')+
-  labs(subtitle = "Years to second member entry", x = "Years",y = "Density")+
+  labs( x = "Years",y = "Density",
+        caption= "Source: Uttar Pradesh Political Families data set"
+)+
   #xlim(0,45)
   ylim(.0,.25)+
   geom_vline(aes(xintercept =  median(dyn_entry_exit$entry_years), color = "median"))+
   geom_vline(aes(xintercept =  mean(dyn_entry_exit$entry_years), color = "mean",show.legend  =TRUE))+
    scale_color_manual(name = "stats", values = c(median = "red", mean = "blue"))+
-  #scale_y_continuous(limits = c(0,.07),
-  #labels = scales::number_format(accuracy = 0.01))+
- theme_bw()
+   scale_color_manual(name = "stats", values = c(median = "grey50", mean = "grey0"))+
+  scale_y_continuous(
+  labels = scales::number_format(accuracy = 0.01))+
+ theme_bw()+
+   theme(
+        
+        text = element_text(color = "gray20",family = "serif"),
+        legend.title = element_blank(),
+       
+        axis.title= element_blank(),
+       
+        axis.ticks.y = element_blank(),
+       
+        axis.line.y = element_blank(),
+        
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        legend.position ="bottom"
+  )
+  
+
+p3_4
+  ggsave("D:/cpr/thesis/figures/fig_3_4.png", p3_4,width = 5, height =3, dpi = 300, units ="in" )
+```
+
+
+```{r}
+dyn_ae_ge_fam <- inner_join(dyn_ae_ge_fam, first_member, by = "family_id")
  
- dyn_ae_ge_fam <- inner_join(dyn_ae_ge_fam, first_member, by = "family_id")
+ # group_by(year) %>% 
+ #   mutate(sum = sum(count),
+ #          prop = count/sum,
+ #          p_square = prop* prop) %>% 
+ #   group_by(year) %>% 
+ #   summarise(sum_square = sum(p_square),
+ #             enop = 1/sum_square)
 
 # dyn_ae_ge_fam %>% filter(dyn_cum_2 ==1
 #                          ) %>% group_by(family_id)%>% mutate(dyn_year= min(year))  %>%filter(year==dyn_year) %>% group_by(family_id) %>% mutate(same_entry = ifelse(any(relative_id ==first_member),1,0)) %>%  select(family_id,year, dyn_year, same_entry) %>% 
@@ -2000,8 +2132,10 @@ labels <-  c( "Political diversification", "Economic diversification", "Land own
 
 lines <- list (c("Caste control", "Yes"), c ("Decade control" ,"Yes"))
 
-stargazer(fit.life, type="html", keep = keep,order = order, covariate.labels = labels,
-          add.lines = lines, dep.var.labels = "Family life span")
+stargazer(fit.life,  keep = keep,order = order, covariate.labels = labels,
+          add.lines = lines, dep.var.labels = "Family life span", type = "latex",font.size = "small",omit = drop,omit.stat=c("f", "ser"),align=TRUE,  no.space=TRUE,single.row = TRUE)
+
+
 
 # 
 # fam_df %>% group_by(success_cat) %>% summarise(median(n_elections_w), ) %>% 
@@ -2061,14 +2195,18 @@ all <-fam_df%>% group_by(caste_2) %>% summarise(count = n(), prop = count/322 )%
 
 all_sep <- rbindlist(list(all, sep), use.names = TRUE)
 
-  ggplot(all_sep, aes(factor(success_cat), prop, fill = caste_2,label = ifelse(prop>.04,round(prop,2),"")))+
+  p4_1 <- ggplot(all_sep, aes(factor(success_cat), prop, fill = caste_2,label = ifelse(prop>.04,round(prop,2),"")))+
    geom_bar(stat="identity", position = "stack")+
     geom_text(size = 2.5, position = position_stack(vjust = 0.5))+ 
-  colorspace::scale_fill_discrete_qualitative(palette= "dark3" )+
+    scale_fill_grey()+
+  #colorspace::scale_fill_discrete_qualitative(palette= "dark3" )+
   #coord_fixed(ratio =5)+
     theme_minimal()+
       
-    labs(title = "Caste composition",x = "", y = "Proportion", fill = "") +
+    labs(#title = "Caste composition",
+      caption= "Source: Uttar Pradesh Political Families data set",
+
+      x = "", y = "Proportion", fill = "") +
     #theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
   theme(plot.background = element_blank(),
         axis.line.x = element_line(),
@@ -2078,8 +2216,12 @@ all_sep <- rbindlist(list(all, sep), use.names = TRUE)
         axis.title = element_blank(), 
         #legend.position = "bottom",
         axis.text.x = element_text(size = 10),
-        text= element_text(family = "serif")
+        text= element_text(family = "serif"), 
+        legend.position = "top"
   )
+  
+  p4_1
+  ggsave("D:/cpr/thesis/figures/fig_4_1.png", p4_1,width = 5, height =4, dpi = 300, units ="in" )
 ```
 
 
@@ -2132,6 +2274,81 @@ dyn_ae_ge_fam_uniq %>% filter(caste_groups!= "NA" & caste_groups!= "Others") %>%
 ```
 
 ### Land
+
+```{r}
+# 
+# dyn_ae_ge_uniq$land <- ifelse(is.na(dyn_ae_ge_uniq$land_cat),0,dyn_ae_ge_uniq$land)
+# 
+# dyn_ae_ge_uniq$land_cat <- cut(dyn_ae_ge_uniq$land, breaks = c(0,1,100,250,500,Inf), include.lowest =TRUE, labels = c( "very small", "small", "medium", "large", "very large"))
+#    # 
+#    # land_lev <- c("1"=  "very small","2"=  "small", "3"= "medium", "4"= "large","5"= "very large")
+# 
+# 
+# 
+# 
+# # dyn_ae_ge_uniq$land_cat <-factor(land_lev[as.character(dyn_ae_ge_uniq$land_cat)], levels = land_lev)
+# 
+# p3_7 <- dyn_ae_ge_uniq %>% group_by(dyn_tot_2, land_cat) %>%
+#   summarise(count = n()) %>% 
+#   group_by(dyn_tot_2) %>% 
+#   mutate(sum =sum(count),
+#          prop= count/sum) %>% 
+#   ggplot(aes(factor(dyn_tot_2), prop,, fill = land_cat, label = ifelse(prop>.03,round(prop,2),"")))+
+#   geom_bar(position= "stack", stat = "identity")+
+#   geom_text(size = 2.5, position = position_stack(vjust = 0.5))+
+#   coord_fixed(ratio =2)+
+#   theme_minimal()+
+#   scale_fill_grey()+
+#   labs(y = "Proportion",
+#        caption= "Source: Uttar Pradesh Political Families data set")+
+#   scale_x_discrete(labels = c("Non-Family", "Family"))+
+#     theme(plot.background = element_blank(),
+#         axis.line.x = element_line(),
+#         panel.grid.major = element_blank(),
+#         panel.grid.minor = element_blank(),
+#         axis.text.y = element_blank(),
+#         axis.title.x = element_blank(),
+#         legend.position = "top",
+#         legend.title = element_blank(),
+#         text = element_text(family= "serif")
+#        )
+# 
+#   ggsave("D:/cpr/thesis/figures/fig_3_7.png", p3_7,width = 5, height =3.5, dpi = 300, units ="in" )
+```
+
+
+```{r}
+
+
+  p3_7 <- dyn_ae_ge_uniq %>% group_by(dyn_tot_2, land_cat) %>%
+  summarise(count = n()) %>% 
+  group_by(dyn_tot_2) %>% 
+  mutate(sum =sum(count),
+         prop= count/sum) %>% 
+  ggplot(aes(factor(dyn_tot_2), prop,, fill = land_cat, label = ifelse(prop>.03,round(prop,2),"")))+
+  geom_bar(position= "stack", stat = "identity")+
+  geom_text(size = 2.5, position = position_stack(vjust = 0.5))+
+  coord_fixed(ratio =2)+
+  theme_minimal()+
+  scale_fill_grey()+
+  labs(y = "Proportion",
+       caption= "Source: Uttar Pradesh Political Families data set")+
+  scale_x_discrete(labels = c("Non-Family", "Family"))+
+    theme(plot.background = element_blank(),
+        axis.line.x = element_line(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.y = element_blank(),
+        axis.title.x = element_blank(),
+        legend.position = "top",
+        legend.title = element_blank(),
+        text = element_text(family= "serif")
+       )
+
+  ggsave("D:/cpr/thesis/figures/fig_3_7.png", p3_7,width = 5, height =3.5, dpi = 300, units ="in" )
+
+```
+
 
 ```{r}
 dyn_ae_ge_fam_uniq$caste_groups <- factor(dyn_ae_ge_fam_uniq$caste_groups, levels = c("Upper Caste","Yadav","Non-Yadav OBC","Dalit" , "Muslim"  ,"Others" ))
@@ -2426,108 +2643,172 @@ adr_non_fam$year1 <- factor(adr_non_fam$year, levels = c(2012,2017, 2014, 2019))
 # 
 # 
 # ae/ge
-ggplot(adr_non_fam %>% filter(year!= 2009), aes(success_cat, log(total_assets)))+
+p4_8 <- ggplot(adr_non_fam %>% filter(year!= 2009), aes(success_cat, log(total_assets)))+
   geom_boxplot(outlier.shape = NA)+
   facet_grid(~year)+
   theme_light()+
+  labs(caption= "Source: Uttar Pradesh Political Families data set",
+        y = "Total assets (log)")+
   theme(
     axis.title.x = element_blank(),
-    axis.text.x = element_text(angle= 90),
-    text = element_text(family = "serif")
-  )+
+    axis.text.x = element_text(angle= 90, vjust = .5),
+    text = element_text(family = "serif"))+
   ylim(c(14,18))+
-  labs(title = "Total assets wrt family class",
-       y = "Total assets (log)")
+  scale_x_discrete(labels = c("Non-\nFamilies",
+                              "Rising",
+                              "Stable"))
 
+p4_8
 
+ ggsave("D:/cpr/thesis/figures/fig_4_8.png", p4_8,width = 5, height =4, dpi = 300, units ="in" )
    
 ```
 
 ## assets v/s div
 
+
+<!-- ```{r} -->
+<!-- library(tidyverse) -->
+
+
+
+
+
+<!-- adr_fam_lim <- adr_fam %>% filter(election_type== "AE" & success_cat!= "Declining")  -->
+
+
+<!--         adr_fam_lim <-  adr_fam_lim %>% group_by(family_id) %>% -->
+<!--           mutate(total_assets = mean(log(total_assets), na.rm = TRUE)) %>% filter(!is.infinite(total_assets)) %>%  -->
+<!--           distinct(family_id, .keep_all = TRUE) -->
+
+<!--         adr_fam_lim <-  adr_fam_lim %>% -->
+<!--           mutate(assets_quartile = case_when( -->
+<!--           total_assets< 16.30156 ~1, -->
+<!--           total_assets<  17.01154~2, -->
+<!--           total_assets<17.80686~3, -->
+<!--           total_assets>= 17.80686~4, -->
+<!--           TRUE ~0)) -->
+<!--     #      -->
+<!--     #     quantile(adr_fam_lim$total_assets, probs = c(0.25.50, .75)) -->
+<!--     # quantile(adr_fam_lim$total_assets, prop = c(.25, .50,.75)) -->
+
+<!--         lim_df <- adr_fam_lim %>% select(family_id,success_cat, assets_quartile, econ_div, pol_div) -->
+
+
+
+<!-- df_pol<- Rmisc::summarySE(lim_df , measurevar = "pol_div", groupvars = c("assets_quartile")) %>% mutate(fam = "Stable")  -->
+
+
+
+<!-- df_pol$assets_quartile <-  factor(df_pol$assets_quartile) -->
+
+<!-- pol_fam1 <-  ggplot(df_pol %>% filter(assets_quartile != "Others") , aes(x=assets_quartile , y=pol_div)) +  -->
+
+<!--     geom_bar(position=position_dodge(), stat="identity", -->
+<!--              colour="black", # Use black outlines, -->
+<!--             # size=.3 -->
+<!--             ) +      # Thinner lines -->
+<!--     geom_errorbar(aes(ymin=pol_div-se, ymax=pol_div+se), -->
+<!--                   size=.3,    # Thinner lines -->
+<!--                   width=.2, -->
+<!--                   position=position_dodge(.9)) + -->
+<!--     xlab("Asset quartiles") + -->
+<!--     ylab("Mean") + -->
+<!--   theme_bw()+ -->
+<!--   ggtitle("Pol diversification: all families")+ -->
+
+<!--     theme(text = element_text(family = "serif")) -->
+
+
+
+<!-- ggplot(df_pol %>% filter(assets_quartile != "Others") , aes(x=assets_quartile , y=pol_div)) +  -->
+
+<!--     geom_bar(position=position_dodge(), stat="identity", -->
+<!--              colour="black", # Use black outlines, -->
+<!--             # size=.3 -->
+<!--             ) +      # Thinner lines -->
+<!--     geom_errorbar(aes(ymin=pol_div-se, ymax=pol_div+se), -->
+<!--                   size=.3,    # Thinner lines -->
+<!--                   width=.2, -->
+<!--                   position=position_dodge(.9)) + -->
+<!--     xlab("Asset quartiles") + -->
+<!--     ylab("Mean") + -->
+<!--   theme_bw()+ -->
+<!--   ggtitle("Pol diversification: all families")+ -->
+
+<!--     theme(text = element_text(family = "serif")) -->
+
+<!-- ``` -->
+
+
 ```{r}
-library(tidyverse)
+## al entitis mean bar
 
- 
- 
- 
-
-adr_fam_lim <- adr_fam %>% filter(election_type== "AE" & success_cat!= "Declining") 
-
-
-        adr_fam_lim <-  adr_fam_lim %>% group_by(family_id) %>%
-          mutate(total_assets = mean(log(total_assets), na.rm = TRUE)) %>% filter(!is.infinite(total_assets)) %>% 
-          distinct(family_id, .keep_all = TRUE)
-  
-        adr_fam_lim <-  adr_fam_lim %>%
-          mutate(assets_quartile = case_when(
-          total_assets< 16.30156 ~1,
-          total_assets<  17.01154~2,
-          total_assets<17.80686~3,
-          total_assets>= 17.80686~4,
-          TRUE ~0))
-    #     
-    #     quantile(adr_fam_lim$total_assets, probs = c(0.25.50, .75))
-    # quantile(adr_fam_lim$total_assets, prop = c(.25, .50,.75))
-
-        lim_df <- adr_fam_lim %>% select(family_id,success_cat, assets_quartile, econ_div, pol_div)
-        
-         
-
-df_pol<- Rmisc::summarySE(lim_df , measurevar = "pol_div", groupvars = c("assets_quartile")) %>% mutate(fam = "Stable") 
-
-
-
-df_pol$assets_quartile <-  factor(df_pol$assets_quartile)
-
-pol_fam1 <-  ggplot(df_pol %>% filter(assets_quartile != "Others") , aes(x=assets_quartile , y=pol_div)) + 
-
+# std <- function(x) sd(x)/sqrt(length(x))
+# 
+# # 
+# # dyn_ae_ge_uniq1$success_cat <- replace_na(as.character(dyn_ae_ge_uniq1$success_cat) , "Non-families")
+# 
+# econ_df4 <- dyn_ae_ge_uniq1 %>% group_by(success_cat)%>% summarise(mean = mean(econ_div),
+#                                        se = std(econ_div))  %>% mutate(cat = "Economic diversification ") %>% filter(success_cat != "Declining")
+# 
+# pol_df4 <- dyn_ae_ge_uniq1 %>% group_by(success_cat)%>% summarise(mean = mean(minister),
+#                                        se = std(minister))  %>% mutate(cat = "Political diversification ") %>% filter(success_cat != "Declining")
+# 
+# # mean_df$success_cat <- factor(mean_df$success_cat, levels = c("Non_fam", "Rising", "Stable"))
+# all_df4 <-   rbindlist(list(pol_df4, econ_df4), use.names = FALSE)
+# 
+# 
+p4_9 <- ggplot(all_df4, aes(x=success_cat, y=mean)) +
     geom_bar(position=position_dodge(), stat="identity",
              colour="black", # Use black outlines,
-            # size=.3
-            ) +      # Thinner lines
-    geom_errorbar(aes(ymin=pol_div-se, ymax=pol_div+se),
+             size=.3) +      # Thinner lines
+    geom_errorbar(aes(ymin=mean-se, ymax=mean+se),
                   size=.3,    # Thinner lines
                   width=.2,
                   position=position_dodge(.9)) +
-    xlab("Asset quartiles") +
-    ylab("Mean") +
+  facet_wrap(~cat, scales = "free_y")+
+  labs(y = "Mean",
+       caption= "Source: Uttar Pradesh Political Families data set"
+ )+
+  scale_x_discrete(labels = c("Non-Families",
+                              "Rising",
+                              "Stable"))+
   theme_bw()+
-  ggtitle("Pol diversification: all families")+
-
-    theme(text = element_text(family = "serif"))
+  theme(text = element_text(family = "serif"),
+        axis.title.x =element_blank())
+  ggsave("D:/cpr/thesis/figures/fig_4_9.png", p4_9,width =5 , height =3.5, dpi = 300, units ="in" )
 
 ```
 
-
 ```{r}
-        
-
-df_econ <- Rmisc::summarySE(lim_df, measurevar = "econ_div", groupvars = c("assets_quartile")) %>% mutate(fam = "Stable") 
-
+#         
+# df_econ <- Rmisc::summarySE(lim_df, measurevar = "econ_div", groupvars = c("assets_quartile")) %>% mutate(fam = "Stable") 
 
 
-df_econ$assets_quartile <-  factor(df_econ$assets_quartile)
 
- econ_fam1 <- ggplot(df_econ %>% filter(assets_quartile != "Others") , aes(x=assets_quartile , y=econ_div)) + 
-    geom_bar(position=position_dodge(), stat="identity",
-             colour="black", # Use black outlines,
-            # size=.3
-            ) +      # Thinner lines
-    geom_errorbar(aes(ymin=econ_div-se, ymax=econ_div+se),
-                  size=.3,    # Thinner lines
-                  width=.2,
-                  position=position_dodge(.9)) +
-
-    xlab("Asset quartiles") +
-    ylab("Mean") +
-  theme_bw()+
-  ggtitle("Economic diversification: all families")+
-
-    theme(text = element_text(family = "serif"))
-
- 
- pol_fam1+econ_fam1
+# 
+# df_econ$assets_quartile <-  factor(df_econ$assets_quartile)
+# 
+#  econ_fam1 <- ggplot(df_econ %>% filter(assets_quartile != "Others") , aes(x=assets_quartile , y=econ_div)) + 
+#     geom_bar(position=position_dodge(), stat="identity",
+#              colour="black", # Use black outlines,
+#             # size=.3
+#             ) +      # Thinner lines
+#     geom_errorbar(aes(ymin=econ_div-se, ymax=econ_div+se),
+#                   size=.3,    # Thinner lines
+#                   width=.2,
+#                   position=position_dodge(.9)) +
+# 
+#     xlab("Asset quartiles") +
+#     ylab("Mean") +
+#   theme_bw()+
+#   ggtitle("Economic diversification: all families")+
+# 
+#     theme(text = element_text(family = "serif"))
+# 
+#  
+#  pol_fam1+econ_fam1
 ```
 
 ## movable+ immovable -  stacked
@@ -2798,11 +3079,14 @@ labels <-  c( "Political diversification", "Economic diversification", "Land own
                  c("Decadecontrol", "Yes","Yes","Yes"))
  
 
-stargazer(fit.declining,  type="html",
+stargazer(fit.declining,  
           keep = keep, order = order,
           add.lines = lines,
           covariate.labels = labels,
-          dep.var.labels = c("Family decline"))
+          dep.var.labels = c("Family decline"),
+          type = "latex",font.size = "small",omit = drop,omit.stat=c("f", "ser"),align=TRUE,  no.space=TRUE,single.row = TRUE)
+
+
 
 ```
 
@@ -3842,16 +4126,16 @@ arrange_ggsurvplots(splots1, print = TRUE,
 splots2 <- list()
 
 splots2[[1]] <- ggsurvplot(survfit(Surv(fam_life2,dead) ~1 , data = subset(fam_df %>% filter(success_cat!= "Rising")) ), 
-           title = "Survival of families",
+           
      xlab = "Years", 
      ylab = "Overall survival probability",
-     risk.table = TRUE,
+     risk.table = FALSE,
       risk.table.col = "strata",
+     palette = "grey",
 ggtheme = theme_light(), # customize plot and risk table with a theme.
           risk.table.y.text.col = T,# colour risk table text annotations.
           risk.table.height = 0.3, # the height of the risk table
           risk.table.y.text = FALSE
-           
 
 )
 
@@ -3860,12 +4144,12 @@ ggtheme = theme_light(), # customize plot and risk table with a theme.
  
  
 splots2[[2]] <-  ggsurvplot(survfit(Surv(fam_life2,dead) ~decade_after ,data = subset(fam_df %>% filter(success_cat!= "Rising")) ),  
-           title = "",
-           subtitle = "",
+           
      xlab = "Years", 
      ylab = "",
-     risk.table = TRUE,
+     risk.table = FALSE,
       risk.table.col = "strata",
+     palette = "grey",
 ggtheme = theme_light(), # customize plot and risk table with a theme.
           risk.table.y.text.col = T,# colour risk table text annotations.
           risk.table.height = 0.3, # the height of the risk table
@@ -3878,10 +4162,11 @@ ggtheme = theme_light(), # customize plot and risk table with a theme.
  
  
  
-arrange_ggsurvplots(splots2, print = TRUE,
-  ncol = 2, nrow = 1, risk.table.height = 0.25)
+p4_6 <- arrange_ggsurvplots(splots2, print = TRUE,
+  ncol = 2, nrow = 1)
 
- 
+   
+  ggsave("D:/cpr/thesis/figures/fig_4_6.png", p4_6,width = 6, height =3.5, dpi = 300, units ="in" )
 ```
 
 ### Econ diversification grid
@@ -4073,10 +4358,9 @@ labels <-  c( "Political diversification", "Economic diversification", "Land own
 lines <- list (c("Caste control", "Yes"))
 
 
-stargazer(fit.surv, type="html", keep = keep,order = order, covariate.labels = labels,
-          add.lines = lines,dep.var.labels = "Family decline",title = "Coax hazard regression")
-
-
+stargazer(fit.surv, type="latex", keep = keep,order = order, covariate.labels = labels,
+          add.lines = lines,dep.var.labels = "Family decline",title = "Coax hazard regression",align=TRUE,  no.space=TRUE,omit.stat=c("f", "ser"),
+font.size = "small",column.sep.width = "-15pt")
 
 
 
@@ -4085,6 +4369,7 @@ stargazer(fit.surv, type="html", keep = keep,order = order, covariate.labels = l
 
 
 ```
+
 
 ```{r}
 # fit.surv1 <- coxph(Surv(fam_diff_decade, dead) ~ linkage +minister + industry + land + edu + caste_uc + caste_yadav + caste_non_yadav_obc+caste_dalit+caste_muslim + factor(min_decade) , data = fam_df1)
@@ -4232,15 +4517,86 @@ dead.surv4 <- coxph(Surv(fam_life, dead_20) ~  pol_div +minister + ind_edu + lan
 
  lines <-  list (c("Cut-off years","2009","2014","2004","1999"),c("Caste control", "Yes","Yes", "Yes", "Yes"), c("Decade control","Yes","Yes", "Yes", "Yes"))
  
-stargazer(dead.surv1,dead.surv2, dead.surv3, dead.surv4,type = "html", keep = keep,order = order, covariate.labels = labels,
+stargazer(dead.surv1,dead.surv2, dead.surv3, dead.surv4,type = "latex", keep = keep,order = order, covariate.labels = labels,
           add.lines = lines,column.separate = c(1:3),
-          header = FALSE,title = "Coax hazard regression", dep.var.labels.include = FALSE, dep.var.caption = "DV: Family decline")
+          header = FALSE,title = "Coax hazard regression", dep.var.labels.include = FALSE, dep.var.caption = "DV: Family decline",
+          align=TRUE, keep.stat= "n" ,no.space=TRUE, omit = drop, 
+ font.size = "small",column.sep.width = "-15pt")
 
-
+# omit.stat=c("f", "ser","LL","wald","rsq" ,"ll","lr","max.rsq"),
+# stargazer(fit.1,fit.2,fit.3, fit.4,dep.var.labels = c("Political Family"),title="Regression Results - AE-GE All ",order= order, covariate.labels = cov_labels,type = "text",
+# align=TRUE,  no.space=TRUE,add.lines=addlines, omit = drop, omit.stat=c("f", "ser"),
+# font.size = "small",column.sep.width = "-40pt")
 
 
 ```
 
+```{r}
+
+
+ fam_df <- fam_df %>% mutate(
+                
+                dead_10 = ifelse(max_year>2009,1,0),
+                dead_5 = ifelse(max_year>2014,1,0),
+                dead_15 = ifelse(max_year>2004,1,0),
+                dead_20 = ifelse(max_year>1999,1,0)
+ )
+ 
+
+
+dead.surv1 <- felm(dead_10 ~  pol_div +minister + ind_edu + land + entry_years +n_elections_w + caste_uc + caste_yadav + caste_non_yadav_obc+caste_dalit+caste_muslim + factor(decade)  , data = subset(fam_df %>% filter(min_fam_year<2009 &success_cat!= "Rising")))
+
+
+
+dead.surv2 <- felm(dead_5  ~  pol_div +minister + ind_edu + land + entry_years +n_elections_w +  caste_uc + caste_yadav + caste_non_yadav_obc+caste_dalit+caste_muslim  + factor(decade) ,  data = subset(fam_df %>% filter(min_fam_year<2014)))
+
+dead.surv3 <-felm(dead_15 ~  pol_div +minister + ind_edu + land + entry_years +n_elections_w+ caste_uc + caste_yadav + caste_non_yadav_obc+caste_dalit+caste_muslim + factor(decade)  ,data = subset(fam_df %>% filter(min_fam_year<2004 &success_cat!= "Rising")))
+
+
+dead.surv4 <- felm(dead_20 ~  pol_div +minister + ind_edu + land + entry_years +n_elections_w+ caste_uc + caste_yadav + caste_non_yadav_obc+caste_dalit+caste_muslim + factor(decade)  ,data = subset(fam_df %>% filter(min_fam_year<1999 &success_cat!= "Rising")))
+
+
+ lines <-  list (c("Cut-off years","2009","2014","2004","1999"),c("Caste control", "Yes","Yes", "Yes", "Yes"), c("Decade control","Yes","Yes", "Yes", "Yes"))
+ 
+stargazer(dead.surv1,dead.surv2, dead.surv3, type = "latex", keep = keep,order = order, covariate.labels = labels,
+          add.lines = lines,column.separate = c(1:3),
+          header = FALSE,title = "Decline of Political Families: An OLS model", dep.var.labels.include = FALSE, dep.var.caption = "DV: Family decline",
+          align=TRUE, keep.stat= "n" ,no.space=TRUE,
+ font.size = "small")
+
+stargazer(dead.surv1,dead.surv2, dead.surv3, dead.surv4,type = "html", keep = keep,order = order, covariate.labels = labels,
+          add.lines = lines,column.separate = c(1:3),
+          header = FALSE,title = "OLSregression", dep.var.labels.include = FALSE, dep.var.caption = "DV: Family decline",
+             align=TRUE, keep.stat= "n" ,no.space=TRUE)
+```
+
+
+
+```{r}
+##real -ols
+
+fam_df$declining<-ifelse(fam_df$success_cat=="Declining", 1,0)
+
+fit.declining <- felm(declining~ pol_div +  ind_edu +  land + entry_years +n_elections_w +caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim + fam_decade, data = subset(fam_df %>% filter(success_cat!= "Rising")))
+
+keep <- c("pol_div","success_cat","ind_edu", "land", "entry_years"  ,"n_elections_w")
+
+order <- c("pol_div","success_cat","ind_edu",  "land")
+
+labels <-  c( "Political diversification", "Economic diversification", "Land ownership", "Years to second member entry","Elections won by founder")
+
+ lines <-  list (c("Caste control", "Yes","Yes","Yes"),
+                 c("Decadecontrol", "Yes","Yes","Yes"))
+ 
+
+stargazer(fit.declining,  
+          keep = keep, order = order,
+          add.lines = lines,
+          covariate.labels = labels,
+          dep.var.labels = c("Family decline"),
+          type = "latex",font.size = "small",omit = drop,omit.stat=c("f", "ser"),align=TRUE,  no.space=TRUE,single.row = TRUE)
+
+```
 
 <!-- # Survival analysis 01{.tabset} -->
 
@@ -4275,10 +4631,12 @@ life span variable in both plots are the ones that arecounted only after they eb
      ggtheme = theme_light(),
      subtitle = "Economic diversification",
      #title = "Survival of political families wrt economic diversification",
-     legend.labs = c("Low","High")
+     legend.labs = c("Low","High"),
+     palette = "grey"
      )
  
- 
+    
+
 
 
 ```
@@ -4300,7 +4658,8 @@ life span variable in both plots are the ones that arecounted only after they eb
      ggtheme = theme_light(),
      subtitle = " Political diversification",
      #title = "Survival of political families wrt economic diversification",
-   legend.labs = c("low",  "high")
+   legend.labs = c("low",  "high"),
+    palette = "grey"
   )
  
  ### decades
@@ -4310,13 +4669,11 @@ life span variable in both plots are the ones that arecounted only after they eb
  
    
   
-   pol_div_all$plot+ggind_edu_all$plot+
-    plot_annotation(
-    title = "Survival of political families"
-  )+
+ p4_7 <-   pol_div_all$plot+ggind_edu_all$plot+
+    
     plot_layout(guides = "collect") & theme(legend.position = "bottom")
    
-  
+    ggsave("D:/cpr/thesis/figures/fig_4_7.png", p4_7,width = 6, height =3.5, dpi = 300, units ="in" )
     
 ```
 

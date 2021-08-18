@@ -116,6 +116,11 @@ dyn_ae_ge <- dyn_ae_ge %>% mutate(level2 = ifelse(is.na(level2), election_type, 
 ```
 
 
+<!-- ```{r} -->
+<!-- rmarkdown::pandoc_convert("D:/cpr/thesis/chaps_word/Chapter7_Aug2.docx", to = "latex", output = "D:/cpr/thesis/chaps_word/Chapter7_Aug2.tex")  -->
+<!-- ``` -->
+
+
 ```{r}
 
 ### edu-ind fixing
@@ -660,7 +665,7 @@ fit.4 <- felm(dynast ~ caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit +
 
 order = c("minister","ind_edu",  "land", "n_elections_w","mem1_female")
 
- addlines <- list(c('Fixed effects', '' ,"Decade", "Sub-region","Deacde and Sub-region"), c("Clustered SE" ,"PC", "PC", "PC","PC"), c("Caste control", "Yes","Yes","Yes","Yes"))
+ addlines <- list(c('Fixed effects', '' ,"Decade", "Sub-region","Deacde  \\ Sub-reg"), c("Clustered SE" ,"PC", "PC", "PC","PC"), c("Caste control", "Yes","Yes","Yes","Yes"))
 
 #addlines <- list( c("Caste control", "Yes","Yes","Yes","Yes"))
 
@@ -679,8 +684,10 @@ cov_labels <- c( "Political Diversification <br>(only cabinet)", "Economic diver
 stargazer(fit.1,fit.2,fit.3, fit.4,dep.var.labels = c("Political Family"),title="Regression Results - AE-GE All ",order= order, covariate.labels = cov_labels,type = "html",
 align=TRUE,  no.space=TRUE,add.lines=addlines, omit = drop)
 
-
-
+# 
+# stargazer(fit.1,fit.2,fit.3, fit.4,dep.var.labels = c("Political Family"),title="Regression Results - AE-GE All ",order= order, covariate.labels = cov_labels,type = "text",
+# align=TRUE,  no.space=TRUE,add.lines=addlines, omit = drop, omit.stat=c("f", "ser"),
+# font.size = "small",column.sep.width = "-40pt")
 
 
 
@@ -1730,7 +1737,7 @@ fit.4 <- felm(dynast ~  log(assets)  +  serious_crime+turncoat+caste_uc +caste_o
 
 order = c("minister","industry",  "land", "edu","total_assets","serious_crime",     "n_elections_w","mem1_female", "turncoat","incumbent","winner")
 
-addlines <- list(c('Fixed effects', '' ,"Year", "Sub-region","Year and Sub-region"), c("Clustered SE" ,"PC","PC","PC","PC"), c("Caste control", "Yes","Yes","Yes","Yes"))
+addlines <- list(c('Fixed effects', '' ,"Year", "Sub-region","Both"), c("Clustered SE" ,"PC","PC","PC","PC"), c("Caste control", "Yes","Yes","Yes","Yes"))
 
 cov_labels <- c( "Minister", "Economic diversification", "Land ownership", "Educational inst. ownership ", "Total assets (log)","Serious crime","Elections won by first member","First member - female", "Turncoat","Incumbent")
 
@@ -1751,6 +1758,11 @@ align=TRUE,  no.space=TRUE,add.lines=addlines, omit = drop)
 # 
 # stargazer(fit.1, type = "html")
 
+
+
+stargazer(fit.1,fit.2, fit.3,fit.4,dep.var.labels = c("Political Family"),title="Regression Results - AE-GE 09:19", type = "latex",
+align=TRUE,  no.space=TRUE,add.lines=addlines, omit = drop,omit.stat=c("f", "ser"),
+font.size = "small",column.sep.width = "-15pt", covariate.labels =  c("Assets (log)", "Serious crime", "Turncoat"))
 
 
 ```

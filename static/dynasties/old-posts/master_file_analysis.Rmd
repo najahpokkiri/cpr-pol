@@ -276,11 +276,17 @@ pc_shp_fam$n_fam <- ifelse(is.na(pc_shp_fam$n_fam),0,pc_shp_fam$n_fam)
 
 library(cowplot)
 
-ggplot(pc_shp_fam)+
+p3_1 <- ggplot(pc_shp_fam)+
   geom_sf(aes(fill = n_fam))+
-  scale_fill_gradientn(colours = c("white", "lightcyan", "steelblue4"), values = c(0,0.1,1))+
-  theme_map()+
-  labs(title = "Families in constituencies", fill = "Number of families")
+  scale_fill_gradientn(colours = c("white", "grey50", "grey3"), values = c(0,0.1,1))+
+  theme_void()+
+  labs( fill = "Number of families",
+       caption= "Source: Uttar Pradesh Political Families data set")
+  
+
+p3_1
+
+ggsave("D:/cpr/thesis/figures/fig_3_1.png", p3_1,width = 5, height =3, dpi = 300, units ="in" ,)
 
 ```
 
@@ -386,20 +392,35 @@ ae_dyn <- ae_dyn %>% rowwise() %>%
 
 
 
-ggplot(ae_dyn, aes(x = factor(year), y=prop, group = 1))+
-  geom_line(size = 1, color = "steelblue")+
+
+
+p1_3 <- ggplot(ae_dyn, aes(x = factor(year), y=prop, group = 1))+
+  
     geom_point(size =2)+
+  geom_line(size = 1)+
+  theme_bw()+
 
-  labs(title = "Proportion of dynasties over years", x = "Year", y = "Proportion")+
+  labs( x = "Year", y = "Proportion",caption= "Source: Uttar Pradesh Political Families data set")+
   scale_y_continuous(limits = c(0,.25),breaks = c(0,.05,.10,.15,.20, .25))+
-  theme_minimal()+
-  # theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
   theme(
-
-        axis.line.x= element_line(color = "gray50", size = .5),
-        panel.grid.major.x  = element_blank(),
-        panel.grid.minor.x   = element_blank()
+        
+        legend.title = element_blank(),
+       
+        axis.ticks.y = element_blank(),
+       
+        axis.line.y = element_blank(),
+        
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        legend.position = "bottom"
+          
   )
+
+
+
+p1_3
+
+ggsave("D:/cpr/thesis/figures/fig_1_3.png", p1_3,width = 6, height =3, dpi = 300, units ="in" )
 
 
 ```
@@ -516,21 +537,32 @@ dyn_ae_ge %>% filter(position ==1& year != 1974) %>% group_by(election_id, conte
 
 ## seats contested by dynasts
 
+
+
+
 ```{r}
-
-dyn_ae_ge %>% filter(position ==1& year != 1974) %>% group_by(year, election_type, contest_type) %>% summarise(count = n()) %>% group_by(election_type, year) %>% mutate(sum = sum(count), prop = count/sum) %>%  filter(contest_type== "non-fam v/s non-fam") %>% select(election_type, year,contest_type, prop) %>% mutate(dyn_prop = (1-prop)*100) %>% 
-  ggplot(aes(year, dyn_prop, color = election_type))+
-  geom_line()+
+p1_4 <- dyn_ae_ge %>% filter(position ==1& year != 1974) %>% group_by(year, election_type, contest_type) %>% summarise(count = n()) %>% group_by(election_type, year) %>% mutate(sum = sum(count), prop = count/sum) %>%  filter(contest_type== "non-fam v/s non-fam") %>% select(election_type, year,contest_type, prop) %>% mutate(dyn_prop = (1-prop)*100) %>% 
+  ggplot(aes(year, dyn_prop))+
+  geom_line(aes(linetype=election_type))+
   geom_point()+
-  labs(title = "Seats contested by dynasts in each elections", y = "Percentage", x ="Year")+
+  #viridis::scale_color_viridis(discrete = TRUE)+
+
   ylim(0,60)+
-  theme_minimal_hgrid()+
-  theme(legend.position = "bottom")
+   labs(#title = "Seats contested by dynasts in each elections", 
+     y = "Percentage", x ="Year",
+        caption= "Source: Uttar Pradesh Political Families data set")+
+  theme_bw()+
+  theme(legend.position = "bottom",
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.x = element_blank(),
+        legend.title = element_blank()
+       
+        )
 
+p1_4
 
-
+ggsave("D:/cpr/thesis/figures/fig_1_4.png", p1_4,width = 6, height =3.5, dpi = 300, units ="in" )
 ```
-
 
 ---
 
@@ -1205,30 +1237,32 @@ edu_tab <- dyn_ae_ge_uniq %>%  filter(!is.na(edu)) %>% group_by(dyn_tot_2,edu) %
 
 edu_tab$dyn_tot_2 <- factor(edu_tab$dyn_tot_2, levels=c("1","0"))
 edu_tab$id=rep(c(1:2),3)
-ggplot(edu_tab , aes(x= reorder(as.factor(edu),-prop), prop , group = id )) +
+p3_9 <- ggplot(edu_tab , aes(x= reorder(as.factor(edu),-prop), prop , group = id )) +
   geom_bar(aes(fill = as.factor(dyn_tot_2)), position = "dodge", stat="identity")+
   theme_minimal()+
   scale_x_discrete(labels=(c(  "School" ,"College","Both")))+
-  scale_fill_discrete(labels = c("Family","Non - Family"))+
-  labs(title = "Ownership of educational institutions \n among families and non-families",
-       x = "", y = "Proportion") +
-  theme(legend.position = "top",plot.title = element_text(hjust = 0.5))+
-  theme(plot.title = element_text(hjust = 0.5, size = 18, family = "serif",
-                                  margin = margin(t = 0, r = 0, b = 20, l = 0)),
+  scale_fill_grey(labels = c("Family","Non - Family"))+
+  labs(#title = "Ownership of educational institutions \n among families and non-families",
+       x = "", y = "Proportion",
+       caption= "Source: Uttar Pradesh Political Families data set"
+) +
+  
+  theme(legend.position = "top",
         text = element_text(color = "gray20"),
         legend.title = element_blank(),
-        legend.text = element_text(size = 12),
-        axis.text = element_text(face = "italic", size = 14),
-        axis.title.x = element_text(vjust = -1, size = 16),
-        axis.title.y = element_text(vjust = 2, size =16),
+        # legend.text = element_text(size = 12),
+        # axis.text = element_text(face = "italic", size = 14),
+        # axis.title.x = element_text(vjust = -1, size = 16),
+        # axis.title.y = element_text(vjust = 2, size =16),
         axis.ticks.y = element_blank(),
         axis.line= element_line(color = "gray40", size = .5),
         axis.line.y = element_blank(),
-        panel.grid.major = element_line(color = "gray50", size = .5),
+        panel.grid.major.x = element_blank(),
         panel.grid.minor = element_blank(),
-        panel.grid.major.x = element_blank()
-
+      
   )
+
+ggsave("D:/cpr/thesis/figures/fig_3_9.png", p3_9,width = 5, height =3.5, dpi = 300, units ="in" )
 
 
 

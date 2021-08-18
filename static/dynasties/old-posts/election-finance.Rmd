@@ -209,7 +209,6 @@ ggplot(dyn_el_fin_all %>% filter(!is.na(fund_tot_given)& fund_tot_calc<4.1e+07),
   geom_boxplot()+
   facet_wrap(~year)+
   theme_bw()+
-  labs(y = "Total funds (In lakhs)", title = "Election finance - funds", x= "")
 
 
 ```
@@ -234,13 +233,18 @@ ggplot(dyn_el_fin_all %>% filter(!is.na(fund_tot_given)& fund_tot_calc<4.1e+07),
 
 names <- as_labeller(c(`fund_tot_lk` = "Total funds", `exp_tot_lk` = "Total expenditure"))
 
-dyn_el_fin_all %>% filter(!is.na(fund_tot_given)&fund_tot_lk < 400 & year ==2017) %>% select(dyn_cum_text, fund_tot_lk, exp_tot_lk) %>% data.table::melt(1:1) %>% 
+p2_2 <- dyn_el_fin_all %>% filter(!is.na(fund_tot_given)&fund_tot_lk < 400 & year ==2017) %>% select(dyn_cum_text, fund_tot_lk, exp_tot_lk) %>% data.table::melt(1:1) %>% 
   ggplot(aes(dyn_cum_text, value))+
   geom_boxplot()+
   facet_wrap(~variable,labeller = names)+
   theme_bw()+
-  labs(y = "Money (In lakhs)", title = "Election finance: AE 2017 UP", x= "")
-   
+  labs(y = "Money (In lakhs)", title = "Election finance : Assembly elections ", 
+       subtitle = "Uttar Pradesh - 2017", caption = "Source : Association for Democratic Reforms")+
+  theme(text = element_text("serif"),
+        axis.title.x = element_blank())
+  
+
+ggsave("D:/cpr/thesis/figures/fig_2_2.png", p2_2,width = 5, height =3, dpi = 300, units ="in" )
 
 ```
 

@@ -75,36 +75,44 @@ dyn_lb %>%filter(position ==1)%>% group_by(election_type) %>% summarise(count = 
 
 ```{r}
 
-cowplot::plot_grid(
-dyn_lb %>%filter(position ==1 & election_type %in% c("BP","ZP"))%>% group_by(election_type, year) %>% summarise(count = n(), dyn= sum(dyn_cum_4), pc= round(dyn/count*100)) %>% 
-  ggplot(aes(factor(year), pc, group=election_type, color = election_type))+
-  geom_line(size = 1)+
-  labs(title = "Dynasts in RLB", x= "Year", y = "Percentage")+
-  colorspace::scale_color_discrete_qualitative(palette = "dark3")+
-  geom_point()+
-  ylim(0,30)+
-  theme_minimal()+
-    theme(#legend.position = "bottom",
-        axis.line.x= element_line(color = "gray50", size = .5),
-        panel.grid.major.x  = element_blank(),
-        panel.grid.minor   = element_blank()
-        
-  ),
 
-dyn_lb %>%filter(position ==1 & election_type %!in% c("BP","ZP"))%>% group_by(election_type, year) %>% summarise(count = n(), dyn= sum(dyn_cum_4), pc= round(dyn/count*100)) %>% 
-  ggplot(aes(factor(year), pc, group=election_type, color = election_type))+
-  geom_line(size = 1)+
-  labs(title = "Dynasts in ULB", x= "Year", y = "Percentage")+
+
+
+cp1 <- dyn_lb %>%filter(position ==1 & election_type %in% c("BP","ZP"))%>% group_by(election_type, year) %>% summarise(count = n(), dyn= sum(dyn_cum_4), pc= dyn/count) %>% 
+  ggplot(aes(factor(year), pc, group=election_type))+
+ geom_line(size = 1, aes(linetype = election_type))+
+  labs(subtitle = "Rural local bodies", x= "", y = "Percentage")+
   colorspace::scale_color_discrete_qualitative(palette = "dark3")+
   geom_point()+
-  ylim(0,40)+
-  theme_minimal()+
+  ylim(0,.4)+
+  theme_bw()+
     theme(#legend.position = "bottom",
         axis.line.x= element_line(color = "gray50", size = .5),
         panel.grid.major.x  = element_blank(),
-        panel.grid.minor   = element_blank()
+        panel.grid.minor   = element_blank(),
+        axis.title.y = element_blank()
         
-  ), ncol = 1)
+  )
+
+cp2 <- dyn_lb %>%filter(position ==1 & election_type %!in% c("BP","ZP"))%>% group_by(election_type, year) %>% summarise(count = n(), dyn= sum(dyn_cum_4), pc= dyn/count) %>% 
+  ggplot(aes(factor(year), pc, group=election_type))+
+  geom_line(size = 1, aes(linetype = election_type))+
+  labs(subtitle = "Urban local bodies", x= "Year", y = "Percentage")+
+  colorspace::scale_color_discrete_qualitative(palette = "dark3")+
+  geom_point()+
+  ylim(0,.4)+
+  theme_bw()+
+    theme(#legend.position = "bottom",
+        axis.line.x= element_line(color = "gray50", size = .5),
+        panel.grid.major.x  = element_blank(),
+        panel.grid.minor   = element_blank(),
+        axis.title.y = element_blank()
+        
+  )
+
+
+p5 <- cp1/cp2 
+ggsave("D:/cpr/thesis/figures/fig_1_5.png", p5,width = 4, height =5, dpi = 300, units ="in" )
 
 
 ```

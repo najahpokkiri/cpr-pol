@@ -35,8 +35,19 @@ library(stargazer)
 `%!in%` = Negate(`%in%`)
 
 select <- dplyr::select
+summarise <- dplyr::summarise
+filter <- dplyr::filter
 
-names(ae_all) <- make.unique(names(ae_all))
+mutate <- dplyr::mutate
+
+select <- dplyr::select
+
+rename <- dplyr::rename
+
+names <- base::names
+
+
+# names(ae_all) <- make.unique(names(ae_all))
 ```
 
 # Party
@@ -54,6 +65,7 @@ dyn_ge <- fread("D:/cpr/UP/up-dynasties/dyn_other_data/tcpd_ge_09_14_19_dyn.csv"
 ge_all <- fread("D:/cpr/data/tcpd/TCPD_GE_all.csv")
 
   names(dyn_ge) <- tolower(names(dyn_ge))
+  # names(e_all) <- make.unique(names(ae_all))
 
 #dyn_ge <-dyn_ge %>% select(1:1, 3:5,13:18)
 
@@ -291,38 +303,34 @@ cont_df <- up_ae_5pc %>%filter(poll_no ==0) %>% filter(party %in% c("INC","BSP",
 win_cont_df <- rbind(win_df, cont_df)
 
 
-  ggplot(win_cont_df,aes(factor(year), prop, fill = party))+
+ p3_2 <-  ggplot(win_cont_df,aes(factor(year), prop, fill = party))+
   geom_bar(stat= "identity",position ="dodge" )+
-  scale_fill_manual(values= c("darkorange1","cornflowerblue","steelblue4","firebrick2"))+
+  scale_fill_grey()+
 
   
-  labs(title = "Family politicians in UP assembly elections", x = "",y = "Proportion")+
+  labs( x = "",y = "Proportion",
+        caption= "Source: Uttar Pradesh Political Families data set")+
 facet_wrap(~type)+
   theme_minimal()+
     ylim(0,.5)+
-  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"),
+  theme(
         legend.position = "bottom",
-        plot.background = element_blank(),
-        plot.title = element_text( size = 18, family = "serif"),
-        plot.subtitle = element_text( size = 15,
-                                     margin = margin(t = 0, r = 0, b = 20, l = 0)),
-        text = element_text(color = "gray20",family = "serif"),
-        axis.text.x = element_text( 
-                                   hjust = .5, vjust = 0),
+        text = element_text(family = "serif"),
+       
         legend.title = element_blank(),
-        legend.text = element_text(size = 12),
-        axis.text = element_text(face = "italic", size = 10),
-        axis.title = element_text(vjust = -1, size = 15),        
+     
         axis.ticks = element_blank(),
-        panel.grid.major = element_line(color = "gray50", size = .5),
+      
         panel.grid.minor = element_blank(),
         panel.grid.major.x = element_blank(),
-         axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
-        axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+
+        
         axis.line.x = element_line()
   ) 
 
+p3_2
 
+ggsave("D:/cpr/thesis/figures/fig_3_2.png", p3_2,width = 5, height =3.5, dpi = 300, units ="in")
 ```
 
 
