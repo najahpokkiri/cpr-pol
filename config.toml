@@ -25,7 +25,7 @@ theme = "hugo-academic"
 # Get last modified date for content from Git?
 enableGitInfo = false
 
-GoogleAnalytics = "G-MMP0D9JCWD"
+GoogleAnalytics = "UA-163989908-5"
 
 # Default language to use (if you setup multilingual support)
 defaultContentLanguage = "en"
