@@ -122,6 +122,22 @@ summarytools::dfSummary(tcpd_dyn5$dyn,
           headings = FALSE,
            tmp.img.dir  = "/tmp")
 ```
+
+
+## Family politicians - year by year
+
+```{r results="asis", warning=FALSE}
+
+
+tcpd_dyn5%>%select(year, dyn) %>%  group_by(year) %>% summarytools::dfSummary( plain.ascii  = FALSE, 
+          style        = "grid", 
+          graph.magnif = 0.75, 
+          valid.col    = FALSE,
+          headings = FALSE,
+           tmp.img.dir  = "/tmp")
+```
+
+
 ## Incumbents
 
   
@@ -162,7 +178,8 @@ tcpd_dyn5 %$%  # Acts like with(tobacco, ...)
 
 tcpd_dyn5 <- tcpd_dyn5 %>% mutate(dynast = ifelse(dyn==1,1,0))
 
-tcpd_dyn5 %>% group_by(year, dynast) %>%summarise(count = n()) %>% 
+tcpd_dyn5 %>% group_by(year,position, dynast) %>%summarise(count = n()) %>%
+  group_by(year, position) %>% 
   mutate(sum = sum(count),
          prop = count/sum) %>% 
   ggplot(aes(factor(year), prop, fill = factor(dynast), label = round(prop,2)))+
@@ -172,13 +189,15 @@ tcpd_dyn5 %>% group_by(year, dynast) %>%summarise(count = n()) %>%
 
   scale_fill_grey(labels = c( "Non-Family","Family"))+
    labs(title = "Family Politicians in Loksabha",
-         subtitle = "Year by year snapshot"
+         subtitle = "Year & position snapshot"
 ) +
+  facet_wrap(~position)+
   theme(plot.background = element_blank(),
         axis.line.x = element_line(),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         axis.text.y = element_blank(),
+        axis.text.x = element_text(angle = 90),
         axis.title = element_blank(), 
         text = element_text(family = "serif"),
         legend.title = element_blank(),
