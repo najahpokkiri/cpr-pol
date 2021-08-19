@@ -6,7 +6,7 @@ params:
 
 output:
   html_document:
-    theme: readable
+    theme: yeti
     toc: TRUE
     toc_float: TRUE
     toc_depth: 5
@@ -111,7 +111,7 @@ summarytools::dfSummary(tcpd_dyn5,
 ```
 
 
-## Dynasts
+## Family politicians
 
 ```{r results="asis", warning=FALSE}
 summarytools::dfSummary(tcpd_dyn5$dyn,
@@ -127,20 +127,14 @@ summarytools::dfSummary(tcpd_dyn5$dyn,
   
 
 ```{r, results = "asis"}
-# summarytools::ctable(x = tcpd_dyn5$dyn  , 
-#                      y= tcpd_dyn5$incumbent,
-#        
-#        prop = "r",
-#        headings = FALSE,
-#          method = "render",
-#        totals = FALSE)
+
 library(summarytools)
 library(magrittr)
 tcpd_dyn5 %$%  # Acts like with(tobacco, ...)
-  ctable(x = dyn , y = incumbent,
+  ctable(y = dyn , x = incumbent,
           prop = "r",
          headings = FALSE,
-         totals = FALSE,
+         totals = TRUE,
          style = 'rmarkdown'
           ) 
   #print(method = "browser")
@@ -151,16 +145,47 @@ tcpd_dyn5 %$%  # Acts like with(tobacco, ...)
 
 ```{r, results = "asis"}
 tcpd_dyn5 %$%  # Acts like with(tobacco, ...)
-  ctable(x = dyn , y = turncoat,
+  ctable(y = dyn , x = turncoat,
           prop = "r",
          headings = FALSE,
-         totals = FALSE,
+         totals =TRUE,
          style = 'rmarkdown'
           ) 
   #print(method = "browser")
 ```
 
+## Year  break up
 
+- From here onwards we will presume that all the empty strings are non-dynasts
+
+```{r}
+
+tcpd_dyn5 <- tcpd_dyn5 %>% mutate(dynast = ifelse(dyn==1,1,0))
+
+tcpd_dyn5 %>% group_by(year, dynast) %>%summarise(count = n()) %>% 
+  mutate(sum = sum(count),
+         prop = count/sum) %>% 
+  ggplot(aes(factor(year), prop, fill = factor(dynast), label = round(prop,2)))+
+  geom_bar(stat = "identity", position = "stack")+
+ geom_text(size = 2.5, position = position_stack(vjust = 0.5))+
+      theme_minimal()+
+
+  scale_fill_grey(labels = c( "Non-Family","Family"))+
+   labs(title = "Family Politicians in Loksabha",
+         subtitle = "Year by year snapshot"
+) +
+  theme(plot.background = element_blank(),
+        axis.line.x = element_line(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.y = element_blank(),
+        axis.title = element_blank(), 
+        text = element_text(family = "serif"),
+        legend.title = element_blank(),
+        legend.position = "top"
+       )
+
+```
 
 
 
