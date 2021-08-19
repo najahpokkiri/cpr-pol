@@ -88,7 +88,7 @@ ge_all <- fread("D:/cpr/data/tcpd/ge_all_0821.csv") %>% rename_all(tolower) %>%
 # str_replace_all(head(ge_all$state_name), "_", " ")
 
 
-tcpd_dyn5 <- inner_join(pc5, ge_all, by = c("state_name", "year","constituency_no","position"))
+tcpd_dyn5 <- inner_join(pc5, ge_all, by = c("state_name", "year","constituency_no","position")) %>% filter(position %in% c(1,2))
 
 
 
