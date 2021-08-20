@@ -10,7 +10,7 @@ authors:
 summary: Analysis of schools and colleges data
 output:
   html_document:
-    theme: flatly
+    theme: yeti
     toc: TRUE
     toc_float: TRUE
     toc_depth: 5
@@ -53,7 +53,7 @@ select <- dplyr::select
 
 
 
-# UP
+# UP{.tabset}
 
 
 The [All India Survey on Higher Education (AISHE)](http://aishe.nic.in/) website provided two kind of college data. 1, Colleges affiliated to Universities. 2, Stand alone institutions. 
@@ -71,7 +71,7 @@ college_up <- college_up %>% filter(year_estd>=1974 & Management != "University"
 #Hmisc::describe(college_up)
 ```
 
-## Data summary{.tabset}
+## Data summary
 
 ```{r}
 
@@ -79,7 +79,7 @@ college_up <- college_up %>% filter(year_estd>=1974 & Management != "University"
 
 ```
 
-### Main variables
+## Main variables
 
 ```{r}
 
@@ -87,7 +87,7 @@ names(college_up)
 
 ```
 
-### types of management
+## types of management
 
 
 ```{r}
@@ -98,7 +98,7 @@ college_up %>% group_by(Management) %>% summarise(count = n())
 
 
 
-### Year by year break-up of number of colleges
+## Year by year break-up of number of colleges
 
 I kept *Private un-aided* as private and clubbed all others as government colleges.
 
@@ -221,12 +221,12 @@ Average number of colleges built every year in a constituency is `r {round(mean(
 
 
 
-### Distribution of number of colleges in a constituency{.tabset}
+## Distribution of number of colleges in a constituency{.tabset}
 
 
 This density chart shows the distribution of the number of colleges built in different constituencies during last 10 years
 
-#### Post 2009
+### Post 2009
 
 ```{r}
 
@@ -239,7 +239,7 @@ ggplot( aes(count))+
 
 ---
 
-#### Pre 2009
+### Pre 2009
 
 ```{r}
 
@@ -456,7 +456,6 @@ dyn_up_college_adr$total_movable_assets_totals <- ifelse(dyn_up_college_adr$tota
 
 
 ```{r, results = "asis"}
-
 ## caste
 
 
@@ -477,9 +476,10 @@ dyn_up_college_adr$n_college_bin <- ifelse(dyn_up_college_adr$n_colleges ==0,0,1
 # 
 # 
 # corrplot(corr, method="circle")
+```
 
 
-
+```{r, results = "asis"}
 fit.probit <- feglm(n_college_bin  ~ dyn_cum_2+ incumbent+margin_percentage+ turnout_percentage+enop+ term_duration+constituency_type+log(electors)+no_terms+log(total_immovable_assets_totals) + log(total_movable_assets_totals)+ non_serious_crime+caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim|year_el + district_name, data = dyn_up_college_adr,family = binomial(link = "probit"))
   
 fit.probit_no_se <- feglm(n_college_bin  ~ dyn_cum_2+ incumbent+margin_percentage+ turnout_percentage+enop+ constituency_type+log(electors)+no_terms+log(total_immovable_assets_totals) + log(total_movable_assets_totals)+ serious_crime+non_serious_crime+caste_uc+ caste_yadav+caste_non_yadav_obc + caste_dalit + caste_muslim|year_el , data = dyn_up_college_adr,family = binomial(link = "probit"))
@@ -489,8 +489,12 @@ fit.poisson <- feglm(data = dyn_up_college_adr, n_colleges ~ dyn_cum_2+incumbent
                      year_el + district_name, family =  "quasipoisson")
 
 #summary(fit.probit_no_se)
+```
 
-etable(fit.poisson, fit.probit, fit.probit_no_se,drop = c("caste_uc", "caste_yadav", "caste_non_yadav_obc" , "caste_dalit" , "caste_muslim") , subtitles = c("Poisson", "Probit", "Probit without SE Clustered"))
+
+```{r, results= "asis"}
+etable(fit.poisson, fit.probit, fit.probit_no_se,drop = c("caste_uc", "caste_yadav", "caste_non_yadav_obc" , "caste_dalit" , "caste_muslim") , subtitles = c("Poisson", "Probit", "Probit without SE Clustered")) %>% kable() %>% kable_styling(full_width = F)
+
 
 
 

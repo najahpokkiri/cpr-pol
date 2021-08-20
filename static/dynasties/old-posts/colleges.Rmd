@@ -1,0 +1,103 @@
+---
+title: "Collges - Pan-India"
+params:
+  orig_date: "Original Publish Date: 19 August, 2021"
+  update_date: !r paste("Updated on:", format(Sys.time(), '%I:%m  %p -- %d %B, %Y'))
+
+output:
+  html_document:
+    theme: yeti
+    toc: TRUE
+    toc_float: TRUE
+    toc_depth: 5
+    number_sections: false
+    fig_width: 6
+editor_options:
+  chunk_output_type: inline
+
+---
+
+---
+
+### Document History
+
+`r params$orig_date`
+
+`r params$update_date`
+
+---
+
+```{r set up, warning=FALSE, include=FALSE, message= FALSE}
+
+knitr::opts_chunk$set(cache = FALSE,echo = FALSE, message=FALSE, warning = FALSE)
+
+##fig.width = 16/2, fig.height = 9/2
+
+library(tidyverse)
+library(data.table)
+library(knitr)
+library(kableExtra)
+
+
+library(stargazer)
+`%!in%` = Negate(`%in%`)
+
+library(lfe)
+
+select <- dplyr::select
+
+summarise <- dplyr::summarise
+filter <- dplyr::filter
+mutate <- dplyr::mutate
+
+
+
+rename <- dplyr::rename
+
+```
+
+# India {.tabset}
+
+## Summary
+
+
+
+
+
+
+There were **45022** affiliated colleges **11987** stand-alone colleges. Among these two categories, only **52232** observations had year of establishment. This further reduced  to  **49959**  observations after geocoding .
+
+
+
+
+
+
+```{r}
+college_in <- fread("D:/cpr/data/college/colleges_pc.csv") %>% 
+  rename_all(tolower) 
+
+```
+
+
+```{r results="asis", warning=FALSE}
+summarytools::dfSummary(college_in,
+                        plain.ascii  = FALSE, 
+          style        = "grid", 
+          graph.magnif = 0.75, 
+          valid.col    = FALSE,
+          headings = FALSE,
+           tmp.img.dir  = "/tmp")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+

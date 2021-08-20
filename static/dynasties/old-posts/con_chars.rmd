@@ -1,7 +1,0 @@
----
-title: "Untitled"
-author: "Najah"
-date: "01/05/2021"
-output: html_document
----
-
