@@ -72,7 +72,8 @@ rename <- dplyr::rename
 +-----------------------------------+-------+-----------------------------------------------+
 | After merging with dynasty data   | 36026 | 5% no match                                   |
 +-----------------------------------+-------+-----------------------------------------------+
-
+| After removing universities       |       |                                               |
++-----------------------------------+-------+-----------------------------------------------+
 : Observations
 
 ```{r}
@@ -107,7 +108,7 @@ college <- college %>% filter(year_estd>=1989  &!is.na(pc_no)) %>%
   )) %>% 
  mutate(state = tolower(state),
         state= str_trim(state)) %>% 
-  filter(state!= "andhra pradesh" & state!= "telengana")
+  filter(state!= "andhra pradesh" & state!= "telengana" & management!= "University")
 # 
 # hist(college$year_el)
 # 
@@ -151,6 +152,8 @@ summarytools::dfSummary(college_dyn,
           valid.col    = FALSE,
           headings = FALSE,
            tmp.img.dir  = "/tmp")
+
+ college %>% filter(management=="University")
 ```
 
 ## distribution of colleges at pc level
@@ -218,3 +221,48 @@ mean_df$entity <-  factor(mean_df$entity)
 
 
 ```
+
+
+## managment
+
+
+```{r results = "asis"}
+
+
+college_dyn %>% group_by(management) %>% 
+  summarise(count = n(),prop = count/length(college_dyn$management)) %>% arrange(-prop) %>%
+  select(-count) %>% 
+  kable(digits = 2) %>% 
+  kable_styling(full_width = FALSE)
+  
+
+
+```
+
+## Colleges by state and year
+
+```{r}
+
+college_dyn %>% group_by(year_el, state) %>% 
+  summarise(count= n()) %>% 
+  ggplot(aes(year_el, count, fill = state))+
+  geom_bar(position = "stack",
+           stat = "identity")+
+  theme_bw()+
+  scale_fill_grey()+
+  labs(caption = "note : fill shades represents states",
+       y = "N colleges established",
+       x = "election cycle")+
+  theme(legend.position = "none")
+
+```
+
+
+
+
+
+
+
+
+
+
