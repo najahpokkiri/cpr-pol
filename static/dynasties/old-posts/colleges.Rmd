@@ -14,10 +14,9 @@ output:
     fig_width: 6
 editor_options:
   chunk_output_type: inline
-
 ---
 
----
+------------------------------------------------------------------------
 
 ### Document History
 
@@ -25,7 +24,7 @@ editor_options:
 
 `r params$update_date`
 
----
+------------------------------------------------------------------------
 
 ```{r set up, warning=FALSE, include=FALSE, message= FALSE}
 
@@ -58,29 +57,94 @@ rename <- dplyr::rename
 
 # India {.tabset}
 
-## Summary
+## Observations
 
++-----------------------------------+-------+-----------------------------------------------+
+| Stage                             | N     | note                                          |
++===================================+=======+===============================================+
+| Total colleges                    | 57009 | From the pdf                                  |
++-----------------------------------+-------+-----------------------------------------------+
+| with lat & long                   | 54683 | Ones with proper address                      |
++-----------------------------------+-------+-----------------------------------------------+
+| built in and after 1989           | 40854 | filtered to match with available dynasty data |
++-----------------------------------+-------+-----------------------------------------------+
+| After removing Andhra & Telengana | 37908 | Andhra/telengana separation causing fuss      |
++-----------------------------------+-------+-----------------------------------------------+
+| After merging with dynasty data   | 36026 | 5% no match                                   |
++-----------------------------------+-------+-----------------------------------------------+
 
-
-
-
-
-There were **45022** affiliated colleges **11987** stand-alone colleges. Among these two categories, only **52232** observations had year of establishment. This further reduced  to  **49959**  observations after geocoding .
-
-
-
-
-
+: Observations
 
 ```{r}
+
+dyn_5pc <- fread("d:/cpr/UP/up-dynasties/dyn_other_data/dyn_5pc_8919.csv") %>% 
+  filter(position ==1) %>% mutate(state_name = str_replace(state_name,  "&", "and")
+                   ,state_name = tolower(state_name),
+                                  
+                                  
+                                  state_name= str_trim(state_name))
+
+
 college_in <- fread("D:/cpr/data/college/colleges_pc.csv") %>% 
   rename_all(tolower) 
 
+college <- college_in
+
+#college_in <- college_in %>% mutate( year_estd = factor(year_estd))
+
+college <- college %>% filter(year_estd>=1989  &!is.na(pc_no)) %>% 
+  mutate(year_el = case_when(
+    year_estd>=1989 & year_estd<1991 ~1989,
+      year_estd>=1991 & year_estd<1996 ~1991,
+      year_estd>=1996 & year_estd<1998 ~1996,
+      year_estd>=1998 & year_estd<1999 ~1998,
+      year_estd>=1999 & year_estd<2004 ~1999,
+      year_estd>=2004 & year_estd<2009 ~2004,
+      year_estd>=2009 & year_estd<2014 ~2009,
+      year_estd>=2014 & year_estd<2019 ~2014,
+      year_estd>=2019 & year_estd<2022 ~2019,
+    TRUE ~0
+  )) %>% 
+ mutate(state = tolower(state),
+        state= str_trim(state)) %>% 
+  filter(state!= "andhra pradesh" & state!= "telengana")
+# 
+# hist(college$year_el)
+# 
+# unique(dyn_5pc$year)
+# names(college)
+# 
+# unique(college$state)
+# 
+# unique(dyn_5pc$state_name)
+
+
+
+## removin andhra - since is is causing matching issue - attributed to telengana split
+# college %>% group_by(year_el,state, constituency_n) %>% summarise(n_college= n())
+
+
+college_dyn <- inner_join(college, dyn_5pc, by = c("state"= "state_name", "year_el" = "year",
+                                                   "pc_no" = "constituency_no"))
+
+# dim(college_dyn)
+# 
+# college %>% filter(!is.na(pc_no))
 ```
 
+```{r}
+# unique(dyn_5pc$state_name)
+# 
+# names(college)
+```
+
+## Summary
 
 ```{r results="asis", warning=FALSE}
-summarytools::dfSummary(college_in,
+
+college_dyn <- college_dyn %>%mutate(year_el = factor(year_el)) 
+
+summarytools::dfSummary(college_dyn,
                         plain.ascii  = FALSE, 
           style        = "grid", 
           graph.magnif = 0.75, 
@@ -89,15 +153,68 @@ summarytools::dfSummary(college_in,
            tmp.img.dir  = "/tmp")
 ```
 
+## distribution of colleges at pc level
+
+```{r}
+
+ac_df <- college_dyn %>% group_by(year_el,state, constituency_name) %>% summarise(count = n())
+
+ggplot(ac_df, aes(count))+
+  geom_histogram()+
+   scale_x_continuous(trans = "pseudo_log",
+                       breaks = c(0:5,10,25,50, 100, 250), minor_breaks = NULL)+
+  labs(x = "n_colleges",y ="COunt at PC level",
+       subtitle = "College distribution at constituency level for every election cycle")+
+  theme_bw()
+
+
+```
+
+## colleges at pc level
+
+**average number of colleges established in a parliamentary constituency during** particular election cycle
+
+```{r}
+college_dyn <- college_dyn %>% mutate(dynast = ifelse(dyn==1,1,0))
+
+std <- function(x) sd(x)/sqrt(length(x))
+
+ac_college <- rbindlist(list(college_dyn %>% group_by(year_el,state, constituency_name) %>% summarise(count = n()) %>% ungroup() %>% 
+  summarise(mean = mean(count),  se = std(count)),
+
+
+college_dyn %>% group_by(year_el,state, constituency_name, dynast) %>% summarise(count = n()) %>% ungroup() %>% group_by(dynast) %>% 
+  summarise(mean= mean(count),se = std(count))), fill = TRUE)
+
+entity <- c("All", "Non-Family","Family")
+
+
+mean_df <- cbind(ac_college, entity) %>% select(-dynast)
 
 
 
 
 
 
+mean_df$entity <-  factor(mean_df$entity)
+
+ ggplot(mean_df , aes(x=entity, y=mean)) +
+    geom_bar(position=position_dodge(), stat="identity",
+             colour="black", # Use black outlines,
+            # size=.3
+            ) +      # Thinner lines
+    geom_errorbar(aes(ymin=mean-se, ymax=mean+se),
+                  size=.3,    # Thinner lines
+                  width=.2,
+                  position=position_dodge(.9)) +
+  labs(y = "Mean")+
+   ylim(0,15)+
+
+    theme_bw()+
+  theme(axis.title.x = element_blank(),
+        text = element_text("serif"))+
+   theme(aspect.ratio=3/2)
 
 
 
-
-
-
+```
