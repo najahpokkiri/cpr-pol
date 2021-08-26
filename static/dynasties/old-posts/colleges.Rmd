@@ -74,12 +74,13 @@ rename <- dplyr::rename
 +-----------------------------------+-------+-----------------------------------------------+
 | After removing universities       |       |                                               |
 +-----------------------------------+-------+-----------------------------------------------+
+
 : Observations
 
 ```{r}
 
 dyn_5pc <- fread("d:/cpr/UP/up-dynasties/dyn_other_data/dyn_5pc_8919.csv") %>% 
-  filter(position ==1) %>% mutate(state_name = str_replace(state_name,  "&", "and")
+   mutate(state_name = str_replace(state_name,  "&", "and")
                    ,state_name = tolower(state_name),
                                   
                                   
@@ -222,9 +223,7 @@ mean_df$entity <-  factor(mean_df$entity)
 
 ```
 
-
 ## managment
-
 
 ```{r results = "asis"}
 
@@ -257,12 +256,125 @@ college_dyn %>% group_by(year_el, state) %>%
 
 ```
 
+# rdd
+
+```{r}
+
+ac_df <- college %>% group_by(year_el,state, pc_no) %>% summarise(n_college = n()/5) %>% 
+  filter(state!= "andhra pradesh" & state!= "telangana" &year_el %in% c(2004, 2009, 2014))
+
+
+dyn_5pc  <- dyn_5pc  %>% mutate(family = ifelse(dyn==1,TRUE,FALSE))
+
+
+dyn_5pc<- dyn_5pc  %>% filter(position %in% c(1,2)) %>% 
+  group_by(state_name, year, constituency_no) %>% 
+  mutate(pos_sum = n()) %>% 
+  filter(pos_sum==2) %>% 
+  mutate(dyn_sum = sum(family)) %>% 
+  filter(position ==1) %>% 
+  mutate(dyn_vs_nondyn = ifelse(dyn_sum==1,1,0))
+
+
+
+dyn_ac <- dyn_5pc  %>% 
+  filter(state_name!= "andhra pradesh" & state_name!= "telangana" &
+           year %in% c(2004, 2009, 2014)) 
+# 
+
+college_dyn_ac <-right_join(ac_df, dyn_ac, by = c("state"= "state_name", "year_el" = "year",
+                                                   "pc_no" = "constituency_no")) %>% 
+  mutate(n_college = ifelse(is.na(n_college),0,n_college))
+
+```
+
+
+### Summary
+```{r}
+
+
+college_rdd <- college_dyn_ac %>% filter(margin_percentage<=10 & dyn_vs_nondyn==1) %>% 
+  mutate(mv = ifelse(family ==0, -margin_percentage, margin_percentage),
+         electors_million = electors/1000000,
+         n_college = n_college/electors_million)
+
+
+```
+
+-   our independent variable`n_college` is defined as the number of colleges built per a million population in a year within a parliamentary constituency
+
+-   We have only included 2004, 2014 & 2019 electoral cycles given they more large in numbers . within these 3 elections there were 408 contest in which a family politician contested against a non-family politician and vice versa.
+
+ -Margin percentage (cut off) break up look like this:
+ 
+| cut off            | 2.5 | 5   | 10  |
+|--------------------|-----|-----|-----|
+| total              | 78  | 165 | 297 |
+| family winners     | 40  | 86  | 167 |
+| non-family winners | 38  | 79  | 130 |
 
 
 
 
+```{r}
+college_rdd <- college_rdd %>% mutate(mv_2.5 = ifelse(margin_percentage<= 2.5,1,0),
+                       mv_5 = ifelse(margin_percentage<= 5,1,0),
+                       mv_10 = ifelse(margin_percentage<= 10,1,0))
+```
+
+
+--- 
+
+
+## rdd graph for 5pc
+
+
+```{r}
+ggplot(college_rdd,  aes(mv,n_college , color = family))+
+  geom_point()+
+    geom_smooth(method="lm", se= FALSE)+
+  geom_vline(xintercept = 0)+
+    scale_color_grey(labels = c("non-family winner", "family winner"))+
+   labs(x = "Margin of victory", y = "n collegs per million population",
+        caption = "note: collegesbuilt in year in a parliamentary constituency")+
+   theme_bw()+
+  theme(legend.position = "bottom", legend.title = element_blank())+
+  ylim(0,10)
+  
+```
+
+
+---
+
+
+## rdd model
+
+---
+
+
+```{r, results = "asis"}
+fit2.5 <- lm(n_college~family, data = subset(college_rdd %>% filter(mv_2.5 ==1)))
+
+fit5 <- lm(n_college~family, data = subset(college_rdd %>% filter(mv_5 ==1)))
+
+fit10 <- lm(n_college~family, data = subset(college_rdd %>% filter(mv_10 ==1)))
 
 
 
+stargazer::stargazer(fit2.5,fit5, fit10, type = "html", omit = "Constant", column.labels = c("2,5","5","10"))
+```
 
 
+---
+
+
+## Further improvments
+
+
+- Add more years
+
+- do seperate ones for private/government college
+
+- remove/keep standalone colleges
+
+- 
