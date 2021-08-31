@@ -1,0 +1,109 @@
+---
+####################
+## Metadata       ##
+####################
+title: |
+  Transfiguration
+code: MINT001
+credits: 12
+year: 2020--2021
+semester: Fall
+program: |
+  Master of International Ring-bearers \
+  Master of the International Fellowship of the Ring
+# This is the YAML (YAML Ain't Markup Language) header that includes 
+# metadata used to produce the document. 
+# Be careful with spacing in this header!
+# Two spaces at the start of the line create indentation,
+# which embeds the parameter in a hierarchy.
+
+####################
+## Professor      ##
+####################
+prof: Gandalf the Grey
+prof-email: gandalf.thegrey@graduateinstitute.ch
+location: Zoom 123-456-7890
+prof-office-hours: "[Fridays, 17--19](https://bit.ly/goog.ly)"
+
+####################
+## Assistant      ##
+####################
+ta: Frodo Baggins
+ta-email: frodo.baggins@graduateinstitute.ch
+ta-office-hours: By appointment
+
+####################
+## Course         ##
+####################
+description: |
+  This course teaches everything you ever wanted
+  to know about the Fellowship of the Ring. You will learn
+  how to melt rings in volcanoes, evade Nazgûls, and not to trust Saruman.
+aims: |
+  This course has two main purposes.
+  First, it provides a deeper understanding of resisting the Power of the Ring.
+  Second, it applies these insights through practical exercises.
+structure: |
+  Extraordinarily, due to the novel coronavirus pandemic, 
+  we will be moving this course online for the remainder of the semester.
+materials: |
+  There is no required textbook for this course.
+  All materials can be found on Moodle.
+evaluation: |
+  Evaluation is by a combination of participation, term papers, and exam.
+  
+  **Participation (10%)**: This is about participation.
+  
+  **Papers (40%)**: This is about the term papers.
+  
+  **Exam (50%)**: This is about the exam.
+policies: |
+  *Auditing* is possible. Please contact me.
+  
+  *Grading* is according to the Swiss 1-6 scale.
+  
+  *Plagiarism* is not tolerated at the Graduate Institute. 
+  If you are unsure, please contact the TA.
+
+#####################
+## Bibliography    ##
+#####################
+bibliography: references.bib
+csl: geneva-syllabus.csl
+
+##########################
+## Define Knit function ##
+##########################
+knit: iheiddown::syllabus_pdf
+
+#####################
+## Output Options  ##
+#####################
+output: iheiddown::syllabus_pdf
+# Set to true if you want anchors to the rendered bibliography
+link-citations: false 
+draft: true
+documentclass: article
+---
+
+```{r, echo = FALSE}
+startdate <- as.Date("2020-09-14")
+```
+
+##  `r advdate(startdate, 1)`: Inheriting a Ring
+
+@Darwin1859
+
+@iheiddown2020
+
+##  `r advdate(startdate, 2)`: Escaping the Shire
+
+@Satchell2009
+
+##  `r advdate(startdate, 3)`: Fleeing from the Nazgûl
+
+##  `r advdate(startdate, 4)`: Meeting Strider
+
+##  `r advdate(startdate, 5)`: Arrival in Rivendell
+
+##  `r advdate(startdate, 6)`: On the road to Mordor
