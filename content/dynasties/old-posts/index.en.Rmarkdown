@@ -19,6 +19,8 @@ output:
 
 Most of the files are just the replication of posts from the old site. All the posts are being revised.
 
+* [Economic consequences](../../dynasties/old-posts/econ_conseq.html)
+
 * [Colleges - Pan-India](../../dynasties/old-posts/colleges.html)
 
 * [Political Familis: 1989-2019](../../dynasties/old-posts/5pc_89_19.html)

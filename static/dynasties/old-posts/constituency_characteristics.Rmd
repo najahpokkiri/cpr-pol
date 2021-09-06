@@ -64,7 +64,7 @@ All the models is a poisson regression regressions. In Asher's data set all the 
 
 
 ```{r}
-asher <- read_dta("D:/cpr/UP/up-dynasties/dyn_other_data/asher/elections_con_panel.dta")
+asher <- read_dta("~/cpr/UP/up-dynasties/dyn_other_data/asher/elections_con_panel.dta")
 
 
 asher_up <- asher %>% filter(pc01_state_name == "Uttar Pradesh")
@@ -98,7 +98,7 @@ asher_period_1 <- asher_up_var %>% filter(period==1)
 
 ## importing francesca data to remove urban constituencies
 
-fr <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/francesca/UPdata.csv")
+fr <- read.csv("~/cpr/UP/up-dynasties/dyn_other_data/francesca/UPdata.csv")
 
 fr <- fr %>% select(Prural,AC_no_2001) %>% rename(constituency_no = AC_no_2001) %>% mutate(p_urban = 100- Prural)
 

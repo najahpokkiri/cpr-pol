@@ -154,7 +154,7 @@ summarytools::dfSummary(college_dyn,
           headings = FALSE,
            tmp.img.dir  = "/tmp")
 
- college %>% filter(management=="University")
+ 
 ```
 
 ## distribution of colleges at pc level

@@ -1,0 +1,772 @@
+---
+title: "Economic consequences"
+author: ""
+params:
+  orig_date: "Orignal Publish Date: 02 September 2021"
+  update_date:  !r paste("Updated on:", format(Sys.time(), '%I:%m  %p -- %d %B, %Y'))
+output: 
+  html_document:
+    theme: yeti
+    toc: true
+    toc_float: true
+    number_sections: true
+    fig_width: 6
+editor_options:
+  chunk_output_type: inline
+---
+
+------------------------------------------------------------------------
+
+### Document history
+
+`r params$orig_date`
+
+`r params$update_date`
+
+------------------------------------------------------------------------
+
+```{r set up, echo =  FALSE, message = FALSE, warning = FALSE}
+
+knitr::opts_chunk$set(cache = FALSE, echo =  FALSE, message = FALSE, warning = FALSE,
+                      fig.width = 16/2, fig.height = 9/2)
+
+```
+
+```{r libraries}
+
+library(tidyverse)
+
+library(data.table)
+
+library(kableExtra)
+library(scales)
+library(haven)
+`%!in%` = Negate(`%in%`)
+
+
+select <- dplyr::select
+
+```
+
+So far we have been focusing on the economic consequences of having political families in constituencies by comparing them against non-families. Here onwards, we will be comparing stable against non-families and other categories.
+
+We address two main question here how does the development indices differ from the political family constituencies from non-political family constituencies. Two address this question we use NREGA , PMGSY, MPL̄̄̄̄̄̄̄̄̄̄̄ADS and nightlights data.
+
+The second question is where do political families come from. This would need longitudinal data or historical data. Given the above datasets are recent we will depend on population census, economic census, weather data, agitation data, criminality data etc.
+
+In our full dataset we have 667 winners from the stable family and 415 after the family formation. Since 2009, it is 161 . We would only be able to use these stable category to assess the consequence of family politicians after 2009 since that category is formed after 2008. This limits us to MPLADS, PMGSY and NREGA
+
+
+
+```{r reading the main file}
+
+
+fam_df <- read.csv("~/cpr/UP/up-dynasties/dyn_other_data/fam_df.csv")
+
+fam_select <- fam_df %>% select(family_id, fam_type = success_cat)
+
+dyn <- fread("~/cpr/UP/up-dynasties/dyn_other_data/dyn_ae_ge.csv") %>% 
+  left_join(fam_select, by = "family_id") %>% 
+  mutate(fam_type = replace_na(fam_type, "Non-Fam"))
+
+# 
+# 
+# dyn %>% filter( position ==1 & fam_type == "Stable" &  year>2008) %>% select(year, constituency_name, candidate_name, party, dyn_cum_2) 
+
+
+
+```
+
+
+
+# MPLADS {.tabset}
+
+```{r}
+mplads <- fread("~/cpr/UP/up-dynasties/dyn_other_data/mplads-dataset.csv")
+
+
+
+names(mplads) <- tolower(names(mplads))
+
+
+mplads <- mplads %>% select(constituency_no,year, everything()) %>% select(- c(30:102)) %>% filter(year>2008)
+
+dyn_ge_w_09 <- dyn %>% filter(election_type == "GE" & position==1 & year==2009)
+
+
+mplads$cost_cat <- cut(mplads$costnew, breaks = c(0,200000,500000,Inf), labels = c("Low", "Medium", "High"))
+
+# names(dyn_mplads) <- make.unique(names(dyn_mplads))
+dyn_mplads <- merge(mplads,dyn_ge_w_09, by = c("year", "constituency_no"))
+
+dyn_mplads$dyn_cum_2_text <- ifelse(dyn_mplads$fam_type=="Stable", "Family","Non-family")
+
+```
+
+
+## Summary {.tabset}
+
+```{r results="asis", warning=FALSE}
+
+library(summarytools)
+
+# college_dyn <- college_dyn %>%mutate(year_el = factor(year_el)) 
+
+summarytools::dfSummary(mplads,
+                        plain.ascii  = FALSE, 
+          style        = "grid", 
+          graph.magnif = 0.75, 
+          valid.col    = FALSE,
+          headings = FALSE,
+           tmp.img.dir  = "/tmp")
+
+ 
+```
+
+
+### Family break-up
+
+
+Here we have stable  as family and all other members as non-family.
+```{r, results='asis'}
+freq(dyn_ge_w_09$fam_type, style='rmarkdown')
+
+```
+
+
+
+
+
+### stable v/s Non-family
+
+
+This table shows the average number of projects and the cost for the family types. First table is forboth years and the second one is year by year break-up of the same.
+
+
+```{r}
+
+  dyn_mplads <- dyn_mplads %>% group_by(constituency_no) %>% mutate(ac_contr_n = n(), ac_mean_cost = mean(costnew))
+
+
+
+dyn_mplads_mean <- dyn_mplads %>% group_by(dyn_cum_2_text) %>% summarise(mean_contract = mean(ac_contr_n),mean_cost = mean(ac_mean_cost))
+
+Entity <- c("Non-family", "Family")
+
+
+ cbind(Entity,dyn_mplads_mean) %>% select(-dyn_cum_2_text) %>%  kable(caption = "MPLADS prjects and spending",col.names = c ("Type of constiuency", "Average number of projects  (pc level)","Avergae expenditure per project (pc level)"),digits = 0)%>% kable_styling(bootstrap_options = "striped")
+
+
+  #dyn_mplads %>% group_by(dyn_cum_2) %>% summarise(mean_cost = mean(costsanctionedbydistrict))
+
+ 
+
+
+
+```
+
+
+
+```{r t test to check the mean difference}
+
+
+
+# t.test(dyn_mplads$costnew ~ dyn_mplads$dyn_cum_2) 
+# 
+# t.test(dyn_mplads$ac_contr_n ~ dyn_mplads$dyn_cum_2)
+```
+
+<!-- The difference in the mean of both project count and the expenditure is statistically significant. -->
+
+
+---
+
+## Days to sanction
+
+<!-- When we looked at number of days that is required to finish a project was almost same for both the family types, on average they take 75 days to finish a project. When I looked at it by year, in 2004 dynasts took 12 days extra to finish the work compared to non-dynasts. Interestingly, in 2009 it reversed and dynasts took 12 day lesser than non-dynasts to finish the work -->
+
+
+
+
+```{r}
+dyn_mplads%>% filter(days>0)%>% group_by(dyn_cum_2_text) %>% summarise(days = mean(days)) %>% kable() %>% kable_styling()
+```
+
+---
+
+
+```{r}
+ggplot(dyn_mplads %>% filter(days>0), aes(dyn_cum_2_text, log(days)))+
+  geom_boxplot()+
+  theme_light()
+
+```
+
+
+
+
+
+```{r days to complete}
+# 
+# dyn_mplads %>% filter(days >0) %>% group_by(year,dyn_cum_2) %>% summarise(mean_days = mean(days)) 
+
+# dyn_mplads_reg <- dyn_mplads %>% filter(days >0)
+# 
+# dim(dyn_mplads_reg)
+# 
+# fit <- glm(data = dyn_mplads_reg, days ~ dyn_cum_2 + costnew + factor(year), family = "poisson" )
+# 
+# summary(fit)
+
+
+```
+
+----
+
+## Projects
+
+**Question** - Is there any difference in the project choices  of family politicians?
+
+This table shows the composition of the category of the projects they choose work on.
+
+
+
+```{r snumber of projects composition - families - non/families}
+# dyn_mplads %>% group_by(year,dyn_cum_2, category_work) %>% summarise( count = n()) %>% 
+ #  ggplot(aes(category_work, count, fill = factor(dyn_cum_2)))+
+ #  geom_bar(stat = "identity", position = "dodge")+
+ #  facet_grid(~year)
+
+
+dyn_mplads$dyn_cum_2 <- ifelse(dyn_mplads$fam_type=="Stable",1,0)
+
+ dyn_mplads %>% group_by(dyn_cum_2, category_work) %>% summarise( count = n()) %>% group_by(dyn_cum_2) %>% mutate(sum = sum(count), prop = count/sum) %>% select(dyn_cum_2, category_work, prop) %>% 
+   ggplot(aes(factor(dyn_cum_2), prop, fill = category_work,label = round(prop,2)))+
+   geom_bar(stat="identity", position = "stack")+
+    geom_text(size = 3, position = position_stack(vjust = 0.5))+ 
+    theme_minimal()+
+    scale_x_discrete(labels = c("Non-Families","Families"))+
+   scale_fill_grey()+
+    labs(title = " MPLADS projects composition \n among non-families and families ",x = "", y = "Proportion", fill = "Type of work") +
+    theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
+  theme(plot.background = element_blank(),
+        plot.title = element_text(hjust = 0.5, size = 18, family = "serif"), 
+        text = element_text(color = "gray20"),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 14,family = "serif"),
+        axis.text = element_text(face = "italic", size = 14),
+        axis.text.y = element_blank(),
+        axis.title.x = element_text(vjust = -1, size = 16),
+        axis.title.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.line= element_line(color = "gray40", size = .5),
+        axis.line.y = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()
+  )
+```
+
+
+```{r tree map attempt}
+# install.packages("treemapify")
+# library(treemapify)
+# 
+# dyn_mplads %>% group_by(dyn_cum_2, category_work) %>% summarise( count = n()) %>% group_by(dyn_cum_2) %>% mutate(sum = sum(count), prop = count/sum) %>% select(dyn_cum_2, category_work, prop) %>% 
+#   ggplot( aes(area=prop, fill= category_work, subgroup= factor(dyn_cum_2))) + 
+#     geom_treemap()+
+#     geom_treemap_subgroup_border()+
+#     #subgroup heading in white
+#     geom_treemap_subgroup_text(color="white")+
+#     #all other group text in black
+#     geom_treemap_text(aes(label=category_work), color="black")+
+#     scale_x_continuous(expand = c(0, 0)) +
+#     scale_y_continuous(expand = c(0, 0)) +
+#     scale_fill_brewer(palette = "Dark2")
+# 
+
+```
+
+
+---
+
+This chart shows the average number of projects of each categories according to the family type.
+
+```{r}
+
+dyn_mplads %>% group_by(dyn_cum_2, category_work ) %>% summarise(mean_projects = mean(ac_contr_n, trim = .1)) %>% 
+  ggplot(aes(factor(reorder(category_work, mean_projects)), mean_projects, fill = factor(dyn_cum_2)))+
+  geom_bar(stat = "identity", position = "dodge")+
+    theme_minimal()+
+  scale_y_continuous(label = label_number_si())+
+  scale_fill_manual (labels = c("Non-family", "Family"),
+    values = c("#468189", "#9DBEBB"))+
+  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
+  labs(title = "Average count of projects",  x = "Type of project", y = "Average count") +
+  theme(legend.position = "top",
+        plot.background = element_blank(),
+        plot.title = element_text(family = "serif",hjust = 0.5, size = 20), 
+        plot.subtitle = element_text(hjust = 0.5, size = 15,
+                                     margin = margin(t = 0, r = 0, b = 20, l = 0)),
+        text = element_text(color = "gray20",family = "serif"),
+        axis.text.x = element_text( 
+                                   hjust = .5, vjust = 0),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 15),
+        axis.text = element_text(face = "italic", size = 10),
+        axis.title.x = element_text(vjust = 1, size = 15,
+                                  margin = margin(t = 20, r = 0, b = 0, l = 0)),  
+        axis.title.y = element_text(vjust = 1, size = 15),
+        axis.ticks = element_blank(),
+        panel.grid.major = element_line(color = "gray50", size = .5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank()
+  ) 
+ 
+
+
+
+#z%>% melt(id = 1:3, measure = 4:4) %>% 
+#   ggplot(aes(factor(fam_exp_cum_cat,levels=c("[0,1)","[1,6)","[6,11)","[11,21)","[21,Inf]")), value, fill = category_work))+
+#   geom_bar(stat = "identity", position = "dodge")+
+#   facet_grid(~dyn_cum_2)
+
+
+
+
+```
+
+
+
+---
+
+## Expenditure
+
+**Question** - Is there any difference in the spending patterns of family politicians?
+
+```{r spending composition}
+
+ dyn_mplads %>% group_by(dyn_cum_2, category_work) %>% summarise(sum_cat = sum(costnew)) %>% group_by(dyn_cum_2) %>% mutate(sum_tot = sum(sum_cat), prop = sum_cat/sum_tot) %>% select(dyn_cum_2, category_work, prop) %>% 
+   ggplot(aes(factor(dyn_cum_2), prop, fill = category_work,label = round(prop,2)))+
+   geom_bar(stat="identity", position = "stack")+
+    geom_text(size = 3, position = position_stack(vjust = 0.5))+ 
+    theme_minimal()+
+  scale_fill_grey()+
+    scale_x_discrete(labels = c("Non-Families","Families"))+
+    labs(title = " MPLADS spending composition \n among non-families and families ",x = "", y = "Proportion", fill = "Type of work") +
+    theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
+  theme(plot.background = element_blank(),
+        plot.title = element_text(hjust = 0.5, size = 18, family = "serif"), 
+        text = element_text(color = "gray20"),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 14,family = "serif"),
+        axis.text = element_text(face = "italic", size = 14),
+        axis.text.y = element_blank(),
+        axis.title.x = element_text(vjust = -1, size = 16),
+        axis.title.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.line= element_line(color = "gray40", size = .5),
+        axis.line.y = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()
+  ) 
+
+
+```
+
+---
+
+
+## Cost {.tabset}
+
+### cost per project
+
+**Question** : What's the average cost of a project for each categories?
+
+
+```{r}
+dyn_mplads %>% group_by(dyn_cum_2, category_work ) %>% summarise(mean_cost = mean(costnew, trim = .1)) %>% 
+  ggplot(aes(factor(reorder(category_work, mean_cost)), mean_cost, fill = factor(dyn_cum_2)))+
+  geom_bar(stat = "identity", position = "dodge")+
+  theme_minimal()+
+  scale_y_continuous(label = label_number_si())+
+  scale_fill_grey(labels = c("Non-family", "Family"))+
+  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
+  labs(title = "Average cost per project",  x = "Type of project", y = "Average cost") +
+  theme(legend.position = "top",
+        plot.background = element_blank(),
+        plot.title = element_text(family = "serif",hjust = 0.5, size = 20), 
+        plot.subtitle = element_text(hjust = 0.5, size = 15,
+                                     margin = margin(t = 0, r = 0, b = 20, l = 0)),
+        text = element_text(color = "gray20",family = "serif"),
+        axis.text.x = element_text( 
+                                   hjust = .5, vjust = 0),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 15),
+        axis.text = element_text(face = "italic", size = 10),
+        axis.title.x = element_text(vjust = 1, size = 15,
+                                  margin = margin(t = 20, r = 0, b = 0, l = 0)),  
+        axis.title.y = element_text(vjust = 1, size = 15),
+        axis.ticks = element_blank(),
+        panel.grid.major = element_line(color = "gray50", size = .5),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank()
+  ) 
+```
+
+
+### cost categories
+
+
+We categorised the projects into three depending upon the cost of the project:
+
+
+Categories:
+
+Low - 0-.2 mn
+
+Medium - 2.2 mn - 5 mn
+
+High - 5 mn+
+
+```{r}
+
+
+# names(mplads)
+# 
+# summary(mplads$costnew)
+# 
+# hist(mplads$costnew) %>% scale_x_continuous(label = label_number_si())
+
+ggplot(dyn_mplads, aes(costnew, color = dyn_cum_2_text))+
+  geom_density()+ 
+  theme_minimal()+ scale_y_continuous(label = label_number())+
+  theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
+  scale_color_grey()+
+  labs(title = "Project cost distribution wrt politician's identity",  x = "Cost", y = "Density") +
+  theme(legend.position = "top",
+        plot.background = element_blank(),
+        plot.title = element_text(family = "serif",hjust = 0.5, size = 20), 
+        plot.subtitle = element_text(hjust = 0.5, size = 15,
+                                     margin = margin(t = 0, r = 0, b = 20, l = 0)),
+        text = element_text(color = "gray20",family = "serif"),
+        axis.text.x = element_text( 
+                                   hjust = .5, vjust = 0),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 15),
+        axis.text = element_text(face = "italic", size = 10),
+        axis.title.x = element_text(vjust = 1, size = 15,
+                                  margin = margin(t = 20, r = 0, b = 0, l = 0)),  
+        axis.title.y = element_text(vjust = 1, size = 15),
+        axis.ticks = element_blank(),
+        
+  )
+
+
+
+```
+
+
+---
+
+
+```{r}
+
+dyn_mplads %>% group_by(cost_cat,dyn_cum_2_text) %>% summarise(count = n()) %>% group_by(dyn_cum_2_text) %>% mutate(sum = sum(count), prop = count/sum) %>% select(-c(count,sum)) %>% kable(caption = "Project cost categories wrt politician's identity", col.names = c("Cost Categry","Politicians Identity", "Proportion of projects"), digit = 2) %>% kable_styling(bootstrap_options = "striped")
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# PMGSY{.tabset}
+
+```{r pmgsy read}
+pmgsy<- fread("~/cpr/UP/up-dynasties/dyn_other_data/pmgsy.csv", stringsAsFactors = FALSE)
+
+pmgsy <- pmgsy %>% mutate(year_ac = as.numeric(case_when(`Sanctioned Year` %in% c("2007 - 2008", "2009 - 2010","2010 - 2011","2011 - 2012")~"2007",
+                                     `Sanctioned Year` =="2012 - 2013" ~"2012",
+                                     `Sanctioned Year` =="2018 - 2019" ~"2017",
+                                     TRUE~ "Others"
+                                     )))
+
+#glimpse(pmgsy)
+
+
+names(pmgsy) <- tolower(names(pmgsy))
+
+
+pmgsy <- pmgsy %>% select(year, everything())%>%  select(- c(2:78)) %>% rename(constituency_no = `pc no`) %>% filter(year != 2014) 
+```
+
+
+
+## Summary table
+
+```{r results="asis", warning=FALSE}
+
+summarytools::dfSummary(pmgsy,
+                        plain.ascii  = FALSE, 
+          style        = "grid", 
+          graph.magnif = 0.75, 
+          valid.col    = FALSE,
+          headings = FALSE,
+           tmp.img.dir  = "/tmp")
+
+ 
+```
+
+
+
+```{r}
+
+
+pmgsy <- pmgsy %>% filter(year ==2009)
+
+
+# dyn_ae_pmgsy <- inner_join(pmgsy, dyn_ae_w, by = c("year_ac" = "year", "ac no" = "constituency_no"))
+
+
+dyn_pmgsy <- merge(pmgsy,dyn_ge_w_09, by = c("year", "constituency_no"))
+
+
+
+dyn_pmgsy$dyn_cum_2_text <- ifelse(dyn_pmgsy$fam_type=="Stable", "Family","Non-family")
+
+
+#summary(pwd)
+
+#names(dyn_pmgsy) <- make.unique(names(dyn_pmgsy))
+
+dyn_pmgsy$fam_rel_id_uniq <-  paste(dyn_pmgsy$family_id, dyn_pmgsy$rel_id_uniq,sep = "")
+
+dyn_pmgsy  <- dyn_pmgsy %>% group_by(fam_rel_id_uniq) %>% mutate(n_proj_ind = n())
+```
+
+
+
+## total stats
+
+
+
+
+
+
+```{r}
+
+
+dyn_pmgsy %>% group_by(dyn_cum_2_text) %>% summarise(count = n(), sum(`road length (kms)`), sum(sanctionedcostnew)) %>% kable(caption = "PMGSY across years" ,col.names = c ("Loksabha Term", "Number of projects", "Length coverd (Kms)", "Total sanctioned amount (Lakhs)"),digits = 0)%>% kable_styling(bootstrap_options = "striped")
+
+
+```
+
+## Constituency level avg.
+
+```{r}
+
+
+dyn_pmgsy$sanc_cost_rup <-(dyn_pmgsy$sanctionedcostnew)*100000
+
+dyn_pmgsy <- dyn_pmgsy %>% group_by(year,constituency_no) %>% mutate(ac_proj_no = n())
+
+
+ 
+
+#  dyn_pmgsy  %>% group_by(dyn_cum_2_text) %>% summarise(mean_proj = mean(ac_proj_no), mean_cost = mean(sanc_cost_rup ), mean_rd_len = mean(`road length (kms)`))
+# 
+# #,sum_rd = sum(`road length (kms)`),sum_cost = sum(`sanction cost`), cost_p_km = (sum_rd/sum_cost)*100000) 
+# 
+# 
+# Entity <- c("Non-family", "Family")
+#  
+#  cbind(Entity,dyn_pmgsy_mean) %>% select(-dyn_cum_2) %>%  kable(caption = "PMGSY summary wrt constituency type", col.names = c ("Type of constituency", "Average number of projects","Avergae expenditure per project", "Average road length (km)"),digits = 1)%>% kable_styling(bootstrap_options = "striped")
+
+ #summary(pmgsy)
+ 
+ 
+ dyn_pmgsy %>% group_by(dyn_cum_2_text) %>% summarise(sum = sum(`road length (kms)`), count = n_distinct(constituency_no),mean_proj_con = n()/count,mean_proj = mean(`road length (kms)`), mean_con = sum/count) %>% select(dyn_cum_2_text,mean_proj_con,mean_proj, mean_con) %>% kable(caption = "PMGSY summary stats wrt constituency type", col.names = c("Constituency Type","Average number of projects"," Average length per project", "Average length over all"),digits = 1)%>% kable_styling(bootstrap_options = "striped")
+
+
+
+
+
+```
+
+
+
+
+
+
+
+
+
+## Contractors
+
+
+```{r}
+
+
+dyn_pmgsy <- dyn_pmgsy %>% group_by(constituency_no) %>% mutate(cont_uniq = n_distinct(`contractor name`))
+
+
+dyn_pmgsy  <- dyn_pmgsy %>% group_by(fam_rel_id_uniq) %>% mutate(n_cont_ind = n_distinct(`contractor name`))
+
+dyn_pmgsy %>% group_by(dyn_cum_2_text) %>% summarise(mean(n_cont_ind),sum(sanctionedcostnew)/n_distinct(`contractor name`)) %>% 
+kable(caption = "PMGSY average number of contractors and amount sanctioned  wrt constituency type", col.names = c ("Type of constituency", "Average number of unique contractors", "AAvergae amount sanctioned to a unique contractor (Lakhs)"),digits = 0)%>% kable_styling(bootstrap_options = "striped")
+
+```
+
+
+
+# NREGA {.tabset}
+
+
+
+```{r file config}
+
+
+
+
+
+nrega <- fread("~/cpr/UP/up-dynasties/dyn_other_data/nrega.csv", stringsAsFactors = FALSE)
+
+dyn_ge_w_09 <- dyn %>% filter(year == 2009 &position == 1)
+
+
+#glimpse(nrega)
+
+# 
+names(nrega) <- tolower(names(nrega))
+# 
+nrega <- nrega %>% select(- c(343:417)) %>%   rename(constituency_no = `pc no`) %>%select(constituency_no,worked, workdays,workdays_jc,disbursed_all,ratio) 
+
+# 
+# dyn_ge_w <- dyn %>% filter(election_type == "GE" & position==1)
+# 
+# 
+dyn_nrega <- merge(dyn_ge_w_09,nrega, by = c("constituency_no"))
+# 
+# 
+#names(dyn_nrega) <- make.unique(names(dyn_nrega))
+
+
+#summary(nrega)
+
+dyn_nrega$dyn_cum_2_text <- ifelse(dyn_nrega$fam_type=="Stable", "Family","Non-family")
+
+dyn_nrega$fam_rel_id_uniq <-  paste(dyn_nrega$family_id, dyn_nrega$rel_id_uniq,sep = "")
+
+
+
+ dyn_nrega  <- dyn_nrega%>% group_by(fam_rel_id_uniq) %>% mutate(n_proj_ind = n())
+```
+**Variable summary**
+
+Workdays - total days worked under NREGS
+
+– Coded as: log(Workdays + 1)
+
+Worked - number of individuals who worked under NREGS
+
+– Coded as: log(Worked + 1)
+
+ Deposits - sum of disbursements to laborers’ bank and post office accounts
+ 
+– Coded as: log(Bank Deposits + Post office Deposits + 1)
+
+## Summary table
+
+```{r results="asis", warning=FALSE}
+
+summarytools::dfSummary(nrega,
+                        plain.ascii  = FALSE, 
+          style        = "grid", 
+          graph.magnif = 0.75, 
+          valid.col    = FALSE,
+          headings = FALSE,
+           tmp.img.dir  = "/tmp")
+
+ 
+```
+
+
+
+## total stats
+
+
+```{r}
+
+# dyn_nrega %>% group_by(dyn_cum_2_text) %>% summarise(n()/n_distinct(constituency_no))
+# 
+# 
+# dyn_nrega %>% group_by(dyn_cum_2) %>% summarise(n())
+
+
+dyn_nrega %>% group_by(year) %>% summarise(count = n(),total_workdays =sum(workdays), mean_len_proj = total_workdays/count,proj_con =n()/n_distinct(constituency_no), len_con = sum(workdays)/n_distinct(constituency_no)) %>%  kable(caption = "Summary of NREGA", col.names = c ("Year", "Total number of projects","Total days", "Average days per project","Average number of projects per constituency","Average days per constituency "),digits = 1)%>% kable_styling(bootstrap_options = "striped")
+
+```
+
+
+
+## Constituency avg.
+
+```{r}
+
+
+ dyn_nrega %>% group_by(dyn_cum_2_text) %>%
+   summarise(sum = sum(workdays), count = n_distinct(constituency_no),mean_proj_con = n()/count, mean_con = sum/count, mean_workers_con = sum(worked)/count, mean_disbursed = sum(disbursed_all)/count) %>% select(dyn_cum_2_text,mean_proj_con, mean_con,,mean_workers_con,mean_disbursed ) %>%
+
+  kable(caption = "NREGA summary stats wrt constituency type", col.names = c("Caste group","Average number of projects", "Average days ",  "Average number of poeple", "Average money disbursed"),digits = 1)%>% kable_styling(bootstrap_options = "striped")
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

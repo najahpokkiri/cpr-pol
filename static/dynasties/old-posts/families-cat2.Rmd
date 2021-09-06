@@ -61,7 +61,7 @@ In this post we further analyse the families. We categorised them into two - dec
 The following table shows the difference the longevity of these two groups
 
 ```{r file config}
-dyn <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/dyn_all.csv")
+dyn <- fread("~/cpr/UP/up-dynasties/dyn_other_data/dyn_all.csv")
 
 dyn_ae_ge <- dyn %>% filter(election_type %in% c("AE", "GE") & family_id != "")
 
@@ -132,12 +132,12 @@ dyn_ae_ge  <- dyn_ae_ge %>% mutate(delim_change=ifelse(is.na(delim_change) & ele
 ```{r}
 
 
-dyn_indus <- read.csv("D:/cpr/UP/up-dynasties/ae_ge_indus.csv")
+dyn_indus <- fread("~/cpr/UP/up-dynasties/ae_ge_indus.csv")
 
-dyn_indus <- dyn_indus %>% filter(ï..election_type %in% c("AE", "GE"))
+dyn_indus <- dyn_indus %>% filter(election_type %in% c("AE", "GE"))
 
 
-dyn_indus <- dyn_indus %>% mutate(indus_2 = ifelse(indus_2>0,indus_2,0), indus_3 = ifelse(indus_3>0,indus_2,0),indus_4 = ifelse(indus_4>0,indus_4,0)) %>% select(ï..election_type,year, pid, indus_2, indus_3, indus_4)
+dyn_indus <- dyn_indus %>% mutate(indus_2 = ifelse(indus_2>0,indus_2,0), indus_3 = ifelse(indus_3>0,indus_2,0),indus_4 = ifelse(indus_4>0,indus_4,0)) %>% select(election_type,year, pid, indus_2, indus_3, indus_4)
 
 names(dyn_indus)[1] <- "election_type"
 
@@ -147,7 +147,7 @@ dyn_ae_ge <- dyn_ae_ge %>% mutate(indus_2_c = ifelse(indus_2>0,1,0),indus_3_c = 
 
 
 
-cabinet <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/up_cabinet_01.07.20.csv")
+cabinet <- fread("~/cpr/UP/up-dynasties/dyn_other_data/up_cabinet_01.07.20.csv")
 
 #glimpse(cabinet)
 
@@ -207,7 +207,7 @@ dyn_ae_ge$decade <-  year(as.Date(ISOdate(dyn_ae_ge$decade, 1, 1)))
 
 
 # 
-# inv <- read.csv("D:/cpr/UP/up-dynasties/ae_ge_lb_who_is_who.csv")
+# inv <- fread("~/cpr/UP/up-dynasties/ae_ge_lb_who_is_who.csv")
 # 
 # inv <- inv  %>% dplyr::select(family_id,association_inv,org_inv, poitical_inv )
 # 
@@ -261,7 +261,7 @@ dyn_ae_ge_fam <- dyn_ae_ge_fam %>% mutate(success_cat = case_when(n_pre_08 >=2 &
 dyn_ae_ge_fam_out <- dyn_ae_ge_fam %>% distinct(family_id, .keep_all = TRUE) %>% select(family_id, success_cat)
 
 
-#write.csv(dyn_ae_ge_fam_out, "D:/cpr/UP/up-dynasties/dyn_other_data/fam_cvat_list.csv")
+#write.csv(dyn_ae_ge_fam_out, "~/cpr/UP/up-dynasties/dyn_other_data/fam_cvat_list.csv")
 
 
 # dyn_ae_ge_fam <- dyn_ae_ge_fam  %>%
@@ -278,7 +278,7 @@ dyn_ae_ge_fam_uniq <- dyn_ae_ge_fam  %>% group_by(family_id)%>% arrange(election
 ```
 
 ```{r}
-inv <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/upwhoiswho.csv")
+inv <- fread("~/cpr/UP/up-dynasties/dyn_other_data/upwhoiswho.csv")
 
 inv$position <- as.numeric(inv$position)
 
@@ -343,7 +343,7 @@ fam_df_out <- dyn_ae_ge_fam %>% group_by(family_id) %>% mutate(PCs = paste(uniqu
 
 
 library(openxlsx)
-#openxlsx::write.xlsx(fam_df, "D:/cpr/UP/up-dynasties/dyn_other_data/fam_df.xlsx")
+#openxlsx::write.xlsx(fam_df, "~/cpr/UP/up-dynasties/dyn_other_data/fam_df.xlsx")
 
 
 ```
@@ -354,7 +354,7 @@ library(openxlsx)
 
 ### Definitions
 
-![](D:/cpr/UP/up-dynasties/dyn_other_data/def_2_elite.png)
+![](~/cpr/UP/up-dynasties/dyn_other_data/def_2_elite.png)
 
 <!-- Eventhough we have 300 families in total, in this analysis has come down to 189. This is because, we are tracking families which are active before 2007. Then we asses how they have performed in last one decade or so to asses their performance. Criteria to be successful is that they have won one or more elections after 2007. -->
 
@@ -458,7 +458,7 @@ year_entry <- ggplot(fam_tab %>% filter(diff>=0), aes(diff))+
 
 <!-- ```{r} -->
 
-<!-- dyn <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/dyn_family.csv") -->
+<!-- dyn <- fread("~/cpr/UP/up-dynasties/dyn_other_data/dyn_family.csv") -->
 
 <!-- dyn_ae_ge <- dyn %>% filter(election_type %in% c("AE", "GE")) -->
 
@@ -730,7 +730,7 @@ land_caste_df$success_cat<- factor(land_caste_df$success_cat, levels = c("UC","Y
        )
 
   
-  ggsave("D:/cpr/thesis/figures/fig_4_2.png", p4_2,width = 5, height =4, dpi = 300, units ="in" )
+  #  ggsave("~/cpr/thesis/figures/fig_4_2.png", p4_2,width = 5, height =4, dpi = 300, units ="in" )
 ```
 
 ------------------------------------------------------------------------
@@ -902,7 +902,7 @@ labs(#title = "Industry composition  ",
 
 
 p4_4
-  ggsave("D:/cpr/thesis/figures/fig_4_4.png", p4_4,width = 4, height =4, dpi = 300, units ="in" )
+  # ggsave("~/cpr/thesis/figures/fig_4_4.png", p4_4,width = 4, height =4, dpi = 300, units ="in" )
 
 ```
 
@@ -1173,7 +1173,7 @@ life_span_df <- inner_join(fam_span2,dyn_entry_exit, by = "family_id") %>% selec
 
 
 
-inv <- read.csv("D:/cpr/UP/up-dynasties/ae_ge_lb_who_is_who.csv")
+inv <- fread("~/cpr/UP/up-dynasties/ae_ge_lb_who_is_who.csv")
 
 inv <- inv %>% filter(election_type == "AE")
 
@@ -1287,7 +1287,7 @@ p3_10 <- ggplot(econ_pol_df2, aes(x=success_cat1, y=minister)) +
   scale_x_discrete(labels = c("Family", "Non_family"))+
   theme(text = element_text(family = "serif"),
         axis.title.x =element_blank() )
-  ggsave("D:/cpr/thesis/figures/fig_3_10.png", p3_10,width = 5, height =3.5, dpi = 300, units ="in" )
+  # ggsave("~/cpr/thesis/figures/fig_3_10.png", p3_10,width = 5, height =3.5, dpi = 300, units ="in" )
 
 ```
 
@@ -1451,13 +1451,16 @@ pol_div_land <- ggplot(mean_df %>% filter(land!= "Others") , aes(x=land, y=div))
   facet_wrap(~cat, scales = "free_y")+
     xlab("") +
     ylab("Mean diversification") +
-  ggtitle("Land: rising families")+
+  ggtitle("Lan~ rising families")+
   theme_bw()+
     theme(text = element_text(family = "serif"))+
    scale_x_discrete(labels = c("Very \nsmall", "Small", "Medium", "Large", "Very \nlarge"))
 
 ```
 
+<!-- ```{r} -->
+<!-- fwrite(fam_df, "~/cpr/UP/up-dynasties/dyn_other_data/fam_df.csv") -->
+<!-- ``` -->
 
 
 ```{r}
@@ -1528,7 +1531,7 @@ ggplot( aes(variable, y = value, fill = success_cat, label = round(value,2)))+
   )
  p4_5
 
-  ggsave("D:/cpr/thesis/figures/fig_4_5.png", p4_5,width = 5, height =3.5, dpi = 300, units ="in" )
+  # ggsave("~/cpr/thesis/figures/fig_4_5.png", p4_5,width = 5, height =3.5, dpi = 300, units ="in" )
 
 ```
 
@@ -1832,7 +1835,7 @@ p4_3 <- ggplot(all_df_land , aes(x=land, y=mean)) +
 
 
 p4_3
-  ggsave("D:/cpr/thesis/figures/fig_4_3.png", p4_3,width = 5, height =3, dpi = 300, units ="in" )
+  # ggsave("~/cpr/thesis/figures/fig_4_3.png", p4_3,width = 5, height =3, dpi = 300, units ="in" )
 
 
 
@@ -2019,15 +2022,15 @@ p3_5 <- ggpubr::ggarrange(fam_ls_w, ind_ls ,common.legend = TRUE, legend = "bott
 
 p3_5
 
-  ggsave("D:/cpr/thesis/figures/fig_3_5.png", p3_5,width = 5, height =3, dpi = 300, units ="in" )
-# inner_join(dyn_ae_ge, fam_life_3, by = "family_id") %>% write.csv("D:/cpr/UP/up-dynasties/dyn_other_data/fam_life_test.csv")
+  # ggsave("~/cpr/thesis/figures/fig_3_5.png", p3_5,width = 5, height =3, dpi = 300, units ="in" )
+# inner_join(dyn_ae_ge, fam_life_3, by = "family_id") %>% write.csv("~/cpr/UP/up-dynasties/dyn_other_data/fam_life_test.csv")
 
 
 ```
 
 
 ```{r}
-rmarkdown::pandoc_convert("D:/cpr/thesis/chaps_word/Chapter4_Aug2.docx", to = "latex",output = "D:/cpr/thesis/chaps_word/Chapter4_Aug2_c1.tex", options = c("-V geometry:margin=.5in"))
+# rmarkdown::pandoc_convert("~/cpr/thesis/chaps_word/Chapter4_Aug2.docx", to = "latex",output = "~/cpr/thesis/chaps_word/Chapter4_Aug2_c1.tex", options = c("-V geometry:margin=.5in"))
 
 
 ```
@@ -2067,7 +2070,7 @@ p3_4 <- ggplot(dyn_entry_exit, aes(entry_years))+
   
 
 p3_4
-  ggsave("D:/cpr/thesis/figures/fig_3_4.png", p3_4,width = 5, height =3, dpi = 300, units ="in" )
+  # ggsave("~/cpr/thesis/figures/fig_3_4.png", p3_4,width = 5, height =3, dpi = 300, units ="in" )
 ```
 
 
@@ -2221,7 +2224,7 @@ all_sep <- rbindlist(list(all, sep), use.names = TRUE)
   )
   
   p4_1
-  ggsave("D:/cpr/thesis/figures/fig_4_1.png", p4_1,width = 5, height =4, dpi = 300, units ="in" )
+  # ggsave("~/cpr/thesis/figures/fig_4_1.png", p4_1,width = 5, height =4, dpi = 300, units ="in" )
 ```
 
 
@@ -2313,39 +2316,39 @@ dyn_ae_ge_fam_uniq %>% filter(caste_groups!= "NA" & caste_groups!= "Others") %>%
 #         text = element_text(family= "serif")
 #        )
 # 
-#   ggsave("D:/cpr/thesis/figures/fig_3_7.png", p3_7,width = 5, height =3.5, dpi = 300, units ="in" )
+#   # ggsave("~/cpr/thesis/figures/fig_3_7.png", p3_7,width = 5, height =3.5, dpi = 300, units ="in" )
 ```
 
 
 ```{r}
 
 
-  p3_7 <- dyn_ae_ge_uniq %>% group_by(dyn_tot_2, land_cat) %>%
-  summarise(count = n()) %>% 
-  group_by(dyn_tot_2) %>% 
-  mutate(sum =sum(count),
-         prop= count/sum) %>% 
-  ggplot(aes(factor(dyn_tot_2), prop,, fill = land_cat, label = ifelse(prop>.03,round(prop,2),"")))+
-  geom_bar(position= "stack", stat = "identity")+
-  geom_text(size = 2.5, position = position_stack(vjust = 0.5))+
-  coord_fixed(ratio =2)+
-  theme_minimal()+
-  scale_fill_grey()+
-  labs(y = "Proportion",
-       caption= "Source: Uttar Pradesh Political Families data set")+
-  scale_x_discrete(labels = c("Non-Family", "Family"))+
-    theme(plot.background = element_blank(),
-        axis.line.x = element_line(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        axis.text.y = element_blank(),
-        axis.title.x = element_blank(),
-        legend.position = "top",
-        legend.title = element_blank(),
-        text = element_text(family= "serif")
-       )
+  # p3_7 <- dyn_ae_ge_uniq %>% group_by(dyn_tot_2, land_cat) %>%
+  # summarise(count = n()) %>%
+  # group_by(dyn_tot_2) %>%
+  # mutate(sum =sum(count),
+  #        prop= count/sum) %>%
+  # ggplot(aes(factor(dyn_tot_2), prop,, fill = land_cat, label = ifelse(prop>.03,round(prop,2),"")))+
+  # geom_bar(position= "stack", stat = "identity")+
+  # geom_text(size = 2.5, position = position_stack(vjust = 0.5))+
+  # coord_fixed(ratio =2)+
+  # theme_minimal()+
+  # scale_fill_grey()+
+  # labs(y = "Proportion",
+  #      caption= "Source: Uttar Pradesh Political Families data set")+
+  # scale_x_discrete(labels = c("Non-Family", "Family"))+
+  #   theme(plot.background = element_blank(),
+  #       axis.line.x = element_line(),
+  #       panel.grid.major = element_blank(),
+  #       panel.grid.minor = element_blank(),
+  #       axis.text.y = element_blank(),
+  #       axis.title.x = element_blank(),
+  #       legend.position = "top",
+  #       legend.title = element_blank(),
+  #       text = element_text(family= "serif")
+  #      )
 
-  ggsave("D:/cpr/thesis/figures/fig_3_7.png", p3_7,width = 5, height =3.5, dpi = 300, units ="in" )
+  # ggsave("~/cpr/thesis/figures/fig_3_7.png", p3_7,width = 5, height =3.5, dpi = 300, units ="in" )
 
 ```
 
@@ -2449,7 +2452,7 @@ ggplot(fam_span2 %>% filter(caste_groups!= "Others"),aes(x = caste_groups, fam_l
 <!-- library(sf) -->
 
 
-<!-- ac_shp <- st_read("D:/cpr/data/shape-file/maps-master/assembly-constituencies/India_AC.shp") -->
+<!-- ac_shp <- st_read("~/cpr/data/shape-file/maps-master/assembly-constituencies/India_AC.shp") -->
 
 
 
@@ -2541,7 +2544,7 @@ ggplot(fam_span2 %>% filter(caste_groups!= "Others"),aes(x = caste_groups, fam_l
 <!-- ### orgs -->
 
 ```{r}
-# inv <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/upwhoiswho.csv")
+# inv <- fread("~/cpr/UP/up-dynasties/dyn_other_data/upwhoiswho.csv")
 # 
 # inv$position <- as.numeric(inv$position)
 # 
@@ -2588,7 +2591,7 @@ ggplot(fam_span2 %>% filter(caste_groups!= "Others"),aes(x = caste_groups, fam_l
 
 ```{r}
 
-adr <-fread("D:/cpr/UP/up-dynasties/dyn_other_data/adr_candidatelevel.csv", stringsAsFactors = FALSE)
+adr <-fread("~/cpr/UP/up-dynasties/dyn_other_data/adr_candidatelevel.csv", stringsAsFactors = FALSE)
 
 
 adr  <- adr %>% mutate(
@@ -2660,7 +2663,7 @@ p4_8 <- ggplot(adr_non_fam %>% filter(year!= 2009), aes(success_cat, log(total_a
 
 p4_8
 
- ggsave("D:/cpr/thesis/figures/fig_4_8.png", p4_8,width = 5, height =4, dpi = 300, units ="in" )
+ # ggsave("~/cpr/thesis/figures/fig_4_8.png", p4_8,width = 5, height =4, dpi = 300, units ="in" )
    
 ```
 
@@ -2759,25 +2762,25 @@ p4_8
 # all_df4 <-   rbindlist(list(pol_df4, econ_df4), use.names = FALSE)
 # 
 # 
-p4_9 <- ggplot(all_df4, aes(x=success_cat, y=mean)) +
-    geom_bar(position=position_dodge(), stat="identity",
-             colour="black", # Use black outlines,
-             size=.3) +      # Thinner lines
-    geom_errorbar(aes(ymin=mean-se, ymax=mean+se),
-                  size=.3,    # Thinner lines
-                  width=.2,
-                  position=position_dodge(.9)) +
-  facet_wrap(~cat, scales = "free_y")+
-  labs(y = "Mean",
-       caption= "Source: Uttar Pradesh Political Families data set"
- )+
-  scale_x_discrete(labels = c("Non-Families",
-                              "Rising",
-                              "Stable"))+
-  theme_bw()+
-  theme(text = element_text(family = "serif"),
-        axis.title.x =element_blank())
-  ggsave("D:/cpr/thesis/figures/fig_4_9.png", p4_9,width =5 , height =3.5, dpi = 300, units ="in" )
+# p4_9 <- ggplot(all_df4, aes(x=success_cat, y=mean)) +
+#     geom_bar(position=position_dodge(), stat="identity",
+#              colour="black", # Use black outlines,
+#              size=.3) +      # Thinner lines
+#     geom_errorbar(aes(ymin=mean-se, ymax=mean+se),
+#                   size=.3,    # Thinner lines
+#                   width=.2,
+#                   position=position_dodge(.9)) +
+#   facet_wrap(~cat, scales = "free_y")+
+#   labs(y = "Mean",
+#        caption= "Source: Uttar Pradesh Political Families data set"
+#  )+
+#   scale_x_discrete(labels = c("Non-Families",
+#                               "Rising",
+#                               "Stable"))+
+#   theme_bw()+
+#   theme(text = element_text(family = "serif"),
+#         axis.title.x =element_blank())
+  # ggsave("~/cpr/thesis/figures/fig_4_9.png", p4_9,width =5 , height =3.5, dpi = 300, units ="in" )
 
 ```
 
@@ -3097,7 +3100,7 @@ stargazer(fit.declining,
 
 <!-- ```{r} -->
 
-<!-- adr <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/adr_candidatelevel.csv", stringsAsFactors = FALSE) -->
+<!-- adr <- fread("~/cpr/UP/up-dynasties/dyn_other_data/adr_candidatelevel.csv", stringsAsFactors = FALSE) -->
 
 <!-- names(adr)[1] <- "position" -->
 
@@ -3448,7 +3451,7 @@ cbind(stat, vals) %>% kable(digits = 2, col.names = c("Measure", "Elite catagory
 
 <!-- fam_list_70 <- dyn_ae_ge_fam %>% ungroup()%>%  filter(success_cat!= "Rising" & year<2001  )%>% arrange(year)%>% distinct(family_id,.keep_all =TRUE) %>% select(year,constituency_no, constituency_name, success_cat) -->
 
-<!-- cen <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/francesca/UPdata.csv") -->
+<!-- cen <- fread("~/cpr/UP/up-dynasties/dyn_other_data/francesca/UPdata.csv") -->
 
 <!-- names(cen) <- tolower(names(cen)) -->
 
@@ -3468,7 +3471,7 @@ cbind(stat, vals) %>% kable(digits = 2, col.names = c("Measure", "Elite catagory
 
 <!-- fam_list_93 <- dyn_ae_ge_fam %>% ungroup()%>%  filter(success_cat!= "Rising" &year>1992  )%>% arrange(year)%>% distinct(family_id,.keep_all =TRUE) %>% select(year,constituency_no, constituency_name, success_cat) -->
 
-<!-- nl <- read.csv("D:/projects & works/CPR_Verma/dyn_dev.csv") -->
+<!-- nl <- fread("~/projects & works/CPR_Verma/dyn_dev.csv") -->
 
 <!-- nl <- nl %>% filter(position==1) %>% select(year, ac07_id,term_growth, annual_growth)   -->
 
@@ -3760,7 +3763,7 @@ cbind(stat, vals) %>% kable(digits = 2, col.names = c("Measure", "Elite catagory
 
 <!-- ```{r} -->
 
-<!-- cen <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/francesca/UPdata.csv") -->
+<!-- cen <- fread("~/cpr/UP/up-dynasties/dyn_other_data/francesca/UPdata.csv") -->
 
 <!-- names(cen) <- tolower(names(cen)) -->
 
@@ -3786,7 +3789,7 @@ cbind(stat, vals) %>% kable(digits = 2, col.names = c("Measure", "Elite catagory
 
 <!-- ```{r} -->
 
-<!-- cen <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/francesca/UPdata.csv") -->
+<!-- cen <- fread("~/cpr/UP/up-dynasties/dyn_other_data/francesca/UPdata.csv") -->
 
 <!-- names(cen) <- tolower(names(cen)) -->
 
@@ -3953,7 +3956,7 @@ fam_life <-  dyn_ae_ge_fam %>%
  
  
  
-sub_reg <- read.csv( "D:/cpr/UP/up-dynasties/dyn_other_data/sub_reg_all.csv")
+sub_reg <- fread( "~/cpr/UP/up-dynasties/dyn_other_data/sub_reg_all.csv",header = TRUE)
 
 fam_df <- left_join(fam_df, sub_reg, by =c("election_type","constituency"="constituency_name"))
  
@@ -4166,7 +4169,7 @@ p4_6 <- arrange_ggsurvplots(splots2, print = TRUE,
   ncol = 2, nrow = 1)
 
    
-  ggsave("D:/cpr/thesis/figures/fig_4_6.png", p4_6,width = 6, height =3.5, dpi = 300, units ="in" )
+  # ggsave("~/cpr/thesis/figures/fig_4_6.png", p4_6,width = 6, height =3.5, dpi = 300, units ="in" )
 ```
 
 ### Econ diversification grid
@@ -4673,7 +4676,7 @@ life span variable in both plots are the ones that arecounted only after they eb
     
     plot_layout(guides = "collect") & theme(legend.position = "bottom")
    
-    ggsave("D:/cpr/thesis/figures/fig_4_7.png", p4_7,width = 6, height =3.5, dpi = 300, units ="in" )
+    # ggsave("~/cpr/thesis/figures/fig_4_7.png", p4_7,width = 6, height =3.5, dpi = 300, units ="in" )
     
 ```
 

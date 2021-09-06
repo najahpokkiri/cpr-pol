@@ -27,6 +27,7 @@ editor_options:
 knitr::opts_chunk$set(cache = FALSE,echo = FALSE, message=FALSE, warning = FALSE,fig.width = 16/2, fig.height = 9/2)
 
 
+
 library(tidyverse)
 library(data.table)
 library(knitr)
@@ -52,10 +53,9 @@ select <- dplyr::select
 
 ```{r file config}
 
-dyn <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/dyn_ae_ge.csv")
+dyn <- fread("~/cpr/UP/up-dynasties/dyn_other_data/dyn_ae_ge.csv")
 
-
-mplads <- fread("D:/cpr/UP/up-dynasties/dyn_other_data/mplads-dataset.csv")
+mplads <- fread("~/cpr/UP/up-dynasties/dyn_other_data/mplads-dataset.csv")
 
 
 
@@ -90,7 +90,7 @@ dyn_mplads$dyn_cum_2_text <- ifelse(dyn_mplads$dyn_cum_2 ==0, "Non-family","Fami
 
 # dim(dyn_mplads)
 # 
-#fwrite(dyn_mplads, "D:/cpr/UP/up-dynasties/dyn_other_data/mplads-dyn.csv")
+#fwrite(dyn_mplads, "~/cpr/UP/up-dynasties/dyn_other_data/mplads-dyn.csv")
 
 ```
 
@@ -187,7 +187,7 @@ ggplot(dyn_mplads %>% filter(days>0), aes(dyn_cum_2_text, log(days)))+
 dyn_mplads_09 <- dyn_mplads %>% filter(year==2009)
 
 
-fam <- read.csv("D:/cpr/UP/up-dynasties/dyn_other_data/fam_cvat_list.csv")
+fam <- fread("~/cpr/UP/up-dynasties/dyn_other_data/fam_cvat_list.csv", header = TRUE)
 
 
 mplads_fam <- inner_join(dyn_mplads_09, fam, by = "family_id")
