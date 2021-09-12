@@ -61,11 +61,11 @@ In our full dataset we have 667 winners from the stable family and 415 after the
 ```{r reading the main file}
 
 
-fam_df <- read.csv("~/cpr/UP/up-dynasties/dyn_other_data/fam_df.csv")
+fam_df <- read.csv("~/work/cpr/UP/up-dynasties/dyn_other_data/fam_df.csv")
 
 fam_select <- fam_df %>% select(family_id, fam_type = success_cat)
 
-dyn <- fread("~/cpr/UP/up-dynasties/dyn_other_data/dyn_ae_ge.csv") %>% 
+dyn <- fread("~/work/cpr/UP/up-dynasties/dyn_other_data/dyn_ae_ge.csv") %>% 
   left_join(fam_select, by = "family_id") %>% 
   mutate(fam_type = replace_na(fam_type, "Non-Fam"))
 
@@ -77,29 +77,45 @@ dyn <- fread("~/cpr/UP/up-dynasties/dyn_other_data/dyn_ae_ge.csv") %>%
 
 ```
 
-
+# Econ consequences
 
 # MPLADS {.tabset}
 
 ```{r}
-mplads <- fread("~/cpr/UP/up-dynasties/dyn_other_data/mplads-dataset.csv")
+
+## reading the data set
+mplads <- fread("~/work/cpr/UP/up-dynasties/dyn_other_data/mplads-dataset.csv")
 
 
 
 names(mplads) <- tolower(names(mplads))
 
+## remove the unwanted columns
 
 mplads <- mplads %>% select(constituency_no,year, everything()) %>% select(- c(30:102)) %>% filter(year>2008)
+
+## filtering ge data to only 2009
 
 dyn_ge_w_09 <- dyn %>% filter(election_type == "GE" & position==1 & year==2009)
 
 
+## categorising the costs to 3 catagories
+
+
 mplads$cost_cat <- cut(mplads$costnew, breaks = c(0,200000,500000,Inf), labels = c("Low", "Medium", "High"))
 
-# names(dyn_mplads) <- make.unique(names(dyn_mplads))
+## names(dyn_mplads) <- make.unique(names(dyn_mplads))
 dyn_mplads <- merge(mplads,dyn_ge_w_09, by = c("year", "constituency_no"))
 
-dyn_mplads$dyn_cum_2_text <- ifelse(dyn_mplads$fam_type=="Stable", "Family","Non-family")
+## just changing the families to just stable ones
+
+dyn_mplads$dyn_cum_2_text <- ifelse(dyn_mplads$fam_type=="Stable", "Stable","Rest")
+
+## winsorizng few columns to remove the discrepencies
+
+dyn_mplads <- dyn_mplads %>% 
+  mutate(costnew =  DescTools::Winsorize(costnew, na.rm = TRUE,probs = c(.01,.99)),
+         days =  DescTools::Winsorize(days, na.rm = TRUE,probs = c(.01,.99)))
 
 ```
 
@@ -124,20 +140,9 @@ summarytools::dfSummary(mplads,
 ```
 
 
-### Family break-up
 
 
-Here we have stable  as family and all other members as non-family.
-```{r, results='asis'}
-freq(dyn_ge_w_09$fam_type, style='rmarkdown')
-
-```
-
-
-
-
-
-### stable v/s Non-family
+## Top level summary: stable v/s Non-family
 
 
 This table shows the average number of projects and the cost for the family types. First table is forboth years and the second one is year by year break-up of the same.
@@ -149,12 +154,16 @@ This table shows the average number of projects and the cost for the family type
 
 
 
-dyn_mplads_mean <- dyn_mplads %>% group_by(dyn_cum_2_text) %>% summarise(mean_contract = mean(ac_contr_n),mean_cost = mean(ac_mean_cost))
+dyn_mplads_mean <- dyn_mplads %>% group_by(dyn_cum_2_text) %>%
+  summarise(n_pc = n_distinct(pc_name),
+            mean_contract = mean(ac_contr_n),
+            mean_cost = mean(ac_mean_cost),
+            mean_dyas = mean(days))
 
-Entity <- c("Non-family", "Family")
+ Entity <- c("Stable", "Rest")
 
 
- cbind(Entity,dyn_mplads_mean) %>% select(-dyn_cum_2_text) %>%  kable(caption = "MPLADS prjects and spending",col.names = c ("Type of constiuency", "Average number of projects  (pc level)","Avergae expenditure per project (pc level)"),digits = 0)%>% kable_styling(bootstrap_options = "striped")
+dyn_mplads_mean%>%  kable(caption = "MPLADS 2009",col.names = c ("Entity", "N PCs","Avg. number of projects in a PC","Avg. cost sanctioned for a project", "Avg. number of days to sanction"),digits = 0)%>% kable_styling(bootstrap_options = "striped")
 
 
   #dyn_mplads %>% group_by(dyn_cum_2) %>% summarise(mean_cost = mean(costsanctionedbydistrict))
@@ -165,6 +174,14 @@ Entity <- c("Non-family", "Family")
 
 ```
 
+
+
+```{r}
+
+dyn_mplads %>% group_by(dyn_cum_2_text, constituency_name) %>% 
+  summarise(mean_cost = mean(costnew))
+
+```
 
 
 ```{r t test to check the mean difference}
@@ -181,49 +198,10 @@ Entity <- c("Non-family", "Family")
 
 ---
 
-## Days to sanction
-
-<!-- When we looked at number of days that is required to finish a project was almost same for both the family types, on average they take 75 days to finish a project. When I looked at it by year, in 2004 dynasts took 12 days extra to finish the work compared to non-dynasts. Interestingly, in 2009 it reversed and dynasts took 12 day lesser than non-dynasts to finish the work -->
+## Break-up {.tabset}
 
 
-
-
-```{r}
-dyn_mplads%>% filter(days>0)%>% group_by(dyn_cum_2_text) %>% summarise(days = mean(days)) %>% kable() %>% kable_styling()
-```
-
----
-
-
-```{r}
-ggplot(dyn_mplads %>% filter(days>0), aes(dyn_cum_2_text, log(days)))+
-  geom_boxplot()+
-  theme_light()
-
-```
-
-
-
-
-
-```{r days to complete}
-# 
-# dyn_mplads %>% filter(days >0) %>% group_by(year,dyn_cum_2) %>% summarise(mean_days = mean(days)) 
-
-# dyn_mplads_reg <- dyn_mplads %>% filter(days >0)
-# 
-# dim(dyn_mplads_reg)
-# 
-# fit <- glm(data = dyn_mplads_reg, days ~ dyn_cum_2 + costnew + factor(year), family = "poisson" )
-# 
-# summary(fit)
-
-
-```
-
-----
-
-## Projects
+### Projects
 
 **Question** - Is there any difference in the project choices  of family politicians?
 
@@ -232,59 +210,27 @@ This table shows the composition of the category of the projects they choose wor
 
 
 ```{r snumber of projects composition - families - non/families}
-# dyn_mplads %>% group_by(year,dyn_cum_2, category_work) %>% summarise( count = n()) %>% 
- #  ggplot(aes(category_work, count, fill = factor(dyn_cum_2)))+
- #  geom_bar(stat = "identity", position = "dodge")+
- #  facet_grid(~year)
-
-
-dyn_mplads$dyn_cum_2 <- ifelse(dyn_mplads$fam_type=="Stable",1,0)
-
- dyn_mplads %>% group_by(dyn_cum_2, category_work) %>% summarise( count = n()) %>% group_by(dyn_cum_2) %>% mutate(sum = sum(count), prop = count/sum) %>% select(dyn_cum_2, category_work, prop) %>% 
+dyn_mplads %>% group_by(dyn_cum_2, category_work) %>% summarise( count = n()) %>% group_by(dyn_cum_2) %>% mutate(sum = sum(count), prop = count/sum) %>% select(dyn_cum_2, category_work, prop) %>% 
    ggplot(aes(factor(dyn_cum_2), prop, fill = category_work,label = round(prop,2)))+
    geom_bar(stat="identity", position = "stack")+
     geom_text(size = 3, position = position_stack(vjust = 0.5))+ 
-    theme_minimal()+
+    
     scale_x_discrete(labels = c("Non-Families","Families"))+
    scale_fill_grey()+
-    labs(title = " MPLADS projects composition \n among non-families and families ",x = "", y = "Proportion", fill = "Type of work") +
-    theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
+    labs(title = " MPLADS projects composition",x = "", y = "Proportion", fill = "Type of work") +
+ theme_minimal()+
+  coord_fixed(ratio =2)+
   theme(plot.background = element_blank(),
-        plot.title = element_text(hjust = 0.5, size = 18, family = "serif"), 
-        text = element_text(color = "gray20"),
-        legend.title = element_blank(),
-        legend.text = element_text(size = 14,family = "serif"),
-        axis.text = element_text(face = "italic", size = 14),
-        axis.text.y = element_blank(),
-        axis.title.x = element_text(vjust = -1, size = 16),
-        axis.title.y = element_blank(),
-        axis.ticks.y = element_blank(),
-        axis.line= element_line(color = "gray40", size = .5),
-        axis.line.y = element_blank(),
+        axis.line.x = element_line(),
         panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank()
-  )
+        panel.grid.minor = element_blank(),
+        axis.text.y = element_blank(),
+        #legend.position = "bottom",
+        axis.title = element_blank(), 
+        axis.text = element_text(size = 10),
+        text = element_text(family = "serif")       )
 ```
 
-
-```{r tree map attempt}
-# install.packages("treemapify")
-# library(treemapify)
-# 
-# dyn_mplads %>% group_by(dyn_cum_2, category_work) %>% summarise( count = n()) %>% group_by(dyn_cum_2) %>% mutate(sum = sum(count), prop = count/sum) %>% select(dyn_cum_2, category_work, prop) %>% 
-#   ggplot( aes(area=prop, fill= category_work, subgroup= factor(dyn_cum_2))) + 
-#     geom_treemap()+
-#     geom_treemap_subgroup_border()+
-#     #subgroup heading in white
-#     geom_treemap_subgroup_text(color="white")+
-#     #all other group text in black
-#     geom_treemap_text(aes(label=category_work), color="black")+
-#     scale_x_continuous(expand = c(0, 0)) +
-#     scale_y_continuous(expand = c(0, 0)) +
-#     scale_fill_brewer(palette = "Dark2")
-# 
-
-```
 
 
 ---
@@ -298,8 +244,8 @@ dyn_mplads %>% group_by(dyn_cum_2, category_work ) %>% summarise(mean_projects =
   geom_bar(stat = "identity", position = "dodge")+
     theme_minimal()+
   scale_y_continuous(label = label_number_si())+
-  scale_fill_manual (labels = c("Non-family", "Family"),
-    values = c("#468189", "#9DBEBB"))+
+  scale_fill_grey (labels = c("Non-family", "Family")
+   )+
   theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
   labs(title = "Average count of projects",  x = "Type of project", y = "Average count") +
   theme(legend.position = "top",
@@ -339,7 +285,7 @@ dyn_mplads %>% group_by(dyn_cum_2, category_work ) %>% summarise(mean_projects =
 
 ---
 
-## Expenditure
+### Expenditure
 
 **Question** - Is there any difference in the spending patterns of family politicians?
 
@@ -351,34 +297,25 @@ dyn_mplads %>% group_by(dyn_cum_2, category_work ) %>% summarise(mean_projects =
     geom_text(size = 3, position = position_stack(vjust = 0.5))+ 
     theme_minimal()+
   scale_fill_grey()+
+    coord_fixed(ratio =2)+
     scale_x_discrete(labels = c("Non-Families","Families"))+
-    labs(title = " MPLADS spending composition \n among non-families and families ",x = "", y = "Proportion", fill = "Type of work") +
-    theme(plot.margin = unit(c(.5,.5,.5,.5), "cm"))+
+    labs(title = " MPLADS expenditure ",x = "", y = "Proportion", fill = "Type of work") +
+  theme_minimal()+
+  
   theme(plot.background = element_blank(),
-        plot.title = element_text(hjust = 0.5, size = 18, family = "serif"), 
-        text = element_text(color = "gray20"),
-        legend.title = element_blank(),
-        legend.text = element_text(size = 14,family = "serif"),
-        axis.text = element_text(face = "italic", size = 14),
-        axis.text.y = element_blank(),
-        axis.title.x = element_text(vjust = -1, size = 16),
-        axis.title.y = element_blank(),
-        axis.ticks.y = element_blank(),
-        axis.line= element_line(color = "gray40", size = .5),
-        axis.line.y = element_blank(),
+        axis.line.x = element_line(),
         panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank()
-  ) 
+        panel.grid.minor = element_blank(),
+        axis.text.y = element_blank(),
+        #legend.position = "bottom",
+        axis.title = element_blank(), 
+        axis.text = element_text(size = 10),
+        text = element_text(family = "serif")       )
 
 
 ```
 
 ---
-
-
-## Cost {.tabset}
-
-### cost per project
 
 **Question** : What's the average cost of a project for each categories?
 
@@ -414,7 +351,8 @@ dyn_mplads %>% group_by(dyn_cum_2, category_work ) %>% summarise(mean_cost = mea
 ```
 
 
-### cost categories
+
+## cost categories
 
 
 We categorised the projects into three depending upon the cost of the project:
@@ -507,10 +445,42 @@ dyn_mplads %>% group_by(cost_cat,dyn_cum_2_text) %>% summarise(count = n()) %>% 
 
 
 
+
+
+<!-- # MPLADS carlos -->
+
+<!-- ```{r} -->
+
+
+<!-- mplads_car1 <- load("~/work/cpr/data/replication/carlos_mplads/data/mplads-eval-data.RData") -->
+
+<!-- mplads_car_up <- mplads.eval %>% filter(state == "Uttar Pradesh") -->
+
+
+
+<!-- mplads_car2 <- load("~/work/cpr/data/replication/carlos_mplads/data/mplads-eval-data-bureaucrats-for-imputation.RData") -->
+
+
+
+<!-- mplads_car2_up <- mplads.ebureau %>% filter(state == "Uttar Pradesh") -->
+
+<!-- ## -->
+
+<!-- mplads_car3 <- load("~/work/cpr/data/replication/carlos_mplads/data/mplads-data.RData") -->
+
+<!-- mplads_car4 <- load("~/work/cpr/data/replication/carlos_mplads/data/mplads-data-bureaucrats-for-imputation.RData") -->
+
+<!-- mplads_car2_up <- mplads.ebureau %>% filter(state == "Uttar Pradesh") -->
+
+<!-- dyn %>% filter(constituency_no ==40  & year ==2009) -->
+
+
+<!-- ``` -->
+
 # PMGSY{.tabset}
 
 ```{r pmgsy read}
-pmgsy<- fread("~/cpr/UP/up-dynasties/dyn_other_data/pmgsy.csv", stringsAsFactors = FALSE)
+pmgsy<- fread("~/work/cpr/UP/up-dynasties/dyn_other_data/pmgsy.csv", stringsAsFactors = FALSE)
 
 pmgsy <- pmgsy %>% mutate(year_ac = as.numeric(case_when(`Sanctioned Year` %in% c("2007 - 2008", "2009 - 2010","2010 - 2011","2011 - 2012")~"2007",
                                      `Sanctioned Year` =="2012 - 2013" ~"2012",
@@ -656,7 +626,7 @@ kable(caption = "PMGSY average number of contractors and amount sanctioned  wrt 
 
 
 
-nrega <- fread("~/cpr/UP/up-dynasties/dyn_other_data/nrega.csv", stringsAsFactors = FALSE)
+nrega <- fread("~/work/cpr/UP/up-dynasties/dyn_other_data/nrega.csv", stringsAsFactors = FALSE)
 
 dyn_ge_w_09 <- dyn %>% filter(year == 2009 &position == 1)
 
@@ -769,4 +739,154 @@ dyn_nrega %>% group_by(year) %>% summarise(count = n(),total_workdays =sum(workd
 
 
 
+
+
+
+
+
+
+# Pol consequences
+
+
+
+## UP CV {.tabset}
+
+
+This is carried out using AE election booth level data from 2007, 2012, 2017 UP elections
+
+
+```{r}
+raphael <- fread("~/work/cpr/UP/up-dynasties/dyn_other_data/rafael-dataset.csv", stringsAsFactors = FALSE)
+
+
+ raphael_up <- raphael %>% select(year, constituency_no, position, votes = totalvotes, partynew, partypercent) %>% filter(year>= 2009)
+ 
+ # 
+ # raphael_up %>% group_by(year, constituency_no) %>% mutate(total_votes = sum(votes))
+ # 
+```
+
+
+```{r}
+
+ps_17 <- fread("~/work/cpr/data/raphael/upvidhansabha2017.csv")
+
+```
+
+
+```{r}
+dyn <- dyn %>% group_by(election_type, year, constituency_no) %>% mutate(dyn_vs_nondyn = ifelse(any(dyn_cum_2==1) & any(dyn_cum_2==0),1,0), dyn_w_vs_nondyn = ifelse(dyn_vs_nondyn==1 & position==1 &dyn_cum_2==1,1,0))
+  
+  
+
+ 
+ dyn_ae <- dyn %>% filter(election_type=="AE" & position %in% c(1,2))
+ 
+dyn_ae<- dyn_ae %>% mutate(margin_cat = cut(margin_percentage, breaks = c(0,1,3,5,7,10,15,20, Inf), labels = c("1","3","5","7","10","15","20","21")))
+                  
+                  
+ 
+dyn_raphael <- merge(dyn_ae, raphael_up, by = c("year", "constituency_no","position"), allow.cartesian = TRUE)
+
+
+library(DescTools)
+
+
+
+cv <- dyn_raphael%>%group_by(year, constituency_no,position) %>% summarise(cv =CoefVar(partypercent, na.rm = TRUE)) 
+
+
+dyn_cv <- inner_join(dyn_ae, cv, by =c( "year", "constituency_no","position"))
+```
+
+
+### CV density graphs
+
+
+```{r}
+ggplot(filter(dyn_cv %>% filter(position==1) ), aes( cv,fill =fam_type))+
+  geom_density()+
+  xlim(0,3)+
+  theme_light()
+  
+```
+
+### Linear regression
+
+
+```{r results = "asis"}
+
+dyn_cv$dynast <- ifelse(dyn_cv$fam_type=="Stable",1,0)
+
+library(lfe)
+
+fit.up <- felm(cv~dynast+margin_percentage+vote_share_percentage+enop+incumbent+log(electors)+turnout_percentage|constituency_name+year|0|constituency_name, data=subset( dyn_cv %>% filter(position ==1)))
+
+
+
+
+addlines <- list(c('Fixed effects',"Year and Constituency"), c("Clustered SE" ,"Constituency"))
+
+
+
+
+
+ #drop <- c("caste_uc", "caste_obc", "caste_sc", "caste_muslim","(Intercept)","Constant","mov_assets_ratio:assets")
+library(stargazer)
+
+stargazer(fit.up, type = "html", add.lines = addlines)
+
+```
+
+
+```{r}
+rdd <- dyn_cv%>% ungroup() %>% filter(dyn_vs_nondyn==1&margin_percentage<=5 &position%in% c(1,2))  %>% mutate(mv = ifelse(dynast==0,-margin_percentage, margin_percentage)) %>% select(year,constituency_no,position,dynast,margin_percentage,mv,cv)
+
+```
+
+
+### close elections [5 PC] break up
+
+```{r}
+
+
+rdd %>% filter(position ==1) %>% group_by(dynast) %>% summarise(count = n()) %>% kable() %>% kable_styling(full_width = F)
+
+
+```
+
+### rdd graph
+
+
+```{r}
+ggplot(rdd %>% filter(cv<2.5 & position ==1), aes(mv,cv , color = factor(dynast)))+
+  geom_point()+
+    geom_smooth(method="lm", se= FALSE)+
+  geom_vline(xintercept = 0)+
+    scale_color_discrete(labels = c("non-dynast winner", "dynast winner"))+
+  #guides(color = FALSE)+
+  ylim(0,1)+
+   labs(x = "Margin of victory", y = "co-efficient of variation")+
+  theme(legend.position = "bottom", legend.title = element_blank())
+  
+
+```
+
+### RDD model
+
+
+```{r results="asis"}
+
+
+fit.rdd <- felm(cv~factor(dynast), data = subset(rdd %>% filter(cv<2.5& position ==1)))
+
+# fit <- felm(cv~factor(dynast)+ position, data = subset(rdd %>% filter(cv<2.5& position ==1)))
+
+
+stargazer(fit.rdd ,type = "html", covariate.labels = c("Stable", "Constatnt"))
+
+
+
+
+```
 

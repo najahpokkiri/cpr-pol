@@ -51,11 +51,11 @@ library(gridExtra)
 ```{r file config}
 
 
-dyn <- fread("~/cpr/UP/up-dynasties/dyn_other_data/dyn_ae_ge.csv", header = TRUE)
+dyn <- fread("~/work/cpr/UP/up-dynasties/dyn_other_data/dyn_ae_ge.csv", header = TRUE)
 
 
 dyn$dyn_cum_2_text <- ifelse(dyn$dyn_cum_2 ==0, "Non-family","Family")
-pmgsy<- fread("~/cpr/UP/up-dynasties/dyn_other_data/pmgsy.csv", stringsAsFactors = FALSE)
+pmgsy<- fread("~/work/cpr/UP/up-dynasties/dyn_other_data/pmgsy.csv", stringsAsFactors = FALSE)
 
 pmgsy <- pmgsy %>% mutate(year_ac = as.numeric(case_when(`Sanctioned Year` %in% c("2007 - 2008", "2009 - 2010","2010 - 2011","2011 - 2012")~"2007",
                                      `Sanctioned Year` =="2012 - 2013" ~"2012",
@@ -82,8 +82,6 @@ dyn_pmgsy <- merge(pmgsy,dyn_ge_w, by = c("year", "constituency_no"))
 #dyn_pmgsy$dyn_cum_2_text <- ifelse(dyn_pmgsy$dyn_cum_2 ==0, "Non-family","Family")
 
 #summary(pwd)
-
-dyn_pmgsy$fam_exp_cum_cat <- factor(dyn_pmgsy$fam_exp_cum_cat, levels=c("[0,1)","[1,6)","[6,11)","[11,21)","[21,Inf]"))
 
 
 names(dyn_pmgsy) <- make.unique(names(dyn_pmgsy))
@@ -246,14 +244,14 @@ kable(caption = "PMGSY average number of contractors and amount sanctioned  wrt 
 
 ```{r}
 
-pmgsy_ac <- fread("~/cpr/data/up_misc/merged_ac_all.csv")
+pmgsy_ac <- fread("~/work/cpr/data/up_misc/merged_ac_all.csv")
 
 #names(pmgsy_ac)
 
 pmgsy_ac <-pmgsy_ac %>% group_by(year,constituency_no) %>% summarise(length = sum(`Road Length (Kms)`, na.rm = TRUE), n_roads = n(), cost = sum(`Sanction Cost`, na.rm = TRUE))
 
 
-dyn <- fread("~/cpr/UP/up-dynasties/dyn_other_data/dyn_all.csv")
+dyn <- fread("~/work/cpr/UP/up-dynasties/dyn_other_data/dyn_all.csv")
 
 dyn <- dyn %>% filter(year %in% c(2007, 2012)&position ==1&election_type=="AE")
 
@@ -261,7 +259,7 @@ dyn_pmgsy <- left_join( dyn,pmgsy_ac, by = c("year", "constituency_no"))
 
 
 
-nl <- fread("~/cpr/data/controls/nl_94_13.csv", header = TRUE)
+nl <- fread("~/work/cpr/data/controls/nl_94_13.csv", header = TRUE)
 
 nl <- nl %>% filter(year %in% c(2007, 2012))
 
@@ -410,13 +408,13 @@ stargazer(fit.nroad, type = "text")
 
 ```{r}
 
-pmgsy_ac <- fread("~/cpr/data/up_misc/merged_ac_all.csv")
+pmgsy_ac <- fread("~/work/cpr/data/up_misc/merged_ac_all.csv")
 
 pmgsy_df <- pmgsy_ac %>% select(c(1:1,3:3,124:135)) %>% rename(cost = `Sanction Cost`, length = `Road Length (Kms)` , expenditure = `Expenditure Till Date`) %>% mutate(left_over = cost- expenditure , cost_km = cost/length)
 
 
 
-dyn <- fread("~/cpr/UP/up-dynasties/dyn_other_data/dyn_ae_ge.csv")
+dyn <- fread("~/work/cpr/UP/up-dynasties/dyn_other_data/dyn_ae_ge.csv")
 
 dyn <- dyn %>% filter(year %in% c(2007, 2012)&position ==1&election_type=="AE")
 
@@ -458,7 +456,7 @@ fit.cost_project<- felm(cost_project~dyn_cum_2 + incumbent+no_terms+constituency
 ## Summary {.tabset}
 
 ```{r}
-raw_data <- readxl::read_xlsx("~/cpr/data/up_misc/PMGSY Contractors.xlsx", sheet = 1:1)
+raw_data <- readxl::read_xlsx("~/work/cpr/data/up_misc/PMGSY Contractors.xlsx", sheet = 1:1)
 ```
 
 
@@ -534,7 +532,7 @@ raw_data %>% group_by(caste_group) %>% summarise(count= n(), pc = count/length(r
 
 
 ```{r}
-pwd<- fread("~/cpr/UP/up-dynasties/dyn_other_data/roads-uppwd.csv", stringsAsFactors = FALSE)
+pwd<- fread("~/work/cpr/UP/up-dynasties/dyn_other_data/roads-uppwd.csv", stringsAsFactors = FALSE)
 
 #dyn_cum_2 fam_exp_cum_cat mean(\road length`)`glimpse(pwd)
 
@@ -637,7 +635,7 @@ dyn_pwd %>% group_by(dyn_cum_2_text,fam_exp_cum_cat) %>% summarise(proj =n()/n_d
 ```{r}
 
 
-pmgsy <- readxl::read_xlsx("~/cpr/data/up_misc/PMGSY Contractors.xlsx")
+pmgsy <- readxl::read_xlsx("~/work/cpr/data/up_misc/PMGSY Contractors.xlsx")
 
 pmgsy$Caste <- tolower(pmgsy$Caste)
 
