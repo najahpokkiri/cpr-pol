@@ -19,6 +19,9 @@ output:
 
 Most of the files are just the replication of posts from the old site. All the posts are being revised.
 
+
+* [MPLADS Carlos](../../dynasties/old-posts/mplads1.html)
+
 * [Economic consequences](../../dynasties/old-posts/econ_conseq.html)
 
 * [Colleges - Pan-India](../../dynasties/old-posts/colleges.html)
