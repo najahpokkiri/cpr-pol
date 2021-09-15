@@ -82,7 +82,7 @@ dyn_ge_w_09 <- dyn %>% filter(election_type == "GE" & position==1 & year==2009)
 ```
 
 # UP
-All analysis are limited to 2009:14 session.
+All analyses are limited to 2009:14 session.
 
 
 ## Audit data {.tabset}
