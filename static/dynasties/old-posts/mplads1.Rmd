@@ -81,13 +81,20 @@ dyn_ge_w_09 <- dyn %>% filter(election_type == "GE" & position==1 & year==2009)
 
 ```
 
-# UP
-All analyses are limited to 2009:14 session.
 
 
-## Audit data {.tabset}
+
+
+## Audit data
+
 
 Second part of carlos data that provides full information on MPLADS projects
+
+## UP {.tabset}
+
+In this section we look at the projets approved in 2009:14 session.
+
+
 
 ```{r}
 
@@ -164,6 +171,260 @@ mp_car_dyn %>% group_by (stable, clean.sector) %>% summarise(count = n()) %>%
         text = element_text(family = "serif")       )
 ```
 
+
+**Average time approval for the project types**
+
+
+
+
+<!-- ```{r} -->
+
+
+<!--   ggplot(mp_car_dyn %>% filter(app.time>0), aes(reorder(clean.sector, -app.time, FUN = median),log(app.time+1)))+ -->
+<!--   geom_boxplot()+ -->
+<!--     geom_jitter(alpha = .3)+ -->
+<!--    stat_summary(fun=mean, colour="darkred", geom="point",  -->
+<!--                shape=15, size=1.5, show.legend=FALSE) +  -->
+<!--   labs(title = "Average weeks to approval", -->
+<!--        y = "Log of weeks", -->
+<!--        x = "Project Type")+ -->
+<!--   theme_light()+ -->
+<!--   theme(axis.title.x =  element_blank()) -->
+<!-- #  -->
+<!-- #   ggplot(mp_car_dyn %>% filter(app.time>0), aes(reorder(clean.sector, -app.time, FUN = median),app.time))+ -->
+<!-- #   geom_boxplot()+ -->
+<!-- #     scale_y_log10() -->
+
+<!-- ``` -->
+
+### Approval time
+
+**Family**
+
+```{r}
+
+  ggplot(mp_car_dyn %>% filter(app.time>0 & clean.sector 
+                               %in% c("education", "electricty", "other",
+                                      "roads", "water")), aes(stable,log(app.time+1)))+
+
+  geom_boxplot()+
+  geom_jitter(alpha = .3)+
+   stat_summary(fun=mean, colour="darkred", geom="point", 
+               shape=15, size=1.5, show.legend=FALSE) + 
+  facet_grid(~clean.sector)+
+labs(title = "Average weeks to approval",
+       y = "Log of weeks",
+       x = "Project Type")+
+  theme_light()+
+  theme(axis.title.x =  element_blank())
+```
+
+
+### Cost sanctioned
+
+**Family**
+
+
+
+
+```{r}
+
+
+  ggplot(mp_car_dyn %>% filter(app.time>0 & clean.sector 
+                               %in% c("education", "electricty", "other",
+                                      "roads", "water")), aes(stable,log(amt_sanc+1)))+
+
+  geom_boxplot()+
+  geom_jitter(alpha = .3)+
+   stat_summary(fun=mean, colour="darkred", geom="point", 
+               shape=15, size=1.5, show.legend=FALSE) + 
+  facet_grid(~clean.sector)+
+  labs(title = "Average amount sanctioned",
+       y = "Log of amount sanctioned",
+       x = "Project Type")+
+  theme_light()+
+  theme(axis.title.x =  element_blank())
+
+```
+
+## India {.tabset}
+
+In this section we look at the projects approved during 14th & 15the session for 12 Indian states. They are chhattisgarh, gujarat,       haryana,himachal pradesh, jammu and kashmir, karnataka, madhya pradesh,maharashtra, punjab, rajasthan, uttar pradesh and uttarakhand.
+
+
+```{r}
+mplads_all <- mplads.eval %>%rename_all(tolower) %>% mutate(state = tolower(state)) %>% 
+  filter(!is.na(idpc) & session %in% c(15,14)) %>% mutate(year = ifelse(session==15, 2009, 2004))
+
+
+   
+  dyn_ge  <- read_csv("~/work/cpr/UP/up-dynasties/dyn_other_data/dyn_5pc_8919.csv") %>% 
+    filter(position ==1 & year %in% c(2009,2004))%>% 
+    distinct(year,state_name, constituency_no, position, .keep_all = TRUE) %>% 
+    select(state_name, constituency_no, dynast = dyn, year) %>% 
+    mutate(state_name = tolower(state_name),
+           state_name = ifelse(state_name =="jammu & kashmir",
+                               "jammu and kashmir", state_name),
+           fam= ifelse(dynast ==1,"Family","Non-Family"),
+           fam = ifelse(is.na(fam),"Non-Family", fam)) %>% 
+    filter(state_name %in% c("chhattisgarh" , "gujarat",          
+  "haryana","himachal pradesh", 
+ "jammu and kashmir", "karnataka",        
+ "madhya pradesh","maharashtra",      
+ "punjab"  ,"rajasthan",        
+"uttar pradesh" ,"uttarakhand" ))
+  
+  
+  mplads_dyn <- inner_join(mplads_all,dyn_ge, by = c("year" = "year",
+                                                     "state"= "state_name",
+                                                     "idpc"= "constituency_no") )
+
+
+  
+  mplads_dyn  <-  mplads_dyn  %>% group_by(state,idpc) %>% 
+  mutate(n_ac = n())
+```
+
+
+
+### top level summary
+
+```{r, results = "asis"}
+
+
+mplads_dyn%>%  group_by(fam) %>%  
+  summarise(count = n(),
+            ngo = mean(ngo, na.rm = TRUE),
+            #completion_time = mean(comp_time, na.rm = TRUE),
+            amount = mean(amt_sanc),
+            n_proj_ac = mean(n_ac),
+            mean_app_time = mean(app.time, na.rm = TRUE)
+            ) %>% 
+            kable(digits =2, type = "html") %>% 
+            kable_styling()
+
+
+```
+
+### projects break-up
+
+```{r}
+
+mplads_dyn%>% group_by (fam,year, clean.sector) %>% summarise(count = n()) %>% 
+  group_by(fam, year) %>% mutate(sum = sum(count), prop= count /sum) %>% 
+  ggplot(aes(fam, prop, fill= clean.sector, label = ifelse(prop>.03, round(prop,2),"")))+
+  geom_bar(stat = "identity",
+           position = "stack")+
+    facet_wrap(~year)+
+  geom_text(size = 3, position = position_stack(vjust = 0.5))+ 
+
+    scale_x_discrete(labels = c("Non-Families","Families"))+
+   #scale_fill_grey()+
+    labs(title = " MPLADS projects composition",x = "", y = "Proportion", fill = "Type of work") +
+ theme_minimal()+
+  coord_fixed(ratio =2)+
+  theme(plot.background = element_blank(),
+        axis.line.x = element_line(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.y = element_blank(),
+        #legend.position = "bottom",
+        axis.title = element_blank(), 
+        axis.text = element_text(size = 10),
+        text = element_text(family = "serif") )
+```
+
+
+### Approval time
+
+**All**
+
+
+
+
+```{r}
+
+
+  ggplot(mplads_dyn%>% filter(app.time>0), aes(factor(year),log(app.time+1)))+
+  geom_boxplot()+
+    geom_jitter(alpha = .1)+
+  facet_wrap(~clean.sector, nrow =2)+
+   stat_summary(fun=mean, colour="darkred", geom="point", 
+               shape=15, size=1.5, show.legend=FALSE) + 
+  labs(title = "Average weeks to approval",
+       y = "Log of weeks",
+       x = "Project Type")+
+  theme_light()+
+  theme(axis.title.x =  element_blank())
+# 
+#   ggplot(mp_car_dyn %>% filter(app.time>0), aes(reorder(clean.sector, -app.time, FUN = median),app.time))+
+#   geom_boxplot()+
+#     scale_y_log10()
+   
+```
+
+---
+
+**Family**
+
+```{r}
+
+  ggplot(mplads_dyn%>% filter(app.time>0 ), aes(fam,log(app.time+1)))+
+
+  geom_boxplot()+
+  geom_jitter(alpha = .1)+
+   stat_summary(fun=mean, colour="darkred", geom="point", 
+               shape=15, size=1.5, show.legend=FALSE) + 
+  facet_wrap(~clean.sector,scales = "fixed", nrow =2)+
+labs(title = "Average weeks to approval",
+       y = "Log of weeks",
+       x = "Project Type")+
+  theme_light()+
+  theme(axis.title.x =  element_blank())
+```
+
+
+
+### Cost sanctioned
+
+**All*
+
+```{r}
+
+  ggplot(mplads_dyn%>% filter(app.time>0), aes(factor(year),log(amt_sanc+1)))+
+  geom_boxplot()+
+    geom_jitter(alpha = .1)+
+   stat_summary(fun=mean, colour="darkred", geom="point", 
+               shape=15, size=1.5, show.legend=FALSE) +
+  facet_wrap(~clean.sector, nrow =2)+
+  labs(title = "Average amount sanctioned",
+       y = "Log of amount sanctioned",
+       x = "Project Type")+
+  theme_light()+
+  theme(axis.title.x =  element_blank())
+```
+
+---
+
+**Family**
+
+```{r}
+
+
+  ggplot(mplads_dyn %>% filter(app.time>0 ), aes(fam,log(amt_sanc+1)))+
+
+  geom_boxplot()+
+  geom_jitter(alpha = .1)+
+   stat_summary(fun=mean, colour="darkred", geom="point", 
+               shape=15, size=1.5, show.legend=FALSE) + 
+  facet_wrap(~clean.sector,scales = "fixed", nrow =2)+
+  labs(title = "Average amount sanctioned",
+       y = "Log of amount sanctioned",
+       x = "Project Type")+
+  theme_light()+
+  theme(axis.title.x =  element_blank())
+
+```
 
 ## Bureaucrats data {.tabset}
 First part of carlos data that provides limited information on MPLADS projects, but a huge dataset with ~3 lakhs obs. for pan-india and for different sessions
