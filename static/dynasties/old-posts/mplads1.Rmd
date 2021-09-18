@@ -76,7 +76,7 @@ dyn <- fread("~/work/cpr/UP/up-dynasties/dyn_other_data/dyn_ae_ge.csv") %>%
 # dyn %>% filter( position ==1 & fam_type == "Stable" &  year>2008) %>% select(year, constituency_name, candidate_name, party, dyn_cum_2) 
 ## filtering ge data to only 2009
 
-dyn_ge_w_09 <- dyn %>% filter(election_type == "GE" & position==1 & year==2009)
+
 
 
 ```
@@ -85,7 +85,7 @@ dyn_ge_w_09 <- dyn %>% filter(election_type == "GE" & position==1 & year==2009)
 
 
 
-## Audit data
+# Audit data
 
 
 Second part of carlos data that provides full information on MPLADS projects
@@ -101,8 +101,12 @@ In this section we look at the projets approved in 2009:14 session.
 
 mplads_car1 <- load("~/work/cpr/data/replication/carlos_mplads/data/mplads-eval-data.RData")
 
+mplads.eval <- mplads.eval %>% mutate(work_cat = case_when(clean.sector %!in% c("roads", "education") ~ "other",
+                                                           TRUE~as.character(clean.sector) ))
 
-mplads_car_up <- mplads.eval %>% filter(state == "Uttar Pradesh")
+mplads.eval$work_cat <- factor(mplads.eval$work_cat , levels = c("roads", "education", "other"))
+
+mplads_up <- mplads.eval %>% filter(state == "Uttar Pradesh" & session %in% c(14,15)) %>% mutate(year = ifelse(session==15, 2009, 2004))
 
 
 ##
@@ -115,13 +119,18 @@ mplads_car3 <- load("~/work/cpr/data/replication/carlos_mplads/data/mplads-data.
 ```
 
 ```{r, results = "asis"}
-dyn_ge_w_09 <- dyn_ge_w_09 %>% mutate(stable = ifelse(fam_type=="Stable", "Stable", "Rest"))
 
-mplads_car_09 <- mplads_car_up %>% filter(session ==15)
-mp_car_dyn <- inner_join(mplads_car_09,dyn_ge_w_09,by = c("idpc" = "constituency_no"))
+dyn_ge_up <- dyn %>% filter(election_type == "GE" & position==1 & year %in% c(2004, 2009))
+
+dyn_ge_up$fam <- ifelse(dyn_ge_up$dyn_cum_2==1, "Family", "Non-Family")
 
 
-mp_car_dyn  <- mp_car_dyn %>% group_by(idpc) %>% 
+
+
+mplads_dyn_up <- inner_join(mplads_up,dyn_ge_up,by = c("year"= "year","idpc" = "constituency_no"))
+
+
+mplads_dyn_up <- mplads_dyn_up%>% group_by(idpc) %>% 
   mutate(n_ac = n())
 ```
 
@@ -129,14 +138,14 @@ mp_car_dyn  <- mp_car_dyn %>% group_by(idpc) %>%
 ### top level summary
 
 ```{r, results = "asis"}
-mp_car_dyn %>% group_by(stable) %>% 
+mplads_dyn_up%>% group_by(fam) %>% 
   summarise(count = n(),
             ngo = mean(ngo),
             completion_time = mean(comp_time, na.rm = TRUE),
             amount = mean(amt_sanc),
             n_proj_ac = mean(n_ac),
             mean_proj_el = mean(elec_yr),
-            mean_app_time = mean(app.time, na.rm = TRUE)
+            mean_app_time_wk = mean(app.time, na.rm = TRUE)
             ) %>% 
             kable(digits =2, type = "html") %>% 
             kable_styling()
@@ -148,15 +157,16 @@ mp_car_dyn %>% group_by(stable) %>%
 
 ```{r}
 
-mp_car_dyn %>% group_by (stable, clean.sector) %>% summarise(count = n()) %>% 
-  group_by(stable) %>% mutate(sum = sum(count), prop= count /sum) %>% 
-  ggplot(aes(stable, prop, fill= clean.sector, label = ifelse(prop>.03, round(prop,2),"")))+
+mplads_dyn_up %>% group_by (year,fam, work_cat) %>% summarise(count = n()) %>% 
+  group_by(year,fam) %>% mutate(sum = sum(count), prop= count /sum) %>% 
+  ggplot(aes(fam, prop, fill= work_cat, label = ifelse(prop>.03, round(prop,2),"")))+
   geom_bar(stat = "identity",
            position = "stack")+
   geom_text(size = 3, position = position_stack(vjust = 0.5))+ 
     
     scale_x_discrete(labels = c("Non-Families","Families"))+
-   #scale_fill_grey()+
+   scale_fill_grey()+
+  facet_wrap(~year)+
     labs(title = " MPLADS projects composition",x = "", y = "Proportion", fill = "Type of work") +
  theme_minimal()+
   coord_fixed(ratio =2)+
@@ -172,46 +182,47 @@ mp_car_dyn %>% group_by (stable, clean.sector) %>% summarise(count = n()) %>%
 ```
 
 
-**Average time approval for the project types**
-
-
-
-
-<!-- ```{r} -->
-
-
-<!--   ggplot(mp_car_dyn %>% filter(app.time>0), aes(reorder(clean.sector, -app.time, FUN = median),log(app.time+1)))+ -->
-<!--   geom_boxplot()+ -->
-<!--     geom_jitter(alpha = .3)+ -->
-<!--    stat_summary(fun=mean, colour="darkred", geom="point",  -->
-<!--                shape=15, size=1.5, show.legend=FALSE) +  -->
-<!--   labs(title = "Average weeks to approval", -->
-<!--        y = "Log of weeks", -->
-<!--        x = "Project Type")+ -->
-<!--   theme_light()+ -->
-<!--   theme(axis.title.x =  element_blank()) -->
-<!-- #  -->
-<!-- #   ggplot(mp_car_dyn %>% filter(app.time>0), aes(reorder(clean.sector, -app.time, FUN = median),app.time))+ -->
-<!-- #   geom_boxplot()+ -->
-<!-- #     scale_y_log10() -->
-
-<!-- ``` -->
 
 ### Approval time
+
+**All**
+
+
+```{r}
+
+
+  ggplot(mplads_dyn_up %>% filter(app.time>0), aes(factor(year)
+                                                   ,log(app.time+1)))+
+  geom_boxplot()+
+    geom_jitter(alpha = .3)+
+   stat_summary(fun=mean, colour="darkred", geom="point",
+               shape=15, size=1.5, show.legend=FALSE) +
+  facet_wrap(~work_cat)+
+  labs(title = "Average weeks to approval",
+       y = "Log of weeks",
+       x = "Project Type")+
+  theme_light()+
+  theme(axis.title.x =  element_blank())
+#
+#   ggplot(mp_car_dyn %>% filter(app.time>0), aes(reorder(clean.sector, -app.time, FUN = median),app.time))+
+#   geom_boxplot()+
+#     scale_y_log10()
+
+```
+
+
 
 **Family**
 
 ```{r}
 
-  ggplot(mp_car_dyn %>% filter(app.time>0 & clean.sector 
-                               %in% c("education", "electricty", "other",
-                                      "roads", "water")), aes(stable,log(app.time+1)))+
+  ggplot(mplads_dyn_up%>% filter(app.time>0 ), aes(fam,log(app.time+1)))+
 
   geom_boxplot()+
   geom_jitter(alpha = .3)+
    stat_summary(fun=mean, colour="darkred", geom="point", 
                shape=15, size=1.5, show.legend=FALSE) + 
-  facet_grid(~clean.sector)+
+  facet_wrap(~work_cat+year)+
 labs(title = "Average weeks to approval",
        y = "Log of weeks",
        x = "Project Type")+
@@ -230,15 +241,13 @@ labs(title = "Average weeks to approval",
 ```{r}
 
 
-  ggplot(mp_car_dyn %>% filter(app.time>0 & clean.sector 
-                               %in% c("education", "electricty", "other",
-                                      "roads", "water")), aes(stable,log(amt_sanc+1)))+
+  ggplot(mplads_dyn_up%>% filter(app.time>0 ), aes(fam,log(amt_sanc+1)))+
 
   geom_boxplot()+
   geom_jitter(alpha = .3)+
    stat_summary(fun=mean, colour="darkred", geom="point", 
                shape=15, size=1.5, show.legend=FALSE) + 
-  facet_grid(~clean.sector)+
+  facet_wrap(~work_cat+year)+
   labs(title = "Average amount sanctioned",
        y = "Log of amount sanctioned",
        x = "Project Type")+
@@ -261,7 +270,7 @@ mplads_all <- mplads.eval %>%rename_all(tolower) %>% mutate(state = tolower(stat
   dyn_ge  <- read_csv("~/work/cpr/UP/up-dynasties/dyn_other_data/dyn_5pc_8919.csv") %>% 
     filter(position ==1 & year %in% c(2009,2004))%>% 
     distinct(year,state_name, constituency_no, position, .keep_all = TRUE) %>% 
-    select(state_name, constituency_no, dynast = dyn, year) %>% 
+    select(state_name, constituency_no,constituency_name, dynast = dyn, year) %>% 
     mutate(state_name = tolower(state_name),
            state_name = ifelse(state_name =="jammu & kashmir",
                                "jammu and kashmir", state_name),
@@ -280,7 +289,7 @@ mplads_all <- mplads.eval %>%rename_all(tolower) %>% mutate(state = tolower(stat
                                                      "idpc"= "constituency_no") )
 
 
-  
+    
   mplads_dyn  <-  mplads_dyn  %>% group_by(state,idpc) %>% 
   mutate(n_ac = n())
 ```
@@ -426,45 +435,184 @@ labs(title = "Average weeks to approval",
 
 ```
 
-## Bureaucrats data {.tabset}
+# Bureaucrats data 
 First part of carlos data that provides limited information on MPLADS projects, but a huge dataset with ~3 lakhs obs. for pan-india and for different sessions
 
-### Summary {.tabset}
+
+## India {.tabset}
+
+
+```{r}
+remove <- c("\\(sc\\)", "\\(st\\)")
+
+mplads_br <- mplads %>%rename_all(tolower) %>% mutate(state = tolower(state)) %>% 
+  filter( session %in% c(15,14)) %>% mutate(year = ifelse(session==15, 2009, 2004)) %>% 
+  mutate(pc_name = str_trim(str_remove(tolower(constituency.name),paste(remove, collapse=  "|")
+         )))
+```
+
+
+```{r}
+dyn_ge1  <- read_csv("~/work/cpr/UP/up-dynasties/dyn_other_data/dyn_5pc_8919.csv") %>% 
+    filter(position ==1 & year %in% c(2009,2004))%>% 
+    distinct(year,state_name, constituency_no, position, .keep_all = TRUE) %>% 
+    select(state_name, constituency_no,constituency_name, dynast = dyn, year) %>% 
+    mutate(state_name = tolower(state_name),
+           constituency_name = tolower(constituency_name),
+           state_name = ifelse(state_name =="jammu & kashmir",
+                               "jammu and kashmir", state_name),
+           fam= ifelse(dynast ==1,"Family","Non-Family"),
+           fam = ifelse(is.na(fam),"Non-Family", fam)) %>% 
+  filter(state_name  %!in% c("andhra pradesh", "telengana"))
+ 
+ 
+
+
+mplads_br <- mplads_br %>% mutate(state = tolower(state),
+                                  pc_name = tolower(pc_name),
+                     state_name = case_when(state == "himachal pr." ~"himachal pradesh" ,
+                                            state == "j & k"  ~"jammu and kashmir",
+                                            TRUE ~state))
+
+```
+
 
 ```{r}
 
+mplads_br_dyn <- inner_join(dyn_ge1, mplads_br, by = c(year = "year",state_name = "state_name",constituency_name = "pc_name"))
 
-mplads_09_up <- mplads %>% filter(session=="15" & State == "Uttar Pradesh") %>% 
-  mutate(pc_name = str_trim(str_remove(tolower(Constituency.Name),"\\(sc\\)"
-         )))
+```
 
-dyn_ge_w_09 <- dyn_ge_w_09 %>% mutate( constituency_name= str_trim(tolower(constituency_name)),
-                                       constituency_name = ifelse(constituency_name=="gautam buddh nagar","gautam buddha nagar", constituency_name)) 
 
-# up_pc_uniq <- mplads_09_up %>% distinct(pc_name)
-# dyn_pc_uniq <- dyn_ge_w_09 %>% distinct(constituency_name)
-# 
-# inner_join(dyn_pc_uniq, up_pc_uniq, by = c(constituency_name = "pc_name"))
+```{r}
 
-mplads_dyn_up09 <- inner_join(mplads_09_up , dyn_ge_w_09, by = c( "pc_name" = "constituency_name"))
+  
+  
 
-mplads_dyn_up09 <- mplads_dyn_up09 %>%  mutate(completed = ifelse(Work.Status == "COMPLETED", 1,0),
-                                               stable_binary = ifelse(stable =="Stable", 1,0),
-                                               party_bjp = ifelse(party =="BJP", 1,0),
-                                               party_inc = ifelse(party =="INC",1,0),
-                                               party_bsp = ifelse(party =="BSP",1,0),
+mplads_br_dyn <- mplads_br_dyn%>%  mutate(completed = ifelse(work.status== "COMPLETED", 1,0),
+                                               
+                                               party_bjp = ifelse(pty_n =="BJP", 1,0),
+                                               party_inc = ifelse(pty_n =="INC",1,0),
+                                               party_bsp = ifelse(pty_n =="BSP",1,0),
                                                party_sp
-                                               = ifelse(party =="SP",1,0),
+                                               = ifelse(pty_n =="SP",1,0),
                                                )
 
 
 
 ```
 
-#### Top level summary
+### Top level summary
 
 ```{r}
-mplads_dyn_up09 %>% group_by(stable) %>% 
+mplads_br_dyn%>% group_by(fam) %>% 
+  summarise(n_projects = n(),
+            n_pc = n_distinct(constituency_name),
+            avg_proj_pc = n_projects/n_pc,
+            avg_days_approv = mean(app.time*7, na.rm = TRUE),
+            avg_cost = mean(cost.sanc, na.rm = TRUE),
+            avg_unfinished = mean(unfinish*100),
+            completed = mean(completed)
+            ) %>% 
+  kable(digits = 2) %>% 
+  kable_styling()
+```
+
+### weeks for approval
+
+```{r, weeks in}
+ggplot(mplads_br_dyn, aes(fam, log(app.time+1)))+
+  geom_boxplot()+
+  facet_wrap(~year)+
+  labs(title = "Weeks to approve proposal",
+       subtitle = "Loksabha MPs - 2009:14",
+       y = "log of weeks",
+       x="Legislator")+
+  theme_light()
+```
+
+### Cost per project
+
+```{r cost in }
+ggplot(mplads_br_dyn, aes(fam, log(cost.sanc+1)))+
+  geom_boxplot()+
+  facet_wrap(~year)+
+  labs(title = "Project costs",
+       subtitle = "UP Loksabha MPs - 2009:14",
+       y = "log of cost",
+       x="Legislator")+
+  theme_light()
+```
+
+### Number of projects in PCs
+
+```{r n proj in }
+
+
+n_proj_df<- mplads_br_dyn %>% group_by(year, constituency_name, fam) %>% summarise(count = n())  
+n_proj_bp <- ggplot(n_proj_df, aes(fam, log(count)))+
+  geom_boxplot()+
+  facet_wrap(~year)+
+  labs(title = "Number of projects in PCs",
+       subtitle = " Loksabha MPs - 2004:14",
+       y = "log of count",
+       x="Legislator")+
+  theme_light()
+
+n_proj_dens <-ggplot(n_proj_df, aes( log(count+1), fill = fam))+
+    geom_density(alpha = .5)+
+  facet_wrap(~year)+
+    labs(title = "Number of projects in PCs",
+         subtitle = "Loksabha MPs - 2004:14",
+         y = "log+1 of count",
+         x="Legislator")+
+    theme_light()+
+    theme(legend.position = "bottom")
+
+library(patchwork)
+
+n_proj_bp +  n_proj_dens
+
+
+```
+
+## UP {.tabset}
+
+
+
+```{r}
+
+
+mplads_09_up <- mplads_br %>% filter(session %in% c(14,15) & state == "uttar pradesh") 
+
+dyn_ge_up <- dyn_ge1 %>% mutate( constituency_name= str_trim(tolower(constituency_name)),
+                                       constituency_name = ifelse(constituency_name=="gautam buddh nagar","gautam buddha nagar", constituency_name)) %>% 
+  filter(year %in% c(2004, 2009) & state_name == "uttar pradesh")
+
+# up_pc_uniq <- mplads_09_up %>% distinct(pc_name)
+# dyn_pc_uniq <- dyn_ge_w_09 %>% distinct(constituency_name)
+# 
+# inner_join(dyn_pc_uniq, up_pc_uniq, by = c(constituency_name = "pc_name"))
+
+mplads_dyn_up09 <- inner_join(mplads_09_up , dyn_ge_up, by = c( "year"= "year","pc_name" = "constituency_name"))
+
+mplads_dyn_up09 <- mplads_dyn_up09 %>%  mutate(completed = ifelse(work.status == "COMPLETED", 1,0),
+                                              
+                                               party_bjp = ifelse(pty_n =="BJP", 1,0),
+                                               party_inc = ifelse(pty_n =="INC",1,0),
+                                               party_bsp = ifelse(pty_n =="BSP",1,0),
+                                               party_sp
+                                               = ifelse(pty_n =="SP",1,0),
+                                               )
+
+
+
+```
+
+### Top level summary
+
+```{r}
+mplads_dyn_up09 %>% group_by(fam) %>% 
   summarise(n_projects = n(),
             n_pc = n_distinct(pc_name),
             avg_proj_pc = n_projects/n_pc,
@@ -477,11 +625,12 @@ mplads_dyn_up09 %>% group_by(stable) %>%
   kable_styling()
 ```
 
-#### weeks for approval
+### weeks for approval
 
 ```{r, weeks}
-ggplot(mplads_dyn_up09, aes(stable, log(app.time+1)))+
+ggplot(mplads_dyn_up09, aes(fam, log(app.time+1)))+
   geom_boxplot()+
+  facet_wrap(~year)+
   labs(title = "Weeks to approve proposal",
        subtitle = "UP Loksabha MPs - 2009:14",
        y = "log of weeks",
@@ -489,11 +638,12 @@ ggplot(mplads_dyn_up09, aes(stable, log(app.time+1)))+
   theme_light()
 ```
 
-#### Cost per project
+### Cost per project
 
 ```{r cost }
-ggplot(mplads_dyn_up09, aes(stable, log(cost.sanc+1)))+
+ggplot(mplads_dyn_up09, aes(fam, log(cost.sanc+1)))+
   geom_boxplot()+
+  facet_wrap(~year)+
   labs(title = "Project costs",
        subtitle = "UP Loksabha MPs - 2009:14",
        y = "log of cost",
@@ -501,27 +651,30 @@ ggplot(mplads_dyn_up09, aes(stable, log(cost.sanc+1)))+
   theme_light()
 ```
 
-#### Number of projects in PCs
+### Number of projects in PCs
 
 ```{r n proj }
 
 
-n_proj_df<- mplads_dyn_up09 %>% group_by(stable, pc_name) %>% summarise(count = n())  
-n_proj_bp <- ggplot(n_proj_df, aes(stable, log(count)))+
+n_proj_df<- mplads_dyn_up09 %>% group_by(year, fam,pc_name) %>% summarise(count = n())  
+n_proj_bp <- ggplot(n_proj_df, aes(fam, log(count)))+
   geom_boxplot()+
+  facet_wrap(~year)+
   labs(title = "Number of projects in PCs",
        subtitle = "UP Loksabha MPs - 2009:14",
        y = "log+1 of count",
        x="Legislator")+
   theme_light()
 
-n_proj_dens <-ggplot(n_proj_df, aes( log(count+1), fill = stable))+
+n_proj_dens <-ggplot(n_proj_df, aes( log(count+1), fill = fam))+
     geom_density(alpha = .5)+
+  facet_wrap(~year)+
     labs(title = "Number of projects in PCs",
          subtitle = "UP Loksabha MPs - 2009:14",
          y = "log+1 of count",
          x="Legislator")+
-    theme_light()
+    theme_light()+
+  theme(legend.position = "bottom")
 
 library(patchwork)
 
@@ -530,150 +683,135 @@ n_proj_bp +  n_proj_dens
 
 ```
 
-### Models {.tabset}
+<!-- ### Models {.tabset} -->
 
-```{r}
+<!-- ```{r} -->
 
 
-df <- mplads_dyn_up09 %>% 
-   group_by(pc_name) %>% mutate(n_proj_pc = n()) %>% ungroup() %>% 
- 
-  select(n_proj_pc, approval_time = app.time , cost_sanctioned = cost.sanc , stable_binary ,cpwork ,  poweryr ,  national , govcol, reserved , margin.x , turnout , ncan,party_bjp , party_inc ,party_sp , party_bsp, tot.dis.works , mp.per.dis,  gdppc , rugged, pc_name) %>% mutate(approval_time = log(approval_time+1),  cost_sanctioned = log(cost_sanctioned+1),
-                                                                                                                                                                                                                                                                                                                     gdppc = log(gdppc+1),
-                                                                                                                                                                                                                                                                                                                     rugged = log(rugged+1)) %>% 
-  filter(cost_sanctioned>0 & approval_time>0)
+<!-- df <- mplads_dyn_up09 %>%  -->
+<!--    group_by(pc_name) %>% mutate(n_proj_pc = n()) %>% ungroup() %>%  -->
 
+<!--   select(n_proj_pc, approval_time = app.time , cost_sanctioned = cost.sanc , fam ,cpwork ,  poweryr ,  national , govcol, reserved , margin.x , turnout , ncan,party_bjp , party_inc ,party_sp , party_bsp, tot.dis.works , mp.per.dis,  gdppc , rugged, pc_name) %>% mutate(approval_time = log(approval_time+1),  cost_sanctioned = log(cost_sanctioned+1))  %>%mutate(                                                                                                                                                                                                                                                  gdppc = log(gdppc+1), -->
+<!--                                                                                                                                                                                                                                                                                                                      rugged = log(rugged+1)) %>%  -->
+<!--   filter(cost_sanctioned>0 & approval_time>0) -->
 
 
 
-```
+
+<!-- ``` -->
 
 
-#### Data summary
+<!-- #### Data summary -->
 
 
-```{r}
+<!-- ```{r} -->
 
 
-mean1 <- df %>% summarise_at(c(1:20),~ mean(.x, na.rm = TRUE)) %>% transpose() %>% setNames("Mean")
+<!-- mean1 <- df %>% summarise_at(c(1:20),~ mean(.x, na.rm = TRUE)) %>% transpose() %>% setNames("Mean") -->
 
-min1 <- df %>% summarise_at(c(1:20),~ min(.x, na.rm = TRUE))%>% transpose()%>% setNames("Min")
+<!-- min1 <- df %>% summarise_at(c(1:20),~ min(.x, na.rm = TRUE))%>% transpose()%>% setNames("Min") -->
 
-max1 <- df %>% summarise_at(c(1:20),~ max(.x, na.rm = TRUE))%>% transpose()%>% setNames("Max")
-
-
-sd1 <- df %>% summarise_at(c(1:20),~ sd(.x, na.rm = TRUE))%>% transpose()%>% setNames("SD")
+<!-- max1 <- df %>% summarise_at(c(1:20),~ max(.x, na.rm = TRUE))%>% transpose()%>% setNames("Max") -->
 
 
-
-na1 <- df %>%
-  summarise_all(funs(sum(is.na(.))))%>% transpose()%>% slice(1:20)%>% setNames("NA")
-
-vars1 <- c("Number of projects (PC)","Log(Approval Time)","Log(Cost Sanctioned)", 
-           "State Alignment","Stable Family",  "CM Tenure", "National Party",
-           "Centre Alignment", "Reserved PC","Margin", "Turnout", "Number of Candidates",
-           "Party: BJP",   "Party: INC",
-           "Party: SP","Party BSP", "Number of Works: District", "MPs per District",
-           "Log(Rugged)", "Log(GDP per Capita)") %>% as.data.frame() %>% slice(1:20) %>% setNames("variable")
-
-cbind(vars1, mean1, min1, max1, sd1, na1) %>% 
-  kable(digits = 2,) %>% 
-  kable_styling(full_width = F)
-
-```
+<!-- sd1 <- df %>% summarise_at(c(1:20),~ sd(.x, na.rm = TRUE))%>% transpose()%>% setNames("SD") -->
 
 
-#### Models sub{.tabset}
 
-##### Approval time
+<!-- na1 <- df %>% -->
+<!--   summarise_all(funs(sum(is.na(.))))%>% transpose()%>% slice(1:20)%>% setNames("NA") -->
 
+<!-- vars1 <- c("Number of projects (PC)","Log(Approval Time)","Log(Cost Sanctioned)",  -->
+<!--            "State Alignment","Stable Family",  "CM Tenure", "National Party", -->
+<!--            "Centre Alignment", "Reserved PC","Margin", "Turnout", "Number of Candidates", -->
+<!--            "Party: BJP",   "Party: INC", -->
+<!--            "Party: SP","Party BSP", "Number of Works: District", "MPs per District", -->
+<!--            "Log(Rugged)", "Log(GDP per Capita)") %>% as.data.frame() %>% slice(1:20) %>% setNames("variable") -->
 
-```{r,results="asis"}
+<!-- cbind(vars1, mean1, min1, max1, sd1, na1) %>%  -->
+<!--   kable(digits = 2,) %>%  -->
+<!--   kable_styling(full_width = F) -->
 
-
-fit_time1 <- felm(approval_time ~ cost_sanctioned+cpwork +  stable_binary,data = df)
-
-fit_time2 <- lmer(approval_time ~ cost_sanctioned+ cpwork + stable_binary+(1|pc_name),data = df)
-
-fit_time3 <- lmer(approval_time ~ cost_sanctioned+ cpwork + stable_binary+ national+ poweryr +(1|pc_name),data = df)
-
-fit_time4 <- lmer(approval_time ~ cost_sanctioned+ cpwork + stable_binary+ national+ poweryr + ncan+rugged+ (1|pc_name),data = df)
-
-fit_time <- lmer(approval_time ~ cost_sanctioned+ stable_binary +cpwork +  poweryr +  national + govcol+ reserved + margin.x + turnout + ncan+party_bjp + party_inc +party_sp + party_bsp+ tot.dis.works + mp.per.dis+  gdppc + rugged + (1|pc_name),data = df)
-
-lines <-  list (c("RE Parliamentary Constituency", "No","Yes", "Yes", "Yes", "Yes"))
-
-labs <- c( "Log Cost Sanctioned", 
-           "State Alignment","Stable Family",  "CM Tenure", "National Party",
-           "Centre Alignment", "Reserved PC","Margin", "Turnout", "Number of Candidates",
-           "Party: BJP",   "Party: INC",
-           "Party: SP", "Number of Works: District", "MPs per District",
-           "Log(Rugged)", "Log(GDP per Capita)", "Intercept"
-          )
-
-stargazer(fit_time1,
-          fit_time2,
-          fit_time3,
-          fit_time4,
-          fit_time,
-          type = "html",
-          add.lines = lines,
-          covariate.labels = labs,
-          dep.var.caption = "Log(Approval time- weeks)",
-          dep.var.labels.include = FALSE
-          )
-
-```
-
-##### Cost Sanctioned
-
-```{r, results="asis"}
-
-fit_cost1 <- felm(cost_sanctioned~approval_time+cpwork +  stable_binary,data = df)
-
-fit_cost2 <- lmer(cost_sanctioned~approval_time+ cpwork + stable_binary+(1|pc_name),data = df)
-
-fit_cost3 <- lmer(cost_sanctioned~approval_time+ cpwork + stable_binary+ national+ poweryr +(1|pc_name),data = df)
-
-fit_cost4 <- lmer(cost_sanctioned~approval_time+ cpwork + stable_binary+ national+ poweryr + ncan+rugged+ (1|pc_name),data = df)
-
-fit_cost <- lmer(cost_sanctioned~approval_time+ stable_binary +cpwork +  poweryr +  national + govcol+ reserved + margin.x + turnout + ncan+party_bjp + party_inc +party_sp + party_bsp+ tot.dis.works + mp.per.dis+  gdppc + rugged + (1|pc_name),data = df)
-
-lines <-  list (c("RE Parliamentary Constituency", "No","Yes", "Yes", "Yes", "Yes"))
-
-labs <- c( "Log Approval Time", 
-           "State Alignment","Stable Family",  "CM Tenure", "National Party",
-           "Centre Alignment", "Reserved PC","Margin", "Turnout", "Number of Candidates",
-           "Party: BJP",   "Party: INC",
-           "Party: SP", "Number of Works: District", "MPs per District",
-           "Log(Rugged)", "Log(GDP per Capita)", "Intercept"
-          )
-
-stargazer(fit_cost1,
-          fit_cost2,
-          fit_cost3,
-          fit_cost4,
-          fit_cost,type = "html",
-          add.lines = lines,
-          covariate.labels = labs,
-          dep.var.caption = "Log(Cost sanctioned)",
-          dep.var.labels.include = FALSE
-            
-          )
-
-```
+<!-- ``` -->
 
 
-```{r}
+<!-- #### Models sub{.tabset} -->
 
-# df <- df %>% group_by(pc_name) %>% 
-#   mutate(mean_app_time = mean(approval_time),
-#          mean_cost = mean(cost_sanctioned))
-# 
-# fit.3 <- felm(n_proj_pc~mean_app_time + mean_cost + stable_binary +cpwork +  poweryr +  national +  reserved + margin.x + turnout + ncan +party_bjp + party_inc +party_sp + party_bsp+  mp.per.dis+  gdppc + rugged ,data = subset(df %>% distinct(pc_name,.keep_all = TRUE)))
+<!-- ##### Approval time -->
 
 
-```
+<!-- ```{r,results="asis"} -->
 
 
+<!-- fit_time1 <- felm(approval_time ~ cost_sanctioned+cpwork +  stable_binary,data = df) -->
+
+<!-- fit_time2 <- lmer(approval_time ~ cost_sanctioned+ cpwork + stable_binary+(1|pc_name),data = df) -->
+
+<!-- fit_time3 <- lmer(approval_time ~ cost_sanctioned+ cpwork + stable_binary+ national+ poweryr +(1|pc_name),data = df) -->
+
+<!-- fit_time4 <- lmer(approval_time ~ cost_sanctioned+ cpwork + stable_binary+ national+ poweryr + ncan+rugged+ (1|pc_name),data = df) -->
+
+<!-- fit_time <- lmer(approval_time ~ cost_sanctioned+ stable_binary +cpwork +  poweryr +  national + govcol+ reserved + margin.x + turnout + ncan+party_bjp + party_inc +party_sp + party_bsp+ tot.dis.works + mp.per.dis+  gdppc + rugged + (1|pc_name),data = df) -->
+
+<!-- lines <-  list (c("RE Parliamentary Constituency", "No","Yes", "Yes", "Yes", "Yes")) -->
+
+<!-- labs <- c( "Log Cost Sanctioned",  -->
+<!--            "State Alignment","Stable Family",  "CM Tenure", "National Party", -->
+<!--            "Centre Alignment", "Reserved PC","Margin", "Turnout", "Number of Candidates", -->
+<!--            "Party: BJP",   "Party: INC", -->
+<!--            "Party: SP", "Number of Works: District", "MPs per District", -->
+<!--            "Log(Rugged)", "Log(GDP per Capita)", "Intercept" -->
+<!--           ) -->
+
+<!-- stargazer(fit_time1, -->
+<!--           fit_time2, -->
+<!--           fit_time3, -->
+<!--           fit_time4, -->
+<!--           fit_time, -->
+<!--           type = "html", -->
+<!--           add.lines = lines, -->
+<!--           covariate.labels = labs, -->
+<!--           dep.var.caption = "Log(Approval time- weeks)", -->
+<!--           dep.var.labels.include = FALSE -->
+<!--           ) -->
+
+<!-- ``` -->
+
+<!-- ##### Cost Sanctioned -->
+
+<!-- ```{r, results="asis"} -->
+
+<!-- fit_cost1 <- felm(cost_sanctioned~approval_time+cpwork +  stable_binary,data = df) -->
+
+<!-- fit_cost2 <- lmer(cost_sanctioned~approval_time+ cpwork + stable_binary+(1|pc_name),data = df) -->
+
+<!-- fit_cost3 <- lmer(cost_sanctioned~approval_time+ cpwork + stable_binary+ national+ poweryr +(1|pc_name),data = df) -->
+
+<!-- fit_cost4 <- lmer(cost_sanctioned~approval_time+ cpwork + stable_binary+ national+ poweryr + ncan+rugged+ (1|pc_name),data = df) -->
+
+<!-- fit_cost <- lmer(cost_sanctioned~approval_time+ stable_binary +cpwork +  poweryr +  national + govcol+ reserved + margin.x + turnout + ncan+party_bjp + party_inc +party_sp + party_bsp+ tot.dis.works + mp.per.dis+  gdppc + rugged + (1|pc_name),data = df) -->
+
+<!-- lines <-  list (c("RE Parliamentary Constituency", "No","Yes", "Yes", "Yes", "Yes")) -->
+
+<!-- labs <- c( "Log Approval Time",  -->
+<!--            "State Alignment","Stable Family",  "CM Tenure", "National Party", -->
+<!--            "Centre Alignment", "Reserved PC","Margin", "Turnout", "Number of Candidates", -->
+<!--            "Party: BJP",   "Party: INC", -->
+<!--            "Party: SP", "Number of Works: District", "MPs per District", -->
+<!--            "Log(Rugged)", "Log(GDP per Capita)", "Intercept" -->
+<!--           ) -->
+
+<!-- stargazer(fit_cost1, -->
+<!--           fit_cost2, -->
+<!--           fit_cost3, -->
+<!--           fit_cost4, -->
+<!--           fit_cost,type = "html", -->
+<!--           add.lines = lines, -->
+<!--           covariate.labels = labs, -->
+<!--           dep.var.caption = "Log(Cost sanctioned)", -->
+<!--           dep.var.labels.include = FALSE -->
+
+<!--           ) -->
+
+<!-- ``` -->
 
