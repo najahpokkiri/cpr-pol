@@ -319,9 +319,9 @@ mplads_dyn%>%  group_by(fam) %>%
 
 ```{r}
 
-mplads_dyn%>% group_by (fam,year, clean.sector) %>% summarise(count = n()) %>% 
+mplads_dyn%>% group_by (fam,year, work_cat) %>% summarise(count = n()) %>% 
   group_by(fam, year) %>% mutate(sum = sum(count), prop= count /sum) %>% 
-  ggplot(aes(fam, prop, fill= clean.sector, label = ifelse(prop>.03, round(prop,2),"")))+
+  ggplot(aes(fam, prop, fill= work_cat, label = ifelse(prop>.03, round(prop,2),"")))+
   geom_bar(stat = "identity",
            position = "stack")+
     facet_wrap(~year)+
@@ -357,7 +357,7 @@ mplads_dyn%>% group_by (fam,year, clean.sector) %>% summarise(count = n()) %>%
   ggplot(mplads_dyn%>% filter(app.time>0), aes(factor(year),log(app.time+1)))+
   geom_boxplot()+
     geom_jitter(alpha = .1)+
-  facet_wrap(~clean.sector, nrow =2)+
+  facet_wrap(~work_cat, nrow =2)+
    stat_summary(fun=mean, colour="darkred", geom="point", 
                shape=15, size=1.5, show.legend=FALSE) + 
   labs(title = "Average weeks to approval",
@@ -384,7 +384,7 @@ mplads_dyn%>% group_by (fam,year, clean.sector) %>% summarise(count = n()) %>%
   geom_jitter(alpha = .1)+
    stat_summary(fun=mean, colour="darkred", geom="point", 
                shape=15, size=1.5, show.legend=FALSE) + 
-  facet_wrap(~clean.sector,scales = "fixed", nrow =2)+
+  facet_wrap(~work_cat,scales = "fixed", nrow =2)+
 labs(title = "Average weeks to approval",
        y = "Log of weeks",
        x = "Project Type")+
@@ -405,7 +405,7 @@ labs(title = "Average weeks to approval",
     geom_jitter(alpha = .1)+
    stat_summary(fun=mean, colour="darkred", geom="point", 
                shape=15, size=1.5, show.legend=FALSE) +
-  facet_wrap(~clean.sector, nrow =2)+
+  facet_wrap(~work_cat, nrow =2)+
   labs(title = "Average amount sanctioned",
        y = "Log of amount sanctioned",
        x = "Project Type")+
@@ -426,7 +426,7 @@ labs(title = "Average weeks to approval",
   geom_jitter(alpha = .1)+
    stat_summary(fun=mean, colour="darkred", geom="point", 
                shape=15, size=1.5, show.legend=FALSE) + 
-  facet_wrap(~clean.sector,scales = "fixed", nrow =2)+
+  facet_wrap(~work_cat,scales = "fixed", nrow =2)+
   labs(title = "Average amount sanctioned",
        y = "Log of amount sanctioned",
        x = "Project Type")+
