@@ -1,0 +1,147 @@
+---
+title: "Impact of Political Families"
+subtitle: "Economic and Political Consequences" 
+output:
+  xaringan::moon_reader:
+    css: xaringan-themer.css
+    nature:
+      slideNumberFormat: "%current%"
+      highlightStyle: github
+      highlightLines: true
+      ratio: 16:9
+      countIncrementalSlides: true
+---
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+knitr::opts_chunk$set(
+  fig.width=9, fig.height=3.5, fig.retina=3,
+  out.width = "100%",
+  cache = FALSE,
+  echo = TRUE,
+  message = FALSE, 
+  warning = FALSE,
+  hiline = TRUE
+)
+```
+
+```{r xaringan-themer, include=FALSE, warning=FALSE}
+library(xaringanthemer)
+style_mono_accent(
+  base_color = "#23395b",
+   # fonts
+  header_font_google = google_font("Martel", "300", "400"),
+  text_font_google = google_font("Lato"),
+  code_font_google = google_font("Fira Mono")
+)
+
+
+
+xaringanExtra::use_xaringan_extra(c("tile_view", "animate_css", "tachyons"))
+
+```
+
+
+# Outline
+```{r xaringan-logo, echo=FALSE}
+xaringanExtra::use_logo(
+  image_url = "https://upload.wikimedia.org/wikipedia/commons/2/2e/CPR_logo_englishCLR.png",
+    width = "200px",
+  height = "128px",
+)
+```
+
+In this slide we will cover both economic and political consequences of political families. 
+
+.pull-left[
+**Economic consequences**
+- MPLADS
+    - Bholken
+    - Carlos
+- PMGSY
+- NREGA
+]
+
+.pull-right[
+**Political Consequnces**
+- Turnout
+- Margin
+
+]
+
+---
+
+
+##MPLADS
+
+--
+
+.pull-left[
+
+### Variables of interest
+- Days to sanction
+
+- Cost sanctioned
+
+- Type of the projects
+]
+
+--
+
+.pull-right[
+
+
+### Available datasets
+
+Replication data from
+- Bohlken, Anjali Thomas, 2018, “Targeting Ordinary Voters or Political Elites? Why Pork Is Distributed Along Partisan Lines in India.” 
+
+- Velasco Rivera, Carlos, 2019, "Replication Data for: Loyalty or Incentives? How party alignment affects bureaucratic performance"
+]
+
+---
+class: center, middle, inverse
+
+## Bohlken
+
+
+
+---
+
+# PMGSY
+
+.pull-left[
+### Variables of interest
+
+- Sanctioned cost
+
+- Number of roads built
+
+- Road length
+]
+
+.pull-right[
+### Available dataset
+
+- Data source?
+]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
