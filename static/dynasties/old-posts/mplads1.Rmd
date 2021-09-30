@@ -120,9 +120,9 @@ mplads_car3 <- load("~/work/cpr/data/replication/carlos_mplads/data/mplads-data.
 
 ```{r, results = "asis"}
 
-dyn_ge_up <- dyn %>% filter(election_type == "GE" & position==1 & year %in% c(2004, 2009))
+dyn_ge_up <- dyn %>% filter(election_type == "GE" & position==1 & year %in% c( 2009))
 
-dyn_ge_up$fam <- ifelse(dyn_ge_up$dyn_cum_2==1, "Family", "Non-Family")
+dyn_ge_up$fam <- ifelse(dyn_ge_up$fam_type =="Stable" , "Stable"  , "Non-Family")
 
 
 
@@ -138,7 +138,7 @@ mplads_dyn_up <- mplads_dyn_up%>% group_by(idpc) %>%
 ### top level summary
 
 ```{r, results = "asis"}
-mplads_dyn_up%>% group_by(fam) %>% 
+mplads_dyn_up%>% filter(year ==2009) %>% group_by(fam) %>% 
   summarise(count = n(),
             ngo = mean(ngo),
             completion_time = mean(comp_time, na.rm = TRUE),
@@ -147,7 +147,7 @@ mplads_dyn_up%>% group_by(fam) %>%
             mean_proj_el = mean(elec_yr),
             mean_app_time_wk = mean(app.time, na.rm = TRUE)
             ) %>% 
-            kable(digits =2, type = "html") %>% 
+            kable(digits =0, type = "html") %>% 
             kable_styling()
 
 
@@ -309,7 +309,7 @@ mplads_dyn%>%  group_by(fam) %>%
             n_proj_ac = mean(n_ac),
             mean_app_time = mean(app.time, na.rm = TRUE)
             ) %>% 
-            kable(digits =2, type = "html") %>% 
+            kable(digits =0, type = "html") %>% 
             kable_styling()
 
 

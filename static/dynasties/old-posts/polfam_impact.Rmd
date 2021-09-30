@@ -100,10 +100,44 @@ Replication data from
 ]
 
 ---
-class: center, middle, inverse
 
-## Bohlken
+.pull-left[
+### UP
 
+**MPLADS Carlos**
+
+```{r, out.width="100%",out.height = "50%", echo = FALSE}
+knitr::include_graphics("impact/mplads_carlos.png")
+```
+
+----
+
+<br>
+<br>
+**MPLADS Bohlekn**
+
+```{r, out.width = "120%",echo = FALSE}
+knitr::include_graphics("impact/mplads_bohlekn.png")
+```
+
+]
+
+
+
+
+.pull-right[
+
+
+
+### India
+
+**MPLADS Carlos**
+
+```{r,  out.width = "150%", out.height=120,echo = FALSE}
+knitr::include_graphics("impact/carlos_india.png")
+```
+
+]
 
 
 ---
