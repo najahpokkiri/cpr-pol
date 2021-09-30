@@ -9,10 +9,13 @@ output:
       highlightStyle: github
       highlightLines: true
       ratio: 16:9
-      countIncrementalSlides: true
+      countIncrementalSlides: false
 ---
 
 ```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(cache = FALSE,echo = FALSE, message=FALSE, warning = FALSE)
+
 options(htmltools.dir.version = FALSE)
 knitr::opts_chunk$set(
   fig.width=9, fig.height=3.5, fig.retina=3,
@@ -56,8 +59,6 @@ In this slide we will cover both economic and political consequences of politica
 .pull-left[
 **Economic consequences**
 - MPLADS
-    - Bholken
-    - Carlos
 - PMGSY
 - NREGA
 ]
@@ -110,10 +111,12 @@ Replication data from
 knitr::include_graphics("impact/mplads_carlos.png")
 ```
 
+
 ----
 
 <br>
 <br>
+
 **MPLADS Bohlekn**
 
 ```{r, out.width = "120%",echo = FALSE}
@@ -124,6 +127,7 @@ knitr::include_graphics("impact/mplads_bohlekn.png")
 
 
 
+--
 
 .pull-right[
 
@@ -137,6 +141,9 @@ knitr::include_graphics("impact/mplads_bohlekn.png")
 knitr::include_graphics("impact/carlos_india.png")
 ```
 
+- In UP, we observed that Family politicians get delayed sanctions, but when we looked at India, we see the exact opposite.
+
+- We ran models for Both UP and India keeping the `Number of weeks for approval` as the outcome variable. However, in both cases the family dummy variable turned out to be **insignificant** as the model became more rigorous
 ]
 
 
@@ -155,7 +162,7 @@ knitr::include_graphics("impact/carlos_india.png")
 ]
 
 .pull-right[
-### Available dataset
+### Available datasets
 
 - Data source?
 ]
@@ -163,14 +170,53 @@ knitr::include_graphics("impact/carlos_india.png")
 
 
 
+---
+
+## UP
+
+.pull-left[
+
+PMGSY 2012 summary
+
+```{r,out.width="100%", echo=FALSE}
+knitr::include_graphics("impact/pmgsy_tops.png")
+```
+
+]
+
+--
+
+.pull-right[
+Outcome variable: Number of roads built in a constituency 
+```{r,out.width="60%", echo=FALSE}
+knitr::include_graphics("impact/pmgsy_nroads.png")
+```
+]
+---
+
+## PMGSY contd.
+.pull-left[
+Outcome variable:: Length of the road built
+```{r, echo=FALSE}
+knitr::include_graphics("impact/pmgsy_road_length.png")
+```
+
+]
+
+--
+
+.pull-right[
+
+Outcome variable: Cost sanctioned for the road
+
+```{r, echo=FALSE}
+knitr::include_graphics("impact/pmgsy_cost.png")
+```
+]
 
 
 
-
-
-
-
-
+---
 
 
 

@@ -65,8 +65,6 @@ In this slide we will cover both economic and political consequences of politica
 .pull-left[
 **Economic consequences**
 - MPLADS
-    - Bholken
-    - Carlos
 - PMGSY
 - NREGA
 ]
@@ -117,10 +115,12 @@ Replication data from
 
 &lt;img src="impact/mplads_carlos.png" width="100%" height="50%" /&gt;
 
+
 ----
 
 &lt;br&gt;
 &lt;br&gt;
+
 **MPLADS Bohlekn**
 
 &lt;img src="impact/mplads_bohlekn.png" width="120%" /&gt;
@@ -129,6 +129,7 @@ Replication data from
 
 
 
+--
 
 .pull-right[
 
@@ -140,6 +141,9 @@ Replication data from
 
 &lt;img src="impact/carlos_india.png" width="150%" height="120" /&gt;
 
+- In UP, we observed that Family politicians get delayed sanctions, but when we looked at India, we see the exact opposite.
+
+- We ran models for Both UP and India keeping the `Number of weeks for approval` as the outcome variable. However, in both cases the family dummy variable turned out to be **insignificant** as the model became more rigorous
 ]
 
 
@@ -158,7 +162,7 @@ Replication data from
 ]
 
 .pull-right[
-### Available dataset
+### Available datasets
 
 - Data source?
 ]
@@ -166,14 +170,45 @@ Replication data from
 
 
 
+---
+
+## UP
+
+.pull-left[
+
+PMGSY 2012 summary
+
+&lt;img src="impact/pmgsy_tops.png" width="100%" /&gt;
+
+]
+
+--
+
+.pull-right[
+Outcome variable: Number of roads built in a constituency 
+&lt;img src="impact/pmgsy_nroads.png" width="60%" /&gt;
+]
+---
+
+## PMGSY contd.
+.pull-left[
+Outcome variable:: Length of the road built
+&lt;img src="impact/pmgsy_road_length.png" width="100%" /&gt;
+
+]
+
+--
+
+.pull-right[
+
+Outcome variable: Cost sanctioned for the road
+
+&lt;img src="impact/pmgsy_cost.png" width="100%" /&gt;
+]
 
 
 
-
-
-
-
-
+---
 
 
 
@@ -190,7 +225,7 @@ Replication data from
 "highlightStyle": "github",
 "highlightLines": true,
 "ratio": "16:9",
-"countIncrementalSlides": true
+"countIncrementalSlides": false
 });
 if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
   window.dispatchEvent(new Event('resize'));
