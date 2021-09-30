@@ -54,7 +54,6 @@ xaringanExtra::use_logo(
 )
 ```
 
-In this slide we will cover both economic and political consequences of political families. 
 
 .pull-left[
 **Economic consequences**
